@@ -19,6 +19,7 @@ import com.liferay.microblogs.service.MicroblogsEntryLocalServiceUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.security.auth.PrincipalException;
+import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portlet.social.service.SocialRelationLocalServiceUtil;
 
@@ -64,8 +65,19 @@ public class MicroblogsEntryPermission {
 			MicroblogsEntry microblogsEntry, String actionId)
 		throws SystemException {
 
-		if (permissionChecker.getUserId() == microblogsEntry.getUserId()) {
-			return true;
+		if (actionId.equals(ActionKeys.DELETE) ||
+			actionId.equals(ActionKeys.UPDATE)) {
+
+			if (permissionChecker.hasOwnerPermission(
+					microblogsEntry.getCompanyId(),
+					MicroblogsEntry.class.getName(),
+					microblogsEntry.getMicroblogsEntryId(),
+					microblogsEntry.getUserId(), actionId)) {
+
+				return true;
+			}
+
+			return false;
 		}
 
 		if (permissionChecker.hasOwnerPermission(
@@ -76,18 +88,19 @@ public class MicroblogsEntryPermission {
 			return true;
 		}
 
-		if ((microblogsEntry.getSocialRelationType() != 0) &&
-			(microblogsEntry.getUserId() != permissionChecker.getUserId()) &&
-			!SocialRelationLocalServiceUtil.hasRelation(
+		if (microblogsEntry.getSocialRelationType() == 0) {
+			return true;
+		}
+
+		if ((microblogsEntry.getUserId() != permissionChecker.getUserId()) &&
+			SocialRelationLocalServiceUtil.hasRelation(
 				permissionChecker.getUserId(), microblogsEntry.getUserId(),
 				microblogsEntry.getSocialRelationType())) {
 
-			return false;
+			return true;
 		}
 
-		return permissionChecker.hasPermission(
-			0, MicroblogsEntry.class.getName(),
-			microblogsEntry.getMicroblogsEntryId(), actionId);
+		return false;
 	}
 
 }

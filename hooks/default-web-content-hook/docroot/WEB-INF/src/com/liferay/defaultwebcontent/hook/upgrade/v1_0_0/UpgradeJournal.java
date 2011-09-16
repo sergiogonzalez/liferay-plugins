@@ -18,7 +18,6 @@ import com.liferay.portal.kernel.upgrade.UpgradeProcess;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.model.Group;
-import com.liferay.portal.model.GroupConstants;
 import com.liferay.portal.service.GroupLocalServiceUtil;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.UserLocalServiceUtil;
@@ -27,6 +26,7 @@ import com.liferay.portlet.journal.service.JournalStructureLocalServiceUtil;
 import com.liferay.portlet.journal.service.JournalTemplateLocalServiceUtil;
 
 import java.io.InputStream;
+import java.util.Locale;
 
 /**
  * @author Ryan Park
@@ -48,10 +48,14 @@ public class UpgradeJournal extends UpgradeProcess {
 		String description = "This structure accommodates article title, " +
 			"both main, and preview images, and the main article body.";
 		String xsd = getFileAsString("/structures/article.xml");
+		java.util.Map<java.util.Locale,String> nameMap = new java.util.HashMap<java.util.Locale, String>();
+		nameMap.put(Locale.getDefault(), name);
+		java.util.Map<java.util.Locale,String> descriptionMap = new java.util.HashMap<java.util.Locale, String>();
+		descriptionMap.put(Locale.getDefault(), description);
 
 		JournalStructureLocalServiceUtil.addStructure(
-			userId, groupId, structureId, false, StringPool.BLANK, name,
-			description, xsd, serviceContext);
+			userId, groupId, structureId, false, StringPool.BLANK, nameMap,
+			descriptionMap, xsd, serviceContext);
 
 		// Carousel
 
@@ -61,10 +65,14 @@ public class UpgradeJournal extends UpgradeProcess {
 			"handle other necessary carousel configurations.";
 		xsd = getFileAsString(
 			"/structures/multiple_item_carousel.xml");
+		nameMap.clear();
+		nameMap.put(Locale.getDefault(), name);
+		descriptionMap.clear();
+		descriptionMap.put(Locale.getDefault(), description);
 
 		JournalStructureLocalServiceUtil.addStructure(
-			userId, groupId, structureId, false, StringPool.BLANK, name,
-			description, xsd, serviceContext);
+			userId, groupId, structureId, false, StringPool.BLANK, nameMap,
+			descriptionMap, xsd, serviceContext);
 
 		// Multiple Item
 
@@ -74,10 +82,14 @@ public class UpgradeJournal extends UpgradeProcess {
 			"element that includes an HTML field, and text-box for a title " +
 				"and url designation.";
 		xsd = getFileAsString("/structures/multiple_item.xml");
+		nameMap.clear();
+		nameMap.put(Locale.getDefault(), name);
+		descriptionMap.clear();
+		descriptionMap.put(Locale.getDefault(), description);
 
 		JournalStructureLocalServiceUtil.addStructure(
-			userId, groupId, structureId, false, StringPool.BLANK, name,
-			description, xsd, serviceContext);
+			userId, groupId, structureId, false, StringPool.BLANK, nameMap,
+			descriptionMap, xsd, serviceContext);
 	}
 
 	protected void addJournalTemplates(long groupId, long userId)
@@ -98,10 +110,14 @@ public class UpgradeJournal extends UpgradeProcess {
 		String type = "vm";
 		String xsl = getFileAsString(
 			"/templates/article_description.vm");
+		java.util.Map<java.util.Locale,String> nameMap = new java.util.HashMap<java.util.Locale, String>();
+		nameMap.put(Locale.getDefault(), name);
+		java.util.Map<java.util.Locale,String> descriptionMap = new java.util.HashMap<java.util.Locale, String>();
+		descriptionMap.put(Locale.getDefault(), description);
 
 		JournalTemplateLocalServiceUtil.addTemplate(
-			userId, groupId, templateId, false, structureId, name,
-			description, xsl, true, type, true, false, StringPool.BLANK, null,
+			userId, groupId, templateId, false, structureId, nameMap,
+			descriptionMap, xsl, true, type, true, false, StringPool.BLANK, null,
 			serviceContext);
 
 		// Regular Article
@@ -112,10 +128,14 @@ public class UpgradeJournal extends UpgradeProcess {
 			"basic article content like, titles, main image, body, and " +
 				"author information.";
 		xsl = getFileAsString("/templates/regular_article.vm");
+		nameMap.clear();
+		nameMap.put(Locale.getDefault(), name);
+		descriptionMap.clear();
+		descriptionMap.put(Locale.getDefault(), description);
 
 		JournalTemplateLocalServiceUtil.addTemplate(
-			userId, groupId, templateId, false, structureId, name,
-			description, xsl, true, type, true, false, StringPool.BLANK, null,
+			userId, groupId, templateId, false, structureId, nameMap,
+			descriptionMap, xsl, true, type, true, false, StringPool.BLANK, null,
 			serviceContext);
 
 		// Carousel
@@ -126,10 +146,14 @@ public class UpgradeJournal extends UpgradeProcess {
 		description = "This is the carousel template that utilizes Alloy UI " +
 			"to display repeatable content as a slideshow.";
 		xsl = getFileAsString("/templates/multiple_item_carousel.vm");
+		nameMap.clear();
+		nameMap.put(Locale.getDefault(), name);
+		descriptionMap.clear();
+		descriptionMap.put(Locale.getDefault(), description);
 
 		JournalTemplateLocalServiceUtil.addTemplate(
-			userId, groupId, templateId, false, structureId, name,
-			description, xsl, true, type, true, false, StringPool.BLANK, null,
+			userId, groupId, templateId, false, structureId, nameMap,
+			descriptionMap, xsl, true, type, true, false, StringPool.BLANK, null,
 			serviceContext);
 
 		// Featured Items
@@ -140,10 +164,14 @@ public class UpgradeJournal extends UpgradeProcess {
 		description = "This is a template that utilizes the Multiple Item " +
 			"Structure, and displays the data as Featured Items.";
 		xsl = getFileAsString("/templates/multiple_item_feature.vm");
+		nameMap.clear();
+		nameMap.put(Locale.getDefault(), name);
+		descriptionMap.clear();
+		descriptionMap.put(Locale.getDefault(), description);
 
 		JournalTemplateLocalServiceUtil.addTemplate(
-			userId, groupId, templateId, false, structureId, name,
-			description, xsl, true, type, true, false, StringPool.BLANK, null,
+			userId, groupId, templateId, false, structureId, nameMap,
+			descriptionMap, xsl, true, type, true, false, StringPool.BLANK, null,
 			serviceContext);
 	}
 

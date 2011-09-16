@@ -8,7 +8,7 @@
  *
  * Liferay Social Office is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
  * for more details.
  *
  * You should have received a copy of the GNU General Public License along with
@@ -111,7 +111,7 @@ public class UpgradeGroup extends UpgradeProcess {
 				sourceLayout.getName(LocaleUtil.getDefault().toString()),
 				StringPool.BLANK, StringPool.BLANK,
 				LayoutConstants.TYPE_PORTLET, false,
-				sourceLayout.getFriendlyURL(), serviceContext);
+				sourceLayout.getFriendlyURL(), false, serviceContext);
 
 			LayoutLocalServiceUtil.updateLayout(
 				targetLayout.getGroupId(), targetLayout.isPrivateLayout(),

@@ -44,7 +44,7 @@ UserThreadLocalServiceUtil.markUserThreadAsRead(user.getUserId(), mbThreadId);
 	Between
 
 	<%
-	List<User> users = PrivateMessagingUtil.getThreadUsers(user.getUserId(), mbThreadId, true);
+	List<User> users = PrivateMessagingUtil.getThreadUsers(user.getUserId(), mbThreadId);
 
 	for (int i = 0; i < users.size(); i++) {
 		User curUser = users.get(i);
@@ -52,8 +52,8 @@ UserThreadLocalServiceUtil.markUserThreadAsRead(user.getUserId(), mbThreadId);
 
 		<c:choose>
 			<c:when test="<%= LAYOUT_USER_PUBLIC_LAYOUTS_ENABLED %>">
-				<liferay-portlet:actionURL portletName="<%= PortletKeys.MY_PLACES %>" var="publicPagesURL">
-					<portlet:param name="struts_action" value="/my_places/view" />
+				<liferay-portlet:actionURL portletName="<%= PortletKeys.MY_SITES %>" var="publicPagesURL">
+					<portlet:param name="struts_action" value="/my_sites/view" />
 					<portlet:param name="groupId" value="<%= String.valueOf(curUser.getGroup().getGroupId()) %>" />
 					<portlet:param name="privateLayout" value="<%= Boolean.FALSE.toString() %>" />
 				</liferay-portlet:actionURL>
@@ -75,8 +75,8 @@ UserThreadLocalServiceUtil.markUserThreadAsRead(user.getUserId(), mbThreadId);
 
 	<c:choose>
 		<c:when test="<%= LAYOUT_USER_PUBLIC_LAYOUTS_ENABLED %>">
-			<liferay-portlet:actionURL portletName="<%= PortletKeys.MY_PLACES %>" var="selfPublicPagesURL">
-				<portlet:param name="struts_action" value="/my_places/view" />
+			<liferay-portlet:actionURL portletName="<%= PortletKeys.MY_SITES %>" var="selfPublicPagesURL">
+				<portlet:param name="struts_action" value="/my_sites/view" />
 				<portlet:param name="groupId" value="<%= String.valueOf(user.getGroup().getGroupId()) %>" />
 				<portlet:param name="privateLayout" value="<%= Boolean.FALSE.toString() %>" />
 			</liferay-portlet:actionURL>
@@ -113,19 +113,16 @@ UserThreadLocalServiceUtil.markUserThreadAsRead(user.getUserId(), mbThreadId);
 				userName="<%= mbMessage.getUserName() %>"
 				displayStyle="<%= 2 %>"
 			/>
-		</liferay-ui:search-container-column-text>
-
-		<liferay-ui:search-container-column-text valign="top">
 
 			<%
 			User curUser = UserLocalServiceUtil.getUser(mbMessage.getUserId());
 			%>
 
-			<aui:layout>
+			<div class="message">
 				<c:choose>
 					<c:when test="<%= LAYOUT_USER_PUBLIC_LAYOUTS_ENABLED %>">
-						<liferay-portlet:actionURL portletName="<%= PortletKeys.MY_PLACES %>" var="publicPagesURL">
-							<portlet:param name="struts_action" value="/my_places/view" />
+						<liferay-portlet:actionURL portletName="<%= PortletKeys.MY_SITES %>" var="publicPagesURL">
+							<portlet:param name="struts_action" value="/my_sites/view" />
 							<portlet:param name="groupId" value="<%= String.valueOf(curUser.getGroup().getGroupId()) %>" />
 							<portlet:param name="privateLayout" value="<%= Boolean.FALSE.toString() %>" />
 						</liferay-portlet:actionURL>
@@ -144,58 +141,58 @@ UserThreadLocalServiceUtil.markUserThreadAsRead(user.getUserId(), mbThreadId);
 				<span class="date">
 					<%= dateFormatDateTime.format(mbMessage.getCreateDate()) %>
 				</span>
-			</aui:layout>
 
-			<aui:layout cssClass="body">
-				<%= HtmlUtil.escape(mbMessage.getBody()) %>
+				<div class="body">
+					<%= HtmlUtil.escape(mbMessage.getBody()) %>
 
-				<c:if test="<%= mbMessage.isAttachments() %>">
-					<hr />
+					<c:if test="<%= mbMessage.isAttachments() %>">
+						<hr />
 
-					<%
-					String[] attachmentsFiles = mbMessage.getAttachmentsFiles();
+						<%
+						String[] attachmentsFiles = mbMessage.getAttachmentsFiles();
 
-					for (int j = 0; j < attachmentsFiles.length; j++) {
-						String fileName = FileUtil.getShortFileName(attachmentsFiles[j]);
+						for (int j = 0; j < attachmentsFiles.length; j++) {
+							String fileName = FileUtil.getShortFileName(attachmentsFiles[j]);
 
-						if (StringUtil.endsWith(fileName, ".gif") || StringUtil.endsWith(fileName, ".jpg") || StringUtil.endsWith(fileName, ".png")) {
-					%>
+							if (StringUtil.endsWith(fileName, ".gif") || StringUtil.endsWith(fileName, ".jpg") || StringUtil.endsWith(fileName, ".png")) {
+						%>
 
-							<div>
-								<img alt="<liferay-ui:message key="attachment" />" src="<liferay-portlet:actionURL name="getMessageAttachment" windowState="<%= LiferayWindowState.EXCLUSIVE.toString() %>"><portlet:param name="messageId" value="<%= String.valueOf(mbMessage.getMessageId()) %>" /><portlet:param name="attachment" value="<%= fileName %>" /></liferay-portlet:actionURL>" />
-							</div>
+								<div>
+									<img alt="<liferay-ui:message key="attachment" />" src="<liferay-portlet:actionURL name="getMessageAttachment" windowState="<%= LiferayWindowState.EXCLUSIVE.toString() %>"><portlet:param name="messageId" value="<%= String.valueOf(mbMessage.getMessageId()) %>" /><portlet:param name="attachment" value="<%= fileName %>" /></liferay-portlet:actionURL>" />
+								</div>
 
-							<br />
+								<br />
 
-					<%
-						}
-					}
-					%>
-
-					<table class="lfr-table">
-					<tr>
-						<td class="lfr-top">
-							<strong><liferay-ui:message key="attachments" />:</strong>
-						</td>
-						<td>
-
-							<%
-							for (int j = 0; j < attachmentsFiles.length; j++) {
-								String fileName = FileUtil.getShortFileName(attachmentsFiles[j]);
-								long fileSize = DLLocalServiceUtil.getFileSize(company.getCompanyId(), CompanyConstants.SYSTEM, attachmentsFiles[j]);
-							%>
-
-								<a href="<liferay-portlet:actionURL name="getMessageAttachment" windowState="<%= LiferayWindowState.EXCLUSIVE.toString() %>"><portlet:param name="messageId" value="<%= String.valueOf(mbMessage.getMessageId()) %>" /><portlet:param name="attachment" value="<%= fileName %>" /></liferay-portlet:actionURL>"><%= fileName %></a> (<%= TextFormatter.formatKB(fileSize, locale) %>k)<%= (j < (attachmentsFiles.length - 1)) ? ", " : "" %>
-
-							<%
+						<%
 							}
-							%>
+						}
+						%>
 
-						</td>
-					</tr>
-					</table>
-				</c:if>
-			</aui:layout>
+						<table class="lfr-table">
+						<tr>
+							<td class="lfr-top">
+								<strong><liferay-ui:message key="attachments" />:</strong>
+							</td>
+							<td>
+
+								<%
+								for (int j = 0; j < attachmentsFiles.length; j++) {
+									String fileName = FileUtil.getShortFileName(attachmentsFiles[j]);
+									long fileSize = DLStoreUtil.getFileSize(company.getCompanyId(), CompanyConstants.SYSTEM, attachmentsFiles[j]);
+								%>
+
+									<a href="<liferay-portlet:actionURL name="getMessageAttachment" windowState="<%= LiferayWindowState.EXCLUSIVE.toString() %>"><portlet:param name="messageId" value="<%= String.valueOf(mbMessage.getMessageId()) %>" /><portlet:param name="attachment" value="<%= fileName %>" /></liferay-portlet:actionURL>"><%= fileName %></a> (<%= TextFormatter.formatKB(fileSize, locale) %>k)<%= (j < (attachmentsFiles.length - 1)) ? ", " : "" %>
+
+								<%
+								}
+								%>
+
+							</td>
+						</tr>
+						</table>
+					</c:if>
+				</div>
+			</div>
 		</liferay-ui:search-container-column-text>
 	</liferay-ui:search-container-row>
 
@@ -210,26 +207,21 @@ UserThreadLocalServiceUtil.markUserThreadAsRead(user.getUserId(), mbThreadId);
 		<aui:input name="userId" type="hidden" value="<%= user.getUserId() %>" />
 		<aui:input name="mbThreadId" type="hidden" value="<%= mbThreadId %>" />
 
-		<table>
-		<tr>
-			<td>
-				<textarea class="message-body" name="<portlet:namespace />body"></textarea>
-			</td>
-			<td>
-				<aui:layout>
-					<label class="aui-field-label">
-						<liferay-ui:message key="attachments" />
-					</label>
+		<div>
+			<textarea class="message-body" name="<portlet:namespace />body"></textarea>
+		</div>
 
-					<aui:input label="" name="msgFile1" type="file" />
+		<div>
+			<label class="aui-field-label">
+				<liferay-ui:message key="attachments" />
+			</label>
 
-					<aui:input label="" name="msgFile2" type="file" />
+			<aui:input label="" name="msgFile1" type="file" />
 
-					<aui:input label="" name="msgFile3" type="file" />
-				</aui:layout>
-			</td>
-		</tr>
-		</table>
+			<aui:input label="" name="msgFile2" type="file" />
+
+			<aui:input label="" name="msgFile3" type="file" />
+		</div>
 
 		<aui:button-row>
 			<aui:button name="send" type="submit" value="send" />
@@ -238,7 +230,7 @@ UserThreadLocalServiceUtil.markUserThreadAsRead(user.getUserId(), mbThreadId);
 </aui:layout>
 
 <aui:layout cssClass="controls">
-	<aui:button href="<%= backURL %>" value="back-to-messages" />
+	<aui:button cssClass="back-button" href="<%= backURL %>" value="back-to-messages" />
 </aui:layout>
 
 <aui:script>

@@ -282,7 +282,7 @@ public class AttachmentWrapper implements Attachment {
 		return new AttachmentWrapper((Attachment)_attachment.clone());
 	}
 
-	public int compareTo(com.liferay.mail.model.Attachment attachment) {
+	public int compareTo(Attachment attachment) {
 		return _attachment.compareTo(attachment);
 	}
 
@@ -291,7 +291,11 @@ public class AttachmentWrapper implements Attachment {
 		return _attachment.hashCode();
 	}
 
-	public com.liferay.mail.model.Attachment toEscapedModel() {
+	public com.liferay.portal.model.CacheModel<Attachment> toCacheModel() {
+		return _attachment.toCacheModel();
+	}
+
+	public Attachment toEscapedModel() {
 		return new AttachmentWrapper(_attachment.toEscapedModel());
 	}
 
@@ -302,6 +306,11 @@ public class AttachmentWrapper implements Attachment {
 
 	public java.lang.String toXmlString() {
 		return _attachment.toXmlString();
+	}
+
+	public void persist()
+		throws com.liferay.portal.kernel.exception.SystemException {
+		_attachment.persist();
 	}
 
 	public Attachment getWrappedAttachment() {

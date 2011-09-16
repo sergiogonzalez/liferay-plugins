@@ -20,8 +20,9 @@
 			<basic name="modifiedDate">
 				<temporal>TIMESTAMP</temporal>
 			</basic>
+			<basic name="kaleoClassName" />
+			<basic name="kaleoClassPK" />
 			<basic name="kaleoDefinitionId" />
-			<basic name="kaleoNodeId" />
 			<basic name="kaleoNodeName" />
 			<basic name="name" />
 			<basic name="description" />
@@ -72,6 +73,7 @@
 			<basic name="name" />
 			<basic name="title" />
 			<basic name="description" />
+			<basic name="content" />
 			<basic name="version" />
 			<basic name="active">
 				<column name="ACTIVE_" />
@@ -154,11 +156,12 @@
 			<basic name="modifiedDate">
 				<temporal>TIMESTAMP</temporal>
 			</basic>
+			<basic name="kaleoClassName" />
+			<basic name="kaleoClassPK" />
 			<basic name="kaleoDefinitionId" />
 			<basic name="kaleoInstanceId" />
 			<basic name="kaleoInstanceTokenId" />
 			<basic name="kaleoTaskInstanceTokenId" />
-			<basic name="kaleoNodeId" />
 			<basic name="kaleoNodeName" />
 			<basic name="terminalKaleoNode" />
 			<basic name="kaleoActionId" />
@@ -204,6 +207,7 @@
 			</basic>
 			<basic name="kaleoDefinitionId" />
 			<basic name="name" />
+			<basic name="metadata" />
 			<basic name="description" />
 			<basic name="type">
 				<column name="TYPE_" />
@@ -230,8 +234,9 @@
 			<basic name="modifiedDate">
 				<temporal>TIMESTAMP</temporal>
 			</basic>
+			<basic name="kaleoClassName" />
+			<basic name="kaleoClassPK" />
 			<basic name="kaleoDefinitionId" />
-			<basic name="kaleoNodeId" />
 			<basic name="kaleoNodeName" />
 			<basic name="name" />
 			<basic name="description" />
@@ -303,9 +308,10 @@
 			<basic name="modifiedDate">
 				<temporal>TIMESTAMP</temporal>
 			</basic>
+			<basic name="kaleoClassName" />
+			<basic name="kaleoClassPK" />
 			<basic name="kaleoDefinitionId" />
 			<basic name="kaleoNodeId" />
-			<basic name="kaleoTaskId" />
 			<basic name="assigneeClassName" />
 			<basic name="assigneeClassPK" />
 			<basic name="assigneeActionId" />
@@ -341,6 +347,28 @@
 			<basic name="completionDate">
 				<temporal>TIMESTAMP</temporal>
 			</basic>
+			<transient name="primaryKey" />
+			<transient name="primaryKeyObj" />
+			<transient name="userUuid" />
+		</attributes>
+	</mapped-superclass>
+	<mapped-superclass class="com.liferay.portal.workflow.kaleo.model.impl.KaleoTaskFormModelImpl">
+		<attributes>
+			<id name="kaleoTaskFormId" />
+			<basic name="groupId" />
+			<basic name="companyId" />
+			<basic name="userId" />
+			<basic name="userName" />
+			<basic name="createDate">
+				<temporal>TIMESTAMP</temporal>
+			</basic>
+			<basic name="modifiedDate">
+				<temporal>TIMESTAMP</temporal>
+			</basic>
+			<basic name="kaleoDefinitionId" />
+			<basic name="kaleoTaskId" />
+			<basic name="description" />
+			<basic name="formTemplateId" />
 			<transient name="primaryKey" />
 			<transient name="primaryKeyObj" />
 			<transient name="userUuid" />
@@ -394,14 +422,16 @@
 			<basic name="modifiedDate">
 				<temporal>TIMESTAMP</temporal>
 			</basic>
+			<basic name="kaleoClassName" />
+			<basic name="kaleoClassPK" />
 			<basic name="kaleoDefinitionId" />
-			<basic name="kaleoNodeId" />
-			<basic name="parentKaleoNodeId" />
 			<basic name="name" />
-			<basic name="defaultTimer" />
+			<basic name="blocking" />
 			<basic name="description" />
 			<basic name="duration" />
 			<basic name="scale" />
+			<basic name="recurrenceDuration" />
+			<basic name="recurrenceScale" />
 			<transient name="primaryKey" />
 			<transient name="primaryKeyObj" />
 			<transient name="userUuid" />
@@ -420,11 +450,15 @@
 			<basic name="modifiedDate">
 				<temporal>TIMESTAMP</temporal>
 			</basic>
+			<basic name="kaleoClassName" />
+			<basic name="kaleoClassPK" />
 			<basic name="kaleoDefinitionId" />
 			<basic name="kaleoInstanceId" />
 			<basic name="kaleoInstanceTokenId" />
+			<basic name="kaleoTaskInstanceTokenId" />
 			<basic name="kaleoTimerId" />
 			<basic name="kaleoTimerName" />
+			<basic name="blocking" />
 			<basic name="completionUserId" />
 			<basic name="completed" />
 			<basic name="completionDate">
@@ -512,6 +546,10 @@
 	</entity>
 	<entity class="com.liferay.portal.workflow.kaleo.model.impl.KaleoTaskAssignmentInstanceImpl" name="KaleoTaskAssignmentInstance">
 		<table name="KaleoTaskAssignmentInstance" />
+		<attributes />
+	</entity>
+	<entity class="com.liferay.portal.workflow.kaleo.model.impl.KaleoTaskFormImpl" name="KaleoTaskForm">
+		<table name="KaleoTaskForm" />
 		<attributes />
 	</entity>
 	<entity class="com.liferay.portal.workflow.kaleo.model.impl.KaleoTaskInstanceTokenImpl" name="KaleoTaskInstanceToken">

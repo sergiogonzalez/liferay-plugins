@@ -53,7 +53,7 @@ if (WebFormUtil.getTableRowsCount(company.getCompanyId(), databaseTableName) > 0
 				<liferay-ui:error key="titleRequired" message="please-enter-a-title" />
 
 				<aui:field-wrapper cssClass="lfr-input-text-container" label="title">
-					<liferay-ui:input-localized  name="title" xml="<%= titleXml %>" />
+					<liferay-ui:input-localized name="title" xml="<%= titleXml %>" />
 				</aui:field-wrapper>
 
 				<aui:field-wrapper cssClass="lfr-textarea-container" label="description">
@@ -244,7 +244,8 @@ if (!fieldsEditingDisabled) {
 	webFields.all('select').each(toggleOptions);
 
 	<c:if test="<%= !fieldsEditingDisabled %>">
-		webFields.delegate(['click', 'keydown'], toggleOptions, 'select');
+		webFields.delegate(['change', 'click', 'keydown'], toggleOptions, 'select');
+
 		webFields.delegate('click', toggleValidationOptions, '.validation-link');
 
 		webFields.delegate(

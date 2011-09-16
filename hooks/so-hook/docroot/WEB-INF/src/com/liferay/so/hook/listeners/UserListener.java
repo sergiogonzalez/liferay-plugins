@@ -8,7 +8,7 @@
  *
  * Liferay Social Office is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
  * for more details.
  *
  * You should have received a copy of the GNU General Public License along with
@@ -25,6 +25,7 @@ import com.liferay.portal.model.RoleConstants;
 import com.liferay.portal.model.User;
 import com.liferay.portal.service.LayoutSetLocalServiceUtil;
 import com.liferay.portal.service.RoleLocalServiceUtil;
+import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.UserLocalServiceUtil;
 
 /**
@@ -59,8 +60,12 @@ public class UserListener extends BaseModelListener<User> {
 
 		Group group = user.getGroup();
 
-		LayoutSetLocalServiceUtil.deleteLayoutSet(group.getGroupId(), false);
-		LayoutSetLocalServiceUtil.deleteLayoutSet(group.getGroupId(), true);
+		ServiceContext serviceContext = new ServiceContext();
+
+		LayoutSetLocalServiceUtil.deleteLayoutSet(
+			group.getGroupId(), false, serviceContext);
+		LayoutSetLocalServiceUtil.deleteLayoutSet(
+			group.getGroupId(), true, serviceContext);
 
 		LayoutSetLocalServiceUtil.addLayoutSet(group.getGroupId(), false);
 		LayoutSetLocalServiceUtil.addLayoutSet(group.getGroupId(), true);

@@ -14,8 +14,10 @@
 
 package com.liferay.portal.workflow.kaleo.model;
 
+import com.liferay.portal.model.PersistedModel;
+
 /**
- * The model interface for the KaleoTask service. Represents a row in the &quot;KaleoTask&quot; database table, with each column mapped to a property of this class.
+ * The extended model interface for the KaleoTask service. Represents a row in the &quot;KaleoTask&quot; database table, with each column mapped to a property of this class.
  *
  * @author Brian Wing Shun Chan
  * @see KaleoTaskModel
@@ -23,7 +25,7 @@ package com.liferay.portal.workflow.kaleo.model;
  * @see com.liferay.portal.workflow.kaleo.model.impl.KaleoTaskModelImpl
  * @generated
  */
-public interface KaleoTask extends KaleoTaskModel {
+public interface KaleoTask extends KaleoTaskModel, PersistedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
@@ -34,5 +36,8 @@ public interface KaleoTask extends KaleoTaskModel {
 			com.liferay.portal.kernel.exception.SystemException;
 
 	public java.util.List<com.liferay.portal.workflow.kaleo.model.KaleoTaskAssignment> getKaleoTaskAssignments()
+		throws com.liferay.portal.kernel.exception.SystemException;
+
+	public java.util.List<com.liferay.portal.workflow.kaleo.model.KaleoTaskForm> getKaleoTaskForms()
 		throws com.liferay.portal.kernel.exception.SystemException;
 }

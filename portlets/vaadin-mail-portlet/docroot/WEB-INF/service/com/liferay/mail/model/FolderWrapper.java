@@ -300,7 +300,7 @@ public class FolderWrapper implements Folder {
 		return new FolderWrapper((Folder)_folder.clone());
 	}
 
-	public int compareTo(com.liferay.mail.model.Folder folder) {
+	public int compareTo(Folder folder) {
 		return _folder.compareTo(folder);
 	}
 
@@ -309,7 +309,11 @@ public class FolderWrapper implements Folder {
 		return _folder.hashCode();
 	}
 
-	public com.liferay.mail.model.Folder toEscapedModel() {
+	public com.liferay.portal.model.CacheModel<Folder> toCacheModel() {
+		return _folder.toCacheModel();
+	}
+
+	public Folder toEscapedModel() {
 		return new FolderWrapper(_folder.toEscapedModel());
 	}
 
@@ -320,6 +324,11 @@ public class FolderWrapper implements Folder {
 
 	public java.lang.String toXmlString() {
 		return _folder.toXmlString();
+	}
+
+	public void persist()
+		throws com.liferay.portal.kernel.exception.SystemException {
+		_folder.persist();
 	}
 
 	public Folder getWrappedFolder() {
