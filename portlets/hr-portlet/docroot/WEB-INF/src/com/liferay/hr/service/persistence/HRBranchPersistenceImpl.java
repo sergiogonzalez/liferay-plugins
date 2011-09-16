@@ -46,6 +46,7 @@ import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.ModelListener;
 import com.liferay.portal.service.persistence.BatchSessionUtil;
 import com.liferay.portal.service.persistence.ResourcePersistence;
@@ -82,11 +83,11 @@ public class HRBranchPersistenceImpl extends BasePersistenceImpl<HRBranch>
 	public static final String FINDER_CLASS_NAME_LIST = FINDER_CLASS_NAME_ENTITY +
 		".List";
 	public static final FinderPath FINDER_PATH_FIND_ALL = new FinderPath(HRBranchModelImpl.ENTITY_CACHE_ENABLED,
-			HRBranchModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"findAll", new String[0]);
+			HRBranchModelImpl.FINDER_CACHE_ENABLED, HRBranchImpl.class,
+			FINDER_CLASS_NAME_LIST, "findAll", new String[0]);
 	public static final FinderPath FINDER_PATH_COUNT_ALL = new FinderPath(HRBranchModelImpl.ENTITY_CACHE_ENABLED,
-			HRBranchModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"countAll", new String[0]);
+			HRBranchModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST, "countAll", new String[0]);
 
 	/**
 	 * Caches the h r branch in the entity cache if it is enabled.
@@ -109,7 +110,7 @@ public class HRBranchPersistenceImpl extends BasePersistenceImpl<HRBranch>
 		for (HRBranch hrBranch : hrBranchs) {
 			if (EntityCacheUtil.getResult(
 						HRBranchModelImpl.ENTITY_CACHE_ENABLED,
-						HRBranchImpl.class, hrBranch.getPrimaryKey(), this) == null) {
+						HRBranchImpl.class, hrBranch.getPrimaryKey()) == null) {
 				cacheResult(hrBranch);
 			}
 		}
@@ -144,6 +145,8 @@ public class HRBranchPersistenceImpl extends BasePersistenceImpl<HRBranch>
 	public void clearCache(HRBranch hrBranch) {
 		EntityCacheUtil.removeResult(HRBranchModelImpl.ENTITY_CACHE_ENABLED,
 			HRBranchImpl.class, hrBranch.getPrimaryKey());
+
+		FinderCacheUtil.removeResult(FINDER_PATH_FIND_ALL, FINDER_ARGS_EMPTY);
 	}
 
 	/**
@@ -375,10 +378,16 @@ public class HRBranchPersistenceImpl extends BasePersistenceImpl<HRBranch>
 	public HRBranch fetchByPrimaryKey(long hrBranchId)
 		throws SystemException {
 		HRBranch hrBranch = (HRBranch)EntityCacheUtil.getResult(HRBranchModelImpl.ENTITY_CACHE_ENABLED,
-				HRBranchImpl.class, hrBranchId, this);
+				HRBranchImpl.class, hrBranchId);
+
+		if (hrBranch == _nullHRBranch) {
+			return null;
+		}
 
 		if (hrBranch == null) {
 			Session session = null;
+
+			boolean hasException = false;
 
 			try {
 				session = openSession();
@@ -387,11 +396,17 @@ public class HRBranchPersistenceImpl extends BasePersistenceImpl<HRBranch>
 						Long.valueOf(hrBranchId));
 			}
 			catch (Exception e) {
+				hasException = true;
+
 				throw processException(e);
 			}
 			finally {
 				if (hrBranch != null) {
 					cacheResult(hrBranch);
+				}
+				else if (!hasException) {
+					EntityCacheUtil.putResult(HRBranchModelImpl.ENTITY_CACHE_ENABLED,
+						HRBranchImpl.class, hrBranchId, _nullHRBranch);
 				}
 
 				closeSession(session);
@@ -442,10 +457,7 @@ public class HRBranchPersistenceImpl extends BasePersistenceImpl<HRBranch>
 	 */
 	public List<HRBranch> findAll(int start, int end,
 		OrderByComparator orderByComparator) throws SystemException {
-		Object[] finderArgs = new Object[] {
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
-			};
+		Object[] finderArgs = new Object[] { start, end, orderByComparator };
 
 		List<HRBranch> list = (List<HRBranch>)FinderCacheUtil.getResult(FINDER_PATH_FIND_ALL,
 				finderArgs, this);
@@ -527,10 +539,8 @@ public class HRBranchPersistenceImpl extends BasePersistenceImpl<HRBranch>
 	 * @throws SystemException if a system exception occurred
 	 */
 	public int countAll() throws SystemException {
-		Object[] finderArgs = new Object[0];
-
 		Long count = (Long)FinderCacheUtil.getResult(FINDER_PATH_COUNT_ALL,
-				finderArgs, this);
+				FINDER_ARGS_EMPTY, this);
 
 		if (count == null) {
 			Session session = null;
@@ -550,8 +560,8 @@ public class HRBranchPersistenceImpl extends BasePersistenceImpl<HRBranch>
 					count = Long.valueOf(0);
 				}
 
-				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL, finderArgs,
-					count);
+				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL,
+					FINDER_ARGS_EMPTY, count);
 
 				closeSession(session);
 			}
@@ -592,6 +602,7 @@ public class HRBranchPersistenceImpl extends BasePersistenceImpl<HRBranch>
 
 	public static final FinderPath FINDER_PATH_GET_HRJOBTITLES = new FinderPath(com.liferay.hr.model.impl.HRJobTitleModelImpl.ENTITY_CACHE_ENABLED,
 			HRBranchModelImpl.FINDER_CACHE_ENABLED_HRBRANCHES_HRJOBTITLES,
+			com.liferay.hr.model.impl.HRJobTitleImpl.class,
 			HRBranchModelImpl.MAPPING_TABLE_HRBRANCHES_HRJOBTITLES_NAME,
 			"getHRJobTitles",
 			new String[] {
@@ -616,10 +627,7 @@ public class HRBranchPersistenceImpl extends BasePersistenceImpl<HRBranch>
 	public List<com.liferay.hr.model.HRJobTitle> getHRJobTitles(long pk,
 		int start, int end, OrderByComparator orderByComparator)
 		throws SystemException {
-		Object[] finderArgs = new Object[] {
-				pk, String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
-			};
+		Object[] finderArgs = new Object[] { pk, start, end, orderByComparator };
 
 		List<com.liferay.hr.model.HRJobTitle> list = (List<com.liferay.hr.model.HRJobTitle>)FinderCacheUtil.getResult(FINDER_PATH_GET_HRJOBTITLES,
 				finderArgs, this);
@@ -676,6 +684,7 @@ public class HRBranchPersistenceImpl extends BasePersistenceImpl<HRBranch>
 
 	public static final FinderPath FINDER_PATH_GET_HRJOBTITLES_SIZE = new FinderPath(com.liferay.hr.model.impl.HRJobTitleModelImpl.ENTITY_CACHE_ENABLED,
 			HRBranchModelImpl.FINDER_CACHE_ENABLED_HRBRANCHES_HRJOBTITLES,
+			Long.class,
 			HRBranchModelImpl.MAPPING_TABLE_HRBRANCHES_HRJOBTITLES_NAME,
 			"getHRJobTitlesSize", new String[] { Long.class.getName() });
 
@@ -729,12 +738,13 @@ public class HRBranchPersistenceImpl extends BasePersistenceImpl<HRBranch>
 
 	public static final FinderPath FINDER_PATH_CONTAINS_HRJOBTITLE = new FinderPath(com.liferay.hr.model.impl.HRJobTitleModelImpl.ENTITY_CACHE_ENABLED,
 			HRBranchModelImpl.FINDER_CACHE_ENABLED_HRBRANCHES_HRJOBTITLES,
+			Boolean.class,
 			HRBranchModelImpl.MAPPING_TABLE_HRBRANCHES_HRJOBTITLES_NAME,
 			"containsHRJobTitle",
 			new String[] { Long.class.getName(), Long.class.getName() });
 
 	/**
-	 * Determines if the h r job title is associated with the h r branch.
+	 * Returns <code>true</code> if the h r job title is associated with the h r branch.
 	 *
 	 * @param pk the primary key of the h r branch
 	 * @param hrJobTitlePK the primary key of the h r job title
@@ -770,7 +780,7 @@ public class HRBranchPersistenceImpl extends BasePersistenceImpl<HRBranch>
 	}
 
 	/**
-	 * Determines if the h r branch has any h r job titles associated with it.
+	 * Returns <code>true</code> if the h r branch has any h r job titles associated with it.
 	 *
 	 * @param pk the primary key of the h r branch to check for associations with h r job titles
 	 * @return <code>true</code> if the h r branch has any h r job titles associated with it; <code>false</code> otherwise
@@ -1340,4 +1350,21 @@ public class HRBranchPersistenceImpl extends BasePersistenceImpl<HRBranch>
 	private static final boolean _HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE = GetterUtil.getBoolean(PropsUtil.get(
 				PropsKeys.HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE));
 	private static Log _log = LogFactoryUtil.getLog(HRBranchPersistenceImpl.class);
+	private static HRBranch _nullHRBranch = new HRBranchImpl() {
+			@Override
+			public Object clone() {
+				return this;
+			}
+
+			@Override
+			public CacheModel<HRBranch> toCacheModel() {
+				return _nullHRBranchCacheModel;
+			}
+		};
+
+	private static CacheModel<HRBranch> _nullHRBranchCacheModel = new CacheModel<HRBranch>() {
+			public HRBranch toEntityModel() {
+				return _nullHRBranch;
+			}
+		};
 }

@@ -78,6 +78,10 @@ public class TasksEntryLocalServiceImpl extends TasksEntryLocalServiceBaseImpl {
 
 		tasksEntryPersistence.update(tasksEntry, false);
 
+		// Resources
+
+		resourceLocalService.addModelResources(tasksEntry, serviceContext);
+
 		// Asset
 
 		updateAsset(

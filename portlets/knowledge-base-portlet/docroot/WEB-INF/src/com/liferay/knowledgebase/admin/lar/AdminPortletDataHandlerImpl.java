@@ -15,7 +15,6 @@
 package com.liferay.knowledgebase.admin.lar;
 
 import com.liferay.counter.service.CounterLocalServiceUtil;
-import com.liferay.documentlibrary.service.DLLocalServiceUtil;
 import com.liferay.knowledgebase.admin.util.AdminUtil;
 import com.liferay.knowledgebase.model.KBArticle;
 import com.liferay.knowledgebase.model.KBArticleConstants;
@@ -47,8 +46,8 @@ import com.liferay.portal.kernel.xml.Document;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.kernel.xml.SAXReaderUtil;
 import com.liferay.portal.model.CompanyConstants;
-import com.liferay.portal.model.GroupConstants;
 import com.liferay.portal.service.ServiceContext;
+import com.liferay.portlet.documentlibrary.store.DLStoreUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -135,11 +134,8 @@ public class AdminPortletDataHandlerImpl extends BasePortletDataHandler {
 
 		Element rootElement = document.getRootElement();
 
-		// KB templates are imported before KB articles. See
-		// AdminPortletDataHandlerImp#importKBArticle.
-
-		importKBTemplates(portletDataContext, rootElement);
 		importKBArticles(portletDataContext, rootElement);
+		importKBTemplates(portletDataContext, rootElement);
 		importKBComments(portletDataContext, rootElement);
 
 		return null;
@@ -182,7 +178,7 @@ public class AdminPortletDataHandlerImpl extends BasePortletDataHandler {
 			String shortFileName = FileUtil.getShortFileName(fileName);
 
 			String path = rootPath + StringPool.SLASH + shortFileName;
-			byte[] bytes = DLLocalServiceUtil.getFile(
+			byte[] bytes = DLStoreUtil.getFileAsBytes(
 				kbArticle.getCompanyId(), CompanyConstants.SYSTEM, fileName);
 
 			Element fileElement = kbArticleAttachmentsElement.addElement(
@@ -375,15 +371,9 @@ public class AdminPortletDataHandlerImpl extends BasePortletDataHandler {
 			(Map<Long, Long>)portletDataContext.getNewPrimaryKeysMap(
 				KBArticle.class);
 
-		Map<Long, Long> kbTemplatePKs =
-			(Map<Long, Long>)portletDataContext.getNewPrimaryKeysMap(
-				KBTemplate.class);
-
 		long userId = portletDataContext.getUserId(kbArticle.getUserUuid());
 		long parentResourcePrimKey = MapUtil.getLong(
 			kbArticlePKs, kbArticle.getParentResourcePrimKey());
-		long kbTemplateId = MapUtil.getLong(
-			kbTemplatePKs, kbArticle.getKbTemplateId());
 		String[] sections = AdminUtil.unescapeSections(kbArticle.getSections());
 		String dirName = MapUtil.getString(
 			dirNames, String.valueOf(kbArticle.getResourcePrimKey()));
@@ -406,7 +396,7 @@ public class AdminPortletDataHandlerImpl extends BasePortletDataHandler {
 				KBArticleLocalServiceUtil.updateKBArticle(
 					userId, existingKBArticle.getResourcePrimKey(),
 					kbArticle.getTitle(), kbArticle.getContent(),
-					kbArticle.getDescription(), kbTemplateId, sections, dirName,
+					kbArticle.getDescription(), sections, dirName,
 					serviceContext);
 
 				KBArticleLocalServiceUtil.moveKBArticle(
@@ -447,7 +437,7 @@ public class AdminPortletDataHandlerImpl extends BasePortletDataHandler {
 				"knowledgebase/temp/import/" + importId + StringPool.SLASH +
 					resourcePrimKey;
 
-			DLLocalServiceUtil.addDirectory(
+			DLStoreUtil.addDirectory(
 				portletDataContext.getCompanyId(), CompanyConstants.SYSTEM,
 				dirName);
 
@@ -468,12 +458,9 @@ public class AdminPortletDataHandlerImpl extends BasePortletDataHandler {
 				byte[] bytes = portletDataContext.getZipEntryAsByteArray(
 					fileElement.attributeValue("path"));
 
-				DLLocalServiceUtil.addFile(
-					portletDataContext.getCompanyId(),
-					CompanyConstants.SYSTEM_STRING,
-					GroupConstants.DEFAULT_PARENT_GROUP_ID,
-					CompanyConstants.SYSTEM, fileName, 0, StringPool.BLANK,
-					serviceContext.getCreateDate(null), serviceContext, bytes);
+				DLStoreUtil.addFile(
+					portletDataContext.getCompanyId(), CompanyConstants.SYSTEM,
+					fileName, bytes);
 			}
 
 			dirNames.put(resourcePrimKey, dirName);
@@ -485,10 +472,6 @@ public class AdminPortletDataHandlerImpl extends BasePortletDataHandler {
 			long parentResourcePrimKey, String dirName,
 			Element kbArticleElement)
 		throws Exception {
-
-		Map<Long, Long> kbTemplatePKs =
-			(Map<Long, Long>)portletDataContext.getNewPrimaryKeysMap(
-				KBTemplate.class);
 
 		Element versionsElement = kbArticleElement.element("versions");
 
@@ -504,8 +487,6 @@ public class AdminPortletDataHandlerImpl extends BasePortletDataHandler {
 
 			long curUserId = portletDataContext.getUserId(
 				curKBArticle.getUserUuid());
-			long curKBTemplateId = MapUtil.getLong(
-				kbTemplatePKs, curKBArticle.getKbTemplateId());
 			String[] curSections = AdminUtil.unescapeSections(
 				curKBArticle.getSections());
 			String curDirName = StringPool.BLANK;
@@ -524,14 +505,14 @@ public class AdminPortletDataHandlerImpl extends BasePortletDataHandler {
 				importedKBArticle = KBArticleLocalServiceUtil.addKBArticle(
 					curUserId, parentResourcePrimKey, curKBArticle.getTitle(),
 					curKBArticle.getContent(), curKBArticle.getDescription(),
-					curKBTemplateId, curSections, curDirName, serviceContext);
+					curSections, curDirName, serviceContext);
 			}
 			else {
 				importedKBArticle = KBArticleLocalServiceUtil.updateKBArticle(
 					curUserId, importedKBArticle.getResourcePrimKey(),
 					curKBArticle.getTitle(), curKBArticle.getContent(),
-					curKBArticle.getDescription(), curKBTemplateId, curSections,
-					curDirName, serviceContext);
+					curKBArticle.getDescription(), curSections, curDirName,
+					serviceContext);
 			}
 		}
 
@@ -547,7 +528,7 @@ public class AdminPortletDataHandlerImpl extends BasePortletDataHandler {
 		Map<String, String> dirNames = new HashMap<String, String>();
 
 		try {
-			DLLocalServiceUtil.addDirectory(
+			DLStoreUtil.addDirectory(
 				portletDataContext.getCompanyId(), CompanyConstants.SYSTEM,
 				"knowledgebase/temp/import/" + importId);
 
@@ -572,9 +553,8 @@ public class AdminPortletDataHandlerImpl extends BasePortletDataHandler {
 			}
 		}
 		finally {
-			DLLocalServiceUtil.deleteDirectory(
-				portletDataContext.getCompanyId(),
-				CompanyConstants.SYSTEM_STRING, CompanyConstants.SYSTEM,
+			DLStoreUtil.deleteDirectory(
+				portletDataContext.getCompanyId(), CompanyConstants.SYSTEM,
 				"knowledgebase/temp/import/" + importId);
 		}
 	}
@@ -664,7 +644,6 @@ public class AdminPortletDataHandlerImpl extends BasePortletDataHandler {
 
 				importedKBTemplate = KBTemplateLocalServiceUtil.addKBTemplate(
 					userId, kbTemplate.getTitle(), kbTemplate.getContent(),
-					kbTemplate.getEngineType(), kbTemplate.isCacheable(),
 					serviceContext);
 			}
 			else {
@@ -672,14 +651,12 @@ public class AdminPortletDataHandlerImpl extends BasePortletDataHandler {
 					KBTemplateLocalServiceUtil.updateKBTemplate(
 						existingKBTemplate.getKbTemplateId(),
 						kbTemplate.getTitle(), kbTemplate.getContent(),
-						kbTemplate.getEngineType(), kbTemplate.isCacheable(),
 						serviceContext);
 			}
 		}
 		else {
 			importedKBTemplate = KBTemplateLocalServiceUtil.addKBTemplate(
 				userId, kbTemplate.getTitle(), kbTemplate.getContent(),
-				kbTemplate.getEngineType(), kbTemplate.isCacheable(),
 				serviceContext);
 		}
 

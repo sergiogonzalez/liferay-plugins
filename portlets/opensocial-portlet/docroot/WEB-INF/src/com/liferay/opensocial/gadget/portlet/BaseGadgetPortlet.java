@@ -19,11 +19,17 @@ import com.liferay.opensocial.shindig.util.ShindigUtil;
 import com.liferay.opensocial.util.WebKeys;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.model.Portlet;
+import com.liferay.portal.model.ResourceConstants;
+import com.liferay.portal.model.Role;
+import com.liferay.portal.model.RoleConstants;
 import com.liferay.portal.model.User;
+import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.service.PortletLocalServiceUtil;
+import com.liferay.portal.service.ResourcePermissionLocalServiceUtil;
+import com.liferay.portal.service.RoleLocalServiceUtil;
 import com.liferay.portal.theme.PortletDisplay;
 import com.liferay.portal.theme.ThemeDisplay;
-import com.liferay.portlet.expando.NoSuchColumnException;
+import com.liferay.portlet.expando.model.ExpandoColumn;
 import com.liferay.portlet.expando.model.ExpandoColumnConstants;
 import com.liferay.portlet.expando.model.ExpandoTable;
 import com.liferay.portlet.expando.service.ExpandoColumnLocalServiceUtil;
@@ -82,14 +88,22 @@ public abstract class BaseGadgetPortlet extends MVCPortlet {
 
 		String columnName = ShindigUtil.getColumnUserPrefs(namespace);
 
-		try {
-			ExpandoColumnLocalServiceUtil.getColumn(
-				expandoTable.getTableId(), columnName);
-		}
-		catch (NoSuchColumnException nsce) {
-			ExpandoColumnLocalServiceUtil.addColumn(
+		ExpandoColumn expandoColumn = ExpandoColumnLocalServiceUtil.getColumn(
+			expandoTable.getTableId(), columnName);
+
+		if (expandoColumn == null) {
+			expandoColumn = ExpandoColumnLocalServiceUtil.addColumn(
 				expandoTable.getTableId(), columnName,
 				ExpandoColumnConstants.STRING);
+
+			Role role = RoleLocalServiceUtil.getRole(
+				expandoColumn.getCompanyId(), RoleConstants.USER);
+
+			ResourcePermissionLocalServiceUtil.setResourcePermissions(
+				expandoColumn.getCompanyId(), ExpandoColumn.class.getName(),
+				ResourceConstants.SCOPE_INDIVIDUAL,
+				String.valueOf(expandoColumn.getColumnId()), role.getRoleId(),
+				new String[] {ActionKeys.UPDATE, ActionKeys.VIEW});
 		}
 	}
 

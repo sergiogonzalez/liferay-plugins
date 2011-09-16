@@ -47,13 +47,15 @@ if (WebFormUtil.getTableRowsCount(company.getCompanyId(), databaseTableName) > 0
 	<aui:input name="<%= Constants.CMD %>" type="hidden" value="<%= Constants.UPDATE %>" />
 	<aui:input name="redirect" type="hidden" value="<%= redirect %>" />
 
+	<liferay-ui:error exception="<%= DuplicateColumnNameException.class %>" message="please-enter-unique-field-names" />
+
 	<liferay-ui:panel-container extended="<%= Boolean.TRUE %>" id="webFormConfiguration" persistState="<%= true %>">
 		<liferay-ui:panel collapsible="<%= true %>" extended="<%= true %>" id="webFormGeneral" persistState="<%= true %>" title="form-information">
 			<aui:fieldset>
 				<liferay-ui:error key="titleRequired" message="please-enter-a-title" />
 
 				<aui:field-wrapper cssClass="lfr-input-text-container" label="title">
-					<liferay-ui:input-localized  name="title" xml="<%= titleXml %>" />
+					<liferay-ui:input-localized name="title" xml="<%= titleXml %>" />
 				</aui:field-wrapper>
 
 				<aui:field-wrapper cssClass="lfr-textarea-container" label="description">
@@ -78,7 +80,7 @@ if (WebFormUtil.getTableRowsCount(company.getCompanyId(), databaseTableName) > 0
 
 				<aui:input cssClass="lfr-input-text-container" name="preferences--subject--" value="<%= subject %>" />
 
-				<aui:input cssClass="lfr-input-text-container" name="preferences--emailAddress--" value="<%= emailAddress %>" />
+				<aui:input cssClass="lfr-input-text-container" helpMessage="add-email-addresses-separated-by-commas" label="email-addresses" name="preferences--emailAddress--" value="<%= emailAddress %>" />
 			</aui:fieldset>
 
 			<aui:fieldset cssClass="handle-data" label="database">
@@ -244,7 +246,8 @@ if (!fieldsEditingDisabled) {
 	webFields.all('select').each(toggleOptions);
 
 	<c:if test="<%= !fieldsEditingDisabled %>">
-		webFields.delegate(['click', 'keydown'], toggleOptions, 'select');
+		webFields.delegate(['change', 'click', 'keydown'], toggleOptions, 'select');
+
 		webFields.delegate('click', toggleValidationOptions, '.validation-link');
 
 		webFields.delegate(

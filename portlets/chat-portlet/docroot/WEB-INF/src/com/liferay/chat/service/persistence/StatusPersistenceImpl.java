@@ -40,6 +40,7 @@ import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.ModelListener;
 import com.liferay.portal.service.persistence.BatchSessionUtil;
 import com.liferay.portal.service.persistence.ResourcePersistence;
@@ -75,14 +76,16 @@ public class StatusPersistenceImpl extends BasePersistenceImpl<Status>
 	public static final String FINDER_CLASS_NAME_LIST = FINDER_CLASS_NAME_ENTITY +
 		".List";
 	public static final FinderPath FINDER_PATH_FETCH_BY_USERID = new FinderPath(StatusModelImpl.ENTITY_CACHE_ENABLED,
-			StatusModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_ENTITY,
-			"fetchByUserId", new String[] { Long.class.getName() });
+			StatusModelImpl.FINDER_CACHE_ENABLED, StatusImpl.class,
+			FINDER_CLASS_NAME_ENTITY, "fetchByUserId",
+			new String[] { Long.class.getName() });
 	public static final FinderPath FINDER_PATH_COUNT_BY_USERID = new FinderPath(StatusModelImpl.ENTITY_CACHE_ENABLED,
-			StatusModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"countByUserId", new String[] { Long.class.getName() });
+			StatusModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST, "countByUserId",
+			new String[] { Long.class.getName() });
 	public static final FinderPath FINDER_PATH_FIND_BY_MODIFIEDDATE = new FinderPath(StatusModelImpl.ENTITY_CACHE_ENABLED,
-			StatusModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"findByModifiedDate",
+			StatusModelImpl.FINDER_CACHE_ENABLED, StatusImpl.class,
+			FINDER_CLASS_NAME_LIST, "findByModifiedDate",
 			new String[] {
 				Long.class.getName(),
 				
@@ -90,11 +93,12 @@ public class StatusPersistenceImpl extends BasePersistenceImpl<Status>
 				"com.liferay.portal.kernel.util.OrderByComparator"
 			});
 	public static final FinderPath FINDER_PATH_COUNT_BY_MODIFIEDDATE = new FinderPath(StatusModelImpl.ENTITY_CACHE_ENABLED,
-			StatusModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"countByModifiedDate", new String[] { Long.class.getName() });
+			StatusModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST, "countByModifiedDate",
+			new String[] { Long.class.getName() });
 	public static final FinderPath FINDER_PATH_FIND_BY_ONLINE = new FinderPath(StatusModelImpl.ENTITY_CACHE_ENABLED,
-			StatusModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"findByOnline",
+			StatusModelImpl.FINDER_CACHE_ENABLED, StatusImpl.class,
+			FINDER_CLASS_NAME_LIST, "findByOnline",
 			new String[] {
 				Boolean.class.getName(),
 				
@@ -102,11 +106,12 @@ public class StatusPersistenceImpl extends BasePersistenceImpl<Status>
 				"com.liferay.portal.kernel.util.OrderByComparator"
 			});
 	public static final FinderPath FINDER_PATH_COUNT_BY_ONLINE = new FinderPath(StatusModelImpl.ENTITY_CACHE_ENABLED,
-			StatusModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"countByOnline", new String[] { Boolean.class.getName() });
+			StatusModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST, "countByOnline",
+			new String[] { Boolean.class.getName() });
 	public static final FinderPath FINDER_PATH_FIND_BY_M_O = new FinderPath(StatusModelImpl.ENTITY_CACHE_ENABLED,
-			StatusModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"findByM_O",
+			StatusModelImpl.FINDER_CACHE_ENABLED, StatusImpl.class,
+			FINDER_CLASS_NAME_LIST, "findByM_O",
 			new String[] {
 				Long.class.getName(), Boolean.class.getName(),
 				
@@ -114,15 +119,15 @@ public class StatusPersistenceImpl extends BasePersistenceImpl<Status>
 				"com.liferay.portal.kernel.util.OrderByComparator"
 			});
 	public static final FinderPath FINDER_PATH_COUNT_BY_M_O = new FinderPath(StatusModelImpl.ENTITY_CACHE_ENABLED,
-			StatusModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"countByM_O",
+			StatusModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST, "countByM_O",
 			new String[] { Long.class.getName(), Boolean.class.getName() });
 	public static final FinderPath FINDER_PATH_FIND_ALL = new FinderPath(StatusModelImpl.ENTITY_CACHE_ENABLED,
-			StatusModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"findAll", new String[0]);
+			StatusModelImpl.FINDER_CACHE_ENABLED, StatusImpl.class,
+			FINDER_CLASS_NAME_LIST, "findAll", new String[0]);
 	public static final FinderPath FINDER_PATH_COUNT_ALL = new FinderPath(StatusModelImpl.ENTITY_CACHE_ENABLED,
-			StatusModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"countAll", new String[0]);
+			StatusModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST, "countAll", new String[0]);
 
 	/**
 	 * Caches the status in the entity cache if it is enabled.
@@ -148,7 +153,7 @@ public class StatusPersistenceImpl extends BasePersistenceImpl<Status>
 		for (Status status : statuses) {
 			if (EntityCacheUtil.getResult(
 						StatusModelImpl.ENTITY_CACHE_ENABLED, StatusImpl.class,
-						status.getPrimaryKey(), this) == null) {
+						status.getPrimaryKey()) == null) {
 				cacheResult(status);
 			}
 		}
@@ -183,6 +188,8 @@ public class StatusPersistenceImpl extends BasePersistenceImpl<Status>
 	public void clearCache(Status status) {
 		EntityCacheUtil.removeResult(StatusModelImpl.ENTITY_CACHE_ENABLED,
 			StatusImpl.class, status.getPrimaryKey());
+
+		FinderCacheUtil.removeResult(FINDER_PATH_FIND_ALL, FINDER_ARGS_EMPTY);
 
 		FinderCacheUtil.removeResult(FINDER_PATH_FETCH_BY_USERID,
 			new Object[] { Long.valueOf(status.getUserId()) });
@@ -427,10 +434,16 @@ public class StatusPersistenceImpl extends BasePersistenceImpl<Status>
 	 */
 	public Status fetchByPrimaryKey(long statusId) throws SystemException {
 		Status status = (Status)EntityCacheUtil.getResult(StatusModelImpl.ENTITY_CACHE_ENABLED,
-				StatusImpl.class, statusId, this);
+				StatusImpl.class, statusId);
+
+		if (status == _nullStatus) {
+			return null;
+		}
 
 		if (status == null) {
 			Session session = null;
+
+			boolean hasException = false;
 
 			try {
 				session = openSession();
@@ -439,11 +452,17 @@ public class StatusPersistenceImpl extends BasePersistenceImpl<Status>
 						Long.valueOf(statusId));
 			}
 			catch (Exception e) {
+				hasException = true;
+
 				throw processException(e);
 			}
 			finally {
 				if (status != null) {
 					cacheResult(status);
+				}
+				else if (!hasException) {
+					EntityCacheUtil.putResult(StatusModelImpl.ENTITY_CACHE_ENABLED,
+						StatusImpl.class, statusId, _nullStatus);
 				}
 
 				closeSession(session);
@@ -500,6 +519,7 @@ public class StatusPersistenceImpl extends BasePersistenceImpl<Status>
 	 * Returns the status where userId = &#63; or returns <code>null</code> if it could not be found, optionally using the finder cache.
 	 *
 	 * @param userId the user ID
+	 * @param retrieveFromCache whether to use the finder cache
 	 * @return the matching status, or <code>null</code> if a matching status could not be found
 	 * @throws SystemException if a system exception occurred
 	 */
@@ -629,8 +649,7 @@ public class StatusPersistenceImpl extends BasePersistenceImpl<Status>
 		Object[] finderArgs = new Object[] {
 				modifiedDate,
 				
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
+				start, end, orderByComparator
 			};
 
 		List<Status> list = (List<Status>)FinderCacheUtil.getResult(FINDER_PATH_FIND_BY_MODIFIEDDATE,
@@ -956,12 +975,7 @@ public class StatusPersistenceImpl extends BasePersistenceImpl<Status>
 	 */
 	public List<Status> findByOnline(boolean online, int start, int end,
 		OrderByComparator orderByComparator) throws SystemException {
-		Object[] finderArgs = new Object[] {
-				online,
-				
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
-			};
+		Object[] finderArgs = new Object[] { online, start, end, orderByComparator };
 
 		List<Status> list = (List<Status>)FinderCacheUtil.getResult(FINDER_PATH_FIND_BY_ONLINE,
 				finderArgs, this);
@@ -1292,8 +1306,7 @@ public class StatusPersistenceImpl extends BasePersistenceImpl<Status>
 		Object[] finderArgs = new Object[] {
 				modifiedDate, online,
 				
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
+				start, end, orderByComparator
 			};
 
 		List<Status> list = (List<Status>)FinderCacheUtil.getResult(FINDER_PATH_FIND_BY_M_O,
@@ -1632,10 +1645,7 @@ public class StatusPersistenceImpl extends BasePersistenceImpl<Status>
 	 */
 	public List<Status> findAll(int start, int end,
 		OrderByComparator orderByComparator) throws SystemException {
-		Object[] finderArgs = new Object[] {
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
-			};
+		Object[] finderArgs = new Object[] { start, end, orderByComparator };
 
 		List<Status> list = (List<Status>)FinderCacheUtil.getResult(FINDER_PATH_FIND_ALL,
 				finderArgs, this);
@@ -1987,10 +1997,8 @@ public class StatusPersistenceImpl extends BasePersistenceImpl<Status>
 	 * @throws SystemException if a system exception occurred
 	 */
 	public int countAll() throws SystemException {
-		Object[] finderArgs = new Object[0];
-
 		Long count = (Long)FinderCacheUtil.getResult(FINDER_PATH_COUNT_ALL,
-				finderArgs, this);
+				FINDER_ARGS_EMPTY, this);
 
 		if (count == null) {
 			Session session = null;
@@ -2010,8 +2018,8 @@ public class StatusPersistenceImpl extends BasePersistenceImpl<Status>
 					count = Long.valueOf(0);
 				}
 
-				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL, finderArgs,
-					count);
+				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL,
+					FINDER_ARGS_EMPTY, count);
 
 				closeSession(session);
 			}
@@ -2074,4 +2082,21 @@ public class StatusPersistenceImpl extends BasePersistenceImpl<Status>
 	private static final boolean _HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE = GetterUtil.getBoolean(PropsUtil.get(
 				PropsKeys.HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE));
 	private static Log _log = LogFactoryUtil.getLog(StatusPersistenceImpl.class);
+	private static Status _nullStatus = new StatusImpl() {
+			@Override
+			public Object clone() {
+				return this;
+			}
+
+			@Override
+			public CacheModel<Status> toCacheModel() {
+				return _nullStatusCacheModel;
+			}
+		};
+
+	private static CacheModel<Status> _nullStatusCacheModel = new CacheModel<Status>() {
+			public Status toEntityModel() {
+				return _nullStatus;
+			}
+		};
 }

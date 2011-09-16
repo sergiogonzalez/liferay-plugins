@@ -9,7 +9,7 @@
  *
  * Liferay Social Office is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
  * for more details.
  *
  * You should have received a copy of the GNU General Public License along with
@@ -30,9 +30,9 @@
 <%@ page import="com.liferay.portal.NoSuchUserException" %>
 <%@ page import="com.liferay.portal.kernel.dao.orm.QueryUtil" %>
 <%@ page import="com.liferay.portal.kernel.dao.search.DAOParamUtil" %>
-<%@ page import="com.liferay.portal.kernel.dao.search.ResultRow" %>
 <%@ page import="com.liferay.portal.kernel.dao.search.SearchContainer" %>
 <%@ page import="com.liferay.portal.kernel.language.LanguageUtil" %>
+<%@ page import="com.liferay.portal.kernel.portlet.LiferayPortletResponse" %>
 <%@ page import="com.liferay.portal.kernel.portlet.LiferayWindowState" %>
 <%@ page import="com.liferay.portal.kernel.servlet.SessionMessages" %>
 <%@ page import="com.liferay.portal.kernel.util.CalendarFactoryUtil" %>
@@ -42,13 +42,11 @@
 <%@ page import="com.liferay.portal.kernel.util.FastDateFormatFactoryUtil" %>
 <%@ page import="com.liferay.portal.kernel.util.GetterUtil" %>
 <%@ page import="com.liferay.portal.kernel.util.HtmlUtil" %>
-<%@ page import="com.liferay.portal.kernel.util.LocaleUtil" %>
 <%@ page import="com.liferay.portal.kernel.util.ParamUtil" %>
 <%@ page import="com.liferay.portal.kernel.util.StringPool" %>
 <%@ page import="com.liferay.portal.kernel.util.StringUtil" %>
 <%@ page import="com.liferay.portal.kernel.util.UnicodeProperties" %>
 <%@ page import="com.liferay.portal.kernel.util.Validator" %>
-<%@ page import="com.liferay.portal.kernel.util.WebKeys" %>
 <%@ page import="com.liferay.portal.kernel.workflow.WorkflowConstants" %>
 <%@ page import="com.liferay.portal.model.Group" %>
 <%@ page import="com.liferay.portal.model.GroupConstants" %>
@@ -59,7 +57,6 @@
 <%@ page import="com.liferay.portal.model.RoleConstants" %>
 <%@ page import="com.liferay.portal.model.Team" %>
 <%@ page import="com.liferay.portal.model.User" %>
-<%@ page import="com.liferay.portal.model.UserConstants" %>
 <%@ page import="com.liferay.portal.security.permission.ActionKeys" %>
 <%@ page import="com.liferay.portal.service.GroupLocalServiceUtil" %>
 <%@ page import="com.liferay.portal.service.LayoutLocalServiceUtil" %>
@@ -76,6 +73,7 @@
 <%@ page import="com.liferay.portal.util.comparator.GroupNameComparator" %>
 <%@ page import="com.liferay.portal.util.comparator.RoleNameComparator" %>
 <%@ page import="com.liferay.portlet.PortletPreferencesFactoryUtil" %>
+<%@ page import="com.liferay.portlet.expando.model.ExpandoBridge" %>
 <%@ page import="com.liferay.portlet.social.model.SocialActivity" %>
 <%@ page import="com.liferay.portlet.social.model.SocialActivityFeedEntry" %>
 <%@ page import="com.liferay.portlet.social.model.SocialRelationConstants" %>
@@ -84,7 +82,6 @@
 <%@ page import="com.liferay.portlet.social.model.SocialRequestFeedEntry" %>
 <%@ page import="com.liferay.portlet.social.service.SocialActivityInterpreterLocalServiceUtil" %>
 <%@ page import="com.liferay.portlet.social.service.SocialActivityLocalServiceUtil" %>
-<%@ page import="com.liferay.portlet.social.service.SocialRelationLocalServiceUtil" %>
 <%@ page import="com.liferay.portlet.social.service.SocialRequestInterpreterLocalServiceUtil" %>
 <%@ page import="com.liferay.portlet.social.service.SocialRequestLocalServiceUtil" %>
 <%@ page import="com.liferay.portlet.usersadmin.util.UsersAdminUtil" %>
@@ -101,13 +98,12 @@
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.Calendar" %>
 <%@ page import="java.util.Date" %>
-<%@ page import="java.util.Iterator" %>
 <%@ page import="java.util.LinkedHashMap" %>
 <%@ page import="java.util.List" %>
-<%@ page import="java.util.Locale" %>
 
-<%@ page import="javax.portlet.ActionRequest" %>
+<%@ page import="javax.portlet.PortletMode" %>
 <%@ page import="javax.portlet.PortletPreferences" %>
+<%@ page import="javax.portlet.PortletRequest" %>
 <%@ page import="javax.portlet.PortletURL" %>
 <%@ page import="javax.portlet.WindowState" %>
 

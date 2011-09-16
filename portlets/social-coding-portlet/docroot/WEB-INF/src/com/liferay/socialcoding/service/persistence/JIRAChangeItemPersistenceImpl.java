@@ -35,6 +35,7 @@ import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.ModelListener;
 import com.liferay.portal.service.persistence.BatchSessionUtil;
 import com.liferay.portal.service.persistence.ResourcePersistence;
@@ -76,7 +77,8 @@ public class JIRAChangeItemPersistenceImpl extends BasePersistenceImpl<JIRAChang
 		".List";
 	public static final FinderPath FINDER_PATH_FIND_BY_JIRACHANGEGROUPID = new FinderPath(JIRAChangeItemModelImpl.ENTITY_CACHE_ENABLED,
 			JIRAChangeItemModelImpl.FINDER_CACHE_ENABLED,
-			FINDER_CLASS_NAME_LIST, "findByJiraChangeGroupId",
+			JIRAChangeItemImpl.class, FINDER_CLASS_NAME_LIST,
+			"findByJiraChangeGroupId",
 			new String[] {
 				Long.class.getName(),
 				
@@ -84,14 +86,15 @@ public class JIRAChangeItemPersistenceImpl extends BasePersistenceImpl<JIRAChang
 				"com.liferay.portal.kernel.util.OrderByComparator"
 			});
 	public static final FinderPath FINDER_PATH_COUNT_BY_JIRACHANGEGROUPID = new FinderPath(JIRAChangeItemModelImpl.ENTITY_CACHE_ENABLED,
-			JIRAChangeItemModelImpl.FINDER_CACHE_ENABLED,
+			JIRAChangeItemModelImpl.FINDER_CACHE_ENABLED, Long.class,
 			FINDER_CLASS_NAME_LIST, "countByJiraChangeGroupId",
 			new String[] { Long.class.getName() });
 	public static final FinderPath FINDER_PATH_FIND_ALL = new FinderPath(JIRAChangeItemModelImpl.ENTITY_CACHE_ENABLED,
 			JIRAChangeItemModelImpl.FINDER_CACHE_ENABLED,
-			FINDER_CLASS_NAME_LIST, "findAll", new String[0]);
+			JIRAChangeItemImpl.class, FINDER_CLASS_NAME_LIST, "findAll",
+			new String[0]);
 	public static final FinderPath FINDER_PATH_COUNT_ALL = new FinderPath(JIRAChangeItemModelImpl.ENTITY_CACHE_ENABLED,
-			JIRAChangeItemModelImpl.FINDER_CACHE_ENABLED,
+			JIRAChangeItemModelImpl.FINDER_CACHE_ENABLED, Long.class,
 			FINDER_CLASS_NAME_LIST, "countAll", new String[0]);
 
 	/**
@@ -116,8 +119,7 @@ public class JIRAChangeItemPersistenceImpl extends BasePersistenceImpl<JIRAChang
 		for (JIRAChangeItem jiraChangeItem : jiraChangeItems) {
 			if (EntityCacheUtil.getResult(
 						JIRAChangeItemModelImpl.ENTITY_CACHE_ENABLED,
-						JIRAChangeItemImpl.class,
-						jiraChangeItem.getPrimaryKey(), this) == null) {
+						JIRAChangeItemImpl.class, jiraChangeItem.getPrimaryKey()) == null) {
 				cacheResult(jiraChangeItem);
 			}
 		}
@@ -152,6 +154,8 @@ public class JIRAChangeItemPersistenceImpl extends BasePersistenceImpl<JIRAChang
 	public void clearCache(JIRAChangeItem jiraChangeItem) {
 		EntityCacheUtil.removeResult(JIRAChangeItemModelImpl.ENTITY_CACHE_ENABLED,
 			JIRAChangeItemImpl.class, jiraChangeItem.getPrimaryKey());
+
+		FinderCacheUtil.removeResult(FINDER_PATH_FIND_ALL, FINDER_ARGS_EMPTY);
 	}
 
 	/**
@@ -377,10 +381,16 @@ public class JIRAChangeItemPersistenceImpl extends BasePersistenceImpl<JIRAChang
 	public JIRAChangeItem fetchByPrimaryKey(long jiraChangeItemId)
 		throws SystemException {
 		JIRAChangeItem jiraChangeItem = (JIRAChangeItem)EntityCacheUtil.getResult(JIRAChangeItemModelImpl.ENTITY_CACHE_ENABLED,
-				JIRAChangeItemImpl.class, jiraChangeItemId, this);
+				JIRAChangeItemImpl.class, jiraChangeItemId);
+
+		if (jiraChangeItem == _nullJIRAChangeItem) {
+			return null;
+		}
 
 		if (jiraChangeItem == null) {
 			Session session = null;
+
+			boolean hasException = false;
 
 			try {
 				session = openSession();
@@ -389,11 +399,18 @@ public class JIRAChangeItemPersistenceImpl extends BasePersistenceImpl<JIRAChang
 						Long.valueOf(jiraChangeItemId));
 			}
 			catch (Exception e) {
+				hasException = true;
+
 				throw processException(e);
 			}
 			finally {
 				if (jiraChangeItem != null) {
 					cacheResult(jiraChangeItem);
+				}
+				else if (!hasException) {
+					EntityCacheUtil.putResult(JIRAChangeItemModelImpl.ENTITY_CACHE_ENABLED,
+						JIRAChangeItemImpl.class, jiraChangeItemId,
+						_nullJIRAChangeItem);
 				}
 
 				closeSession(session);
@@ -454,8 +471,7 @@ public class JIRAChangeItemPersistenceImpl extends BasePersistenceImpl<JIRAChang
 		Object[] finderArgs = new Object[] {
 				jiraChangeGroupId,
 				
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
+				start, end, orderByComparator
 			};
 
 		List<JIRAChangeItem> list = (List<JIRAChangeItem>)FinderCacheUtil.getResult(FINDER_PATH_FIND_BY_JIRACHANGEGROUPID,
@@ -780,10 +796,7 @@ public class JIRAChangeItemPersistenceImpl extends BasePersistenceImpl<JIRAChang
 	 */
 	public List<JIRAChangeItem> findAll(int start, int end,
 		OrderByComparator orderByComparator) throws SystemException {
-		Object[] finderArgs = new Object[] {
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
-			};
+		Object[] finderArgs = new Object[] { start, end, orderByComparator };
 
 		List<JIRAChangeItem> list = (List<JIRAChangeItem>)FinderCacheUtil.getResult(FINDER_PATH_FIND_ALL,
 				finderArgs, this);
@@ -933,10 +946,8 @@ public class JIRAChangeItemPersistenceImpl extends BasePersistenceImpl<JIRAChang
 	 * @throws SystemException if a system exception occurred
 	 */
 	public int countAll() throws SystemException {
-		Object[] finderArgs = new Object[0];
-
 		Long count = (Long)FinderCacheUtil.getResult(FINDER_PATH_COUNT_ALL,
-				finderArgs, this);
+				FINDER_ARGS_EMPTY, this);
 
 		if (count == null) {
 			Session session = null;
@@ -956,8 +967,8 @@ public class JIRAChangeItemPersistenceImpl extends BasePersistenceImpl<JIRAChang
 					count = Long.valueOf(0);
 				}
 
-				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL, finderArgs,
-					count);
+				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL,
+					FINDER_ARGS_EMPTY, count);
 
 				closeSession(session);
 			}
@@ -1025,4 +1036,21 @@ public class JIRAChangeItemPersistenceImpl extends BasePersistenceImpl<JIRAChang
 	private static final boolean _HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE = GetterUtil.getBoolean(PropsUtil.get(
 				PropsKeys.HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE));
 	private static Log _log = LogFactoryUtil.getLog(JIRAChangeItemPersistenceImpl.class);
+	private static JIRAChangeItem _nullJIRAChangeItem = new JIRAChangeItemImpl() {
+			@Override
+			public Object clone() {
+				return this;
+			}
+
+			@Override
+			public CacheModel<JIRAChangeItem> toCacheModel() {
+				return _nullJIRAChangeItemCacheModel;
+			}
+		};
+
+	private static CacheModel<JIRAChangeItem> _nullJIRAChangeItemCacheModel = new CacheModel<JIRAChangeItem>() {
+			public JIRAChangeItem toEntityModel() {
+				return _nullJIRAChangeItem;
+			}
+		};
 }

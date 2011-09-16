@@ -46,6 +46,7 @@ import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.ModelListener;
 import com.liferay.portal.service.persistence.BatchSessionUtil;
 import com.liferay.portal.service.persistence.ResourcePersistence;
@@ -82,11 +83,11 @@ public class HROfficePersistenceImpl extends BasePersistenceImpl<HROffice>
 	public static final String FINDER_CLASS_NAME_LIST = FINDER_CLASS_NAME_ENTITY +
 		".List";
 	public static final FinderPath FINDER_PATH_FIND_ALL = new FinderPath(HROfficeModelImpl.ENTITY_CACHE_ENABLED,
-			HROfficeModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"findAll", new String[0]);
+			HROfficeModelImpl.FINDER_CACHE_ENABLED, HROfficeImpl.class,
+			FINDER_CLASS_NAME_LIST, "findAll", new String[0]);
 	public static final FinderPath FINDER_PATH_COUNT_ALL = new FinderPath(HROfficeModelImpl.ENTITY_CACHE_ENABLED,
-			HROfficeModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"countAll", new String[0]);
+			HROfficeModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST, "countAll", new String[0]);
 
 	/**
 	 * Caches the h r office in the entity cache if it is enabled.
@@ -109,7 +110,7 @@ public class HROfficePersistenceImpl extends BasePersistenceImpl<HROffice>
 		for (HROffice hrOffice : hrOffices) {
 			if (EntityCacheUtil.getResult(
 						HROfficeModelImpl.ENTITY_CACHE_ENABLED,
-						HROfficeImpl.class, hrOffice.getPrimaryKey(), this) == null) {
+						HROfficeImpl.class, hrOffice.getPrimaryKey()) == null) {
 				cacheResult(hrOffice);
 			}
 		}
@@ -144,6 +145,8 @@ public class HROfficePersistenceImpl extends BasePersistenceImpl<HROffice>
 	public void clearCache(HROffice hrOffice) {
 		EntityCacheUtil.removeResult(HROfficeModelImpl.ENTITY_CACHE_ENABLED,
 			HROfficeImpl.class, hrOffice.getPrimaryKey());
+
+		FinderCacheUtil.removeResult(FINDER_PATH_FIND_ALL, FINDER_ARGS_EMPTY);
 	}
 
 	/**
@@ -375,10 +378,16 @@ public class HROfficePersistenceImpl extends BasePersistenceImpl<HROffice>
 	public HROffice fetchByPrimaryKey(long hrOfficeId)
 		throws SystemException {
 		HROffice hrOffice = (HROffice)EntityCacheUtil.getResult(HROfficeModelImpl.ENTITY_CACHE_ENABLED,
-				HROfficeImpl.class, hrOfficeId, this);
+				HROfficeImpl.class, hrOfficeId);
+
+		if (hrOffice == _nullHROffice) {
+			return null;
+		}
 
 		if (hrOffice == null) {
 			Session session = null;
+
+			boolean hasException = false;
 
 			try {
 				session = openSession();
@@ -387,11 +396,17 @@ public class HROfficePersistenceImpl extends BasePersistenceImpl<HROffice>
 						Long.valueOf(hrOfficeId));
 			}
 			catch (Exception e) {
+				hasException = true;
+
 				throw processException(e);
 			}
 			finally {
 				if (hrOffice != null) {
 					cacheResult(hrOffice);
+				}
+				else if (!hasException) {
+					EntityCacheUtil.putResult(HROfficeModelImpl.ENTITY_CACHE_ENABLED,
+						HROfficeImpl.class, hrOfficeId, _nullHROffice);
 				}
 
 				closeSession(session);
@@ -442,10 +457,7 @@ public class HROfficePersistenceImpl extends BasePersistenceImpl<HROffice>
 	 */
 	public List<HROffice> findAll(int start, int end,
 		OrderByComparator orderByComparator) throws SystemException {
-		Object[] finderArgs = new Object[] {
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
-			};
+		Object[] finderArgs = new Object[] { start, end, orderByComparator };
 
 		List<HROffice> list = (List<HROffice>)FinderCacheUtil.getResult(FINDER_PATH_FIND_ALL,
 				finderArgs, this);
@@ -527,10 +539,8 @@ public class HROfficePersistenceImpl extends BasePersistenceImpl<HROffice>
 	 * @throws SystemException if a system exception occurred
 	 */
 	public int countAll() throws SystemException {
-		Object[] finderArgs = new Object[0];
-
 		Long count = (Long)FinderCacheUtil.getResult(FINDER_PATH_COUNT_ALL,
-				finderArgs, this);
+				FINDER_ARGS_EMPTY, this);
 
 		if (count == null) {
 			Session session = null;
@@ -550,8 +560,8 @@ public class HROfficePersistenceImpl extends BasePersistenceImpl<HROffice>
 					count = Long.valueOf(0);
 				}
 
-				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL, finderArgs,
-					count);
+				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL,
+					FINDER_ARGS_EMPTY, count);
 
 				closeSession(session);
 			}
@@ -592,6 +602,7 @@ public class HROfficePersistenceImpl extends BasePersistenceImpl<HROffice>
 
 	public static final FinderPath FINDER_PATH_GET_HRHOLIDAIES = new FinderPath(com.liferay.hr.model.impl.HRHolidayModelImpl.ENTITY_CACHE_ENABLED,
 			HROfficeModelImpl.FINDER_CACHE_ENABLED_HRHOLIDAYS_HROFFICES,
+			com.liferay.hr.model.impl.HRHolidayImpl.class,
 			HROfficeModelImpl.MAPPING_TABLE_HRHOLIDAYS_HROFFICES_NAME,
 			"getHRHolidaies",
 			new String[] {
@@ -616,10 +627,7 @@ public class HROfficePersistenceImpl extends BasePersistenceImpl<HROffice>
 	public List<com.liferay.hr.model.HRHoliday> getHRHolidaies(long pk,
 		int start, int end, OrderByComparator orderByComparator)
 		throws SystemException {
-		Object[] finderArgs = new Object[] {
-				pk, String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
-			};
+		Object[] finderArgs = new Object[] { pk, start, end, orderByComparator };
 
 		List<com.liferay.hr.model.HRHoliday> list = (List<com.liferay.hr.model.HRHoliday>)FinderCacheUtil.getResult(FINDER_PATH_GET_HRHOLIDAIES,
 				finderArgs, this);
@@ -676,6 +684,7 @@ public class HROfficePersistenceImpl extends BasePersistenceImpl<HROffice>
 
 	public static final FinderPath FINDER_PATH_GET_HRHOLIDAIES_SIZE = new FinderPath(com.liferay.hr.model.impl.HRHolidayModelImpl.ENTITY_CACHE_ENABLED,
 			HROfficeModelImpl.FINDER_CACHE_ENABLED_HRHOLIDAYS_HROFFICES,
+			Long.class,
 			HROfficeModelImpl.MAPPING_TABLE_HRHOLIDAYS_HROFFICES_NAME,
 			"getHRHolidaiesSize", new String[] { Long.class.getName() });
 
@@ -729,12 +738,13 @@ public class HROfficePersistenceImpl extends BasePersistenceImpl<HROffice>
 
 	public static final FinderPath FINDER_PATH_CONTAINS_HRHOLIDAY = new FinderPath(com.liferay.hr.model.impl.HRHolidayModelImpl.ENTITY_CACHE_ENABLED,
 			HROfficeModelImpl.FINDER_CACHE_ENABLED_HRHOLIDAYS_HROFFICES,
+			Boolean.class,
 			HROfficeModelImpl.MAPPING_TABLE_HRHOLIDAYS_HROFFICES_NAME,
 			"containsHRHoliday",
 			new String[] { Long.class.getName(), Long.class.getName() });
 
 	/**
-	 * Determines if the h r holiday is associated with the h r office.
+	 * Returns <code>true</code> if the h r holiday is associated with the h r office.
 	 *
 	 * @param pk the primary key of the h r office
 	 * @param hrHolidayPK the primary key of the h r holiday
@@ -770,7 +780,7 @@ public class HROfficePersistenceImpl extends BasePersistenceImpl<HROffice>
 	}
 
 	/**
-	 * Determines if the h r office has any h r holidaies associated with it.
+	 * Returns <code>true</code> if the h r office has any h r holidaies associated with it.
 	 *
 	 * @param pk the primary key of the h r office to check for associations with h r holidaies
 	 * @return <code>true</code> if the h r office has any h r holidaies associated with it; <code>false</code> otherwise
@@ -1339,4 +1349,21 @@ public class HROfficePersistenceImpl extends BasePersistenceImpl<HROffice>
 	private static final boolean _HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE = GetterUtil.getBoolean(PropsUtil.get(
 				PropsKeys.HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE));
 	private static Log _log = LogFactoryUtil.getLog(HROfficePersistenceImpl.class);
+	private static HROffice _nullHROffice = new HROfficeImpl() {
+			@Override
+			public Object clone() {
+				return this;
+			}
+
+			@Override
+			public CacheModel<HROffice> toCacheModel() {
+				return _nullHROfficeCacheModel;
+			}
+		};
+
+	private static CacheModel<HROffice> _nullHROfficeCacheModel = new CacheModel<HROffice>() {
+			public HROffice toEntityModel() {
+				return _nullHROffice;
+			}
+		};
 }

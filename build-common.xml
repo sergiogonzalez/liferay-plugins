@@ -1,4 +1,5 @@
 <?xml version="1.0"?>
+<!DOCTYPE project>
 
 <project name="build-common">
 	<property environment="env" />
@@ -80,6 +81,10 @@ ECJ was automatically installed. Please rerun your task.
 	</if>
 
 	<target name="compile-java">
+		<copy todir="${javac.destdir}">
+			<fileset dir="${javac.srcdir}" excludes="**/*.java" />
+		</copy>
+
 		<javac
 			classpathref="${javac.classpathref}"
 			compiler="${javac.compiler}"
@@ -91,10 +96,6 @@ ECJ was automatically installed. Please rerun your task.
 			nowarn="${javac.nowarn}"
 			srcdir="${javac.srcdir}"
 		/>
-
-		<copy todir="${javac.destdir}">
-			<fileset dir="${javac.srcdir}" excludes="**/*.java" />
-		</copy>
 	</target>
 
 	<target name="format-javadoc">
@@ -134,28 +135,9 @@ ECJ was automatically installed. Please rerun your task.
 			classname="com.liferay.portal.tools.PluginsEnvironmentBuilder"
 			classpathref="portal.classpath"
 			fork="true"
-			maxmemory="256m"
 			newenvironment="true"
 		>
-			<jvmarg value="-Dexternal-properties=com/liferay/portal/tools/dependencies/portal-tools.properties" />
 			<jvmarg value="-Dplugins.env.dir=." />
-			<jvmarg value="-Dplugins.env.svn=${svn.enabled}" />
-			<jvmarg value="-Dplugins.env.eclipse=true" />
-		</java>
-	</target>
-
-	<target name="setup-svn-ignores">
-		<java
-			classname="com.liferay.portal.tools.PluginsEnvironmentBuilder"
-			classpathref="portal.classpath"
-			fork="true"
-			maxmemory="256m"
-			newenvironment="true"
-		>
-			<jvmarg value="-Dexternal-properties=com/liferay/portal/tools/dependencies/portal-tools.properties" />
-			<jvmarg value="-Dplugins.env.dir=." />
-			<jvmarg value="-Dplugins.env.svn=${svn.enabled}" />
-			<jvmarg value="-Dplugins.env.eclipse=false" />
 		</java>
 	</target>
 </project>

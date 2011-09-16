@@ -20,15 +20,12 @@ import com.liferay.opensocial.service.GadgetLocalServiceUtil;
 import com.liferay.opensocial.service.permission.GadgetPermission;
 import com.liferay.opensocial.shindig.util.ShindigUtil;
 import com.liferay.opensocial.util.ActionKeys;
-import com.liferay.portal.kernel.io.unsync.UnsyncByteArrayInputStream;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.repository.model.Folder;
 import com.liferay.portal.kernel.util.Constants;
-import com.liferay.portal.kernel.util.ContentTypes;
-import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
@@ -41,10 +38,8 @@ import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portlet.documentlibrary.service.DLAppServiceUtil;
 import com.liferay.portlet.documentlibrary.util.comparator.RepositoryModelNameComparator;
-import com.liferay.util.servlet.PortletResponseUtil;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 import java.util.List;
 import java.util.Map;
@@ -165,12 +160,13 @@ public class EditorPortlet extends AdminPortlet {
 			String publishGadgetRedirect = ParamUtil.getString(
 				actionRequest, "publishGadgetRedirect");
 
-			boolean deletePermission = GadgetPermission.contains(
+			boolean unpublishPermission = GadgetPermission.contains(
 				permissionChecker, groupId, gadget.getGadgetId(),
 				ActionKeys.DELETE);
 
 			publishGadgetRedirect = HttpUtil.addParameter(
-				publishGadgetRedirect, "deletePermission", deletePermission);
+				publishGadgetRedirect, "unpublishPermission",
+				unpublishPermission);
 
 			publishGadgetRedirect = HttpUtil.addParameter(
 				publishGadgetRedirect, "gadgetId", gadget.getGadgetId());
@@ -210,8 +206,6 @@ public class EditorPortlet extends AdminPortlet {
 		serviceContext.setAddGroupPermissions(true);
 		serviceContext.setAddGuestPermissions(true);
 
-		String extension = FileUtil.getExtension(fileEntryTitle);
-
 		serviceContext.setAttribute("sourceFileName", fileEntryTitle);
 
 		serviceContext.setScopeGroupId(folder.getGroupId());
@@ -219,7 +213,7 @@ public class EditorPortlet extends AdminPortlet {
 		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
 
 		FileEntry fileEntry = DLAppServiceUtil.addFileEntry(
-			folder.getRepositoryId(), folderId,
+			folder.getRepositoryId(), folderId, fileEntryTitle,
 			resourceRequest.getContentType(), fileEntryTitle,
 			StringPool.BLANK, StringPool.BLANK, bytes, serviceContext);
 
@@ -232,7 +226,7 @@ public class EditorPortlet extends AdminPortlet {
 
 		jsonObject.put("fileEntryURL", fileEntryURL);
 
-		writeJSON(resourceRequest, resourceResponse, jsonObject.toString());
+		writeJSON(resourceRequest, resourceResponse, jsonObject);
 	}
 
 	protected void serveAddFolder(
@@ -260,7 +254,7 @@ public class EditorPortlet extends AdminPortlet {
 
 		jsonObject.put("folderId", folder.getFolderId());
 
-		writeJSON(resourceRequest, resourceResponse, jsonObject.toString());
+		writeJSON(resourceRequest, resourceResponse, jsonObject);
 	}
 
 	protected void serveDeleteFileEntry(
@@ -295,7 +289,7 @@ public class EditorPortlet extends AdminPortlet {
 
 		jsonObject.put("error", jsonError);
 
-		writeJSON(resourceRequest, resourceResponse, jsonObject.toString());
+		writeJSON(resourceRequest, resourceResponse, jsonObject);
 	}
 
 	protected void serveGetFileEntryContent(
@@ -312,7 +306,7 @@ public class EditorPortlet extends AdminPortlet {
 
 		jsonObject.put("content", content);
 
-		writeJSON(resourceRequest, resourceResponse, jsonObject.toString());
+		writeJSON(resourceRequest, resourceResponse, jsonObject);
 	}
 
 	protected void serveGetFolderChildren(
@@ -351,10 +345,6 @@ public class EditorPortlet extends AdminPortlet {
 			PermissionChecker permissionChecker =
 				themeDisplay.getPermissionChecker();
 
-			boolean publishGadgetPermission = GadgetPermission.contains(
-				permissionChecker, themeDisplay.getScopeGroupId(),
-				ActionKeys.PUBLISH_GADGET);
-
 			List<FileEntry> fileEntries = DLAppServiceUtil.getFileEntries(
 				repositoryId, folderId);
 
@@ -392,9 +382,6 @@ public class EditorPortlet extends AdminPortlet {
 				JSONObject jsonPermissions =
 					JSONFactoryUtil.createJSONObject();
 
-				jsonPermissions.put(
-					"publishGadgetPermission", publishGadgetPermission);
-
 				if (gadgetId > 0) {
 					boolean unpublishPermission = GadgetPermission.contains(
 						permissionChecker, themeDisplay.getScopeGroupId(),
@@ -412,7 +399,7 @@ public class EditorPortlet extends AdminPortlet {
 			}
 		}
 
-		writeJSON(resourceRequest, resourceResponse, jsonArray.toString());
+		writeJSON(resourceRequest, resourceResponse, jsonArray);
 	}
 
 	protected void serveGetRenderParameters(
@@ -461,7 +448,7 @@ public class EditorPortlet extends AdminPortlet {
 
 		jsonObject.put("specUrl", fileEntryURL);
 
-		writeJSON(resourceRequest, resourceResponse, jsonObject.toString());
+		writeJSON(resourceRequest, resourceResponse, jsonObject);
 	}
 
 	protected void serveUpdateFileEntryContent(
@@ -488,7 +475,7 @@ public class EditorPortlet extends AdminPortlet {
 
 		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
 
-		writeJSON(resourceRequest, resourceResponse, jsonObject.toString());
+		writeJSON(resourceRequest, resourceResponse, jsonObject);
 	}
 
 	protected void serveUpdateFileEntryTitle(
@@ -510,13 +497,13 @@ public class EditorPortlet extends AdminPortlet {
 		serviceContext.setModifiedDate(fileEntry.getModifiedDate());
 
 		DLAppServiceUtil.updateFileEntry(
-			fileEntryId, fileEntryTitle, fileEntryTitle,
-			resourceRequest.getContentType(), fileEntry.getDescription(),
-			StringPool.BLANK, false, bytes, serviceContext);
+			fileEntryId, fileEntryTitle, resourceRequest.getContentType(),
+			fileEntryTitle, fileEntry.getDescription(), StringPool.BLANK, 
+			false, bytes, serviceContext);
 
 		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
 
-		writeJSON(resourceRequest, resourceResponse, jsonObject.toString());
+		writeJSON(resourceRequest, resourceResponse, jsonObject);
 	}
 
 	protected void serveUpdateFolderName(
@@ -539,20 +526,7 @@ public class EditorPortlet extends AdminPortlet {
 
 		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
 
-		writeJSON(resourceRequest, resourceResponse, jsonObject.toString());
-	}
-
-	protected void writeJSON(
-			ResourceRequest resourceRequest, ResourceResponse resourceResponse,
-			String json)
-		throws IOException {
-
-		InputStream inputStream = new UnsyncByteArrayInputStream(
-			json.getBytes());
-
-		PortletResponseUtil.sendFile(
-			resourceRequest, resourceResponse, null, inputStream,
-			ContentTypes.TEXT_JAVASCRIPT);
+		writeJSON(resourceRequest, resourceResponse, jsonObject);
 	}
 
 }

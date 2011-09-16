@@ -17,8 +17,10 @@ package com.liferay.portal.workflow.kaleo.model.impl;
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.impl.BaseModelImpl;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.util.PortalUtil;
@@ -29,8 +31,6 @@ import com.liferay.portlet.expando.model.ExpandoBridge;
 import com.liferay.portlet.expando.util.ExpandoBridgeFactoryUtil;
 
 import java.io.Serializable;
-
-import java.lang.reflect.Proxy;
 
 import java.sql.Types;
 
@@ -318,8 +318,13 @@ public class KaleoTransitionModelImpl extends BaseModelImpl<KaleoTransition>
 			return (KaleoTransition)this;
 		}
 		else {
-			return (KaleoTransition)Proxy.newProxyInstance(_classLoader,
-				_escapedModelProxyInterfaces, new AutoEscapeBeanHandler(this));
+			if (_escapedModelProxy == null) {
+				_escapedModelProxy = (KaleoTransition)ProxyUtil.newProxyInstance(_classLoader,
+						_escapedModelProxyInterfaces,
+						new AutoEscapeBeanHandler(this));
+			}
+
+			return _escapedModelProxy;
 		}
 	}
 
@@ -427,6 +432,91 @@ public class KaleoTransitionModelImpl extends BaseModelImpl<KaleoTransition>
 		kaleoTransitionModelImpl._originalDefaultTransition = kaleoTransitionModelImpl._defaultTransition;
 
 		kaleoTransitionModelImpl._setOriginalDefaultTransition = false;
+	}
+
+	@Override
+	public CacheModel<KaleoTransition> toCacheModel() {
+		KaleoTransitionCacheModel kaleoTransitionCacheModel = new KaleoTransitionCacheModel();
+
+		kaleoTransitionCacheModel.kaleoTransitionId = getKaleoTransitionId();
+
+		kaleoTransitionCacheModel.groupId = getGroupId();
+
+		kaleoTransitionCacheModel.companyId = getCompanyId();
+
+		kaleoTransitionCacheModel.userId = getUserId();
+
+		kaleoTransitionCacheModel.userName = getUserName();
+
+		String userName = kaleoTransitionCacheModel.userName;
+
+		if ((userName != null) && (userName.length() == 0)) {
+			kaleoTransitionCacheModel.userName = null;
+		}
+
+		Date createDate = getCreateDate();
+
+		if (createDate != null) {
+			kaleoTransitionCacheModel.createDate = createDate.getTime();
+		}
+		else {
+			kaleoTransitionCacheModel.createDate = Long.MIN_VALUE;
+		}
+
+		Date modifiedDate = getModifiedDate();
+
+		if (modifiedDate != null) {
+			kaleoTransitionCacheModel.modifiedDate = modifiedDate.getTime();
+		}
+		else {
+			kaleoTransitionCacheModel.modifiedDate = Long.MIN_VALUE;
+		}
+
+		kaleoTransitionCacheModel.kaleoDefinitionId = getKaleoDefinitionId();
+
+		kaleoTransitionCacheModel.kaleoNodeId = getKaleoNodeId();
+
+		kaleoTransitionCacheModel.name = getName();
+
+		String name = kaleoTransitionCacheModel.name;
+
+		if ((name != null) && (name.length() == 0)) {
+			kaleoTransitionCacheModel.name = null;
+		}
+
+		kaleoTransitionCacheModel.description = getDescription();
+
+		String description = kaleoTransitionCacheModel.description;
+
+		if ((description != null) && (description.length() == 0)) {
+			kaleoTransitionCacheModel.description = null;
+		}
+
+		kaleoTransitionCacheModel.sourceKaleoNodeId = getSourceKaleoNodeId();
+
+		kaleoTransitionCacheModel.sourceKaleoNodeName = getSourceKaleoNodeName();
+
+		String sourceKaleoNodeName = kaleoTransitionCacheModel.sourceKaleoNodeName;
+
+		if ((sourceKaleoNodeName != null) &&
+				(sourceKaleoNodeName.length() == 0)) {
+			kaleoTransitionCacheModel.sourceKaleoNodeName = null;
+		}
+
+		kaleoTransitionCacheModel.targetKaleoNodeId = getTargetKaleoNodeId();
+
+		kaleoTransitionCacheModel.targetKaleoNodeName = getTargetKaleoNodeName();
+
+		String targetKaleoNodeName = kaleoTransitionCacheModel.targetKaleoNodeName;
+
+		if ((targetKaleoNodeName != null) &&
+				(targetKaleoNodeName.length() == 0)) {
+			kaleoTransitionCacheModel.targetKaleoNodeName = null;
+		}
+
+		kaleoTransitionCacheModel.defaultTransition = getDefaultTransition();
+
+		return kaleoTransitionCacheModel;
 	}
 
 	@Override
@@ -574,4 +664,5 @@ public class KaleoTransitionModelImpl extends BaseModelImpl<KaleoTransition>
 	private boolean _originalDefaultTransition;
 	private boolean _setOriginalDefaultTransition;
 	private transient ExpandoBridge _expandoBridge;
+	private KaleoTransition _escapedModelProxy;
 }

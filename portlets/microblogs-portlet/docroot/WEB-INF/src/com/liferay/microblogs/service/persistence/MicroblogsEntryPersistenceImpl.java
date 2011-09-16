@@ -41,6 +41,7 @@ import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.ModelListener;
 import com.liferay.portal.security.permission.InlineSQLHelperUtil;
 import com.liferay.portal.service.persistence.BatchSessionUtil;
@@ -78,7 +79,8 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 		".List";
 	public static final FinderPath FINDER_PATH_FIND_BY_COMPANYID = new FinderPath(MicroblogsEntryModelImpl.ENTITY_CACHE_ENABLED,
 			MicroblogsEntryModelImpl.FINDER_CACHE_ENABLED,
-			FINDER_CLASS_NAME_LIST, "findByCompanyId",
+			MicroblogsEntryImpl.class, FINDER_CLASS_NAME_LIST,
+			"findByCompanyId",
 			new String[] {
 				Long.class.getName(),
 				
@@ -86,12 +88,12 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 				"com.liferay.portal.kernel.util.OrderByComparator"
 			});
 	public static final FinderPath FINDER_PATH_COUNT_BY_COMPANYID = new FinderPath(MicroblogsEntryModelImpl.ENTITY_CACHE_ENABLED,
-			MicroblogsEntryModelImpl.FINDER_CACHE_ENABLED,
+			MicroblogsEntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
 			FINDER_CLASS_NAME_LIST, "countByCompanyId",
 			new String[] { Long.class.getName() });
 	public static final FinderPath FINDER_PATH_FIND_BY_USERID = new FinderPath(MicroblogsEntryModelImpl.ENTITY_CACHE_ENABLED,
 			MicroblogsEntryModelImpl.FINDER_CACHE_ENABLED,
-			FINDER_CLASS_NAME_LIST, "findByUserId",
+			MicroblogsEntryImpl.class, FINDER_CLASS_NAME_LIST, "findByUserId",
 			new String[] {
 				Long.class.getName(),
 				
@@ -99,12 +101,12 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 				"com.liferay.portal.kernel.util.OrderByComparator"
 			});
 	public static final FinderPath FINDER_PATH_COUNT_BY_USERID = new FinderPath(MicroblogsEntryModelImpl.ENTITY_CACHE_ENABLED,
-			MicroblogsEntryModelImpl.FINDER_CACHE_ENABLED,
+			MicroblogsEntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
 			FINDER_CLASS_NAME_LIST, "countByUserId",
 			new String[] { Long.class.getName() });
 	public static final FinderPath FINDER_PATH_FIND_BY_U_T = new FinderPath(MicroblogsEntryModelImpl.ENTITY_CACHE_ENABLED,
 			MicroblogsEntryModelImpl.FINDER_CACHE_ENABLED,
-			FINDER_CLASS_NAME_LIST, "findByU_T",
+			MicroblogsEntryImpl.class, FINDER_CLASS_NAME_LIST, "findByU_T",
 			new String[] {
 				Long.class.getName(), Integer.class.getName(),
 				
@@ -112,12 +114,12 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 				"com.liferay.portal.kernel.util.OrderByComparator"
 			});
 	public static final FinderPath FINDER_PATH_COUNT_BY_U_T = new FinderPath(MicroblogsEntryModelImpl.ENTITY_CACHE_ENABLED,
-			MicroblogsEntryModelImpl.FINDER_CACHE_ENABLED,
+			MicroblogsEntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
 			FINDER_CLASS_NAME_LIST, "countByU_T",
 			new String[] { Long.class.getName(), Integer.class.getName() });
 	public static final FinderPath FINDER_PATH_FIND_BY_T_R = new FinderPath(MicroblogsEntryModelImpl.ENTITY_CACHE_ENABLED,
 			MicroblogsEntryModelImpl.FINDER_CACHE_ENABLED,
-			FINDER_CLASS_NAME_LIST, "findByT_R",
+			MicroblogsEntryImpl.class, FINDER_CLASS_NAME_LIST, "findByT_R",
 			new String[] {
 				Integer.class.getName(), Long.class.getName(),
 				
@@ -125,12 +127,12 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 				"com.liferay.portal.kernel.util.OrderByComparator"
 			});
 	public static final FinderPath FINDER_PATH_COUNT_BY_T_R = new FinderPath(MicroblogsEntryModelImpl.ENTITY_CACHE_ENABLED,
-			MicroblogsEntryModelImpl.FINDER_CACHE_ENABLED,
+			MicroblogsEntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
 			FINDER_CLASS_NAME_LIST, "countByT_R",
 			new String[] { Integer.class.getName(), Long.class.getName() });
 	public static final FinderPath FINDER_PATH_FIND_BY_T_RMEI = new FinderPath(MicroblogsEntryModelImpl.ENTITY_CACHE_ENABLED,
 			MicroblogsEntryModelImpl.FINDER_CACHE_ENABLED,
-			FINDER_CLASS_NAME_LIST, "findByT_RMEI",
+			MicroblogsEntryImpl.class, FINDER_CLASS_NAME_LIST, "findByT_RMEI",
 			new String[] {
 				Integer.class.getName(), Long.class.getName(),
 				
@@ -138,14 +140,15 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 				"com.liferay.portal.kernel.util.OrderByComparator"
 			});
 	public static final FinderPath FINDER_PATH_COUNT_BY_T_RMEI = new FinderPath(MicroblogsEntryModelImpl.ENTITY_CACHE_ENABLED,
-			MicroblogsEntryModelImpl.FINDER_CACHE_ENABLED,
+			MicroblogsEntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
 			FINDER_CLASS_NAME_LIST, "countByT_RMEI",
 			new String[] { Integer.class.getName(), Long.class.getName() });
 	public static final FinderPath FINDER_PATH_FIND_ALL = new FinderPath(MicroblogsEntryModelImpl.ENTITY_CACHE_ENABLED,
 			MicroblogsEntryModelImpl.FINDER_CACHE_ENABLED,
-			FINDER_CLASS_NAME_LIST, "findAll", new String[0]);
+			MicroblogsEntryImpl.class, FINDER_CLASS_NAME_LIST, "findAll",
+			new String[0]);
 	public static final FinderPath FINDER_PATH_COUNT_ALL = new FinderPath(MicroblogsEntryModelImpl.ENTITY_CACHE_ENABLED,
-			MicroblogsEntryModelImpl.FINDER_CACHE_ENABLED,
+			MicroblogsEntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
 			FINDER_CLASS_NAME_LIST, "countAll", new String[0]);
 
 	/**
@@ -171,7 +174,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 			if (EntityCacheUtil.getResult(
 						MicroblogsEntryModelImpl.ENTITY_CACHE_ENABLED,
 						MicroblogsEntryImpl.class,
-						microblogsEntry.getPrimaryKey(), this) == null) {
+						microblogsEntry.getPrimaryKey()) == null) {
 				cacheResult(microblogsEntry);
 			}
 		}
@@ -206,6 +209,8 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	public void clearCache(MicroblogsEntry microblogsEntry) {
 		EntityCacheUtil.removeResult(MicroblogsEntryModelImpl.ENTITY_CACHE_ENABLED,
 			MicroblogsEntryImpl.class, microblogsEntry.getPrimaryKey());
+
+		FinderCacheUtil.removeResult(FINDER_PATH_FIND_ALL, FINDER_ARGS_EMPTY);
 	}
 
 	/**
@@ -435,10 +440,16 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	public MicroblogsEntry fetchByPrimaryKey(long microblogsEntryId)
 		throws SystemException {
 		MicroblogsEntry microblogsEntry = (MicroblogsEntry)EntityCacheUtil.getResult(MicroblogsEntryModelImpl.ENTITY_CACHE_ENABLED,
-				MicroblogsEntryImpl.class, microblogsEntryId, this);
+				MicroblogsEntryImpl.class, microblogsEntryId);
+
+		if (microblogsEntry == _nullMicroblogsEntry) {
+			return null;
+		}
 
 		if (microblogsEntry == null) {
 			Session session = null;
+
+			boolean hasException = false;
 
 			try {
 				session = openSession();
@@ -447,11 +458,18 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 						Long.valueOf(microblogsEntryId));
 			}
 			catch (Exception e) {
+				hasException = true;
+
 				throw processException(e);
 			}
 			finally {
 				if (microblogsEntry != null) {
 					cacheResult(microblogsEntry);
+				}
+				else if (!hasException) {
+					EntityCacheUtil.putResult(MicroblogsEntryModelImpl.ENTITY_CACHE_ENABLED,
+						MicroblogsEntryImpl.class, microblogsEntryId,
+						_nullMicroblogsEntry);
 				}
 
 				closeSession(session);
@@ -511,8 +529,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 		Object[] finderArgs = new Object[] {
 				companyId,
 				
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
+				start, end, orderByComparator
 			};
 
 		List<MicroblogsEntry> list = (List<MicroblogsEntry>)FinderCacheUtil.getResult(FINDER_PATH_FIND_BY_COMPANYID,
@@ -865,11 +882,18 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 			query = new StringBundler(3);
 		}
 
-		query.append(_FILTER_SQL_SELECT_MICROBLOGSENTRY_WHERE);
+		if (getDB().isSupportsInlineDistinct()) {
+			query.append(_FILTER_SQL_SELECT_MICROBLOGSENTRY_WHERE);
+		}
+		else {
+			query.append(_FILTER_SQL_SELECT_MICROBLOGSENTRY_NO_INLINE_DISTINCT_WHERE_1);
+		}
 
 		query.append(_FINDER_COLUMN_COMPANYID_COMPANYID_2);
 
-		appendGroupByComparator(query, _FILTER_COLUMN_PK);
+		if (!getDB().isSupportsInlineDistinct()) {
+			query.append(_FILTER_SQL_SELECT_MICROBLOGSENTRY_NO_INLINE_DISTINCT_WHERE_2);
+		}
 
 		if (orderByComparator != null) {
 			if (getDB().isSupportsInlineDistinct()) {
@@ -892,7 +916,8 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 		}
 
 		String sql = InlineSQLHelperUtil.replacePermissionCheck(query.toString(),
-				MicroblogsEntry.class.getName(), _FILTER_COLUMN_PK);
+				MicroblogsEntry.class.getName(),
+				_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN);
 
 		Session session = null;
 
@@ -982,11 +1007,18 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 			query = new StringBundler(3);
 		}
 
-		query.append(_FILTER_SQL_SELECT_MICROBLOGSENTRY_WHERE);
+		if (getDB().isSupportsInlineDistinct()) {
+			query.append(_FILTER_SQL_SELECT_MICROBLOGSENTRY_WHERE);
+		}
+		else {
+			query.append(_FILTER_SQL_SELECT_MICROBLOGSENTRY_NO_INLINE_DISTINCT_WHERE_1);
+		}
 
 		query.append(_FINDER_COLUMN_COMPANYID_COMPANYID_2);
 
-		appendGroupByComparator(query, _FILTER_COLUMN_PK);
+		if (!getDB().isSupportsInlineDistinct()) {
+			query.append(_FILTER_SQL_SELECT_MICROBLOGSENTRY_NO_INLINE_DISTINCT_WHERE_2);
+		}
 
 		if (orderByComparator != null) {
 			String[] orderByFields = orderByComparator.getOrderByFields();
@@ -1064,7 +1096,8 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 		}
 
 		String sql = InlineSQLHelperUtil.replacePermissionCheck(query.toString(),
-				MicroblogsEntry.class.getName(), _FILTER_COLUMN_PK);
+				MicroblogsEntry.class.getName(),
+				_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN);
 
 		SQLQuery q = session.createSQLQuery(sql);
 
@@ -1146,12 +1179,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 */
 	public List<MicroblogsEntry> findByUserId(long userId, int start, int end,
 		OrderByComparator orderByComparator) throws SystemException {
-		Object[] finderArgs = new Object[] {
-				userId,
-				
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
-			};
+		Object[] finderArgs = new Object[] { userId, start, end, orderByComparator };
 
 		List<MicroblogsEntry> list = (List<MicroblogsEntry>)FinderCacheUtil.getResult(FINDER_PATH_FIND_BY_USERID,
 				finderArgs, this);
@@ -1501,11 +1529,18 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 			query = new StringBundler(3);
 		}
 
-		query.append(_FILTER_SQL_SELECT_MICROBLOGSENTRY_WHERE);
+		if (getDB().isSupportsInlineDistinct()) {
+			query.append(_FILTER_SQL_SELECT_MICROBLOGSENTRY_WHERE);
+		}
+		else {
+			query.append(_FILTER_SQL_SELECT_MICROBLOGSENTRY_NO_INLINE_DISTINCT_WHERE_1);
+		}
 
 		query.append(_FINDER_COLUMN_USERID_USERID_2);
 
-		appendGroupByComparator(query, _FILTER_COLUMN_PK);
+		if (!getDB().isSupportsInlineDistinct()) {
+			query.append(_FILTER_SQL_SELECT_MICROBLOGSENTRY_NO_INLINE_DISTINCT_WHERE_2);
+		}
 
 		if (orderByComparator != null) {
 			if (getDB().isSupportsInlineDistinct()) {
@@ -1528,7 +1563,8 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 		}
 
 		String sql = InlineSQLHelperUtil.replacePermissionCheck(query.toString(),
-				MicroblogsEntry.class.getName(), _FILTER_COLUMN_PK);
+				MicroblogsEntry.class.getName(),
+				_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN);
 
 		Session session = null;
 
@@ -1617,11 +1653,18 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 			query = new StringBundler(3);
 		}
 
-		query.append(_FILTER_SQL_SELECT_MICROBLOGSENTRY_WHERE);
+		if (getDB().isSupportsInlineDistinct()) {
+			query.append(_FILTER_SQL_SELECT_MICROBLOGSENTRY_WHERE);
+		}
+		else {
+			query.append(_FILTER_SQL_SELECT_MICROBLOGSENTRY_NO_INLINE_DISTINCT_WHERE_1);
+		}
 
 		query.append(_FINDER_COLUMN_USERID_USERID_2);
 
-		appendGroupByComparator(query, _FILTER_COLUMN_PK);
+		if (!getDB().isSupportsInlineDistinct()) {
+			query.append(_FILTER_SQL_SELECT_MICROBLOGSENTRY_NO_INLINE_DISTINCT_WHERE_2);
+		}
 
 		if (orderByComparator != null) {
 			String[] orderByFields = orderByComparator.getOrderByFields();
@@ -1699,7 +1742,8 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 		}
 
 		String sql = InlineSQLHelperUtil.replacePermissionCheck(query.toString(),
-				MicroblogsEntry.class.getName(), _FILTER_COLUMN_PK);
+				MicroblogsEntry.class.getName(),
+				_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN);
 
 		SQLQuery q = session.createSQLQuery(sql);
 
@@ -1788,8 +1832,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 		Object[] finderArgs = new Object[] {
 				userId, type,
 				
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
+				start, end, orderByComparator
 			};
 
 		List<MicroblogsEntry> list = (List<MicroblogsEntry>)FinderCacheUtil.getResult(FINDER_PATH_FIND_BY_U_T,
@@ -2161,13 +2204,20 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 			query = new StringBundler(4);
 		}
 
-		query.append(_FILTER_SQL_SELECT_MICROBLOGSENTRY_WHERE);
+		if (getDB().isSupportsInlineDistinct()) {
+			query.append(_FILTER_SQL_SELECT_MICROBLOGSENTRY_WHERE);
+		}
+		else {
+			query.append(_FILTER_SQL_SELECT_MICROBLOGSENTRY_NO_INLINE_DISTINCT_WHERE_1);
+		}
 
 		query.append(_FINDER_COLUMN_U_T_USERID_2);
 
 		query.append(_FINDER_COLUMN_U_T_TYPE_2);
 
-		appendGroupByComparator(query, _FILTER_COLUMN_PK);
+		if (!getDB().isSupportsInlineDistinct()) {
+			query.append(_FILTER_SQL_SELECT_MICROBLOGSENTRY_NO_INLINE_DISTINCT_WHERE_2);
+		}
 
 		if (orderByComparator != null) {
 			if (getDB().isSupportsInlineDistinct()) {
@@ -2190,7 +2240,8 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 		}
 
 		String sql = InlineSQLHelperUtil.replacePermissionCheck(query.toString(),
-				MicroblogsEntry.class.getName(), _FILTER_COLUMN_PK);
+				MicroblogsEntry.class.getName(),
+				_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN);
 
 		Session session = null;
 
@@ -2283,13 +2334,20 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 			query = new StringBundler(3);
 		}
 
-		query.append(_FILTER_SQL_SELECT_MICROBLOGSENTRY_WHERE);
+		if (getDB().isSupportsInlineDistinct()) {
+			query.append(_FILTER_SQL_SELECT_MICROBLOGSENTRY_WHERE);
+		}
+		else {
+			query.append(_FILTER_SQL_SELECT_MICROBLOGSENTRY_NO_INLINE_DISTINCT_WHERE_1);
+		}
 
 		query.append(_FINDER_COLUMN_U_T_USERID_2);
 
 		query.append(_FINDER_COLUMN_U_T_TYPE_2);
 
-		appendGroupByComparator(query, _FILTER_COLUMN_PK);
+		if (!getDB().isSupportsInlineDistinct()) {
+			query.append(_FILTER_SQL_SELECT_MICROBLOGSENTRY_NO_INLINE_DISTINCT_WHERE_2);
+		}
 
 		if (orderByComparator != null) {
 			String[] orderByFields = orderByComparator.getOrderByFields();
@@ -2367,7 +2425,8 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 		}
 
 		String sql = InlineSQLHelperUtil.replacePermissionCheck(query.toString(),
-				MicroblogsEntry.class.getName(), _FILTER_COLUMN_PK);
+				MicroblogsEntry.class.getName(),
+				_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN);
 
 		SQLQuery q = session.createSQLQuery(sql);
 
@@ -2459,8 +2518,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 		Object[] finderArgs = new Object[] {
 				type, receiverUserId,
 				
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
+				start, end, orderByComparator
 			};
 
 		List<MicroblogsEntry> list = (List<MicroblogsEntry>)FinderCacheUtil.getResult(FINDER_PATH_FIND_BY_T_R,
@@ -2832,13 +2890,20 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 			query = new StringBundler(4);
 		}
 
-		query.append(_FILTER_SQL_SELECT_MICROBLOGSENTRY_WHERE);
+		if (getDB().isSupportsInlineDistinct()) {
+			query.append(_FILTER_SQL_SELECT_MICROBLOGSENTRY_WHERE);
+		}
+		else {
+			query.append(_FILTER_SQL_SELECT_MICROBLOGSENTRY_NO_INLINE_DISTINCT_WHERE_1);
+		}
 
 		query.append(_FINDER_COLUMN_T_R_TYPE_2);
 
 		query.append(_FINDER_COLUMN_T_R_RECEIVERUSERID_2);
 
-		appendGroupByComparator(query, _FILTER_COLUMN_PK);
+		if (!getDB().isSupportsInlineDistinct()) {
+			query.append(_FILTER_SQL_SELECT_MICROBLOGSENTRY_NO_INLINE_DISTINCT_WHERE_2);
+		}
 
 		if (orderByComparator != null) {
 			if (getDB().isSupportsInlineDistinct()) {
@@ -2861,7 +2926,8 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 		}
 
 		String sql = InlineSQLHelperUtil.replacePermissionCheck(query.toString(),
-				MicroblogsEntry.class.getName(), _FILTER_COLUMN_PK);
+				MicroblogsEntry.class.getName(),
+				_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN);
 
 		Session session = null;
 
@@ -2954,13 +3020,20 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 			query = new StringBundler(3);
 		}
 
-		query.append(_FILTER_SQL_SELECT_MICROBLOGSENTRY_WHERE);
+		if (getDB().isSupportsInlineDistinct()) {
+			query.append(_FILTER_SQL_SELECT_MICROBLOGSENTRY_WHERE);
+		}
+		else {
+			query.append(_FILTER_SQL_SELECT_MICROBLOGSENTRY_NO_INLINE_DISTINCT_WHERE_1);
+		}
 
 		query.append(_FINDER_COLUMN_T_R_TYPE_2);
 
 		query.append(_FINDER_COLUMN_T_R_RECEIVERUSERID_2);
 
-		appendGroupByComparator(query, _FILTER_COLUMN_PK);
+		if (!getDB().isSupportsInlineDistinct()) {
+			query.append(_FILTER_SQL_SELECT_MICROBLOGSENTRY_NO_INLINE_DISTINCT_WHERE_2);
+		}
 
 		if (orderByComparator != null) {
 			String[] orderByFields = orderByComparator.getOrderByFields();
@@ -3038,7 +3111,8 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 		}
 
 		String sql = InlineSQLHelperUtil.replacePermissionCheck(query.toString(),
-				MicroblogsEntry.class.getName(), _FILTER_COLUMN_PK);
+				MicroblogsEntry.class.getName(),
+				_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN);
 
 		SQLQuery q = session.createSQLQuery(sql);
 
@@ -3131,8 +3205,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 		Object[] finderArgs = new Object[] {
 				type, receiverMicroblogsEntryId,
 				
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
+				start, end, orderByComparator
 			};
 
 		List<MicroblogsEntry> list = (List<MicroblogsEntry>)FinderCacheUtil.getResult(FINDER_PATH_FIND_BY_T_RMEI,
@@ -3509,13 +3582,20 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 			query = new StringBundler(4);
 		}
 
-		query.append(_FILTER_SQL_SELECT_MICROBLOGSENTRY_WHERE);
+		if (getDB().isSupportsInlineDistinct()) {
+			query.append(_FILTER_SQL_SELECT_MICROBLOGSENTRY_WHERE);
+		}
+		else {
+			query.append(_FILTER_SQL_SELECT_MICROBLOGSENTRY_NO_INLINE_DISTINCT_WHERE_1);
+		}
 
 		query.append(_FINDER_COLUMN_T_RMEI_TYPE_2);
 
 		query.append(_FINDER_COLUMN_T_RMEI_RECEIVERMICROBLOGSENTRYID_2);
 
-		appendGroupByComparator(query, _FILTER_COLUMN_PK);
+		if (!getDB().isSupportsInlineDistinct()) {
+			query.append(_FILTER_SQL_SELECT_MICROBLOGSENTRY_NO_INLINE_DISTINCT_WHERE_2);
+		}
 
 		if (orderByComparator != null) {
 			if (getDB().isSupportsInlineDistinct()) {
@@ -3538,7 +3618,8 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 		}
 
 		String sql = InlineSQLHelperUtil.replacePermissionCheck(query.toString(),
-				MicroblogsEntry.class.getName(), _FILTER_COLUMN_PK);
+				MicroblogsEntry.class.getName(),
+				_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN);
 
 		Session session = null;
 
@@ -3632,13 +3713,20 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 			query = new StringBundler(3);
 		}
 
-		query.append(_FILTER_SQL_SELECT_MICROBLOGSENTRY_WHERE);
+		if (getDB().isSupportsInlineDistinct()) {
+			query.append(_FILTER_SQL_SELECT_MICROBLOGSENTRY_WHERE);
+		}
+		else {
+			query.append(_FILTER_SQL_SELECT_MICROBLOGSENTRY_NO_INLINE_DISTINCT_WHERE_1);
+		}
 
 		query.append(_FINDER_COLUMN_T_RMEI_TYPE_2);
 
 		query.append(_FINDER_COLUMN_T_RMEI_RECEIVERMICROBLOGSENTRYID_2);
 
-		appendGroupByComparator(query, _FILTER_COLUMN_PK);
+		if (!getDB().isSupportsInlineDistinct()) {
+			query.append(_FILTER_SQL_SELECT_MICROBLOGSENTRY_NO_INLINE_DISTINCT_WHERE_2);
+		}
 
 		if (orderByComparator != null) {
 			String[] orderByFields = orderByComparator.getOrderByFields();
@@ -3716,7 +3804,8 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 		}
 
 		String sql = InlineSQLHelperUtil.replacePermissionCheck(query.toString(),
-				MicroblogsEntry.class.getName(), _FILTER_COLUMN_PK);
+				MicroblogsEntry.class.getName(),
+				_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN);
 
 		SQLQuery q = session.createSQLQuery(sql);
 
@@ -3796,10 +3885,7 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 */
 	public List<MicroblogsEntry> findAll(int start, int end,
 		OrderByComparator orderByComparator) throws SystemException {
-		Object[] finderArgs = new Object[] {
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
-			};
+		Object[] finderArgs = new Object[] { start, end, orderByComparator };
 
 		List<MicroblogsEntry> list = (List<MicroblogsEntry>)FinderCacheUtil.getResult(FINDER_PATH_FIND_ALL,
 				finderArgs, this);
@@ -4012,7 +4098,8 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 		query.append(_FINDER_COLUMN_COMPANYID_COMPANYID_2);
 
 		String sql = InlineSQLHelperUtil.replacePermissionCheck(query.toString(),
-				MicroblogsEntry.class.getName(), _FILTER_COLUMN_PK);
+				MicroblogsEntry.class.getName(),
+				_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN);
 
 		Session session = null;
 
@@ -4112,7 +4199,8 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 		query.append(_FINDER_COLUMN_USERID_USERID_2);
 
 		String sql = InlineSQLHelperUtil.replacePermissionCheck(query.toString(),
-				MicroblogsEntry.class.getName(), _FILTER_COLUMN_PK);
+				MicroblogsEntry.class.getName(),
+				_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN);
 
 		Session session = null;
 
@@ -4221,7 +4309,8 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 		query.append(_FINDER_COLUMN_U_T_TYPE_2);
 
 		String sql = InlineSQLHelperUtil.replacePermissionCheck(query.toString(),
-				MicroblogsEntry.class.getName(), _FILTER_COLUMN_PK);
+				MicroblogsEntry.class.getName(),
+				_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN);
 
 		Session session = null;
 
@@ -4333,7 +4422,8 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 		query.append(_FINDER_COLUMN_T_R_RECEIVERUSERID_2);
 
 		String sql = InlineSQLHelperUtil.replacePermissionCheck(query.toString(),
-				MicroblogsEntry.class.getName(), _FILTER_COLUMN_PK);
+				MicroblogsEntry.class.getName(),
+				_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN);
 
 		Session session = null;
 
@@ -4445,7 +4535,8 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 		query.append(_FINDER_COLUMN_T_RMEI_RECEIVERMICROBLOGSENTRYID_2);
 
 		String sql = InlineSQLHelperUtil.replacePermissionCheck(query.toString(),
-				MicroblogsEntry.class.getName(), _FILTER_COLUMN_PK);
+				MicroblogsEntry.class.getName(),
+				_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN);
 
 		Session session = null;
 
@@ -4482,10 +4573,8 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	 * @throws SystemException if a system exception occurred
 	 */
 	public int countAll() throws SystemException {
-		Object[] finderArgs = new Object[0];
-
 		Long count = (Long)FinderCacheUtil.getResult(FINDER_PATH_COUNT_ALL,
-				finderArgs, this);
+				FINDER_ARGS_EMPTY, this);
 
 		if (count == null) {
 			Session session = null;
@@ -4505,8 +4594,8 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 					count = Long.valueOf(0);
 				}
 
-				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL, finderArgs,
-					count);
+				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL,
+					FINDER_ARGS_EMPTY, count);
 
 				closeSession(session);
 			}
@@ -4565,9 +4654,13 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	private static final String _FINDER_COLUMN_T_RMEI_TYPE_2 = "microblogsEntry.type = ? AND ";
 	private static final String _FINDER_COLUMN_T_RMEI_RECEIVERMICROBLOGSENTRYID_2 =
 		"microblogsEntry.receiverMicroblogsEntryId = ?";
-	private static final String _FILTER_SQL_SELECT_MICROBLOGSENTRY_WHERE = "SELECT {microblogsEntry.*} FROM MicroblogsEntry microblogsEntry WHERE ";
+	private static final String _FILTER_ENTITY_TABLE_FILTER_PK_COLUMN = "microblogsEntry.microblogsEntryId";
+	private static final String _FILTER_SQL_SELECT_MICROBLOGSENTRY_WHERE = "SELECT DISTINCT {microblogsEntry.*} FROM MicroblogsEntry microblogsEntry WHERE ";
+	private static final String _FILTER_SQL_SELECT_MICROBLOGSENTRY_NO_INLINE_DISTINCT_WHERE_1 =
+		"SELECT {MicroblogsEntry.*} FROM (SELECT DISTINCT microblogsEntry.microblogsEntryId FROM MicroblogsEntry microblogsEntry WHERE ";
+	private static final String _FILTER_SQL_SELECT_MICROBLOGSENTRY_NO_INLINE_DISTINCT_WHERE_2 =
+		") TEMP_TABLE INNER JOIN MicroblogsEntry ON TEMP_TABLE.microblogsEntryId = MicroblogsEntry.microblogsEntryId";
 	private static final String _FILTER_SQL_COUNT_MICROBLOGSENTRY_WHERE = "SELECT COUNT(DISTINCT microblogsEntry.microblogsEntryId) AS COUNT_VALUE FROM MicroblogsEntry microblogsEntry WHERE ";
-	private static final String _FILTER_COLUMN_PK = "microblogsEntry.microblogsEntryId";
 	private static final String _FILTER_ENTITY_ALIAS = "microblogsEntry";
 	private static final String _FILTER_ENTITY_TABLE = "MicroblogsEntry";
 	private static final String _ORDER_BY_ENTITY_ALIAS = "microblogsEntry.";
@@ -4577,4 +4670,21 @@ public class MicroblogsEntryPersistenceImpl extends BasePersistenceImpl<Microblo
 	private static final boolean _HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE = GetterUtil.getBoolean(PropsUtil.get(
 				PropsKeys.HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE));
 	private static Log _log = LogFactoryUtil.getLog(MicroblogsEntryPersistenceImpl.class);
+	private static MicroblogsEntry _nullMicroblogsEntry = new MicroblogsEntryImpl() {
+			@Override
+			public Object clone() {
+				return this;
+			}
+
+			@Override
+			public CacheModel<MicroblogsEntry> toCacheModel() {
+				return _nullMicroblogsEntryCacheModel;
+			}
+		};
+
+	private static CacheModel<MicroblogsEntry> _nullMicroblogsEntryCacheModel = new CacheModel<MicroblogsEntry>() {
+			public MicroblogsEntry toEntityModel() {
+				return _nullMicroblogsEntry;
+			}
+		};
 }

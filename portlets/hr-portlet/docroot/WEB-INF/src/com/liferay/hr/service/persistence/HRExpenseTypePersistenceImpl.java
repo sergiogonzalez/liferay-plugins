@@ -41,6 +41,7 @@ import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.ModelListener;
 import com.liferay.portal.service.persistence.BatchSessionUtil;
 import com.liferay.portal.service.persistence.ResourcePersistence;
@@ -77,17 +78,18 @@ public class HRExpenseTypePersistenceImpl extends BasePersistenceImpl<HRExpenseT
 		".List";
 	public static final FinderPath FINDER_PATH_FETCH_BY_G_N = new FinderPath(HRExpenseTypeModelImpl.ENTITY_CACHE_ENABLED,
 			HRExpenseTypeModelImpl.FINDER_CACHE_ENABLED,
-			FINDER_CLASS_NAME_ENTITY, "fetchByG_N",
+			HRExpenseTypeImpl.class, FINDER_CLASS_NAME_ENTITY, "fetchByG_N",
 			new String[] { Long.class.getName(), String.class.getName() });
 	public static final FinderPath FINDER_PATH_COUNT_BY_G_N = new FinderPath(HRExpenseTypeModelImpl.ENTITY_CACHE_ENABLED,
-			HRExpenseTypeModelImpl.FINDER_CACHE_ENABLED,
+			HRExpenseTypeModelImpl.FINDER_CACHE_ENABLED, Long.class,
 			FINDER_CLASS_NAME_LIST, "countByG_N",
 			new String[] { Long.class.getName(), String.class.getName() });
 	public static final FinderPath FINDER_PATH_FIND_ALL = new FinderPath(HRExpenseTypeModelImpl.ENTITY_CACHE_ENABLED,
 			HRExpenseTypeModelImpl.FINDER_CACHE_ENABLED,
-			FINDER_CLASS_NAME_LIST, "findAll", new String[0]);
+			HRExpenseTypeImpl.class, FINDER_CLASS_NAME_LIST, "findAll",
+			new String[0]);
 	public static final FinderPath FINDER_PATH_COUNT_ALL = new FinderPath(HRExpenseTypeModelImpl.ENTITY_CACHE_ENABLED,
-			HRExpenseTypeModelImpl.FINDER_CACHE_ENABLED,
+			HRExpenseTypeModelImpl.FINDER_CACHE_ENABLED, Long.class,
 			FINDER_CLASS_NAME_LIST, "countAll", new String[0]);
 
 	/**
@@ -119,8 +121,7 @@ public class HRExpenseTypePersistenceImpl extends BasePersistenceImpl<HRExpenseT
 		for (HRExpenseType hrExpenseType : hrExpenseTypes) {
 			if (EntityCacheUtil.getResult(
 						HRExpenseTypeModelImpl.ENTITY_CACHE_ENABLED,
-						HRExpenseTypeImpl.class, hrExpenseType.getPrimaryKey(),
-						this) == null) {
+						HRExpenseTypeImpl.class, hrExpenseType.getPrimaryKey()) == null) {
 				cacheResult(hrExpenseType);
 			}
 		}
@@ -155,6 +156,8 @@ public class HRExpenseTypePersistenceImpl extends BasePersistenceImpl<HRExpenseT
 	public void clearCache(HRExpenseType hrExpenseType) {
 		EntityCacheUtil.removeResult(HRExpenseTypeModelImpl.ENTITY_CACHE_ENABLED,
 			HRExpenseTypeImpl.class, hrExpenseType.getPrimaryKey());
+
+		FinderCacheUtil.removeResult(FINDER_PATH_FIND_ALL, FINDER_ARGS_EMPTY);
 
 		FinderCacheUtil.removeResult(FINDER_PATH_FETCH_BY_G_N,
 			new Object[] {
@@ -426,10 +429,16 @@ public class HRExpenseTypePersistenceImpl extends BasePersistenceImpl<HRExpenseT
 	public HRExpenseType fetchByPrimaryKey(long hrExpenseTypeId)
 		throws SystemException {
 		HRExpenseType hrExpenseType = (HRExpenseType)EntityCacheUtil.getResult(HRExpenseTypeModelImpl.ENTITY_CACHE_ENABLED,
-				HRExpenseTypeImpl.class, hrExpenseTypeId, this);
+				HRExpenseTypeImpl.class, hrExpenseTypeId);
+
+		if (hrExpenseType == _nullHRExpenseType) {
+			return null;
+		}
 
 		if (hrExpenseType == null) {
 			Session session = null;
+
+			boolean hasException = false;
 
 			try {
 				session = openSession();
@@ -438,11 +447,18 @@ public class HRExpenseTypePersistenceImpl extends BasePersistenceImpl<HRExpenseT
 						Long.valueOf(hrExpenseTypeId));
 			}
 			catch (Exception e) {
+				hasException = true;
+
 				throw processException(e);
 			}
 			finally {
 				if (hrExpenseType != null) {
 					cacheResult(hrExpenseType);
+				}
+				else if (!hasException) {
+					EntityCacheUtil.putResult(HRExpenseTypeModelImpl.ENTITY_CACHE_ENABLED,
+						HRExpenseTypeImpl.class, hrExpenseTypeId,
+						_nullHRExpenseType);
 				}
 
 				closeSession(session);
@@ -506,6 +522,7 @@ public class HRExpenseTypePersistenceImpl extends BasePersistenceImpl<HRExpenseT
 	 *
 	 * @param groupId the group ID
 	 * @param name the name
+	 * @param retrieveFromCache whether to use the finder cache
 	 * @return the matching h r expense type, or <code>null</code> if a matching h r expense type could not be found
 	 * @throws SystemException if a system exception occurred
 	 */
@@ -645,10 +662,7 @@ public class HRExpenseTypePersistenceImpl extends BasePersistenceImpl<HRExpenseT
 	 */
 	public List<HRExpenseType> findAll(int start, int end,
 		OrderByComparator orderByComparator) throws SystemException {
-		Object[] finderArgs = new Object[] {
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
-			};
+		Object[] finderArgs = new Object[] { start, end, orderByComparator };
 
 		List<HRExpenseType> list = (List<HRExpenseType>)FinderCacheUtil.getResult(FINDER_PATH_FIND_ALL,
 				finderArgs, this);
@@ -814,10 +828,8 @@ public class HRExpenseTypePersistenceImpl extends BasePersistenceImpl<HRExpenseT
 	 * @throws SystemException if a system exception occurred
 	 */
 	public int countAll() throws SystemException {
-		Object[] finderArgs = new Object[0];
-
 		Long count = (Long)FinderCacheUtil.getResult(FINDER_PATH_COUNT_ALL,
-				finderArgs, this);
+				FINDER_ARGS_EMPTY, this);
 
 		if (count == null) {
 			Session session = null;
@@ -837,8 +849,8 @@ public class HRExpenseTypePersistenceImpl extends BasePersistenceImpl<HRExpenseT
 					count = Long.valueOf(0);
 				}
 
-				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL, finderArgs,
-					count);
+				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL,
+					FINDER_ARGS_EMPTY, count);
 
 				closeSession(session);
 			}
@@ -972,4 +984,21 @@ public class HRExpenseTypePersistenceImpl extends BasePersistenceImpl<HRExpenseT
 	private static final boolean _HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE = GetterUtil.getBoolean(PropsUtil.get(
 				PropsKeys.HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE));
 	private static Log _log = LogFactoryUtil.getLog(HRExpenseTypePersistenceImpl.class);
+	private static HRExpenseType _nullHRExpenseType = new HRExpenseTypeImpl() {
+			@Override
+			public Object clone() {
+				return this;
+			}
+
+			@Override
+			public CacheModel<HRExpenseType> toCacheModel() {
+				return _nullHRExpenseTypeCacheModel;
+			}
+		};
+
+	private static CacheModel<HRExpenseType> _nullHRExpenseTypeCacheModel = new CacheModel<HRExpenseType>() {
+			public HRExpenseType toEntityModel() {
+				return _nullHRExpenseType;
+			}
+		};
 }

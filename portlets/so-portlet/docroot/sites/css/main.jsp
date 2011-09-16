@@ -9,7 +9,7 @@
  *
  * Liferay Social Office is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
  * for more details.
  *
  * You should have received a copy of the GNU General Public License along with
@@ -27,7 +27,7 @@
 		margin: 1em 0;
 
 		li {
-			background: url(<%= PortalUtil.getPathContext() %>/html/icons/enterprise_admin_communities.png) no-repeat 10px 3px;
+			background: url(<%= PortalUtil.getPathContext() %>/html/icons/sites_admin.png) no-repeat 10px 3px;
 			border: 1px solid #E8EFF4;
 			margin: 4px;
 			padding: 3px 10px 3px 30px;
@@ -36,10 +36,29 @@
 				display: block;
 			}
 
-			.join {
-				background: url(<%= themeImagesPath %>/common/join.png) no-repeat 0 50%;
+			.action-not-allowed {
 				float: right;
-				padding-left: 20px;
+				height: 16px;
+				margin: 0 5px;
+				width: 16px;
+			}
+
+			.action a {
+				float: right;
+				font-size: 0px;
+				height: 16px;
+				margin: 0 5px;
+				width: 16px;
+			}
+
+			.star a {
+				background: url(<%= request.getContextPath() %>/sites/images/star_empty.png) no-repeat 0 50%;
+				float: right;
+			}
+
+			.unstar a {
+				background: url(<%= request.getContextPath() %>/sites/images/star.png) no-repeat 0 50%;
+				float: right;
 			}
 
 			.name {
@@ -54,6 +73,7 @@
 
 		li.empty {
 			background-image: url(<%= themeImagesPath %>/messages/alert.png);
+			padding-left: 25px;
 		}
 
 		li.empty:hover {
@@ -80,28 +100,88 @@
 		-moz-border-radius: 4px;
 		border-radius: 4px;
 	}
+
+	.site-list-container {
+		clear: both;
+	}
+
+	.sites-tabs {
+		float: left;
+
+		select {
+			padding: 5px 1px;
+		}
+	}
+	.search {
+		float: right;
+		margin-bottom:10px;
+
+		.search-input {
+			vertical-align: top;
+			width: 150px;
+		}
+	}
+
+	.hide-notice {
+		float: right;
+	}
 }
 
-.so-portlet-sites-dialog {
-	.directory-list {
+.so-portlet-sites-dialog,
+.so-sites-directory {
+	ul.directory-list {
 		border: 1px solid #CCC;
+		clear: both;
 		font-size: 12px;
+		list-style: none;
 		margin: 1em 0;
 
 		li {
-			background: url(<%= PortalUtil.getPathContext() %>/html/icons/enterprise_admin_communities.png) no-repeat 5px 5px;
+			background: url(<%= PortalUtil.getPathContext() %>/html/icons/sites_admin.png) no-repeat 5px 5px;
 			padding: 5px 10px 5px 25px;
 
-			.join {
-				background: url(<%= themeImagesPath %>/common/join.png) no-repeat 0 50%;
+			.action-not-allowed {
 				float: right;
-				padding-left: 20px;
+				height: 16px;
+				margin: 0 5px;
+				width: 16px;
+			}
+
+			.action a {
+				float: right;
+				font-size: 0px;
+				height: 16px;
+				margin: 0 5px;
+				width: 16px;
+			}
+
+			.star a {
+				background: url(<%= request.getContextPath() %>/sites/images/star_empty.png) no-repeat 0 50%;
+				float: right;
+			}
+
+			.unstar a {
+				background: url(<%= request.getContextPath() %>/sites/images/star.png) no-repeat 0 50%;
+				float: right;
+			}
+
+			.join a {
+				background: url(<%= themeImagesPath %>/common/join.png) no-repeat 0 50%;
+			}
+
+			.leave a {
+				background: url(<%= themeImagesPath %>/common/leave.png) no-repeat 0 50%;
+			}
+
+			.delete a {
+				background: url(<%= themeImagesPath %>/common/delete.png) no-repeat 0 50%;
 			}
 
 			.description {
 				color: #777;
 				display: block;
 				font-size: 11px;
+				padding-right: 75px;
 			}
 		}
 
@@ -130,5 +210,9 @@
 		display: block;
 		font-weight: bold;
 		padding: .5em;
+	}
+
+	.search {
+		float: none;
 	}
 }

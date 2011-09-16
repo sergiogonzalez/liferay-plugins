@@ -38,6 +38,7 @@ import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.ModelListener;
 import com.liferay.portal.service.persistence.BatchSessionUtil;
 import com.liferay.portal.service.persistence.ResourcePersistence;
@@ -73,11 +74,11 @@ public class HRProjectPersistenceImpl extends BasePersistenceImpl<HRProject>
 	public static final String FINDER_CLASS_NAME_LIST = FINDER_CLASS_NAME_ENTITY +
 		".List";
 	public static final FinderPath FINDER_PATH_FIND_ALL = new FinderPath(HRProjectModelImpl.ENTITY_CACHE_ENABLED,
-			HRProjectModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"findAll", new String[0]);
+			HRProjectModelImpl.FINDER_CACHE_ENABLED, HRProjectImpl.class,
+			FINDER_CLASS_NAME_LIST, "findAll", new String[0]);
 	public static final FinderPath FINDER_PATH_COUNT_ALL = new FinderPath(HRProjectModelImpl.ENTITY_CACHE_ENABLED,
-			HRProjectModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"countAll", new String[0]);
+			HRProjectModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST, "countAll", new String[0]);
 
 	/**
 	 * Caches the h r project in the entity cache if it is enabled.
@@ -100,7 +101,7 @@ public class HRProjectPersistenceImpl extends BasePersistenceImpl<HRProject>
 		for (HRProject hrProject : hrProjects) {
 			if (EntityCacheUtil.getResult(
 						HRProjectModelImpl.ENTITY_CACHE_ENABLED,
-						HRProjectImpl.class, hrProject.getPrimaryKey(), this) == null) {
+						HRProjectImpl.class, hrProject.getPrimaryKey()) == null) {
 				cacheResult(hrProject);
 			}
 		}
@@ -135,6 +136,8 @@ public class HRProjectPersistenceImpl extends BasePersistenceImpl<HRProject>
 	public void clearCache(HRProject hrProject) {
 		EntityCacheUtil.removeResult(HRProjectModelImpl.ENTITY_CACHE_ENABLED,
 			HRProjectImpl.class, hrProject.getPrimaryKey());
+
+		FinderCacheUtil.removeResult(FINDER_PATH_FIND_ALL, FINDER_ARGS_EMPTY);
 	}
 
 	/**
@@ -374,10 +377,16 @@ public class HRProjectPersistenceImpl extends BasePersistenceImpl<HRProject>
 	public HRProject fetchByPrimaryKey(long hrProjectId)
 		throws SystemException {
 		HRProject hrProject = (HRProject)EntityCacheUtil.getResult(HRProjectModelImpl.ENTITY_CACHE_ENABLED,
-				HRProjectImpl.class, hrProjectId, this);
+				HRProjectImpl.class, hrProjectId);
+
+		if (hrProject == _nullHRProject) {
+			return null;
+		}
 
 		if (hrProject == null) {
 			Session session = null;
+
+			boolean hasException = false;
 
 			try {
 				session = openSession();
@@ -386,11 +395,17 @@ public class HRProjectPersistenceImpl extends BasePersistenceImpl<HRProject>
 						Long.valueOf(hrProjectId));
 			}
 			catch (Exception e) {
+				hasException = true;
+
 				throw processException(e);
 			}
 			finally {
 				if (hrProject != null) {
 					cacheResult(hrProject);
+				}
+				else if (!hasException) {
+					EntityCacheUtil.putResult(HRProjectModelImpl.ENTITY_CACHE_ENABLED,
+						HRProjectImpl.class, hrProjectId, _nullHRProject);
 				}
 
 				closeSession(session);
@@ -442,10 +457,7 @@ public class HRProjectPersistenceImpl extends BasePersistenceImpl<HRProject>
 	 */
 	public List<HRProject> findAll(int start, int end,
 		OrderByComparator orderByComparator) throws SystemException {
-		Object[] finderArgs = new Object[] {
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
-			};
+		Object[] finderArgs = new Object[] { start, end, orderByComparator };
 
 		List<HRProject> list = (List<HRProject>)FinderCacheUtil.getResult(FINDER_PATH_FIND_ALL,
 				finderArgs, this);
@@ -527,10 +539,8 @@ public class HRProjectPersistenceImpl extends BasePersistenceImpl<HRProject>
 	 * @throws SystemException if a system exception occurred
 	 */
 	public int countAll() throws SystemException {
-		Object[] finderArgs = new Object[0];
-
 		Long count = (Long)FinderCacheUtil.getResult(FINDER_PATH_COUNT_ALL,
-				finderArgs, this);
+				FINDER_ARGS_EMPTY, this);
 
 		if (count == null) {
 			Session session = null;
@@ -550,8 +560,8 @@ public class HRProjectPersistenceImpl extends BasePersistenceImpl<HRProject>
 					count = Long.valueOf(0);
 				}
 
-				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL, finderArgs,
-					count);
+				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL,
+					FINDER_ARGS_EMPTY, count);
 
 				closeSession(session);
 			}
@@ -678,4 +688,21 @@ public class HRProjectPersistenceImpl extends BasePersistenceImpl<HRProject>
 	private static final boolean _HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE = GetterUtil.getBoolean(PropsUtil.get(
 				PropsKeys.HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE));
 	private static Log _log = LogFactoryUtil.getLog(HRProjectPersistenceImpl.class);
+	private static HRProject _nullHRProject = new HRProjectImpl() {
+			@Override
+			public Object clone() {
+				return this;
+			}
+
+			@Override
+			public CacheModel<HRProject> toCacheModel() {
+				return _nullHRProjectCacheModel;
+			}
+		};
+
+	private static CacheModel<HRProject> _nullHRProjectCacheModel = new CacheModel<HRProject>() {
+			public HRProject toEntityModel() {
+				return _nullHRProject;
+			}
+		};
 }

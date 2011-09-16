@@ -38,6 +38,7 @@ import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.ModelListener;
 import com.liferay.portal.service.persistence.BatchSessionUtil;
 import com.liferay.portal.service.persistence.ResourcePersistence;
@@ -74,9 +75,10 @@ public class HRTimeOffTypePersistenceImpl extends BasePersistenceImpl<HRTimeOffT
 		".List";
 	public static final FinderPath FINDER_PATH_FIND_ALL = new FinderPath(HRTimeOffTypeModelImpl.ENTITY_CACHE_ENABLED,
 			HRTimeOffTypeModelImpl.FINDER_CACHE_ENABLED,
-			FINDER_CLASS_NAME_LIST, "findAll", new String[0]);
+			HRTimeOffTypeImpl.class, FINDER_CLASS_NAME_LIST, "findAll",
+			new String[0]);
 	public static final FinderPath FINDER_PATH_COUNT_ALL = new FinderPath(HRTimeOffTypeModelImpl.ENTITY_CACHE_ENABLED,
-			HRTimeOffTypeModelImpl.FINDER_CACHE_ENABLED,
+			HRTimeOffTypeModelImpl.FINDER_CACHE_ENABLED, Long.class,
 			FINDER_CLASS_NAME_LIST, "countAll", new String[0]);
 
 	/**
@@ -101,8 +103,7 @@ public class HRTimeOffTypePersistenceImpl extends BasePersistenceImpl<HRTimeOffT
 		for (HRTimeOffType hrTimeOffType : hrTimeOffTypes) {
 			if (EntityCacheUtil.getResult(
 						HRTimeOffTypeModelImpl.ENTITY_CACHE_ENABLED,
-						HRTimeOffTypeImpl.class, hrTimeOffType.getPrimaryKey(),
-						this) == null) {
+						HRTimeOffTypeImpl.class, hrTimeOffType.getPrimaryKey()) == null) {
 				cacheResult(hrTimeOffType);
 			}
 		}
@@ -137,6 +138,8 @@ public class HRTimeOffTypePersistenceImpl extends BasePersistenceImpl<HRTimeOffT
 	public void clearCache(HRTimeOffType hrTimeOffType) {
 		EntityCacheUtil.removeResult(HRTimeOffTypeModelImpl.ENTITY_CACHE_ENABLED,
 			HRTimeOffTypeImpl.class, hrTimeOffType.getPrimaryKey());
+
+		FinderCacheUtil.removeResult(FINDER_PATH_FIND_ALL, FINDER_ARGS_EMPTY);
 	}
 
 	/**
@@ -364,10 +367,16 @@ public class HRTimeOffTypePersistenceImpl extends BasePersistenceImpl<HRTimeOffT
 	public HRTimeOffType fetchByPrimaryKey(long hrTimeOffTypeId)
 		throws SystemException {
 		HRTimeOffType hrTimeOffType = (HRTimeOffType)EntityCacheUtil.getResult(HRTimeOffTypeModelImpl.ENTITY_CACHE_ENABLED,
-				HRTimeOffTypeImpl.class, hrTimeOffTypeId, this);
+				HRTimeOffTypeImpl.class, hrTimeOffTypeId);
+
+		if (hrTimeOffType == _nullHRTimeOffType) {
+			return null;
+		}
 
 		if (hrTimeOffType == null) {
 			Session session = null;
+
+			boolean hasException = false;
 
 			try {
 				session = openSession();
@@ -376,11 +385,18 @@ public class HRTimeOffTypePersistenceImpl extends BasePersistenceImpl<HRTimeOffT
 						Long.valueOf(hrTimeOffTypeId));
 			}
 			catch (Exception e) {
+				hasException = true;
+
 				throw processException(e);
 			}
 			finally {
 				if (hrTimeOffType != null) {
 					cacheResult(hrTimeOffType);
+				}
+				else if (!hasException) {
+					EntityCacheUtil.putResult(HRTimeOffTypeModelImpl.ENTITY_CACHE_ENABLED,
+						HRTimeOffTypeImpl.class, hrTimeOffTypeId,
+						_nullHRTimeOffType);
 				}
 
 				closeSession(session);
@@ -432,10 +448,7 @@ public class HRTimeOffTypePersistenceImpl extends BasePersistenceImpl<HRTimeOffT
 	 */
 	public List<HRTimeOffType> findAll(int start, int end,
 		OrderByComparator orderByComparator) throws SystemException {
-		Object[] finderArgs = new Object[] {
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
-			};
+		Object[] finderArgs = new Object[] { start, end, orderByComparator };
 
 		List<HRTimeOffType> list = (List<HRTimeOffType>)FinderCacheUtil.getResult(FINDER_PATH_FIND_ALL,
 				finderArgs, this);
@@ -517,10 +530,8 @@ public class HRTimeOffTypePersistenceImpl extends BasePersistenceImpl<HRTimeOffT
 	 * @throws SystemException if a system exception occurred
 	 */
 	public int countAll() throws SystemException {
-		Object[] finderArgs = new Object[0];
-
 		Long count = (Long)FinderCacheUtil.getResult(FINDER_PATH_COUNT_ALL,
-				finderArgs, this);
+				FINDER_ARGS_EMPTY, this);
 
 		if (count == null) {
 			Session session = null;
@@ -540,8 +551,8 @@ public class HRTimeOffTypePersistenceImpl extends BasePersistenceImpl<HRTimeOffT
 					count = Long.valueOf(0);
 				}
 
-				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL, finderArgs,
-					count);
+				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL,
+					FINDER_ARGS_EMPTY, count);
 
 				closeSession(session);
 			}
@@ -668,4 +679,21 @@ public class HRTimeOffTypePersistenceImpl extends BasePersistenceImpl<HRTimeOffT
 	private static final boolean _HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE = GetterUtil.getBoolean(PropsUtil.get(
 				PropsKeys.HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE));
 	private static Log _log = LogFactoryUtil.getLog(HRTimeOffTypePersistenceImpl.class);
+	private static HRTimeOffType _nullHRTimeOffType = new HRTimeOffTypeImpl() {
+			@Override
+			public Object clone() {
+				return this;
+			}
+
+			@Override
+			public CacheModel<HRTimeOffType> toCacheModel() {
+				return _nullHRTimeOffTypeCacheModel;
+			}
+		};
+
+	private static CacheModel<HRTimeOffType> _nullHRTimeOffTypeCacheModel = new CacheModel<HRTimeOffType>() {
+			public HRTimeOffType toEntityModel() {
+				return _nullHRTimeOffType;
+			}
+		};
 }

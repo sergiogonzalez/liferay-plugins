@@ -17,8 +17,10 @@ package com.liferay.portal.workflow.kaleo.model.impl;
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.impl.BaseModelImpl;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.util.PortalUtil;
@@ -29,8 +31,6 @@ import com.liferay.portlet.expando.model.ExpandoBridge;
 import com.liferay.portlet.expando.util.ExpandoBridgeFactoryUtil;
 
 import java.io.Serializable;
-
-import java.lang.reflect.Proxy;
 
 import java.sql.Types;
 
@@ -250,8 +250,13 @@ public class KaleoNotificationRecipientModelImpl extends BaseModelImpl<KaleoNoti
 			return (KaleoNotificationRecipient)this;
 		}
 		else {
-			return (KaleoNotificationRecipient)Proxy.newProxyInstance(_classLoader,
-				_escapedModelProxyInterfaces, new AutoEscapeBeanHandler(this));
+			if (_escapedModelProxy == null) {
+				_escapedModelProxy = (KaleoNotificationRecipient)ProxyUtil.newProxyInstance(_classLoader,
+						_escapedModelProxyInterfaces,
+						new AutoEscapeBeanHandler(this));
+			}
+
+			return _escapedModelProxy;
 		}
 	}
 
@@ -345,6 +350,72 @@ public class KaleoNotificationRecipientModelImpl extends BaseModelImpl<KaleoNoti
 
 	@Override
 	public void resetOriginalValues() {
+	}
+
+	@Override
+	public CacheModel<KaleoNotificationRecipient> toCacheModel() {
+		KaleoNotificationRecipientCacheModel kaleoNotificationRecipientCacheModel =
+			new KaleoNotificationRecipientCacheModel();
+
+		kaleoNotificationRecipientCacheModel.kaleoNotificationRecipientId = getKaleoNotificationRecipientId();
+
+		kaleoNotificationRecipientCacheModel.groupId = getGroupId();
+
+		kaleoNotificationRecipientCacheModel.companyId = getCompanyId();
+
+		kaleoNotificationRecipientCacheModel.userId = getUserId();
+
+		kaleoNotificationRecipientCacheModel.userName = getUserName();
+
+		String userName = kaleoNotificationRecipientCacheModel.userName;
+
+		if ((userName != null) && (userName.length() == 0)) {
+			kaleoNotificationRecipientCacheModel.userName = null;
+		}
+
+		Date createDate = getCreateDate();
+
+		if (createDate != null) {
+			kaleoNotificationRecipientCacheModel.createDate = createDate.getTime();
+		}
+		else {
+			kaleoNotificationRecipientCacheModel.createDate = Long.MIN_VALUE;
+		}
+
+		Date modifiedDate = getModifiedDate();
+
+		if (modifiedDate != null) {
+			kaleoNotificationRecipientCacheModel.modifiedDate = modifiedDate.getTime();
+		}
+		else {
+			kaleoNotificationRecipientCacheModel.modifiedDate = Long.MIN_VALUE;
+		}
+
+		kaleoNotificationRecipientCacheModel.kaleoDefinitionId = getKaleoDefinitionId();
+
+		kaleoNotificationRecipientCacheModel.kaleoNotificationId = getKaleoNotificationId();
+
+		kaleoNotificationRecipientCacheModel.recipientClassName = getRecipientClassName();
+
+		String recipientClassName = kaleoNotificationRecipientCacheModel.recipientClassName;
+
+		if ((recipientClassName != null) && (recipientClassName.length() == 0)) {
+			kaleoNotificationRecipientCacheModel.recipientClassName = null;
+		}
+
+		kaleoNotificationRecipientCacheModel.recipientClassPK = getRecipientClassPK();
+
+		kaleoNotificationRecipientCacheModel.recipientRoleType = getRecipientRoleType();
+
+		kaleoNotificationRecipientCacheModel.address = getAddress();
+
+		String address = kaleoNotificationRecipientCacheModel.address;
+
+		if ((address != null) && (address.length() == 0)) {
+			kaleoNotificationRecipientCacheModel.address = null;
+		}
+
+		return kaleoNotificationRecipientCacheModel;
 	}
 
 	@Override
@@ -467,4 +538,5 @@ public class KaleoNotificationRecipientModelImpl extends BaseModelImpl<KaleoNoti
 	private int _recipientRoleType;
 	private String _address;
 	private transient ExpandoBridge _expandoBridge;
+	private KaleoNotificationRecipient _escapedModelProxy;
 }

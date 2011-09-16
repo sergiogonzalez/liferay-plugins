@@ -18,11 +18,12 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.servlet.ServletResponseUtil;
 import com.liferay.portal.kernel.upload.UploadPortletRequest;
-import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.MimeTypesUtil;
 import com.liferay.portal.kernel.util.ObjectValuePair;
 import com.liferay.portal.kernel.util.ParamUtil;
+import com.liferay.portal.kernel.util.StreamUtil;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.model.CompanyConstants;
 import com.liferay.portal.security.auth.PrincipalException;
@@ -34,9 +35,7 @@ import com.liferay.portlet.messageboards.service.MBMessageLocalServiceUtil;
 import com.liferay.privatemessaging.service.UserThreadLocalServiceUtil;
 import com.liferay.privatemessaging.util.PrivateMessagingUtil;
 import com.liferay.util.bridges.mvc.MVCPortlet;
-import com.liferay.util.servlet.ServletResponseUtil;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -150,38 +149,56 @@ public class PrivateMessagingPortlet extends MVCPortlet {
 		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
-		UploadPortletRequest uploadRequest = PortalUtil.getUploadPortletRequest(
-			actionRequest);
+		UploadPortletRequest uploadPortletRequest =
+			PortalUtil.getUploadPortletRequest(actionRequest);
 
-		long userId = ParamUtil.getLong(uploadRequest, "userId");
-		long mbThreadId = ParamUtil.getLong(uploadRequest, "mbThreadId");
-		String to = ParamUtil.getString(uploadRequest, "to");
-		String subject = ParamUtil.getString(uploadRequest, "subject");
-		String body = ParamUtil.getString(uploadRequest, "body");
-		List<ObjectValuePair<String, byte[]>> files =
-			new ArrayList<ObjectValuePair<String, byte[]>>();
+		long userId = ParamUtil.getLong(uploadPortletRequest, "userId");
+		long mbThreadId = ParamUtil.getLong(uploadPortletRequest, "mbThreadId");
+		String to = ParamUtil.getString(uploadPortletRequest, "to");
+		String subject = ParamUtil.getString(uploadPortletRequest, "subject");
+		String body = ParamUtil.getString(uploadPortletRequest, "body");
+		List<ObjectValuePair<String, InputStream>> inputStreamOVPs =
+			new ArrayList<ObjectValuePair<String, InputStream>>();
 
-		for (int i = 1; i <= 3; i++) {
-			File file = uploadRequest.getFile("msgFile" + i);
-			String fileName = uploadRequest.getFileName("msgFile" + i);
+		try {
+			for (int i = 1; i <= 3; i++) {
+				String fileName = uploadPortletRequest.getFileName(
+					"msgFile" + i);
+				InputStream inputStream = uploadPortletRequest.getFileAsStream(
+					"msgFile" + i);
 
-			try {
-				byte[] bytes = FileUtil.getBytes(file);
+				if (inputStream == null) {
+					continue;
+				}
 
-				if ((bytes != null) && (bytes.length > 0)) {
-					ObjectValuePair<String, byte[]> ovp =
-						new ObjectValuePair<String, byte[]>(fileName, bytes);
+				try {
+					ObjectValuePair<String, InputStream> inputStreamOVP =
+						new ObjectValuePair<String, InputStream>(
+							fileName, inputStream);
 
-					files.add(ovp);
+					inputStreamOVPs.add(inputStreamOVP);
+				}
+				catch (Exception e) {
+					_log.error("unable to attach file " + fileName, e);
 				}
 			}
-			catch (IOException ioe) {
-				_log.error("unable to attach file " + fileName, ioe);
+
+			UserThreadLocalServiceUtil.addPrivateMessage(
+				userId, mbThreadId, to, subject, body,
+				inputStreamOVPs, themeDisplay);
+		}
+		catch (IOException ioe) {
+			throw new PortalException("Unable to process attachment", ioe);
+		}
+		finally {
+			for (ObjectValuePair<String, InputStream> inputStreamOVP :
+					inputStreamOVPs) {
+
+				InputStream inputStream = inputStreamOVP.getValue();
+
+				StreamUtil.cleanUp(inputStream);
 			}
 		}
-
-		UserThreadLocalServiceUtil.addPrivateMessage(
-			userId, mbThreadId, to, subject, body, files, themeDisplay);
 	}
 
 	private static Log _log = LogFactoryUtil.getLog(

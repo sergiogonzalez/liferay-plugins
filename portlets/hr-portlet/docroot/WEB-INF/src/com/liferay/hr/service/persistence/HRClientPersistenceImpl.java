@@ -38,6 +38,7 @@ import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.ModelListener;
 import com.liferay.portal.service.persistence.BatchSessionUtil;
 import com.liferay.portal.service.persistence.ResourcePersistence;
@@ -73,11 +74,11 @@ public class HRClientPersistenceImpl extends BasePersistenceImpl<HRClient>
 	public static final String FINDER_CLASS_NAME_LIST = FINDER_CLASS_NAME_ENTITY +
 		".List";
 	public static final FinderPath FINDER_PATH_FIND_ALL = new FinderPath(HRClientModelImpl.ENTITY_CACHE_ENABLED,
-			HRClientModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"findAll", new String[0]);
+			HRClientModelImpl.FINDER_CACHE_ENABLED, HRClientImpl.class,
+			FINDER_CLASS_NAME_LIST, "findAll", new String[0]);
 	public static final FinderPath FINDER_PATH_COUNT_ALL = new FinderPath(HRClientModelImpl.ENTITY_CACHE_ENABLED,
-			HRClientModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"countAll", new String[0]);
+			HRClientModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST, "countAll", new String[0]);
 
 	/**
 	 * Caches the h r client in the entity cache if it is enabled.
@@ -100,7 +101,7 @@ public class HRClientPersistenceImpl extends BasePersistenceImpl<HRClient>
 		for (HRClient hrClient : hrClients) {
 			if (EntityCacheUtil.getResult(
 						HRClientModelImpl.ENTITY_CACHE_ENABLED,
-						HRClientImpl.class, hrClient.getPrimaryKey(), this) == null) {
+						HRClientImpl.class, hrClient.getPrimaryKey()) == null) {
 				cacheResult(hrClient);
 			}
 		}
@@ -135,6 +136,8 @@ public class HRClientPersistenceImpl extends BasePersistenceImpl<HRClient>
 	public void clearCache(HRClient hrClient) {
 		EntityCacheUtil.removeResult(HRClientModelImpl.ENTITY_CACHE_ENABLED,
 			HRClientImpl.class, hrClient.getPrimaryKey());
+
+		FinderCacheUtil.removeResult(FINDER_PATH_FIND_ALL, FINDER_ARGS_EMPTY);
 	}
 
 	/**
@@ -357,10 +360,16 @@ public class HRClientPersistenceImpl extends BasePersistenceImpl<HRClient>
 	public HRClient fetchByPrimaryKey(long hrClientId)
 		throws SystemException {
 		HRClient hrClient = (HRClient)EntityCacheUtil.getResult(HRClientModelImpl.ENTITY_CACHE_ENABLED,
-				HRClientImpl.class, hrClientId, this);
+				HRClientImpl.class, hrClientId);
+
+		if (hrClient == _nullHRClient) {
+			return null;
+		}
 
 		if (hrClient == null) {
 			Session session = null;
+
+			boolean hasException = false;
 
 			try {
 				session = openSession();
@@ -369,11 +378,17 @@ public class HRClientPersistenceImpl extends BasePersistenceImpl<HRClient>
 						Long.valueOf(hrClientId));
 			}
 			catch (Exception e) {
+				hasException = true;
+
 				throw processException(e);
 			}
 			finally {
 				if (hrClient != null) {
 					cacheResult(hrClient);
+				}
+				else if (!hasException) {
+					EntityCacheUtil.putResult(HRClientModelImpl.ENTITY_CACHE_ENABLED,
+						HRClientImpl.class, hrClientId, _nullHRClient);
 				}
 
 				closeSession(session);
@@ -424,10 +439,7 @@ public class HRClientPersistenceImpl extends BasePersistenceImpl<HRClient>
 	 */
 	public List<HRClient> findAll(int start, int end,
 		OrderByComparator orderByComparator) throws SystemException {
-		Object[] finderArgs = new Object[] {
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
-			};
+		Object[] finderArgs = new Object[] { start, end, orderByComparator };
 
 		List<HRClient> list = (List<HRClient>)FinderCacheUtil.getResult(FINDER_PATH_FIND_ALL,
 				finderArgs, this);
@@ -509,10 +521,8 @@ public class HRClientPersistenceImpl extends BasePersistenceImpl<HRClient>
 	 * @throws SystemException if a system exception occurred
 	 */
 	public int countAll() throws SystemException {
-		Object[] finderArgs = new Object[0];
-
 		Long count = (Long)FinderCacheUtil.getResult(FINDER_PATH_COUNT_ALL,
-				finderArgs, this);
+				FINDER_ARGS_EMPTY, this);
 
 		if (count == null) {
 			Session session = null;
@@ -532,8 +542,8 @@ public class HRClientPersistenceImpl extends BasePersistenceImpl<HRClient>
 					count = Long.valueOf(0);
 				}
 
-				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL, finderArgs,
-					count);
+				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL,
+					FINDER_ARGS_EMPTY, count);
 
 				closeSession(session);
 			}
@@ -660,4 +670,21 @@ public class HRClientPersistenceImpl extends BasePersistenceImpl<HRClient>
 	private static final boolean _HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE = GetterUtil.getBoolean(PropsUtil.get(
 				PropsKeys.HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE));
 	private static Log _log = LogFactoryUtil.getLog(HRClientPersistenceImpl.class);
+	private static HRClient _nullHRClient = new HRClientImpl() {
+			@Override
+			public Object clone() {
+				return this;
+			}
+
+			@Override
+			public CacheModel<HRClient> toCacheModel() {
+				return _nullHRClientCacheModel;
+			}
+		};
+
+	private static CacheModel<HRClient> _nullHRClientCacheModel = new CacheModel<HRClient>() {
+			public HRClient toEntityModel() {
+				return _nullHRClient;
+			}
+		};
 }

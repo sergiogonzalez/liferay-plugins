@@ -35,6 +35,7 @@ import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.ModelListener;
 import com.liferay.portal.service.persistence.BatchSessionUtil;
 import com.liferay.portal.service.persistence.ResourcePersistence;
@@ -75,8 +76,8 @@ public class UserThreadPersistenceImpl extends BasePersistenceImpl<UserThread>
 	public static final String FINDER_CLASS_NAME_LIST = FINDER_CLASS_NAME_ENTITY +
 		".List";
 	public static final FinderPath FINDER_PATH_FIND_BY_MBTHREADID = new FinderPath(UserThreadModelImpl.ENTITY_CACHE_ENABLED,
-			UserThreadModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"findByMBThreadId",
+			UserThreadModelImpl.FINDER_CACHE_ENABLED, UserThreadImpl.class,
+			FINDER_CLASS_NAME_LIST, "findByMBThreadId",
 			new String[] {
 				Long.class.getName(),
 				
@@ -84,11 +85,12 @@ public class UserThreadPersistenceImpl extends BasePersistenceImpl<UserThread>
 				"com.liferay.portal.kernel.util.OrderByComparator"
 			});
 	public static final FinderPath FINDER_PATH_COUNT_BY_MBTHREADID = new FinderPath(UserThreadModelImpl.ENTITY_CACHE_ENABLED,
-			UserThreadModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"countByMBThreadId", new String[] { Long.class.getName() });
+			UserThreadModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST, "countByMBThreadId",
+			new String[] { Long.class.getName() });
 	public static final FinderPath FINDER_PATH_FIND_BY_USERID = new FinderPath(UserThreadModelImpl.ENTITY_CACHE_ENABLED,
-			UserThreadModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"findByUserId",
+			UserThreadModelImpl.FINDER_CACHE_ENABLED, UserThreadImpl.class,
+			FINDER_CLASS_NAME_LIST, "findByUserId",
 			new String[] {
 				Long.class.getName(),
 				
@@ -96,19 +98,20 @@ public class UserThreadPersistenceImpl extends BasePersistenceImpl<UserThread>
 				"com.liferay.portal.kernel.util.OrderByComparator"
 			});
 	public static final FinderPath FINDER_PATH_COUNT_BY_USERID = new FinderPath(UserThreadModelImpl.ENTITY_CACHE_ENABLED,
-			UserThreadModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"countByUserId", new String[] { Long.class.getName() });
+			UserThreadModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST, "countByUserId",
+			new String[] { Long.class.getName() });
 	public static final FinderPath FINDER_PATH_FETCH_BY_U_M = new FinderPath(UserThreadModelImpl.ENTITY_CACHE_ENABLED,
-			UserThreadModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_ENTITY,
-			"fetchByU_M",
+			UserThreadModelImpl.FINDER_CACHE_ENABLED, UserThreadImpl.class,
+			FINDER_CLASS_NAME_ENTITY, "fetchByU_M",
 			new String[] { Long.class.getName(), Long.class.getName() });
 	public static final FinderPath FINDER_PATH_COUNT_BY_U_M = new FinderPath(UserThreadModelImpl.ENTITY_CACHE_ENABLED,
-			UserThreadModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"countByU_M",
+			UserThreadModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST, "countByU_M",
 			new String[] { Long.class.getName(), Long.class.getName() });
 	public static final FinderPath FINDER_PATH_FIND_BY_U_D = new FinderPath(UserThreadModelImpl.ENTITY_CACHE_ENABLED,
-			UserThreadModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"findByU_D",
+			UserThreadModelImpl.FINDER_CACHE_ENABLED, UserThreadImpl.class,
+			FINDER_CLASS_NAME_LIST, "findByU_D",
 			new String[] {
 				Long.class.getName(), Boolean.class.getName(),
 				
@@ -116,12 +119,12 @@ public class UserThreadPersistenceImpl extends BasePersistenceImpl<UserThread>
 				"com.liferay.portal.kernel.util.OrderByComparator"
 			});
 	public static final FinderPath FINDER_PATH_COUNT_BY_U_D = new FinderPath(UserThreadModelImpl.ENTITY_CACHE_ENABLED,
-			UserThreadModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"countByU_D",
+			UserThreadModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST, "countByU_D",
 			new String[] { Long.class.getName(), Boolean.class.getName() });
 	public static final FinderPath FINDER_PATH_FIND_BY_U_R_D = new FinderPath(UserThreadModelImpl.ENTITY_CACHE_ENABLED,
-			UserThreadModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"findByU_R_D",
+			UserThreadModelImpl.FINDER_CACHE_ENABLED, UserThreadImpl.class,
+			FINDER_CLASS_NAME_LIST, "findByU_R_D",
 			new String[] {
 				Long.class.getName(), Boolean.class.getName(),
 				Boolean.class.getName(),
@@ -130,18 +133,18 @@ public class UserThreadPersistenceImpl extends BasePersistenceImpl<UserThread>
 				"com.liferay.portal.kernel.util.OrderByComparator"
 			});
 	public static final FinderPath FINDER_PATH_COUNT_BY_U_R_D = new FinderPath(UserThreadModelImpl.ENTITY_CACHE_ENABLED,
-			UserThreadModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"countByU_R_D",
+			UserThreadModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST, "countByU_R_D",
 			new String[] {
 				Long.class.getName(), Boolean.class.getName(),
 				Boolean.class.getName()
 			});
 	public static final FinderPath FINDER_PATH_FIND_ALL = new FinderPath(UserThreadModelImpl.ENTITY_CACHE_ENABLED,
-			UserThreadModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"findAll", new String[0]);
+			UserThreadModelImpl.FINDER_CACHE_ENABLED, UserThreadImpl.class,
+			FINDER_CLASS_NAME_LIST, "findAll", new String[0]);
 	public static final FinderPath FINDER_PATH_COUNT_ALL = new FinderPath(UserThreadModelImpl.ENTITY_CACHE_ENABLED,
-			UserThreadModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"countAll", new String[0]);
+			UserThreadModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST, "countAll", new String[0]);
 
 	/**
 	 * Caches the user thread in the entity cache if it is enabled.
@@ -170,7 +173,7 @@ public class UserThreadPersistenceImpl extends BasePersistenceImpl<UserThread>
 		for (UserThread userThread : userThreads) {
 			if (EntityCacheUtil.getResult(
 						UserThreadModelImpl.ENTITY_CACHE_ENABLED,
-						UserThreadImpl.class, userThread.getPrimaryKey(), this) == null) {
+						UserThreadImpl.class, userThread.getPrimaryKey()) == null) {
 				cacheResult(userThread);
 			}
 		}
@@ -205,6 +208,8 @@ public class UserThreadPersistenceImpl extends BasePersistenceImpl<UserThread>
 	public void clearCache(UserThread userThread) {
 		EntityCacheUtil.removeResult(UserThreadModelImpl.ENTITY_CACHE_ENABLED,
 			UserThreadImpl.class, userThread.getPrimaryKey());
+
+		FinderCacheUtil.removeResult(FINDER_PATH_FIND_ALL, FINDER_ARGS_EMPTY);
 
 		FinderCacheUtil.removeResult(FINDER_PATH_FETCH_BY_U_M,
 			new Object[] {
@@ -467,10 +472,16 @@ public class UserThreadPersistenceImpl extends BasePersistenceImpl<UserThread>
 	public UserThread fetchByPrimaryKey(long userThreadId)
 		throws SystemException {
 		UserThread userThread = (UserThread)EntityCacheUtil.getResult(UserThreadModelImpl.ENTITY_CACHE_ENABLED,
-				UserThreadImpl.class, userThreadId, this);
+				UserThreadImpl.class, userThreadId);
+
+		if (userThread == _nullUserThread) {
+			return null;
+		}
 
 		if (userThread == null) {
 			Session session = null;
+
+			boolean hasException = false;
 
 			try {
 				session = openSession();
@@ -479,11 +490,17 @@ public class UserThreadPersistenceImpl extends BasePersistenceImpl<UserThread>
 						Long.valueOf(userThreadId));
 			}
 			catch (Exception e) {
+				hasException = true;
+
 				throw processException(e);
 			}
 			finally {
 				if (userThread != null) {
 					cacheResult(userThread);
+				}
+				else if (!hasException) {
+					EntityCacheUtil.putResult(UserThreadModelImpl.ENTITY_CACHE_ENABLED,
+						UserThreadImpl.class, userThreadId, _nullUserThread);
 				}
 
 				closeSession(session);
@@ -543,8 +560,7 @@ public class UserThreadPersistenceImpl extends BasePersistenceImpl<UserThread>
 		Object[] finderArgs = new Object[] {
 				mbThreadId,
 				
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
+				start, end, orderByComparator
 			};
 
 		List<UserThread> list = (List<UserThread>)FinderCacheUtil.getResult(FINDER_PATH_FIND_BY_MBTHREADID,
@@ -879,12 +895,7 @@ public class UserThreadPersistenceImpl extends BasePersistenceImpl<UserThread>
 	 */
 	public List<UserThread> findByUserId(long userId, int start, int end,
 		OrderByComparator orderByComparator) throws SystemException {
-		Object[] finderArgs = new Object[] {
-				userId,
-				
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
-			};
+		Object[] finderArgs = new Object[] { userId, start, end, orderByComparator };
 
 		List<UserThread> list = (List<UserThread>)FinderCacheUtil.getResult(FINDER_PATH_FIND_BY_USERID,
 				finderArgs, this);
@@ -1226,6 +1237,7 @@ public class UserThreadPersistenceImpl extends BasePersistenceImpl<UserThread>
 	 *
 	 * @param userId the user ID
 	 * @param mbThreadId the mb thread ID
+	 * @param retrieveFromCache whether to use the finder cache
 	 * @return the matching user thread, or <code>null</code> if a matching user thread could not be found
 	 * @throws SystemException if a system exception occurred
 	 */
@@ -1365,8 +1377,7 @@ public class UserThreadPersistenceImpl extends BasePersistenceImpl<UserThread>
 		Object[] finderArgs = new Object[] {
 				userId, deleted,
 				
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
+				start, end, orderByComparator
 			};
 
 		List<UserThread> list = (List<UserThread>)FinderCacheUtil.getResult(FINDER_PATH_FIND_BY_U_D,
@@ -1730,8 +1741,7 @@ public class UserThreadPersistenceImpl extends BasePersistenceImpl<UserThread>
 		Object[] finderArgs = new Object[] {
 				userId, read, deleted,
 				
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
+				start, end, orderByComparator
 			};
 
 		List<UserThread> list = (List<UserThread>)FinderCacheUtil.getResult(FINDER_PATH_FIND_BY_U_R_D,
@@ -2097,10 +2107,7 @@ public class UserThreadPersistenceImpl extends BasePersistenceImpl<UserThread>
 	 */
 	public List<UserThread> findAll(int start, int end,
 		OrderByComparator orderByComparator) throws SystemException {
-		Object[] finderArgs = new Object[] {
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
-			};
+		Object[] finderArgs = new Object[] { start, end, orderByComparator };
 
 		List<UserThread> list = (List<UserThread>)FinderCacheUtil.getResult(FINDER_PATH_FIND_ALL,
 				finderArgs, this);
@@ -2537,10 +2544,8 @@ public class UserThreadPersistenceImpl extends BasePersistenceImpl<UserThread>
 	 * @throws SystemException if a system exception occurred
 	 */
 	public int countAll() throws SystemException {
-		Object[] finderArgs = new Object[0];
-
 		Long count = (Long)FinderCacheUtil.getResult(FINDER_PATH_COUNT_ALL,
-				finderArgs, this);
+				FINDER_ARGS_EMPTY, this);
 
 		if (count == null) {
 			Session session = null;
@@ -2560,8 +2565,8 @@ public class UserThreadPersistenceImpl extends BasePersistenceImpl<UserThread>
 					count = Long.valueOf(0);
 				}
 
-				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL, finderArgs,
-					count);
+				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL,
+					FINDER_ARGS_EMPTY, count);
 
 				closeSession(session);
 			}
@@ -2626,4 +2631,21 @@ public class UserThreadPersistenceImpl extends BasePersistenceImpl<UserThread>
 	private static final boolean _HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE = GetterUtil.getBoolean(PropsUtil.get(
 				PropsKeys.HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE));
 	private static Log _log = LogFactoryUtil.getLog(UserThreadPersistenceImpl.class);
+	private static UserThread _nullUserThread = new UserThreadImpl() {
+			@Override
+			public Object clone() {
+				return this;
+			}
+
+			@Override
+			public CacheModel<UserThread> toCacheModel() {
+				return _nullUserThreadCacheModel;
+			}
+		};
+
+	private static CacheModel<UserThread> _nullUserThreadCacheModel = new CacheModel<UserThread>() {
+			public UserThread toEntityModel() {
+				return _nullUserThread;
+			}
+		};
 }

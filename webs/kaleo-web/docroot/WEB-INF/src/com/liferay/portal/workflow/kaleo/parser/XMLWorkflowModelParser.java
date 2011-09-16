@@ -21,6 +21,7 @@ import com.liferay.portal.kernel.xml.Document;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.kernel.xml.SAXReaderUtil;
 import com.liferay.portal.workflow.kaleo.definition.Action;
+import com.liferay.portal.workflow.kaleo.definition.ActionAware;
 import com.liferay.portal.workflow.kaleo.definition.AddressRecipient;
 import com.liferay.portal.workflow.kaleo.definition.Assignment;
 import com.liferay.portal.workflow.kaleo.definition.Condition;
@@ -28,9 +29,12 @@ import com.liferay.portal.workflow.kaleo.definition.Definition;
 import com.liferay.portal.workflow.kaleo.definition.DelayDuration;
 import com.liferay.portal.workflow.kaleo.definition.DurationScale;
 import com.liferay.portal.workflow.kaleo.definition.Fork;
+import com.liferay.portal.workflow.kaleo.definition.Form;
 import com.liferay.portal.workflow.kaleo.definition.Join;
 import com.liferay.portal.workflow.kaleo.definition.Node;
+import com.liferay.portal.workflow.kaleo.definition.NodeType;
 import com.liferay.portal.workflow.kaleo.definition.Notification;
+import com.liferay.portal.workflow.kaleo.definition.NotificationAware;
 import com.liferay.portal.workflow.kaleo.definition.ResourceActionAssignment;
 import com.liferay.portal.workflow.kaleo.definition.RoleAssignment;
 import com.liferay.portal.workflow.kaleo.definition.RoleRecipient;
@@ -52,6 +56,7 @@ import java.util.Set;
 /**
  * @author Michael C. Han
  * @author Marcellus Tavares
+ * @author Eduardo Lundgren
  */
 public class XMLWorkflowModelParser implements WorkflowModelParser {
 
@@ -77,7 +82,8 @@ public class XMLWorkflowModelParser implements WorkflowModelParser {
 		String description = rootElement.elementText("description");
 		int version = GetterUtil.getInteger(rootElement.elementText("version"));
 
-		Definition definition = new Definition(name, description, version);
+		Definition definition = new Definition(
+			name, description, document.formattedString(), version);
 
 		List<Element> conditionElements = rootElement.elements("condition");
 
@@ -126,14 +132,14 @@ public class XMLWorkflowModelParser implements WorkflowModelParser {
 		return definition;
 	}
 
-	protected void parseActions(Element actionsElement, Node node) {
-		if (actionsElement == null) {
+	protected void parseActionElements(
+		List<Element> actionElements, ActionAware actionAware) {
+
+		if (actionElements.isEmpty()) {
 			return;
 		}
 
-		Set<Action> actions = new HashSet<Action>();
-
-		List<Element> actionElements = actionsElement.elements("action");
+		Set<Action> actions = new HashSet<Action>(actionElements.size());
 
 		for (Element actionElement : actionElements) {
 			String name = actionElement.elementText("name");
@@ -150,42 +156,30 @@ public class XMLWorkflowModelParser implements WorkflowModelParser {
 			actions.add(action);
 		}
 
-		node.setActions(actions);
+		actionAware.setActions(actions);
+	}
 
-		Set<Notification> notifications = new HashSet<Notification>();
+	protected void parseActionsElement(Element actionsElement, Node node) {
+		if (actionsElement == null) {
+			return;
+		}
+
+		List<Element> actionElements = actionsElement.elements("action");
+
+		parseActionElements(actionElements, node);
+
+		NodeType nodeType = node.getNodeType();
+
+		if (nodeType.equals(NodeType.TASK)) {
+			List<Element> formElements = actionsElement.elements("form");
+
+			parseFormElements(formElements, (Task)node);
+		}
 
 		List<Element> notificationElements = actionsElement.elements(
 			"notification");
 
-		for (Element notificationElement : notificationElements) {
-			String name = notificationElement.elementText("name");
-			String description = notificationElement.elementText("description");
-			String executionType = notificationElement.elementText(
-				"execution-type");
-			String template = notificationElement.elementText("template");
-			String templateLanguage = notificationElement.elementText(
-				"template-language");
-
-			Notification notification = new Notification(
-				name, description, executionType, template, templateLanguage);
-
-			List<Element> notificationTypeElements =
-				notificationElement.elements("notification-type");
-
-			for (Element notificationTypeElement : notificationTypeElements) {
-				notification.addNotificationType(
-					notificationTypeElement.getText());
-			}
-
-			Element recipientsElement = notificationElement.element(
-				"recipients");
-
-			parseRecipients(recipientsElement, notification);
-
-			notifications.add(notification);
-		}
-
-		node.setNotifications(notifications);
+		parseNotificationElements(notificationElements, node);
 	}
 
 	protected Set<Assignment> parseAssignments(Element assignmentsElement) {
@@ -288,17 +282,17 @@ public class XMLWorkflowModelParser implements WorkflowModelParser {
 		Condition condition = new Condition(
 			name, description, script, scriptLanguage);
 
+		String metadata = conditionElement.elementText("metadata");
+
+		condition.setMetadata(metadata);
+
 		Element actionsElement = conditionElement.element("actions");
 
-		if (actionsElement != null) {
-			parseActions(actionsElement, condition);
-		}
+		parseActionsElement(actionsElement, condition);
 
 		Element timersElement = conditionElement.element("timers");
 
-		if (timersElement != null) {
-			parseTimers(timersElement, condition);
-		}
+		parseTimerElements(timersElement, condition);
 
 		return condition;
 	}
@@ -322,19 +316,42 @@ public class XMLWorkflowModelParser implements WorkflowModelParser {
 
 		Fork fork = new Fork(name, description);
 
+		String metadata = forkElement.elementText("metadata");
+
+		fork.setMetadata(metadata);
+
 		Element actionsElement = forkElement.element("actions");
 
-		if (actionsElement != null) {
-			parseActions(actionsElement, fork);
-		}
+		parseActionsElement(actionsElement, fork);
 
 		Element timersElement = forkElement.element("timers");
 
-		if (timersElement != null) {
-			parseTimers(timersElement, fork);
-		}
+		parseTimerElements(timersElement, fork);
 
 		return fork;
+	}
+
+	protected void parseFormElements(List<Element> formElements, Task task) {
+		if (formElements.isEmpty()) {
+			return;
+		}
+
+		Set<Form> forms = new HashSet<Form>(formElements.size());
+
+		for (Element formElement : formElements) {
+			long formTemplateId = GetterUtil.getLong(
+				formElement.elementText("form-template-id"));
+
+			Form form = new Form(formTemplateId);
+
+			String description = formElement.elementText("description");
+
+			form.setDescription(description);
+
+			forms.add(form);
+		}
+
+		task.setForms(forms);
 	}
 
 	protected Join parseJoin(Element joinElement) {
@@ -343,19 +360,61 @@ public class XMLWorkflowModelParser implements WorkflowModelParser {
 
 		Join join = new Join(name, description);
 
+		String metadata = joinElement.elementText("metadata");
+
+		join.setMetadata(metadata);
+
 		Element actionsElement = joinElement.element("actions");
 
-		if (actionsElement != null) {
-			parseActions(actionsElement, join);
-		}
+		parseActionsElement(actionsElement, join);
 
 		Element timersElement = joinElement.element("timers");
 
-		if (timersElement != null) {
-			parseTimers(timersElement, join);
-		}
+		parseTimerElements(timersElement, join);
 
 		return join;
+	}
+
+	protected void parseNotificationElements(
+		List<Element> notificationElements,
+		NotificationAware notificationAware) {
+
+		if (notificationElements.isEmpty()) {
+			return;
+		}
+
+		Set<Notification> notifications = new HashSet<Notification>(
+			notificationElements.size());
+
+		for (Element notificationElement : notificationElements) {
+			String name = notificationElement.elementText("name");
+			String description = notificationElement.elementText("description");
+			String executionType = notificationElement.elementText(
+				"execution-type");
+			String template = notificationElement.elementText("template");
+			String templateLanguage = notificationElement.elementText(
+				"template-language");
+
+			Notification notification = new Notification(
+				name, description, executionType, template, templateLanguage);
+
+			List<Element> notificationTypeElements =
+				notificationElement.elements("notification-type");
+
+			for (Element notificationTypeElement : notificationTypeElements) {
+				notification.addNotificationType(
+					notificationTypeElement.getText());
+			}
+
+			Element recipientsElement = notificationElement.element(
+				"recipients");
+
+			parseRecipients(recipientsElement, notification);
+
+			notifications.add(notification);
+		}
+
+		notificationAware.setNotifications(notifications);
 	}
 
 	protected void parseRecipients(
@@ -422,21 +481,21 @@ public class XMLWorkflowModelParser implements WorkflowModelParser {
 		String name = stateElement.elementText("name");
 		String description = stateElement.elementText("description");
 		boolean initial = GetterUtil.getBoolean(
-			stateElement.elementText("initial"));
+			stateElement.elementText("initial"), false);
 
 		State state = new State(name, description, initial);
 
+		String metadata = stateElement.elementText("metadata");
+
+		state.setMetadata(metadata);
+
 		Element actionsElement = stateElement.element("actions");
 
-		if (actionsElement != null) {
-			parseActions(actionsElement, state);
-		}
+		parseActionsElement(actionsElement, state);
 
 		Element timersElement = stateElement.element("timers");
 
-		if (timersElement != null) {
-			parseTimers(timersElement, state);
-		}
+		parseTimerElements(timersElement, state);
 
 		return state;
 	}
@@ -447,11 +506,13 @@ public class XMLWorkflowModelParser implements WorkflowModelParser {
 
 		Task task = new Task(name, description);
 
+		String metadata = taskElement.elementText("metadata");
+
+		task.setMetadata(metadata);
+
 		Element actionsElement = taskElement.element("actions");
 
-		if (actionsElement != null) {
-			parseActions(actionsElement, task);
-		}
+		parseActionsElement(actionsElement, task);
 
 		Element assignmentsElement = taskElement.element("assignments");
 
@@ -463,27 +524,71 @@ public class XMLWorkflowModelParser implements WorkflowModelParser {
 
 		Element timersElement = taskElement.element("task-timers");
 
-		if (timersElement != null) {
-			parseTaskTimers(timersElement, task);
-		}
+		parseTaskTimerElements(timersElement, task);
 
 		return task;
 	}
 
-	protected void parseTaskTimers(Element taskTimersElement, Node node) {
+	protected void parseTaskTimerElements(
+		Element taskTimersElement, Node node) {
+
+		if (taskTimersElement == null) {
+			return;
+		}
+
 		List<Element> taskTimerElements = taskTimersElement.elements(
 			"task-timer");
 
-		parseTimers(taskTimerElements, node);
+		if (taskTimerElements.isEmpty()) {
+			return;
+		}
+
+		Set<Timer> timers = new HashSet<Timer>(taskTimerElements.size());
+
+		for (Element timerElement : taskTimerElements) {
+			Timer timer = parseTimerElement(timerElement, true);
+
+			timers.add(timer);
+		}
+
+		node.setTimers(timers);
 	}
 
-	protected Timer parseTimer(Element timerElement) {
+	protected void parseTimerActions(Element timersElement, Timer timer) {
+		if (timersElement == null) {
+			return;
+		}
+
+		List<Element> timerActionElements = timersElement.elements(
+			"timer-action");
+
+		parseActionElements(timerActionElements, timer);
+
+		List<Element> timerNotificationElements = timersElement.elements(
+			"timer-notification");
+
+		parseNotificationElements(timerNotificationElements, timer);
+
+		Element reassignmentsElement = timersElement.element(
+			"reassignments");
+
+		if (reassignmentsElement != null) {
+			Set<Assignment> assignments = parseAssignments(
+				reassignmentsElement);
+
+			timer.setReassignments(assignments);
+		}
+	}
+
+	protected Timer parseTimerElement(
+		Element timerElement, boolean isTaskTimer) {
+
 		String name = timerElement.elementText("name");
 		String description = timerElement.elementText("description");
-		boolean defaultValue = GetterUtil.getBoolean(
-			timerElement.elementText("default"));
+		boolean blocking = GetterUtil.getBoolean(
+			timerElement.elementText("blocking"), !isTaskTimer);
 
-		Timer timer = new Timer(name, description, defaultValue);
+		Timer timer = new Timer(name, description, blocking);
 
 		Element delayElement = timerElement.element("delay");
 
@@ -491,31 +596,36 @@ public class XMLWorkflowModelParser implements WorkflowModelParser {
 
 		timer.setDelayDuration(delayDuration);
 
-		Element actionsElement = timerElement.element("actions");
+		if (!blocking) {
+			Element recurrenceElement = timerElement.element("recurrence");
 
-		parseActions(actionsElement, timer);
+			DelayDuration recurrence = parseDelay(recurrenceElement);
 
-		Element reassignmentsElement = timerElement.element(
-			"reassignments");
+			timer.setRecurrence(recurrence);
+		}
 
-		Set<Assignment> assignments = parseAssignments(reassignmentsElement);
+		Element timerActions = timerElement.element("timer-actions");
 
-		timer.setReassignments(assignments);
+		parseTimerActions(timerActions, timer);
 
 		return timer;
 	}
 
-	protected void parseTimers(Element timersElement, Node node) {
+	protected void parseTimerElements(Element timersElement, Node node) {
+		if (timersElement == null) {
+			return;
+		}
+
 		List<Element> timerElements = timersElement.elements("timer");
 
-		parseTimers(timerElements, node);
-	}
+		if (timerElements.isEmpty()) {
+			return;
+		}
 
-	protected void parseTimers(List<Element> timerElements, Node node) {
-		Set<Timer> timers = new HashSet<Timer>();
+		Set<Timer> timers = new HashSet<Timer>(timerElements.size());
 
 		for (Element timerElement : timerElements) {
-			Timer timer = parseTimer(timerElement);
+			Timer timer = parseTimerElement(timerElement, false);
 
 			timers.add(timer);
 		}
@@ -557,10 +667,18 @@ public class XMLWorkflowModelParser implements WorkflowModelParser {
 			}
 
 			boolean defaultValue = GetterUtil.getBoolean(
-				transitionElement.elementText("default"));
+				transitionElement.elementText("default"), true);
 
 			Transition transition = new Transition(
 				transitionName, sourceNode, targetNode, defaultValue);
+
+			Element timerElement = transitionElement.element("timer");
+
+			if (timerElement != null) {
+				Timer timer = parseTimerElement(timerElement, false);
+
+				transition.setTimers(timer);
+			}
 
 			sourceNode.addTransition(transition);
 		}

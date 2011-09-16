@@ -35,6 +35,7 @@ import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.ModelListener;
 import com.liferay.portal.service.persistence.BatchSessionUtil;
 import com.liferay.portal.service.persistence.ClassNamePersistence;
@@ -76,8 +77,8 @@ public class BarPersistenceImpl extends BasePersistenceImpl<Bar>
 	public static final String FINDER_CLASS_NAME_LIST = FINDER_CLASS_NAME_ENTITY +
 		".List";
 	public static final FinderPath FINDER_PATH_FIND_BY_TEXT = new FinderPath(BarModelImpl.ENTITY_CACHE_ENABLED,
-			BarModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"findByText",
+			BarModelImpl.FINDER_CACHE_ENABLED, BarImpl.class,
+			FINDER_CLASS_NAME_LIST, "findByText",
 			new String[] {
 				String.class.getName(),
 				
@@ -85,14 +86,15 @@ public class BarPersistenceImpl extends BasePersistenceImpl<Bar>
 				"com.liferay.portal.kernel.util.OrderByComparator"
 			});
 	public static final FinderPath FINDER_PATH_COUNT_BY_TEXT = new FinderPath(BarModelImpl.ENTITY_CACHE_ENABLED,
-			BarModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"countByText", new String[] { String.class.getName() });
+			BarModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST, "countByText",
+			new String[] { String.class.getName() });
 	public static final FinderPath FINDER_PATH_FIND_ALL = new FinderPath(BarModelImpl.ENTITY_CACHE_ENABLED,
-			BarModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"findAll", new String[0]);
+			BarModelImpl.FINDER_CACHE_ENABLED, BarImpl.class,
+			FINDER_CLASS_NAME_LIST, "findAll", new String[0]);
 	public static final FinderPath FINDER_PATH_COUNT_ALL = new FinderPath(BarModelImpl.ENTITY_CACHE_ENABLED,
-			BarModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"countAll", new String[0]);
+			BarModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST, "countAll", new String[0]);
 
 	/**
 	 * Caches the bar in the entity cache if it is enabled.
@@ -114,7 +116,7 @@ public class BarPersistenceImpl extends BasePersistenceImpl<Bar>
 	public void cacheResult(List<Bar> bars) {
 		for (Bar bar : bars) {
 			if (EntityCacheUtil.getResult(BarModelImpl.ENTITY_CACHE_ENABLED,
-						BarImpl.class, bar.getPrimaryKey(), this) == null) {
+						BarImpl.class, bar.getPrimaryKey()) == null) {
 				cacheResult(bar);
 			}
 		}
@@ -149,6 +151,8 @@ public class BarPersistenceImpl extends BasePersistenceImpl<Bar>
 	public void clearCache(Bar bar) {
 		EntityCacheUtil.removeResult(BarModelImpl.ENTITY_CACHE_ENABLED,
 			BarImpl.class, bar.getPrimaryKey());
+
+		FinderCacheUtil.removeResult(FINDER_PATH_FIND_ALL, FINDER_ARGS_EMPTY);
 	}
 
 	/**
@@ -361,10 +365,16 @@ public class BarPersistenceImpl extends BasePersistenceImpl<Bar>
 	 */
 	public Bar fetchByPrimaryKey(long barId) throws SystemException {
 		Bar bar = (Bar)EntityCacheUtil.getResult(BarModelImpl.ENTITY_CACHE_ENABLED,
-				BarImpl.class, barId, this);
+				BarImpl.class, barId);
+
+		if (bar == _nullBar) {
+			return null;
+		}
 
 		if (bar == null) {
 			Session session = null;
+
+			boolean hasException = false;
 
 			try {
 				session = openSession();
@@ -372,11 +382,17 @@ public class BarPersistenceImpl extends BasePersistenceImpl<Bar>
 				bar = (Bar)session.get(BarImpl.class, Long.valueOf(barId));
 			}
 			catch (Exception e) {
+				hasException = true;
+
 				throw processException(e);
 			}
 			finally {
 				if (bar != null) {
 					cacheResult(bar);
+				}
+				else if (!hasException) {
+					EntityCacheUtil.putResult(BarModelImpl.ENTITY_CACHE_ENABLED,
+						BarImpl.class, barId, _nullBar);
 				}
 
 				closeSession(session);
@@ -431,12 +447,7 @@ public class BarPersistenceImpl extends BasePersistenceImpl<Bar>
 	 */
 	public List<Bar> findByText(String text, int start, int end,
 		OrderByComparator orderByComparator) throws SystemException {
-		Object[] finderArgs = new Object[] {
-				text,
-				
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
-			};
+		Object[] finderArgs = new Object[] { text, start, end, orderByComparator };
 
 		List<Bar> list = (List<Bar>)FinderCacheUtil.getResult(FINDER_PATH_FIND_BY_TEXT,
 				finderArgs, this);
@@ -784,10 +795,7 @@ public class BarPersistenceImpl extends BasePersistenceImpl<Bar>
 	 */
 	public List<Bar> findAll(int start, int end,
 		OrderByComparator orderByComparator) throws SystemException {
-		Object[] finderArgs = new Object[] {
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
-			};
+		Object[] finderArgs = new Object[] { start, end, orderByComparator };
 
 		List<Bar> list = (List<Bar>)FinderCacheUtil.getResult(FINDER_PATH_FIND_ALL,
 				finderArgs, this);
@@ -945,10 +953,8 @@ public class BarPersistenceImpl extends BasePersistenceImpl<Bar>
 	 * @throws SystemException if a system exception occurred
 	 */
 	public int countAll() throws SystemException {
-		Object[] finderArgs = new Object[0];
-
 		Long count = (Long)FinderCacheUtil.getResult(FINDER_PATH_COUNT_ALL,
-				finderArgs, this);
+				FINDER_ARGS_EMPTY, this);
 
 		if (count == null) {
 			Session session = null;
@@ -968,8 +974,8 @@ public class BarPersistenceImpl extends BasePersistenceImpl<Bar>
 					count = Long.valueOf(0);
 				}
 
-				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL, finderArgs,
-					count);
+				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL,
+					FINDER_ARGS_EMPTY, count);
 
 				closeSession(session);
 			}
@@ -1030,4 +1036,21 @@ public class BarPersistenceImpl extends BasePersistenceImpl<Bar>
 	private static final boolean _HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE = GetterUtil.getBoolean(PropsUtil.get(
 				PropsKeys.HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE));
 	private static Log _log = LogFactoryUtil.getLog(BarPersistenceImpl.class);
+	private static Bar _nullBar = new BarImpl() {
+			@Override
+			public Object clone() {
+				return this;
+			}
+
+			@Override
+			public CacheModel<Bar> toCacheModel() {
+				return _nullBarCacheModel;
+			}
+		};
+
+	private static CacheModel<Bar> _nullBarCacheModel = new CacheModel<Bar>() {
+			public Bar toEntityModel() {
+				return _nullBar;
+			}
+		};
 }

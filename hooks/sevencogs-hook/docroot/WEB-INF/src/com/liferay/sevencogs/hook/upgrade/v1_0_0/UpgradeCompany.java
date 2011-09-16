@@ -14,13 +14,14 @@
 
 package com.liferay.sevencogs.hook.upgrade.v1_0_0;
 
-import com.liferay.documentlibrary.DuplicateFileException;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.repository.model.Folder;
 import com.liferay.portal.kernel.upgrade.UpgradeProcess;
+import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.ObjectValuePair;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.PropsKeys;
@@ -40,7 +41,11 @@ import com.liferay.portal.model.ResourceConstants;
 import com.liferay.portal.model.Role;
 import com.liferay.portal.model.RoleConstants;
 import com.liferay.portal.model.User;
+import com.liferay.portal.security.auth.PrincipalThreadLocal;
 import com.liferay.portal.security.permission.ActionKeys;
+import com.liferay.portal.security.permission.PermissionChecker;
+import com.liferay.portal.security.permission.PermissionCheckerFactoryUtil;
+import com.liferay.portal.security.permission.PermissionThreadLocal;
 import com.liferay.portal.service.GroupLocalServiceUtil;
 import com.liferay.portal.service.LayoutLocalServiceUtil;
 import com.liferay.portal.service.LayoutSetLocalServiceUtil;
@@ -63,11 +68,8 @@ import com.liferay.portlet.asset.service.AssetCategoryLocalServiceUtil;
 import com.liferay.portlet.asset.service.AssetVocabularyLocalServiceUtil;
 import com.liferay.portlet.blogs.model.BlogsEntry;
 import com.liferay.portlet.blogs.service.BlogsEntryLocalServiceUtil;
+import com.liferay.portlet.documentlibrary.DuplicateFileException;
 import com.liferay.portlet.documentlibrary.service.DLAppLocalServiceUtil;
-import com.liferay.portlet.imagegallery.model.IGFolder;
-import com.liferay.portlet.imagegallery.model.IGImage;
-import com.liferay.portlet.imagegallery.service.IGFolderLocalServiceUtil;
-import com.liferay.portlet.imagegallery.service.IGImageLocalServiceUtil;
 import com.liferay.portlet.journal.model.JournalArticle;
 import com.liferay.portlet.journal.model.JournalArticleConstants;
 import com.liferay.portlet.journal.model.JournalStructure;
@@ -140,31 +142,43 @@ public class UpgradeCompany extends UpgradeProcess {
 
 		return BlogsEntryLocalServiceUtil.addEntry(
 			userId, title, StringPool.BLANK, content, 1, 1, 2008, 0, 0, false,
-			false, new String[0], false, StringPool.BLANK, null,
-			serviceContext);
+			false, new String[0], false, null, null, null, serviceContext);
 	}
 
 	protected FileEntry addDLFileEntry(
 			long userId, long groupId, long folderId, String fileName,
-			String name, String title, String description,
+			String name, String mimeType, String title, String description,
 			ServiceContext serviceContext)
 		throws Exception {
 
 		byte[] bytes = getBytes(fileName);
 
-		serviceContext.setAddCommunityPermissions(true);
+		serviceContext.setAddGroupPermissions(true);
 		serviceContext.setAddGuestPermissions(false);
 
 		try {
 			return DLAppLocalServiceUtil.addFileEntry(
-				userId, groupId, folderId, title, description, StringPool.BLANK,
-				bytes, serviceContext);
+				userId, groupId, folderId, fileName, mimeType, title,
+				description, StringPool.BLANK, bytes, serviceContext);
 		}
 		catch (DuplicateFileException dfe) {
 			return DLAppLocalServiceUtil.updateFileEntry(
-				userId, groupId, name, title, description, StringPool.BLANK,
-				true, bytes, serviceContext);
+				userId, groupId, name, mimeType, title, description,
+				StringPool.BLANK, true, bytes, serviceContext);
 		}
+	}
+
+	protected FileEntry addDLFileEntry(
+			long userId, long folderId, String name, String fileName,
+			ServiceContext serviceContext)
+		throws Exception {
+
+		byte[] bytes = getBytes(fileName);
+
+		return DLAppLocalServiceUtil.addFileEntry(
+			userId, serviceContext.getScopeGroupId(), folderId, fileName,
+			"image/png", name, StringPool.BLANK, StringPool.BLANK, bytes,
+			serviceContext);
 	}
 
 	protected Folder addDLFolder(
@@ -173,23 +187,11 @@ public class UpgradeCompany extends UpgradeProcess {
 
 		ServiceContext serviceContext = new ServiceContext();
 
-		serviceContext.setAddCommunityPermissions(true);
+		serviceContext.setAddGroupPermissions(true);
 		serviceContext.setAddGuestPermissions(false);
 
 		return DLAppLocalServiceUtil.addFolder(
 			userId, groupId, 0, name, description, serviceContext);
-	}
-
-	protected IGImage addIGImage(
-			long userId, long folderId, String name, String fileName,
-			ServiceContext serviceContext)
-		throws Exception {
-
-		InputStream is = getInputStream(fileName);
-
-		return IGImageLocalServiceUtil.addImage(
-			userId, serviceContext.getScopeGroupId(), folderId, name,
-			StringPool.BLANK, name, is, "image/png", serviceContext);
 	}
 
 	protected JournalArticle addJournalArticle(
@@ -210,7 +212,7 @@ public class UpgradeCompany extends UpgradeProcess {
 
 		String content = getString(fileName);
 
-		serviceContext.setAddCommunityPermissions(true);
+		serviceContext.setAddGroupPermissions(true);
 		serviceContext.setAddGuestPermissions(true);
 
 		Map<Locale, String> titleMap = new HashMap<Locale, String>();
@@ -220,7 +222,7 @@ public class UpgradeCompany extends UpgradeProcess {
 		JournalArticle journalArticle =
 			JournalArticleLocalServiceUtil.addArticle(
 				userId, groupId, 0, 0, StringPool.BLANK, true,
-				JournalArticleConstants.DEFAULT_VERSION, titleMap, null,
+				JournalArticleConstants.VERSION_DEFAULT, titleMap, null,
 				content, "general", structureId, templateId, StringPool.BLANK,
 				1, 1, 2008, 0, 0, 0, 0, 0, 0, 0, true, 0, 0, 0, 0, 0, true,
 				true, false, StringPool.BLANK, null, null, StringPool.BLANK,
@@ -238,33 +240,47 @@ public class UpgradeCompany extends UpgradeProcess {
 			long userId, long groupId, String fileName)
 		throws Exception {
 
+		Map<Locale, String> nameMap = new HashMap<Locale, String>();
+
+		nameMap.put(Locale.US, "Single Image");
+
+		Map<Locale, String> descriptionMap = new HashMap<Locale, String>();
+
+		descriptionMap.put(Locale.US, "A single image, optional link");
+
 		String xsd = getString(fileName);
 
 		ServiceContext serviceContext = new ServiceContext();
 
-		serviceContext.setAddCommunityPermissions(true);
+		serviceContext.setAddGroupPermissions(true);
 		serviceContext.setAddGuestPermissions(true);
 
 		return JournalStructureLocalServiceUtil.addStructure(
 			userId, groupId, "SINGLE-IMAGE", false, StringPool.BLANK,
-			"Single Image", "A single image, optional link", xsd,
-			serviceContext);
+			nameMap, descriptionMap, xsd, serviceContext);
 	}
-
 	protected JournalTemplate addJournalTemplate(
 			long userId, long groupId, String fileName)
 		throws Exception {
+
+		Map<Locale, String> descriptionMap = new HashMap<Locale, String>();
+
+		descriptionMap.put(Locale.US, "A single image, optional URL");
+
+		Map<Locale, String> nameMap = new HashMap<Locale, String>();
+
+		nameMap.put(Locale.US, "Single Image");
 
 		String xsl = getString(fileName);
 
 		ServiceContext serviceContext = new ServiceContext();
 
-		serviceContext.setAddCommunityPermissions(true);
+		serviceContext.setAddGroupPermissions(true);
 		serviceContext.setAddGuestPermissions(true);
 
 		return JournalTemplateLocalServiceUtil.addTemplate(
 			userId, groupId, "SINGLE-IMAGE", false, "SINGLE-IMAGE",
-			"Single Image", "A single image, optional URL", xsl, true, "vm",
+			nameMap, descriptionMap, xsl, true, "vm",
 			true, false, StringPool.BLANK, null, serviceContext);
 	}
 
@@ -279,7 +295,7 @@ public class UpgradeCompany extends UpgradeProcess {
 			group.getCreatorUserId(), group.getGroupId(), privateLayout,
 			LayoutConstants.DEFAULT_PARENT_LAYOUT_ID, name, StringPool.BLANK,
 			StringPool.BLANK, LayoutConstants.TYPE_PORTLET, false, friendlyURL,
-			serviceContext);
+			false, serviceContext);
 
 		LayoutTypePortlet layoutTypePortlet =
 			(LayoutTypePortlet)layout.getLayoutType();
@@ -303,6 +319,7 @@ public class UpgradeCompany extends UpgradeProcess {
 			false, StringPool.BLANK, StringPool.BLANK, false, false,
 			serviceContext);
 	}
+
 	protected MBMessage addMBMessage(
 			long userId, String userName, long groupId, long categoryId,
 			long threadId, long parentMessageId, String subject,
@@ -311,10 +328,19 @@ public class UpgradeCompany extends UpgradeProcess {
 
 		String body = getString(fileName);
 
+		List<ObjectValuePair<String, InputStream>> inputStreamOVPs =
+			new ArrayList<ObjectValuePair<String, InputStream>>();
+
+		InputStream inputStream = getInputStream(fileName);
+
+		ObjectValuePair<String, InputStream> inputStreamOVP =
+			new ObjectValuePair<String, InputStream>(fileName, inputStream);
+
+		inputStreamOVPs.add(inputStreamOVP);
+
 		return MBMessageLocalServiceUtil.addMessage(
 			userId, userName, groupId, categoryId, threadId, parentMessageId,
-			subject, body, StringPool.BLANK,
-			new ArrayList<ObjectValuePair<String, byte[]>>(), false, -1.0,
+			subject, body, StringPool.BLANK, inputStreamOVPs, false, -1.0,
 			false, serviceContext);
 	}
 
@@ -518,7 +544,7 @@ public class UpgradeCompany extends UpgradeProcess {
 
 		addPortletId(layout, PortletKeys.RECENT_DOCUMENTS, "column-1");
 		addPortletId(layout, PortletKeys.DOCUMENT_LIBRARY, "column-1");
-		addPortletId(layout, PortletKeys.IMAGE_GALLERY, "column-1");
+		addPortletId(layout, PortletKeys.IMAGE_GALLERY_DISPLAY, "column-1");
 
 		portletId = addPortletId(
 			layout, PortletKeys.JOURNAL_CONTENT, "column-2");
@@ -580,7 +606,7 @@ public class UpgradeCompany extends UpgradeProcess {
 			companyId, null, null, null, QueryUtil.ALL_POS, QueryUtil.ALL_POS);
 
 		for (Group group : groups) {
-			IGFolderLocalServiceUtil.deleteFolders(group.getGroupId());
+			DLAppLocalServiceUtil.deleteAll(group.getGroupId());
 
 			JournalArticleLocalServiceUtil.deleteArticles(group.getGroupId());
 			JournalTemplateLocalServiceUtil.deleteTemplates(group.getGroupId());
@@ -591,8 +617,12 @@ public class UpgradeCompany extends UpgradeProcess {
 				GroupLocalServiceUtil.deleteGroup(group.getGroupId());
 			}
 			else {
-				LayoutLocalServiceUtil.deleteLayouts(group.getGroupId(), false);
-				LayoutLocalServiceUtil.deleteLayouts(group.getGroupId(), true);
+				ServiceContext serviceContext = new ServiceContext();
+
+				LayoutLocalServiceUtil.deleteLayouts(
+					group.getGroupId(), false, serviceContext);
+				LayoutLocalServiceUtil.deleteLayouts(
+					group.getGroupId(), true, serviceContext);
 			}
 		}
 
@@ -659,9 +689,24 @@ public class UpgradeCompany extends UpgradeProcess {
 
 		long defaultUserId = UserLocalServiceUtil.getDefaultUserId(companyId);
 
+		User admin = UserLocalServiceUtil.fetchUserByScreenName(
+			companyId, "joebloggs");
+
+		if (admin == null) {
+			admin = UserLocalServiceUtil.fetchUserByScreenName(
+				companyId, "test");
+		}
+
+		long adminId = admin.getUserId();
+
+		PrincipalThreadLocal.setName(admin.getUserId());
+		PermissionChecker permissionChecker =
+			PermissionCheckerFactoryUtil.create(admin, true);
+		PermissionThreadLocal.setPermissionChecker(permissionChecker);
+
 		clearData(companyId);
-		setupCommunities(companyId, defaultUserId);
-		setupOrganizations(companyId, defaultUserId);
+		setupCommunities(companyId, defaultUserId, adminId);
+		setupOrganizations(companyId, defaultUserId, adminId);
 		setupRoles(companyId, defaultUserId);
 		setupUsers(companyId);
 		setupWorkflow(companyId, defaultUserId);
@@ -728,7 +773,8 @@ public class UpgradeCompany extends UpgradeProcess {
 		}
 	}
 
-	protected void setupCommunities(long companyId, long defaultUserId)
+	protected void setupCommunities(
+			long companyId, long defaultUserId, long adminId)
 		throws Exception {
 
 		// Guest community
@@ -749,40 +795,40 @@ public class UpgradeCompany extends UpgradeProcess {
 
 		ServiceContext serviceContext = new ServiceContext();
 
-		serviceContext.setAddCommunityPermissions(true);
+		serviceContext.setAddGroupPermissions(true);
 		serviceContext.setAddGuestPermissions(true);
 		serviceContext.setScopeGroupId(group.getGroupId());
 
-		IGFolder igFolder = IGFolderLocalServiceUtil.addFolder(
-			defaultUserId, 0, "Web Content", "Images used for content",
-			serviceContext);
+		Folder folder = DLAppLocalServiceUtil.addFolder(
+			defaultUserId, group.getGroupId(), 0, "Web Content",
+			"Images used for content", serviceContext);
 
-		IGImage cellBgIGImage = addIGImage(
-			defaultUserId, igFolder.getFolderId(), "cell_bg.png",
+		FileEntry cellBgFileEntry = addDLFileEntry(
+			adminId, folder.getFolderId(), "cell_bg.png",
 			"/guest/images/cell_bg.png", serviceContext);
 
-		IGImage portalMashupIGImage = addIGImage(
-			defaultUserId, igFolder.getFolderId(), "portal_mashup.png",
+		FileEntry portalMashupFileEntry = addDLFileEntry(
+			adminId, folder.getFolderId(), "portal_mashup.png",
 			"/guest/images/portal_mashup.png", serviceContext);
 
-		IGImage sevenCogsAdIGImage = addIGImage(
-			defaultUserId, igFolder.getFolderId(), "sevencogs_ad.png",
+		FileEntry sevenCogsAdFileEntry = addDLFileEntry(
+			adminId, folder.getFolderId(), "sevencogs_ad.png",
 			"/guest/images/sevencogs_ad.png", serviceContext);
 
-		IGImage sevenCogsMobileAdIGImage = addIGImage(
-			defaultUserId, igFolder.getFolderId(), "sevencogs_mobile_ad.png",
+		FileEntry sevenCogsMobileAdFileEntry = addDLFileEntry(
+			adminId, folder.getFolderId(), "sevencogs_mobile_ad.png",
 			"/guest/images/sevencogs_mobile_ad.png", serviceContext);
 
-		IGImage sharedWorkspacesIGImage = addIGImage(
-			defaultUserId, igFolder.getFolderId(), "shared_workspaces.png",
+		FileEntry sharedWorkspacesFileEntry = addDLFileEntry(
+			adminId, folder.getFolderId(), "shared_workspaces.png",
 			"/guest/images/shared_workspaces.png", serviceContext);
 
-		IGImage socialNetworkingIGImage = addIGImage(
-			defaultUserId, igFolder.getFolderId(), "social_network.png",
+		FileEntry socialNetworkingFileEntry = addDLFileEntry(
+			adminId, folder.getFolderId(), "social_network.png",
 			"/guest/images/social_network.png", serviceContext);
 
-		IGImage webPublishingIGImage = addIGImage(
-			defaultUserId, igFolder.getFolderId(), "web_publishing.png",
+		FileEntry webPublishingFileEntry = addDLFileEntry(
+			adminId, folder.getFolderId(), "web_publishing.png",
 			"/guest/images/web_publishing.png", serviceContext);
 
 		// Welcome layout
@@ -814,12 +860,12 @@ public class UpgradeCompany extends UpgradeProcess {
 				"[$WEB_PUBLISHING_IG_IMAGE_UUID$]"
 			},
 			new String[] {
-				String.valueOf(cellBgIGImage.getUuid()),
+				String.valueOf(cellBgFileEntry.getUuid()),
 				String.valueOf(group.getGroupId()),
-				String.valueOf(portalMashupIGImage.getUuid()),
-				String.valueOf(sharedWorkspacesIGImage.getUuid()),
-				String.valueOf(socialNetworkingIGImage.getUuid()),
-				String.valueOf(webPublishingIGImage.getUuid())
+				String.valueOf(portalMashupFileEntry.getUuid()),
+				String.valueOf(sharedWorkspacesFileEntry.getUuid()),
+				String.valueOf(socialNetworkingFileEntry.getUuid()),
+				String.valueOf(webPublishingFileEntry.getUuid())
 			});
 
 		JournalArticleLocalServiceUtil.updateContent(
@@ -852,7 +898,7 @@ public class UpgradeCompany extends UpgradeProcess {
 			new String[] {
 				String.valueOf(group.getGroupId()),
 				"/web/7cogs/home",
-				String.valueOf(sevenCogsAdIGImage.getUuid())
+				String.valueOf(sevenCogsAdFileEntry.getUuid())
 			});
 
 		JournalArticleLocalServiceUtil.updateContent(
@@ -885,7 +931,7 @@ public class UpgradeCompany extends UpgradeProcess {
 			new String[] {
 				String.valueOf(group.getGroupId()),
 				"/web/7cogs-mobile/home",
-				String.valueOf(sevenCogsMobileAdIGImage.getUuid())
+				String.valueOf(sevenCogsMobileAdFileEntry.getUuid())
 			});
 
 		JournalArticleLocalServiceUtil.updateContent(
@@ -941,7 +987,8 @@ public class UpgradeCompany extends UpgradeProcess {
 		addPortletId(layout, PortletKeys.LOGIN, "column-2");
 	}
 
-	protected void setupOrganizations(long companyId, long defaultUserId)
+	protected void setupOrganizations(
+			long companyId, long defaultUserId, long adminId)
 		throws Exception {
 
 		// 7Cogs, Inc. organization
@@ -960,7 +1007,7 @@ public class UpgradeCompany extends UpgradeProcess {
 
 		ServiceContext serviceContext = new ServiceContext();
 
-		serviceContext.setAddCommunityPermissions(true);
+		serviceContext.setAddGroupPermissions(true);
 		serviceContext.setAddGuestPermissions(true);
 
 		Organization organization =
@@ -1035,40 +1082,40 @@ public class UpgradeCompany extends UpgradeProcess {
 
 		serviceContext.setScopeGroupId(group.getGroupId());
 
-		IGFolder igFolder = IGFolderLocalServiceUtil.addFolder(
-			defaultUserId, 0, "7Cogs Web Content", "Images used for content",
-			serviceContext);
+		Folder folder = DLAppLocalServiceUtil.addFolder(
+			defaultUserId, group.getGroupId(), 0, "7Cogs Web Content",
+			"Images used for content", serviceContext);
 
 		serviceContext.setAssetTagNames(new String[] {"icons"});
 		serviceContext.setAssetCategoryIds(
 			new long[] {iconAssetCategory.getCategoryId()});
 
-		IGImage cogBlueIconIGImage = addIGImage(
-			defaultUserId, igFolder.getFolderId(), "cog_blue.png",
+		FileEntry cogBlueIconFileEntry = addDLFileEntry(
+			adminId, folder.getFolderId(), "cog_blue.png",
 			"/sample/images/cog_blue.png", serviceContext);
 
-		IGImage cogLightBlueIconIGImage = addIGImage(
-			defaultUserId, igFolder.getFolderId(), "cog_light_blue.png",
+		FileEntry cogLightBlueIconFileEntry = addDLFileEntry(
+			adminId, folder.getFolderId(), "cog_light_blue.png",
 			"/sample/images/cog_light_blue.png", serviceContext);
 
-		IGImage cogOrangeIconIGImage = addIGImage(
-			defaultUserId, igFolder.getFolderId(), "cog_orange.png",
+		FileEntry cogOrangeIconFileEntry = addDLFileEntry(
+			adminId, folder.getFolderId(), "cog_orange.png",
 			"/sample/images/cog_orange.png", serviceContext);
 
 		serviceContext.setAssetTagNames(new String[] {"home page", "blogs"});
 		serviceContext.setAssetCategoryIds(
 			new long[] {iconAssetCategory.getCategoryId()});
 
-		IGImage blogsIconIGImage = addIGImage(
-			defaultUserId, igFolder.getFolderId(), "blogs_icon.png",
+		FileEntry blogsIconFileEntry = addDLFileEntry(
+			adminId, folder.getFolderId(), "blogs_icon.png",
 			"/sample/images/blogs_icon.png", serviceContext);
 
 		serviceContext.setAssetTagNames(new String[] {"home page"});
 		serviceContext.setAssetCategoryIds(
 			new long[] {productsAssetCategory.getCategoryId()});
 
-		IGImage cogNetworkAdIGImage = addIGImage(
-			defaultUserId, igFolder.getFolderId(),
+		FileEntry cogNetworkAdFileEntry = addDLFileEntry(
+			adminId, folder.getFolderId(),
 			"cog_network_advertisement.png",
 			"/sample/images/cog_network_advertisement.png",
 			serviceContext);
@@ -1077,40 +1124,40 @@ public class UpgradeCompany extends UpgradeProcess {
 		serviceContext.setAssetCategoryIds(
 			new long[] {iconAssetCategory.getCategoryId()});
 
-		IGImage forumsIconIGImage = addIGImage(
-			defaultUserId, igFolder.getFolderId(), "forums_icon.png",
+		FileEntry forumsIconFileEntry = addDLFileEntry(
+			adminId, folder.getFolderId(), "forums_icon.png",
 			"/sample/images/forums_icon.png", serviceContext);
 
 		serviceContext.setAssetTagNames(new String[] {"liferay", "logo"});
 		serviceContext.setAssetCategoryIds(
 			new long[] {liferayAssetCategory.getCategoryId()});
 
-		IGImage liferayLogoIGImage = addIGImage(
-			defaultUserId, igFolder.getFolderId(), "liferay_logo.png",
+		FileEntry liferayLogoFileEntry = addDLFileEntry(
+			adminId, folder.getFolderId(), "liferay_logo.png",
 			"/sample/images/liferay_logo.png", serviceContext);
 
 		serviceContext.setAssetTagNames(new String[] {"home page"});
 		serviceContext.setAssetCategoryIds(
 			new long[] {bannerAssetCategory.getCategoryId()});
 
-		IGImage homePageBannerIGImage = addIGImage(
-			defaultUserId, igFolder.getFolderId(), "home_page_banner.png",
+		FileEntry homePageBannerFileEntry = addDLFileEntry(
+			adminId, folder.getFolderId(), "home_page_banner.png",
 			"/sample/images/home_page_banner.png", serviceContext);
 
 		serviceContext.setAssetTagNames(new String[] {"home page", "products"});
 		serviceContext.setAssetCategoryIds(
 			new long[] {iconAssetCategory.getCategoryId()});
 
-		IGImage productsIconIGImage = addIGImage(
-			defaultUserId, igFolder.getFolderId(), "products_icon.png",
+		FileEntry productsIconFileEntry = addDLFileEntry(
+			adminId, folder.getFolderId(), "products_icon.png",
 			"/sample/images/products_icon.png", serviceContext);
 
 		serviceContext.setAssetTagNames(new String[] {"products"});
 		serviceContext.setAssetCategoryIds(
 			new long[] {productsAssetCategory.getCategoryId()});
 
-		IGImage productLandingIGImage = addIGImage(
-			defaultUserId, igFolder.getFolderId(), "product_landing.png",
+		FileEntry productLandingFileEntry = addDLFileEntry(
+			adminId, folder.getFolderId(), "product_landing.png",
 			"/sample/images/product_landing.png", serviceContext);
 
 		// Home layout
@@ -1139,7 +1186,7 @@ public class UpgradeCompany extends UpgradeProcess {
 			},
 			new String[] {
 				String.valueOf(group.getGroupId()),
-				String.valueOf(homePageBannerIGImage.getUuid())
+				String.valueOf(homePageBannerFileEntry.getUuid())
 			});
 
 		JournalArticleLocalServiceUtil.updateContent(
@@ -1169,7 +1216,7 @@ public class UpgradeCompany extends UpgradeProcess {
 			},
 			new String[] {
 				String.valueOf(group.getGroupId()),
-				String.valueOf(productsIconIGImage.getUuid())
+				String.valueOf(productsIconFileEntry.getUuid())
 			});
 
 		JournalArticleLocalServiceUtil.updateContent(
@@ -1199,7 +1246,7 @@ public class UpgradeCompany extends UpgradeProcess {
 			},
 			new String[] {
 				String.valueOf(group.getGroupId()),
-				String.valueOf(blogsIconIGImage.getUuid())
+				String.valueOf(blogsIconFileEntry.getUuid())
 			});
 
 		JournalArticleLocalServiceUtil.updateContent(
@@ -1229,7 +1276,7 @@ public class UpgradeCompany extends UpgradeProcess {
 			},
 			new String[] {
 				String.valueOf(group.getGroupId()),
-				String.valueOf(forumsIconIGImage.getUuid())
+				String.valueOf(forumsIconFileEntry.getUuid())
 			});
 
 		JournalArticleLocalServiceUtil.updateContent(
@@ -1261,7 +1308,7 @@ public class UpgradeCompany extends UpgradeProcess {
 			},
 			new String[] {
 				String.valueOf(group.getGroupId()),
-				String.valueOf(productLandingIGImage.getUuid())
+				String.valueOf(productLandingFileEntry.getUuid())
 			});
 
 		JournalArticleLocalServiceUtil.updateContent(
@@ -1292,7 +1339,7 @@ public class UpgradeCompany extends UpgradeProcess {
 			},
 			new String[] {
 				String.valueOf(group.getGroupId()),
-				String.valueOf(cogNetworkAdIGImage.getUuid())
+				String.valueOf(cogNetworkAdFileEntry.getUuid())
 			});
 
 		JournalArticleLocalServiceUtil.updateContent(
@@ -1345,7 +1392,7 @@ public class UpgradeCompany extends UpgradeProcess {
 			},
 			new String[] {
 				String.valueOf(group.getGroupId()),
-				String.valueOf(productLandingIGImage.getUuid())
+				String.valueOf(productLandingFileEntry.getUuid())
 			});
 
 		JournalArticleLocalServiceUtil.updateContent(
@@ -1394,9 +1441,9 @@ public class UpgradeCompany extends UpgradeProcess {
 				"[$GROUP_ID$]"
 			},
 			new String[] {
-				String.valueOf(cogBlueIconIGImage.getUuid()),
-				String.valueOf(cogLightBlueIconIGImage.getUuid()),
-				String.valueOf(cogOrangeIconIGImage.getUuid()),
+				String.valueOf(cogBlueIconFileEntry.getUuid()),
+				String.valueOf(cogLightBlueIconFileEntry.getUuid()),
+				String.valueOf(cogOrangeIconFileEntry.getUuid()),
 				String.valueOf(group.getGroupId())
 			});
 
@@ -1544,7 +1591,7 @@ public class UpgradeCompany extends UpgradeProcess {
 			},
 			new String[] {
 				String.valueOf(group.getGroupId()),
-				String.valueOf(liferayLogoIGImage.getUuid())
+				String.valueOf(liferayLogoFileEntry.getUuid())
 			});
 
 		JournalArticleLocalServiceUtil.updateContent(
@@ -1599,7 +1646,7 @@ public class UpgradeCompany extends UpgradeProcess {
 			group, "Documents", true, "/documents", "2_columns_iii");
 
 		addPortletId(layout, PortletKeys.DOCUMENT_LIBRARY, "column-1");
-		addPortletId(layout, PortletKeys.IMAGE_GALLERY, "column-1");
+		addPortletId(layout, PortletKeys.IMAGE_GALLERY_DISPLAY, "column-1");
 
 		portletId = addPortletId(
 			layout, PortletKeys.JOURNAL_CONTENT, "column-2");
@@ -1648,19 +1695,19 @@ public class UpgradeCompany extends UpgradeProcess {
 
 		serviceContext.setScopeGroupId(group.getGroupId());
 
-		igFolder = IGFolderLocalServiceUtil.addFolder(
-			defaultUserId, 0, "7Cogs Mobile Content",
+		folder = DLAppLocalServiceUtil.addFolder(
+			defaultUserId, group.getGroupId(), 0, "7Cogs Mobile Content",
 			"Images used for mobile content", serviceContext);
 
 		serviceContext.setAssetTagNames(null);
 		serviceContext.setAssetCategoryIds(null);
 
-		IGImage mobileProduct1IGImage = addIGImage(
-			defaultUserId, igFolder.getFolderId(), "mobile_product_1.png",
+		FileEntry mobileProduct1FileEntry = addDLFileEntry(
+			defaultUserId, folder.getFolderId(), "mobile_product_1.png",
 			"/mobile/images/mobile_product_1.png", serviceContext);
 
-		IGImage mobileProduct2IGImage = addIGImage(
-			defaultUserId, igFolder.getFolderId(), "mobile_product_2.png",
+		FileEntry mobileProduct2FileEntry = addDLFileEntry(
+			defaultUserId, folder.getFolderId(), "mobile_product_2.png",
 			"/mobile/images/mobile_product_2.png", serviceContext);
 
 		// Home layout
@@ -1701,8 +1748,8 @@ public class UpgradeCompany extends UpgradeProcess {
 			},
 			new String[] {
 				String.valueOf(group.getGroupId()),
-				String.valueOf(mobileProduct1IGImage.getUuid()),
-				String.valueOf(mobileProduct2IGImage.getUuid())
+				String.valueOf(mobileProduct1FileEntry.getUuid()),
+				String.valueOf(mobileProduct2FileEntry.getUuid())
 			});
 
 		JournalArticleLocalServiceUtil.updateContent(
@@ -1716,9 +1763,14 @@ public class UpgradeCompany extends UpgradeProcess {
 	protected void setupRoles(long companyId, long defaultUserId)
 		throws Exception {
 
+		Map<Locale, String> descriptionMap = new HashMap<Locale, String>();
+
+		descriptionMap.put(
+			LocaleUtil.getDefault(),
+			"Publishers are responsible for publishing content.");
+
 		Role publisherRole = RoleLocalServiceUtil.addRole(
-			defaultUserId, companyId, "Publisher", null,
-			"Publishers are responsible for publishing content.",
+			defaultUserId, companyId, "Publisher", null, descriptionMap,
 			RoleConstants.TYPE_REGULAR);
 
 		setRolePermissions(
@@ -1739,9 +1791,14 @@ public class UpgradeCompany extends UpgradeProcess {
 				ActionKeys.PERMISSIONS, ActionKeys.UPDATE, ActionKeys.VIEW
 			});
 
+		descriptionMap.clear();
+
+		descriptionMap.put(
+			LocaleUtil.getDefault(),
+			"Writers are responsible for creating content.");
+
 		Role writerRole = RoleLocalServiceUtil.addRole(
-			defaultUserId, companyId, "Writer", null,
-			"Writers are responsible for creating content.",
+			defaultUserId, companyId, "Writer", null, descriptionMap,
 			RoleConstants.TYPE_REGULAR);
 
 		setRolePermissions(
@@ -1820,7 +1877,7 @@ public class UpgradeCompany extends UpgradeProcess {
 
 		ServiceContext serviceContext = new ServiceContext();
 
-		serviceContext.setAddCommunityPermissions(true);
+		serviceContext.setAddGroupPermissions(true);
 		serviceContext.setAddGuestPermissions(true);
 		serviceContext.setAssetTagNames(
 			new String[] {"new", "features", "control panel"});
@@ -1878,7 +1935,7 @@ public class UpgradeCompany extends UpgradeProcess {
 
 		// Document library
 
-		Folder Folder = addDLFolder(
+		Folder folder = addDLFolder(
 			brunoUser.getUserId(), brunoUser.getGroup().getGroupId(),
 			"Important Documents", "Documents related with the company");
 
@@ -1886,15 +1943,16 @@ public class UpgradeCompany extends UpgradeProcess {
 			new String[] {"document", "budget", "2009"});
 
 		addDLFileEntry(
-			brunoUser.getUserId(), Folder.getGroupId(), Folder.getFolderId(),
-			"/users/document_library/Budget.xls", "Budget.xls", "Budget",
+			brunoUser.getUserId(), folder.getGroupId(), folder.getFolderId(),
+			"/users/document_library/Budget.xls", "Budget.xls",
+			ContentTypes.APPLICATION_VND_MS_EXCEL, "Budget",
 			"Budgets for the current year", serviceContext);
 
 		addDLFolder(
 			michelleUser.getUserId(), michelleUser.getGroup().getGroupId(),
 			"My Documents", "Personal docs");
 
-		Folder = addDLFolder(
+		folder = addDLFolder(
 			michelleUser.getUserId(), michelleUser.getGroup().getGroupId(),
 			"Work Documents", "Works docs");
 
@@ -1902,16 +1960,16 @@ public class UpgradeCompany extends UpgradeProcess {
 			new String[] {"document", "notes", "meeting"});
 
 		addDLFileEntry(
-			michelleUser.getUserId(), Folder.getGroupId(), Folder.getFolderId(),
+			michelleUser.getUserId(), folder.getGroupId(), folder.getFolderId(),
 			"/users/document_library/Notes from the last meeting.doc",
-			"Notes from the last meeting.doc", "Notes from the last meeting",
-			"Important notes", serviceContext);
+			"Notes from the last meeting.doc", ContentTypes.APPLICATION_MSWORD,
+			"Notes from the last meeting", "Important notes", serviceContext);
 
 		addDLFolder(
 			richardUser.getUserId(), richardUser.getGroup().getGroupId(),
 			"Documentation", StringPool.BLANK);
 
-		Folder = addDLFolder(
+		folder = addDLFolder(
 			richardUser.getUserId(),richardUser.getGroup().getGroupId(),
 			"Innovation", "New things");
 
@@ -1919,9 +1977,10 @@ public class UpgradeCompany extends UpgradeProcess {
 			new String[] {"new", "features", "2009"});
 
 		addDLFileEntry(
-			richardUser.getUserId(), Folder.getGroupId(), Folder.getFolderId(),
+			richardUser.getUserId(), folder.getGroupId(), folder.getFolderId(),
 			"/users/document_library/New Features.ppt", "New Features.ppt",
-			"New Features", "Features for the current year", serviceContext);
+			ContentTypes.APPLICATION_VND_MS_POWERPOINT, "New Features",
+			"Features for the current year", serviceContext);
 
 		// Message boards
 
@@ -1996,7 +2055,7 @@ public class UpgradeCompany extends UpgradeProcess {
 
 		WorkflowDefinitionLinkLocalServiceUtil.updateWorkflowDefinitionLink(
 			defaultUserId, companyId, group.getGroupId(),
-			JournalArticle.class.getName(), 0, workflowDefinitionName,
+			JournalArticle.class.getName(), 0, 0, workflowDefinitionName,
 			workflowDefinitionVersion);
 	}
 

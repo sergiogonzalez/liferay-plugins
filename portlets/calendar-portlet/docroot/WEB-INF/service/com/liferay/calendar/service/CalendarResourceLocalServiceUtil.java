@@ -176,6 +176,13 @@ public class CalendarResourceLocalServiceUtil {
 		return getService().getCalendarResource(calendarResourceId);
 	}
 
+	public static com.liferay.portal.model.PersistedModel getPersistedModel(
+		java.io.Serializable primaryKeyObj)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return getService().getPersistedModel(primaryKeyObj);
+	}
+
 	/**
 	* Returns the calendar resource with the UUID in the group.
 	*
@@ -222,7 +229,7 @@ public class CalendarResourceLocalServiceUtil {
 	}
 
 	/**
-	* Updates the calendar resource in the database. Also notifies the appropriate model listeners.
+	* Updates the calendar resource in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
 	*
 	* @param calendarResource the calendar resource
 	* @return the calendar resource that was updated
@@ -235,7 +242,7 @@ public class CalendarResourceLocalServiceUtil {
 	}
 
 	/**
-	* Updates the calendar resource in the database. Also notifies the appropriate model listeners.
+	* Updates the calendar resource in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
 	*
 	* @param calendarResource the calendar resource
 	* @param merge whether to merge the calendar resource with the current session. See {@link com.liferay.portal.service.persistence.BatchSession#update(com.liferay.portal.kernel.dao.orm.Session, com.liferay.portal.model.BaseModel, boolean)} for an explanation.
@@ -277,27 +284,6 @@ public class CalendarResourceLocalServiceUtil {
 		return getService()
 				   .addCalendarResource(userId, className, classPK, nameMap,
 			descriptionMap, active, serviceContext);
-	}
-
-	public static void addCalendarResourceResources(
-		com.liferay.calendar.model.CalendarResource calendarResource,
-		boolean addCommunityPermissions, boolean addGuestPermissions)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
-		getService()
-			.addCalendarResourceResources(calendarResource,
-			addCommunityPermissions, addGuestPermissions);
-	}
-
-	public static void addCalendarResourceResources(
-		com.liferay.calendar.model.CalendarResource calendarResource,
-		java.lang.String[] communityPermissions,
-		java.lang.String[] guestPermissions)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
-		getService()
-			.addCalendarResourceResources(calendarResource,
-			communityPermissions, guestPermissions);
 	}
 
 	public static com.liferay.calendar.model.CalendarResource getCalendarResource(

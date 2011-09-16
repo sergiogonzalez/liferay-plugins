@@ -39,6 +39,7 @@ import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.ModelListener;
 import com.liferay.portal.service.persistence.BatchSessionUtil;
 import com.liferay.portal.service.persistence.ResourcePersistence;
@@ -79,7 +80,8 @@ public class KaleoTaskInstanceTokenPersistenceImpl extends BasePersistenceImpl<K
 		".List";
 	public static final FinderPath FINDER_PATH_FIND_BY_COMPANYID = new FinderPath(KaleoTaskInstanceTokenModelImpl.ENTITY_CACHE_ENABLED,
 			KaleoTaskInstanceTokenModelImpl.FINDER_CACHE_ENABLED,
-			FINDER_CLASS_NAME_LIST, "findByCompanyId",
+			KaleoTaskInstanceTokenImpl.class, FINDER_CLASS_NAME_LIST,
+			"findByCompanyId",
 			new String[] {
 				Long.class.getName(),
 				
@@ -87,12 +89,13 @@ public class KaleoTaskInstanceTokenPersistenceImpl extends BasePersistenceImpl<K
 				"com.liferay.portal.kernel.util.OrderByComparator"
 			});
 	public static final FinderPath FINDER_PATH_COUNT_BY_COMPANYID = new FinderPath(KaleoTaskInstanceTokenModelImpl.ENTITY_CACHE_ENABLED,
-			KaleoTaskInstanceTokenModelImpl.FINDER_CACHE_ENABLED,
+			KaleoTaskInstanceTokenModelImpl.FINDER_CACHE_ENABLED, Long.class,
 			FINDER_CLASS_NAME_LIST, "countByCompanyId",
 			new String[] { Long.class.getName() });
 	public static final FinderPath FINDER_PATH_FIND_BY_KALEODEFINITIONID = new FinderPath(KaleoTaskInstanceTokenModelImpl.ENTITY_CACHE_ENABLED,
 			KaleoTaskInstanceTokenModelImpl.FINDER_CACHE_ENABLED,
-			FINDER_CLASS_NAME_LIST, "findByKaleoDefinitionId",
+			KaleoTaskInstanceTokenImpl.class, FINDER_CLASS_NAME_LIST,
+			"findByKaleoDefinitionId",
 			new String[] {
 				Long.class.getName(),
 				
@@ -100,12 +103,13 @@ public class KaleoTaskInstanceTokenPersistenceImpl extends BasePersistenceImpl<K
 				"com.liferay.portal.kernel.util.OrderByComparator"
 			});
 	public static final FinderPath FINDER_PATH_COUNT_BY_KALEODEFINITIONID = new FinderPath(KaleoTaskInstanceTokenModelImpl.ENTITY_CACHE_ENABLED,
-			KaleoTaskInstanceTokenModelImpl.FINDER_CACHE_ENABLED,
+			KaleoTaskInstanceTokenModelImpl.FINDER_CACHE_ENABLED, Long.class,
 			FINDER_CLASS_NAME_LIST, "countByKaleoDefinitionId",
 			new String[] { Long.class.getName() });
 	public static final FinderPath FINDER_PATH_FIND_BY_KALEOINSTANCEID = new FinderPath(KaleoTaskInstanceTokenModelImpl.ENTITY_CACHE_ENABLED,
 			KaleoTaskInstanceTokenModelImpl.FINDER_CACHE_ENABLED,
-			FINDER_CLASS_NAME_LIST, "findByKaleoInstanceId",
+			KaleoTaskInstanceTokenImpl.class, FINDER_CLASS_NAME_LIST,
+			"findByKaleoInstanceId",
 			new String[] {
 				Long.class.getName(),
 				
@@ -113,22 +117,24 @@ public class KaleoTaskInstanceTokenPersistenceImpl extends BasePersistenceImpl<K
 				"com.liferay.portal.kernel.util.OrderByComparator"
 			});
 	public static final FinderPath FINDER_PATH_COUNT_BY_KALEOINSTANCEID = new FinderPath(KaleoTaskInstanceTokenModelImpl.ENTITY_CACHE_ENABLED,
-			KaleoTaskInstanceTokenModelImpl.FINDER_CACHE_ENABLED,
+			KaleoTaskInstanceTokenModelImpl.FINDER_CACHE_ENABLED, Long.class,
 			FINDER_CLASS_NAME_LIST, "countByKaleoInstanceId",
 			new String[] { Long.class.getName() });
 	public static final FinderPath FINDER_PATH_FETCH_BY_KII_KTI = new FinderPath(KaleoTaskInstanceTokenModelImpl.ENTITY_CACHE_ENABLED,
 			KaleoTaskInstanceTokenModelImpl.FINDER_CACHE_ENABLED,
-			FINDER_CLASS_NAME_ENTITY, "fetchByKII_KTI",
+			KaleoTaskInstanceTokenImpl.class, FINDER_CLASS_NAME_ENTITY,
+			"fetchByKII_KTI",
 			new String[] { Long.class.getName(), Long.class.getName() });
 	public static final FinderPath FINDER_PATH_COUNT_BY_KII_KTI = new FinderPath(KaleoTaskInstanceTokenModelImpl.ENTITY_CACHE_ENABLED,
-			KaleoTaskInstanceTokenModelImpl.FINDER_CACHE_ENABLED,
+			KaleoTaskInstanceTokenModelImpl.FINDER_CACHE_ENABLED, Long.class,
 			FINDER_CLASS_NAME_LIST, "countByKII_KTI",
 			new String[] { Long.class.getName(), Long.class.getName() });
 	public static final FinderPath FINDER_PATH_FIND_ALL = new FinderPath(KaleoTaskInstanceTokenModelImpl.ENTITY_CACHE_ENABLED,
 			KaleoTaskInstanceTokenModelImpl.FINDER_CACHE_ENABLED,
-			FINDER_CLASS_NAME_LIST, "findAll", new String[0]);
+			KaleoTaskInstanceTokenImpl.class, FINDER_CLASS_NAME_LIST,
+			"findAll", new String[0]);
 	public static final FinderPath FINDER_PATH_COUNT_ALL = new FinderPath(KaleoTaskInstanceTokenModelImpl.ENTITY_CACHE_ENABLED,
-			KaleoTaskInstanceTokenModelImpl.FINDER_CACHE_ENABLED,
+			KaleoTaskInstanceTokenModelImpl.FINDER_CACHE_ENABLED, Long.class,
 			FINDER_CLASS_NAME_LIST, "countAll", new String[0]);
 
 	/**
@@ -161,7 +167,7 @@ public class KaleoTaskInstanceTokenPersistenceImpl extends BasePersistenceImpl<K
 			if (EntityCacheUtil.getResult(
 						KaleoTaskInstanceTokenModelImpl.ENTITY_CACHE_ENABLED,
 						KaleoTaskInstanceTokenImpl.class,
-						kaleoTaskInstanceToken.getPrimaryKey(), this) == null) {
+						kaleoTaskInstanceToken.getPrimaryKey()) == null) {
 				cacheResult(kaleoTaskInstanceToken);
 			}
 		}
@@ -197,6 +203,8 @@ public class KaleoTaskInstanceTokenPersistenceImpl extends BasePersistenceImpl<K
 		EntityCacheUtil.removeResult(KaleoTaskInstanceTokenModelImpl.ENTITY_CACHE_ENABLED,
 			KaleoTaskInstanceTokenImpl.class,
 			kaleoTaskInstanceToken.getPrimaryKey());
+
+		FinderCacheUtil.removeResult(FINDER_PATH_FIND_ALL, FINDER_ARGS_EMPTY);
 
 		FinderCacheUtil.removeResult(FINDER_PATH_FETCH_BY_KII_KTI,
 			new Object[] {
@@ -481,10 +489,16 @@ public class KaleoTaskInstanceTokenPersistenceImpl extends BasePersistenceImpl<K
 	public KaleoTaskInstanceToken fetchByPrimaryKey(
 		long kaleoTaskInstanceTokenId) throws SystemException {
 		KaleoTaskInstanceToken kaleoTaskInstanceToken = (KaleoTaskInstanceToken)EntityCacheUtil.getResult(KaleoTaskInstanceTokenModelImpl.ENTITY_CACHE_ENABLED,
-				KaleoTaskInstanceTokenImpl.class, kaleoTaskInstanceTokenId, this);
+				KaleoTaskInstanceTokenImpl.class, kaleoTaskInstanceTokenId);
+
+		if (kaleoTaskInstanceToken == _nullKaleoTaskInstanceToken) {
+			return null;
+		}
 
 		if (kaleoTaskInstanceToken == null) {
 			Session session = null;
+
+			boolean hasException = false;
 
 			try {
 				session = openSession();
@@ -493,11 +507,18 @@ public class KaleoTaskInstanceTokenPersistenceImpl extends BasePersistenceImpl<K
 						Long.valueOf(kaleoTaskInstanceTokenId));
 			}
 			catch (Exception e) {
+				hasException = true;
+
 				throw processException(e);
 			}
 			finally {
 				if (kaleoTaskInstanceToken != null) {
 					cacheResult(kaleoTaskInstanceToken);
+				}
+				else if (!hasException) {
+					EntityCacheUtil.putResult(KaleoTaskInstanceTokenModelImpl.ENTITY_CACHE_ENABLED,
+						KaleoTaskInstanceTokenImpl.class,
+						kaleoTaskInstanceTokenId, _nullKaleoTaskInstanceToken);
 				}
 
 				closeSession(session);
@@ -558,8 +579,7 @@ public class KaleoTaskInstanceTokenPersistenceImpl extends BasePersistenceImpl<K
 		Object[] finderArgs = new Object[] {
 				companyId,
 				
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
+				start, end, orderByComparator
 			};
 
 		List<KaleoTaskInstanceToken> list = (List<KaleoTaskInstanceToken>)FinderCacheUtil.getResult(FINDER_PATH_FIND_BY_COMPANYID,
@@ -901,8 +921,7 @@ public class KaleoTaskInstanceTokenPersistenceImpl extends BasePersistenceImpl<K
 		Object[] finderArgs = new Object[] {
 				kaleoDefinitionId,
 				
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
+				start, end, orderByComparator
 			};
 
 		List<KaleoTaskInstanceToken> list = (List<KaleoTaskInstanceToken>)FinderCacheUtil.getResult(FINDER_PATH_FIND_BY_KALEODEFINITIONID,
@@ -1247,8 +1266,7 @@ public class KaleoTaskInstanceTokenPersistenceImpl extends BasePersistenceImpl<K
 		Object[] finderArgs = new Object[] {
 				kaleoInstanceId,
 				
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
+				start, end, orderByComparator
 			};
 
 		List<KaleoTaskInstanceToken> list = (List<KaleoTaskInstanceToken>)FinderCacheUtil.getResult(FINDER_PATH_FIND_BY_KALEOINSTANCEID,
@@ -1598,6 +1616,7 @@ public class KaleoTaskInstanceTokenPersistenceImpl extends BasePersistenceImpl<K
 	 *
 	 * @param kaleoInstanceId the kaleo instance ID
 	 * @param kaleoTaskId the kaleo task ID
+	 * @param retrieveFromCache whether to use the finder cache
 	 * @return the matching kaleo task instance token, or <code>null</code> if a matching kaleo task instance token could not be found
 	 * @throws SystemException if a system exception occurred
 	 */
@@ -1726,10 +1745,7 @@ public class KaleoTaskInstanceTokenPersistenceImpl extends BasePersistenceImpl<K
 	 */
 	public List<KaleoTaskInstanceToken> findAll(int start, int end,
 		OrderByComparator orderByComparator) throws SystemException {
-		Object[] finderArgs = new Object[] {
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
-			};
+		Object[] finderArgs = new Object[] { start, end, orderByComparator };
 
 		List<KaleoTaskInstanceToken> list = (List<KaleoTaskInstanceToken>)FinderCacheUtil.getResult(FINDER_PATH_FIND_ALL,
 				finderArgs, this);
@@ -2087,10 +2103,8 @@ public class KaleoTaskInstanceTokenPersistenceImpl extends BasePersistenceImpl<K
 	 * @throws SystemException if a system exception occurred
 	 */
 	public int countAll() throws SystemException {
-		Object[] finderArgs = new Object[0];
-
 		Long count = (Long)FinderCacheUtil.getResult(FINDER_PATH_COUNT_ALL,
-				finderArgs, this);
+				FINDER_ARGS_EMPTY, this);
 
 		if (count == null) {
 			Session session = null;
@@ -2110,8 +2124,8 @@ public class KaleoTaskInstanceTokenPersistenceImpl extends BasePersistenceImpl<K
 					count = Long.valueOf(0);
 				}
 
-				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL, finderArgs,
-					count);
+				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL,
+					FINDER_ARGS_EMPTY, count);
 
 				closeSession(session);
 			}
@@ -2153,6 +2167,7 @@ public class KaleoTaskInstanceTokenPersistenceImpl extends BasePersistenceImpl<K
 
 	public static final FinderPath FINDER_PATH_GET_KALEOTASKASSIGNMENTINSTANCES = new FinderPath(com.liferay.portal.workflow.kaleo.model.impl.KaleoTaskAssignmentInstanceModelImpl.ENTITY_CACHE_ENABLED,
 			com.liferay.portal.workflow.kaleo.model.impl.KaleoTaskAssignmentInstanceModelImpl.FINDER_CACHE_ENABLED,
+			com.liferay.portal.workflow.kaleo.model.impl.KaleoTaskAssignmentInstanceImpl.class,
 			com.liferay.portal.workflow.kaleo.service.persistence.KaleoTaskAssignmentInstancePersistenceImpl.FINDER_CLASS_NAME_LIST,
 			"getKaleoTaskAssignmentInstances",
 			new String[] {
@@ -2177,10 +2192,7 @@ public class KaleoTaskInstanceTokenPersistenceImpl extends BasePersistenceImpl<K
 	public List<com.liferay.portal.workflow.kaleo.model.KaleoTaskAssignmentInstance> getKaleoTaskAssignmentInstances(
 		long pk, int start, int end, OrderByComparator orderByComparator)
 		throws SystemException {
-		Object[] finderArgs = new Object[] {
-				pk, String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
-			};
+		Object[] finderArgs = new Object[] { pk, start, end, orderByComparator };
 
 		List<com.liferay.portal.workflow.kaleo.model.KaleoTaskAssignmentInstance> list =
 			(List<com.liferay.portal.workflow.kaleo.model.KaleoTaskAssignmentInstance>)FinderCacheUtil.getResult(FINDER_PATH_GET_KALEOTASKASSIGNMENTINSTANCES,
@@ -2239,6 +2251,7 @@ public class KaleoTaskInstanceTokenPersistenceImpl extends BasePersistenceImpl<K
 	public static final FinderPath FINDER_PATH_GET_KALEOTASKASSIGNMENTINSTANCES_SIZE =
 		new FinderPath(com.liferay.portal.workflow.kaleo.model.impl.KaleoTaskAssignmentInstanceModelImpl.ENTITY_CACHE_ENABLED,
 			com.liferay.portal.workflow.kaleo.model.impl.KaleoTaskAssignmentInstanceModelImpl.FINDER_CACHE_ENABLED,
+			com.liferay.portal.workflow.kaleo.model.impl.KaleoTaskAssignmentInstanceImpl.class,
 			com.liferay.portal.workflow.kaleo.service.persistence.KaleoTaskAssignmentInstancePersistenceImpl.FINDER_CLASS_NAME_LIST,
 			"getKaleoTaskAssignmentInstancesSize",
 			new String[] { Long.class.getName() });
@@ -2295,12 +2308,13 @@ public class KaleoTaskInstanceTokenPersistenceImpl extends BasePersistenceImpl<K
 	public static final FinderPath FINDER_PATH_CONTAINS_KALEOTASKASSIGNMENTINSTANCE =
 		new FinderPath(com.liferay.portal.workflow.kaleo.model.impl.KaleoTaskAssignmentInstanceModelImpl.ENTITY_CACHE_ENABLED,
 			com.liferay.portal.workflow.kaleo.model.impl.KaleoTaskAssignmentInstanceModelImpl.FINDER_CACHE_ENABLED,
+			com.liferay.portal.workflow.kaleo.model.impl.KaleoTaskAssignmentInstanceImpl.class,
 			com.liferay.portal.workflow.kaleo.service.persistence.KaleoTaskAssignmentInstancePersistenceImpl.FINDER_CLASS_NAME_LIST,
 			"containsKaleoTaskAssignmentInstance",
 			new String[] { Long.class.getName(), Long.class.getName() });
 
 	/**
-	 * Determines if the kaleo task assignment instance is associated with the kaleo task instance token.
+	 * Returns <code>true</code> if the kaleo task assignment instance is associated with the kaleo task instance token.
 	 *
 	 * @param pk the primary key of the kaleo task instance token
 	 * @param kaleoTaskAssignmentInstancePK the primary key of the kaleo task assignment instance
@@ -2336,7 +2350,7 @@ public class KaleoTaskInstanceTokenPersistenceImpl extends BasePersistenceImpl<K
 	}
 
 	/**
-	 * Determines if the kaleo task instance token has any kaleo task assignment instances associated with it.
+	 * Returns <code>true</code> if the kaleo task instance token has any kaleo task assignment instances associated with it.
 	 *
 	 * @param pk the primary key of the kaleo task instance token to check for associations with kaleo task assignment instances
 	 * @return <code>true</code> if the kaleo task instance token has any kaleo task assignment instances associated with it; <code>false</code> otherwise
@@ -2409,6 +2423,8 @@ public class KaleoTaskInstanceTokenPersistenceImpl extends BasePersistenceImpl<K
 	protected KaleoTaskAssignmentPersistence kaleoTaskAssignmentPersistence;
 	@BeanReference(type = KaleoTaskAssignmentInstancePersistence.class)
 	protected KaleoTaskAssignmentInstancePersistence kaleoTaskAssignmentInstancePersistence;
+	@BeanReference(type = KaleoTaskFormPersistence.class)
+	protected KaleoTaskFormPersistence kaleoTaskFormPersistence;
 	@BeanReference(type = KaleoTaskInstanceTokenPersistence.class)
 	protected KaleoTaskInstanceTokenPersistence kaleoTaskInstanceTokenPersistence;
 	@BeanReference(type = KaleoTimerPersistence.class)
@@ -2475,4 +2491,22 @@ public class KaleoTaskInstanceTokenPersistenceImpl extends BasePersistenceImpl<K
 	private static final boolean _HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE = GetterUtil.getBoolean(PropsUtil.get(
 				PropsKeys.HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE));
 	private static Log _log = LogFactoryUtil.getLog(KaleoTaskInstanceTokenPersistenceImpl.class);
+	private static KaleoTaskInstanceToken _nullKaleoTaskInstanceToken = new KaleoTaskInstanceTokenImpl() {
+			@Override
+			public Object clone() {
+				return this;
+			}
+
+			@Override
+			public CacheModel<KaleoTaskInstanceToken> toCacheModel() {
+				return _nullKaleoTaskInstanceTokenCacheModel;
+			}
+		};
+
+	private static CacheModel<KaleoTaskInstanceToken> _nullKaleoTaskInstanceTokenCacheModel =
+		new CacheModel<KaleoTaskInstanceToken>() {
+			public KaleoTaskInstanceToken toEntityModel() {
+				return _nullKaleoTaskInstanceToken;
+			}
+		};
 }

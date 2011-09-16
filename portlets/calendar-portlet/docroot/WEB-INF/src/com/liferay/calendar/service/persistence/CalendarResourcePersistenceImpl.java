@@ -43,6 +43,7 @@ import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.uuid.PortalUUIDUtil;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.ModelListener;
 import com.liferay.portal.security.permission.InlineSQLHelperUtil;
 import com.liferay.portal.service.persistence.BatchSessionUtil;
@@ -82,7 +83,7 @@ public class CalendarResourcePersistenceImpl extends BasePersistenceImpl<Calenda
 		".List";
 	public static final FinderPath FINDER_PATH_FIND_BY_UUID = new FinderPath(CalendarResourceModelImpl.ENTITY_CACHE_ENABLED,
 			CalendarResourceModelImpl.FINDER_CACHE_ENABLED,
-			FINDER_CLASS_NAME_LIST, "findByUuid",
+			CalendarResourceImpl.class, FINDER_CLASS_NAME_LIST, "findByUuid",
 			new String[] {
 				String.class.getName(),
 				
@@ -90,20 +91,21 @@ public class CalendarResourcePersistenceImpl extends BasePersistenceImpl<Calenda
 				"com.liferay.portal.kernel.util.OrderByComparator"
 			});
 	public static final FinderPath FINDER_PATH_COUNT_BY_UUID = new FinderPath(CalendarResourceModelImpl.ENTITY_CACHE_ENABLED,
-			CalendarResourceModelImpl.FINDER_CACHE_ENABLED,
+			CalendarResourceModelImpl.FINDER_CACHE_ENABLED, Long.class,
 			FINDER_CLASS_NAME_LIST, "countByUuid",
 			new String[] { String.class.getName() });
 	public static final FinderPath FINDER_PATH_FETCH_BY_UUID_G = new FinderPath(CalendarResourceModelImpl.ENTITY_CACHE_ENABLED,
 			CalendarResourceModelImpl.FINDER_CACHE_ENABLED,
-			FINDER_CLASS_NAME_ENTITY, "fetchByUUID_G",
+			CalendarResourceImpl.class, FINDER_CLASS_NAME_ENTITY,
+			"fetchByUUID_G",
 			new String[] { String.class.getName(), Long.class.getName() });
 	public static final FinderPath FINDER_PATH_COUNT_BY_UUID_G = new FinderPath(CalendarResourceModelImpl.ENTITY_CACHE_ENABLED,
-			CalendarResourceModelImpl.FINDER_CACHE_ENABLED,
+			CalendarResourceModelImpl.FINDER_CACHE_ENABLED, Long.class,
 			FINDER_CLASS_NAME_LIST, "countByUUID_G",
 			new String[] { String.class.getName(), Long.class.getName() });
 	public static final FinderPath FINDER_PATH_FIND_BY_ACTIVE = new FinderPath(CalendarResourceModelImpl.ENTITY_CACHE_ENABLED,
 			CalendarResourceModelImpl.FINDER_CACHE_ENABLED,
-			FINDER_CLASS_NAME_LIST, "findByActive",
+			CalendarResourceImpl.class, FINDER_CLASS_NAME_LIST, "findByActive",
 			new String[] {
 				Boolean.class.getName(),
 				
@@ -111,12 +113,12 @@ public class CalendarResourcePersistenceImpl extends BasePersistenceImpl<Calenda
 				"com.liferay.portal.kernel.util.OrderByComparator"
 			});
 	public static final FinderPath FINDER_PATH_COUNT_BY_ACTIVE = new FinderPath(CalendarResourceModelImpl.ENTITY_CACHE_ENABLED,
-			CalendarResourceModelImpl.FINDER_CACHE_ENABLED,
+			CalendarResourceModelImpl.FINDER_CACHE_ENABLED, Long.class,
 			FINDER_CLASS_NAME_LIST, "countByActive",
 			new String[] { Boolean.class.getName() });
 	public static final FinderPath FINDER_PATH_FIND_BY_G_A = new FinderPath(CalendarResourceModelImpl.ENTITY_CACHE_ENABLED,
 			CalendarResourceModelImpl.FINDER_CACHE_ENABLED,
-			FINDER_CLASS_NAME_LIST, "findByG_A",
+			CalendarResourceImpl.class, FINDER_CLASS_NAME_LIST, "findByG_A",
 			new String[] {
 				Long.class.getName(), Boolean.class.getName(),
 				
@@ -124,20 +126,20 @@ public class CalendarResourcePersistenceImpl extends BasePersistenceImpl<Calenda
 				"com.liferay.portal.kernel.util.OrderByComparator"
 			});
 	public static final FinderPath FINDER_PATH_COUNT_BY_G_A = new FinderPath(CalendarResourceModelImpl.ENTITY_CACHE_ENABLED,
-			CalendarResourceModelImpl.FINDER_CACHE_ENABLED,
+			CalendarResourceModelImpl.FINDER_CACHE_ENABLED, Long.class,
 			FINDER_CLASS_NAME_LIST, "countByG_A",
 			new String[] { Long.class.getName(), Boolean.class.getName() });
 	public static final FinderPath FINDER_PATH_FETCH_BY_C_C = new FinderPath(CalendarResourceModelImpl.ENTITY_CACHE_ENABLED,
 			CalendarResourceModelImpl.FINDER_CACHE_ENABLED,
-			FINDER_CLASS_NAME_ENTITY, "fetchByC_C",
+			CalendarResourceImpl.class, FINDER_CLASS_NAME_ENTITY, "fetchByC_C",
 			new String[] { Long.class.getName(), Long.class.getName() });
 	public static final FinderPath FINDER_PATH_COUNT_BY_C_C = new FinderPath(CalendarResourceModelImpl.ENTITY_CACHE_ENABLED,
-			CalendarResourceModelImpl.FINDER_CACHE_ENABLED,
+			CalendarResourceModelImpl.FINDER_CACHE_ENABLED, Long.class,
 			FINDER_CLASS_NAME_LIST, "countByC_C",
 			new String[] { Long.class.getName(), Long.class.getName() });
 	public static final FinderPath FINDER_PATH_FIND_BY_G_N_A = new FinderPath(CalendarResourceModelImpl.ENTITY_CACHE_ENABLED,
 			CalendarResourceModelImpl.FINDER_CACHE_ENABLED,
-			FINDER_CLASS_NAME_LIST, "findByG_N_A",
+			CalendarResourceImpl.class, FINDER_CLASS_NAME_LIST, "findByG_N_A",
 			new String[] {
 				Long.class.getName(), String.class.getName(),
 				Boolean.class.getName(),
@@ -146,7 +148,7 @@ public class CalendarResourcePersistenceImpl extends BasePersistenceImpl<Calenda
 				"com.liferay.portal.kernel.util.OrderByComparator"
 			});
 	public static final FinderPath FINDER_PATH_COUNT_BY_G_N_A = new FinderPath(CalendarResourceModelImpl.ENTITY_CACHE_ENABLED,
-			CalendarResourceModelImpl.FINDER_CACHE_ENABLED,
+			CalendarResourceModelImpl.FINDER_CACHE_ENABLED, Long.class,
 			FINDER_CLASS_NAME_LIST, "countByG_N_A",
 			new String[] {
 				Long.class.getName(), String.class.getName(),
@@ -154,7 +156,7 @@ public class CalendarResourcePersistenceImpl extends BasePersistenceImpl<Calenda
 			});
 	public static final FinderPath FINDER_PATH_FIND_BY_C_N_A = new FinderPath(CalendarResourceModelImpl.ENTITY_CACHE_ENABLED,
 			CalendarResourceModelImpl.FINDER_CACHE_ENABLED,
-			FINDER_CLASS_NAME_LIST, "findByC_N_A",
+			CalendarResourceImpl.class, FINDER_CLASS_NAME_LIST, "findByC_N_A",
 			new String[] {
 				Long.class.getName(), String.class.getName(),
 				Boolean.class.getName(),
@@ -163,7 +165,7 @@ public class CalendarResourcePersistenceImpl extends BasePersistenceImpl<Calenda
 				"com.liferay.portal.kernel.util.OrderByComparator"
 			});
 	public static final FinderPath FINDER_PATH_COUNT_BY_C_N_A = new FinderPath(CalendarResourceModelImpl.ENTITY_CACHE_ENABLED,
-			CalendarResourceModelImpl.FINDER_CACHE_ENABLED,
+			CalendarResourceModelImpl.FINDER_CACHE_ENABLED, Long.class,
 			FINDER_CLASS_NAME_LIST, "countByC_N_A",
 			new String[] {
 				Long.class.getName(), String.class.getName(),
@@ -171,9 +173,10 @@ public class CalendarResourcePersistenceImpl extends BasePersistenceImpl<Calenda
 			});
 	public static final FinderPath FINDER_PATH_FIND_ALL = new FinderPath(CalendarResourceModelImpl.ENTITY_CACHE_ENABLED,
 			CalendarResourceModelImpl.FINDER_CACHE_ENABLED,
-			FINDER_CLASS_NAME_LIST, "findAll", new String[0]);
+			CalendarResourceImpl.class, FINDER_CLASS_NAME_LIST, "findAll",
+			new String[0]);
 	public static final FinderPath FINDER_PATH_COUNT_ALL = new FinderPath(CalendarResourceModelImpl.ENTITY_CACHE_ENABLED,
-			CalendarResourceModelImpl.FINDER_CACHE_ENABLED,
+			CalendarResourceModelImpl.FINDER_CACHE_ENABLED, Long.class,
 			FINDER_CLASS_NAME_LIST, "countAll", new String[0]);
 
 	/**
@@ -211,7 +214,7 @@ public class CalendarResourcePersistenceImpl extends BasePersistenceImpl<Calenda
 			if (EntityCacheUtil.getResult(
 						CalendarResourceModelImpl.ENTITY_CACHE_ENABLED,
 						CalendarResourceImpl.class,
-						calendarResource.getPrimaryKey(), this) == null) {
+						calendarResource.getPrimaryKey()) == null) {
 				cacheResult(calendarResource);
 			}
 		}
@@ -246,6 +249,8 @@ public class CalendarResourcePersistenceImpl extends BasePersistenceImpl<Calenda
 	public void clearCache(CalendarResource calendarResource) {
 		EntityCacheUtil.removeResult(CalendarResourceModelImpl.ENTITY_CACHE_ENABLED,
 			CalendarResourceImpl.class, calendarResource.getPrimaryKey());
+
+		FinderCacheUtil.removeResult(FINDER_PATH_FIND_ALL, FINDER_ARGS_EMPTY);
 
 		FinderCacheUtil.removeResult(FINDER_PATH_FETCH_BY_UUID_G,
 			new Object[] {
@@ -563,10 +568,16 @@ public class CalendarResourcePersistenceImpl extends BasePersistenceImpl<Calenda
 	public CalendarResource fetchByPrimaryKey(long calendarResourceId)
 		throws SystemException {
 		CalendarResource calendarResource = (CalendarResource)EntityCacheUtil.getResult(CalendarResourceModelImpl.ENTITY_CACHE_ENABLED,
-				CalendarResourceImpl.class, calendarResourceId, this);
+				CalendarResourceImpl.class, calendarResourceId);
+
+		if (calendarResource == _nullCalendarResource) {
+			return null;
+		}
 
 		if (calendarResource == null) {
 			Session session = null;
+
+			boolean hasException = false;
 
 			try {
 				session = openSession();
@@ -575,11 +586,18 @@ public class CalendarResourcePersistenceImpl extends BasePersistenceImpl<Calenda
 						Long.valueOf(calendarResourceId));
 			}
 			catch (Exception e) {
+				hasException = true;
+
 				throw processException(e);
 			}
 			finally {
 				if (calendarResource != null) {
 					cacheResult(calendarResource);
+				}
+				else if (!hasException) {
+					EntityCacheUtil.putResult(CalendarResourceModelImpl.ENTITY_CACHE_ENABLED,
+						CalendarResourceImpl.class, calendarResourceId,
+						_nullCalendarResource);
 				}
 
 				closeSession(session);
@@ -635,12 +653,7 @@ public class CalendarResourcePersistenceImpl extends BasePersistenceImpl<Calenda
 	 */
 	public List<CalendarResource> findByUuid(String uuid, int start, int end,
 		OrderByComparator orderByComparator) throws SystemException {
-		Object[] finderArgs = new Object[] {
-				uuid,
-				
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
-			};
+		Object[] finderArgs = new Object[] { uuid, start, end, orderByComparator };
 
 		List<CalendarResource> list = (List<CalendarResource>)FinderCacheUtil.getResult(FINDER_PATH_FIND_BY_UUID,
 				finderArgs, this);
@@ -1006,6 +1019,7 @@ public class CalendarResourcePersistenceImpl extends BasePersistenceImpl<Calenda
 	 *
 	 * @param uuid the uuid
 	 * @param groupId the group ID
+	 * @param retrieveFromCache whether to use the finder cache
 	 * @return the matching calendar resource, or <code>null</code> if a matching calendar resource could not be found
 	 * @throws SystemException if a system exception occurred
 	 */
@@ -1151,12 +1165,7 @@ public class CalendarResourcePersistenceImpl extends BasePersistenceImpl<Calenda
 	 */
 	public List<CalendarResource> findByActive(boolean active, int start,
 		int end, OrderByComparator orderByComparator) throws SystemException {
-		Object[] finderArgs = new Object[] {
-				active,
-				
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
-			};
+		Object[] finderArgs = new Object[] { active, start, end, orderByComparator };
 
 		List<CalendarResource> list = (List<CalendarResource>)FinderCacheUtil.getResult(FINDER_PATH_FIND_BY_ACTIVE,
 				finderArgs, this);
@@ -1500,8 +1509,7 @@ public class CalendarResourcePersistenceImpl extends BasePersistenceImpl<Calenda
 		Object[] finderArgs = new Object[] {
 				groupId, active,
 				
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
+				start, end, orderByComparator
 			};
 
 		List<CalendarResource> list = (List<CalendarResource>)FinderCacheUtil.getResult(FINDER_PATH_FIND_BY_G_A,
@@ -1873,13 +1881,20 @@ public class CalendarResourcePersistenceImpl extends BasePersistenceImpl<Calenda
 			query = new StringBundler(4);
 		}
 
-		query.append(_FILTER_SQL_SELECT_CALENDARRESOURCE_WHERE);
+		if (getDB().isSupportsInlineDistinct()) {
+			query.append(_FILTER_SQL_SELECT_CALENDARRESOURCE_WHERE);
+		}
+		else {
+			query.append(_FILTER_SQL_SELECT_CALENDARRESOURCE_NO_INLINE_DISTINCT_WHERE_1);
+		}
 
 		query.append(_FINDER_COLUMN_G_A_GROUPID_2);
 
 		query.append(_FINDER_COLUMN_G_A_ACTIVE_2);
 
-		appendGroupByComparator(query, _FILTER_COLUMN_PK);
+		if (!getDB().isSupportsInlineDistinct()) {
+			query.append(_FILTER_SQL_SELECT_CALENDARRESOURCE_NO_INLINE_DISTINCT_WHERE_2);
+		}
 
 		if (orderByComparator != null) {
 			if (getDB().isSupportsInlineDistinct()) {
@@ -1902,7 +1917,8 @@ public class CalendarResourcePersistenceImpl extends BasePersistenceImpl<Calenda
 		}
 
 		String sql = InlineSQLHelperUtil.replacePermissionCheck(query.toString(),
-				CalendarResource.class.getName(), _FILTER_COLUMN_PK, groupId);
+				CalendarResource.class.getName(),
+				_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
 
 		Session session = null;
 
@@ -1995,13 +2011,20 @@ public class CalendarResourcePersistenceImpl extends BasePersistenceImpl<Calenda
 			query = new StringBundler(3);
 		}
 
-		query.append(_FILTER_SQL_SELECT_CALENDARRESOURCE_WHERE);
+		if (getDB().isSupportsInlineDistinct()) {
+			query.append(_FILTER_SQL_SELECT_CALENDARRESOURCE_WHERE);
+		}
+		else {
+			query.append(_FILTER_SQL_SELECT_CALENDARRESOURCE_NO_INLINE_DISTINCT_WHERE_1);
+		}
 
 		query.append(_FINDER_COLUMN_G_A_GROUPID_2);
 
 		query.append(_FINDER_COLUMN_G_A_ACTIVE_2);
 
-		appendGroupByComparator(query, _FILTER_COLUMN_PK);
+		if (!getDB().isSupportsInlineDistinct()) {
+			query.append(_FILTER_SQL_SELECT_CALENDARRESOURCE_NO_INLINE_DISTINCT_WHERE_2);
+		}
 
 		if (orderByComparator != null) {
 			String[] orderByFields = orderByComparator.getOrderByFields();
@@ -2079,7 +2102,8 @@ public class CalendarResourcePersistenceImpl extends BasePersistenceImpl<Calenda
 		}
 
 		String sql = InlineSQLHelperUtil.replacePermissionCheck(query.toString(),
-				CalendarResource.class.getName(), _FILTER_COLUMN_PK, groupId);
+				CalendarResource.class.getName(),
+				_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
 
 		SQLQuery q = session.createSQLQuery(sql);
 
@@ -2171,6 +2195,7 @@ public class CalendarResourcePersistenceImpl extends BasePersistenceImpl<Calenda
 	 *
 	 * @param classNameId the class name ID
 	 * @param classPK the class p k
+	 * @param retrieveFromCache whether to use the finder cache
 	 * @return the matching calendar resource, or <code>null</code> if a matching calendar resource could not be found
 	 * @throws SystemException if a system exception occurred
 	 */
@@ -2314,8 +2339,7 @@ public class CalendarResourcePersistenceImpl extends BasePersistenceImpl<Calenda
 		Object[] finderArgs = new Object[] {
 				groupId, name, active,
 				
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
+				start, end, orderByComparator
 			};
 
 		List<CalendarResource> list = (List<CalendarResource>)FinderCacheUtil.getResult(FINDER_PATH_FIND_BY_G_N_A,
@@ -2725,8 +2749,7 @@ public class CalendarResourcePersistenceImpl extends BasePersistenceImpl<Calenda
 		Object[] finderArgs = new Object[] {
 				StringUtil.merge(groupIds), name, active,
 				
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
+				start, end, orderByComparator
 			};
 
 		List<CalendarResource> list = (List<CalendarResource>)FinderCacheUtil.getResult(FINDER_PATH_FIND_BY_G_N_A,
@@ -2909,7 +2932,12 @@ public class CalendarResourcePersistenceImpl extends BasePersistenceImpl<Calenda
 			query = new StringBundler(5);
 		}
 
-		query.append(_FILTER_SQL_SELECT_CALENDARRESOURCE_WHERE);
+		if (getDB().isSupportsInlineDistinct()) {
+			query.append(_FILTER_SQL_SELECT_CALENDARRESOURCE_WHERE);
+		}
+		else {
+			query.append(_FILTER_SQL_SELECT_CALENDARRESOURCE_NO_INLINE_DISTINCT_WHERE_1);
+		}
 
 		query.append(_FINDER_COLUMN_G_N_A_GROUPID_2);
 
@@ -2927,7 +2955,9 @@ public class CalendarResourcePersistenceImpl extends BasePersistenceImpl<Calenda
 
 		query.append(_FINDER_COLUMN_G_N_A_ACTIVE_2);
 
-		appendGroupByComparator(query, _FILTER_COLUMN_PK);
+		if (!getDB().isSupportsInlineDistinct()) {
+			query.append(_FILTER_SQL_SELECT_CALENDARRESOURCE_NO_INLINE_DISTINCT_WHERE_2);
+		}
 
 		if (orderByComparator != null) {
 			if (getDB().isSupportsInlineDistinct()) {
@@ -2950,7 +2980,8 @@ public class CalendarResourcePersistenceImpl extends BasePersistenceImpl<Calenda
 		}
 
 		String sql = InlineSQLHelperUtil.replacePermissionCheck(query.toString(),
-				CalendarResource.class.getName(), _FILTER_COLUMN_PK, groupId);
+				CalendarResource.class.getName(),
+				_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
 
 		Session session = null;
 
@@ -3048,7 +3079,12 @@ public class CalendarResourcePersistenceImpl extends BasePersistenceImpl<Calenda
 			query = new StringBundler(3);
 		}
 
-		query.append(_FILTER_SQL_SELECT_CALENDARRESOURCE_WHERE);
+		if (getDB().isSupportsInlineDistinct()) {
+			query.append(_FILTER_SQL_SELECT_CALENDARRESOURCE_WHERE);
+		}
+		else {
+			query.append(_FILTER_SQL_SELECT_CALENDARRESOURCE_NO_INLINE_DISTINCT_WHERE_1);
+		}
 
 		query.append(_FINDER_COLUMN_G_N_A_GROUPID_2);
 
@@ -3066,7 +3102,9 @@ public class CalendarResourcePersistenceImpl extends BasePersistenceImpl<Calenda
 
 		query.append(_FINDER_COLUMN_G_N_A_ACTIVE_2);
 
-		appendGroupByComparator(query, _FILTER_COLUMN_PK);
+		if (!getDB().isSupportsInlineDistinct()) {
+			query.append(_FILTER_SQL_SELECT_CALENDARRESOURCE_NO_INLINE_DISTINCT_WHERE_2);
+		}
 
 		if (orderByComparator != null) {
 			String[] orderByFields = orderByComparator.getOrderByFields();
@@ -3144,7 +3182,8 @@ public class CalendarResourcePersistenceImpl extends BasePersistenceImpl<Calenda
 		}
 
 		String sql = InlineSQLHelperUtil.replacePermissionCheck(query.toString(),
-				CalendarResource.class.getName(), _FILTER_COLUMN_PK, groupId);
+				CalendarResource.class.getName(),
+				_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
 
 		SQLQuery q = session.createSQLQuery(sql);
 
@@ -3248,7 +3287,12 @@ public class CalendarResourcePersistenceImpl extends BasePersistenceImpl<Calenda
 
 		StringBundler query = new StringBundler();
 
-		query.append(_FILTER_SQL_SELECT_CALENDARRESOURCE_WHERE);
+		if (getDB().isSupportsInlineDistinct()) {
+			query.append(_FILTER_SQL_SELECT_CALENDARRESOURCE_WHERE);
+		}
+		else {
+			query.append(_FILTER_SQL_SELECT_CALENDARRESOURCE_NO_INLINE_DISTINCT_WHERE_1);
+		}
 
 		boolean conjunctionable = false;
 
@@ -3298,7 +3342,9 @@ public class CalendarResourcePersistenceImpl extends BasePersistenceImpl<Calenda
 
 		conjunctionable = true;
 
-		appendGroupByComparator(query, _FILTER_COLUMN_PK);
+		if (!getDB().isSupportsInlineDistinct()) {
+			query.append(_FILTER_SQL_SELECT_CALENDARRESOURCE_NO_INLINE_DISTINCT_WHERE_2);
+		}
 
 		if (orderByComparator != null) {
 			if (getDB().isSupportsInlineDistinct()) {
@@ -3321,7 +3367,8 @@ public class CalendarResourcePersistenceImpl extends BasePersistenceImpl<Calenda
 		}
 
 		String sql = InlineSQLHelperUtil.replacePermissionCheck(query.toString(),
-				CalendarResource.class.getName(), _FILTER_COLUMN_PK, groupIds);
+				CalendarResource.class.getName(),
+				_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupIds);
 
 		Session session = null;
 
@@ -3417,8 +3464,7 @@ public class CalendarResourcePersistenceImpl extends BasePersistenceImpl<Calenda
 		Object[] finderArgs = new Object[] {
 				companyId, name, active,
 				
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
+				start, end, orderByComparator
 			};
 
 		List<CalendarResource> list = (List<CalendarResource>)FinderCacheUtil.getResult(FINDER_PATH_FIND_BY_C_N_A,
@@ -3809,10 +3855,7 @@ public class CalendarResourcePersistenceImpl extends BasePersistenceImpl<Calenda
 	 */
 	public List<CalendarResource> findAll(int start, int end,
 		OrderByComparator orderByComparator) throws SystemException {
-		Object[] finderArgs = new Object[] {
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
-			};
+		Object[] finderArgs = new Object[] { start, end, orderByComparator };
 
 		List<CalendarResource> list = (List<CalendarResource>)FinderCacheUtil.getResult(FINDER_PATH_FIND_ALL,
 				finderArgs, this);
@@ -4256,7 +4299,8 @@ public class CalendarResourcePersistenceImpl extends BasePersistenceImpl<Calenda
 		query.append(_FINDER_COLUMN_G_A_ACTIVE_2);
 
 		String sql = InlineSQLHelperUtil.replacePermissionCheck(query.toString(),
-				CalendarResource.class.getName(), _FILTER_COLUMN_PK, groupId);
+				CalendarResource.class.getName(),
+				_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
 
 		Session session = null;
 
@@ -4569,7 +4613,8 @@ public class CalendarResourcePersistenceImpl extends BasePersistenceImpl<Calenda
 		query.append(_FINDER_COLUMN_G_N_A_ACTIVE_2);
 
 		String sql = InlineSQLHelperUtil.replacePermissionCheck(query.toString(),
-				CalendarResource.class.getName(), _FILTER_COLUMN_PK, groupId);
+				CalendarResource.class.getName(),
+				_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupId);
 
 		Session session = null;
 
@@ -4671,7 +4716,8 @@ public class CalendarResourcePersistenceImpl extends BasePersistenceImpl<Calenda
 		conjunctionable = true;
 
 		String sql = InlineSQLHelperUtil.replacePermissionCheck(query.toString(),
-				CalendarResource.class.getName(), _FILTER_COLUMN_PK, groupIds);
+				CalendarResource.class.getName(),
+				_FILTER_ENTITY_TABLE_FILTER_PK_COLUMN, groupIds);
 
 		Session session = null;
 
@@ -4790,10 +4836,8 @@ public class CalendarResourcePersistenceImpl extends BasePersistenceImpl<Calenda
 	 * @throws SystemException if a system exception occurred
 	 */
 	public int countAll() throws SystemException {
-		Object[] finderArgs = new Object[0];
-
 		Long count = (Long)FinderCacheUtil.getResult(FINDER_PATH_COUNT_ALL,
-				finderArgs, this);
+				FINDER_ARGS_EMPTY, this);
 
 		if (count == null) {
 			Session session = null;
@@ -4813,8 +4857,8 @@ public class CalendarResourcePersistenceImpl extends BasePersistenceImpl<Calenda
 					count = Long.valueOf(0);
 				}
 
-				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL, finderArgs,
-					count);
+				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL,
+					FINDER_ARGS_EMPTY, count);
 
 				closeSession(session);
 			}
@@ -4913,9 +4957,13 @@ public class CalendarResourcePersistenceImpl extends BasePersistenceImpl<Calenda
 		return sql;
 	}
 
-	private static final String _FILTER_SQL_SELECT_CALENDARRESOURCE_WHERE = "SELECT {calendarResource.*} FROM CalendarResource calendarResource WHERE ";
+	private static final String _FILTER_ENTITY_TABLE_FILTER_PK_COLUMN = "calendarResource.calendarResourceId";
+	private static final String _FILTER_SQL_SELECT_CALENDARRESOURCE_WHERE = "SELECT DISTINCT {calendarResource.*} FROM CalendarResource calendarResource WHERE ";
+	private static final String _FILTER_SQL_SELECT_CALENDARRESOURCE_NO_INLINE_DISTINCT_WHERE_1 =
+		"SELECT {CalendarResource.*} FROM (SELECT DISTINCT calendarResource.calendarResourceId FROM CalendarResource calendarResource WHERE ";
+	private static final String _FILTER_SQL_SELECT_CALENDARRESOURCE_NO_INLINE_DISTINCT_WHERE_2 =
+		") TEMP_TABLE INNER JOIN CalendarResource ON TEMP_TABLE.calendarResourceId = CalendarResource.calendarResourceId";
 	private static final String _FILTER_SQL_COUNT_CALENDARRESOURCE_WHERE = "SELECT COUNT(DISTINCT calendarResource.calendarResourceId) AS COUNT_VALUE FROM CalendarResource calendarResource WHERE ";
-	private static final String _FILTER_COLUMN_PK = "calendarResource.calendarResourceId";
 	private static final String _FILTER_ENTITY_ALIAS = "calendarResource";
 	private static final String _FILTER_ENTITY_TABLE = "CalendarResource";
 	private static final String _ORDER_BY_ENTITY_ALIAS = "calendarResource.";
@@ -4925,4 +4973,21 @@ public class CalendarResourcePersistenceImpl extends BasePersistenceImpl<Calenda
 	private static final boolean _HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE = GetterUtil.getBoolean(PropsUtil.get(
 				PropsKeys.HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE));
 	private static Log _log = LogFactoryUtil.getLog(CalendarResourcePersistenceImpl.class);
+	private static CalendarResource _nullCalendarResource = new CalendarResourceImpl() {
+			@Override
+			public Object clone() {
+				return this;
+			}
+
+			@Override
+			public CacheModel<CalendarResource> toCacheModel() {
+				return _nullCalendarResourceCacheModel;
+			}
+		};
+
+	private static CacheModel<CalendarResource> _nullCalendarResourceCacheModel = new CacheModel<CalendarResource>() {
+			public CalendarResource toEntityModel() {
+				return _nullCalendarResource;
+			}
+		};
 }

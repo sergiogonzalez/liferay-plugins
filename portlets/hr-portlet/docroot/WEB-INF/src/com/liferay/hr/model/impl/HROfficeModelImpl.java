@@ -22,6 +22,7 @@ import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.impl.BaseModelImpl;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.util.PortalUtil;
@@ -88,8 +89,14 @@ public class HROfficeModelImpl extends BaseModelImpl<HROffice>
 		return HROffice.class.getName();
 	}
 
-	public static final String MAPPING_TABLE_HRHOLIDAYS_HROFFICES_NAME = com.liferay.hr.model.impl.HRHolidayModelImpl.MAPPING_TABLE_HRHOLIDAYS_HROFFICES_NAME;
-	public static final boolean FINDER_CACHE_ENABLED_HRHOLIDAYS_HROFFICES = com.liferay.hr.model.impl.HRHolidayModelImpl.FINDER_CACHE_ENABLED_HRHOLIDAYS_HROFFICES;
+	public static final String MAPPING_TABLE_HRHOLIDAYS_HROFFICES_NAME = "HRHolidays_HROffices";
+	public static final Object[][] MAPPING_TABLE_HRHOLIDAYS_HROFFICES_COLUMNS = {
+			{ "hrHolidayId", Types.BIGINT },
+			{ "hrOfficeId", Types.BIGINT }
+		};
+	public static final String MAPPING_TABLE_HRHOLIDAYS_HROFFICES_SQL_CREATE = "create table HRHolidays_HROffices (hrHolidayId LONG not null,hrOfficeId LONG not null,primary key (hrHolidayId, hrOfficeId))";
+	public static final boolean FINDER_CACHE_ENABLED_HRHOLIDAYS_HROFFICES = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
+				"value.object.finder.cache.enabled.HRHolidays_HROffices"), true);
 	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(com.liferay.util.service.ServiceProps.get(
 				"lock.expiration.time.com.liferay.hr.model.HROffice"));
 
@@ -195,8 +202,13 @@ public class HROfficeModelImpl extends BaseModelImpl<HROffice>
 			return (HROffice)this;
 		}
 		else {
-			return (HROffice)Proxy.newProxyInstance(_classLoader,
-				_escapedModelProxyInterfaces, new AutoEscapeBeanHandler(this));
+			if (_escapedModelProxy == null) {
+				_escapedModelProxy = (HROffice)Proxy.newProxyInstance(_classLoader,
+						_escapedModelProxyInterfaces,
+						new AutoEscapeBeanHandler(this));
+			}
+
+			return _escapedModelProxy;
 		}
 	}
 
@@ -279,6 +291,49 @@ public class HROfficeModelImpl extends BaseModelImpl<HROffice>
 
 	@Override
 	public void resetOriginalValues() {
+	}
+
+	@Override
+	public CacheModel<HROffice> toCacheModel() {
+		HROfficeCacheModel hrOfficeCacheModel = new HROfficeCacheModel();
+
+		hrOfficeCacheModel.hrOfficeId = getHrOfficeId();
+
+		hrOfficeCacheModel.groupId = getGroupId();
+
+		hrOfficeCacheModel.companyId = getCompanyId();
+
+		hrOfficeCacheModel.userId = getUserId();
+
+		hrOfficeCacheModel.userName = getUserName();
+
+		String userName = hrOfficeCacheModel.userName;
+
+		if ((userName != null) && (userName.length() == 0)) {
+			hrOfficeCacheModel.userName = null;
+		}
+
+		Date createDate = getCreateDate();
+
+		if (createDate != null) {
+			hrOfficeCacheModel.createDate = createDate.getTime();
+		}
+		else {
+			hrOfficeCacheModel.createDate = Long.MIN_VALUE;
+		}
+
+		Date modifiedDate = getModifiedDate();
+
+		if (modifiedDate != null) {
+			hrOfficeCacheModel.modifiedDate = modifiedDate.getTime();
+		}
+		else {
+			hrOfficeCacheModel.modifiedDate = Long.MIN_VALUE;
+		}
+
+		hrOfficeCacheModel.organizationId = getOrganizationId();
+
+		return hrOfficeCacheModel;
 	}
 
 	@Override
@@ -365,4 +420,5 @@ public class HROfficeModelImpl extends BaseModelImpl<HROffice>
 	private Date _modifiedDate;
 	private long _organizationId;
 	private transient ExpandoBridge _expandoBridge;
+	private HROffice _escapedModelProxy;
 }

@@ -19,6 +19,8 @@ import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.transaction.Isolation;
 import com.liferay.portal.kernel.transaction.Propagation;
 import com.liferay.portal.kernel.transaction.Transactional;
+import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.kernel.workflow.WorkflowException;
 import com.liferay.portal.kernel.workflow.WorkflowTask;
 import com.liferay.portal.model.Role;
@@ -28,6 +30,7 @@ import com.liferay.portal.workflow.kaleo.BaseKaleoBean;
 import com.liferay.portal.workflow.kaleo.WorkflowTaskAdapter;
 import com.liferay.portal.workflow.kaleo.definition.ExecutionType;
 import com.liferay.portal.workflow.kaleo.model.KaleoInstance;
+import com.liferay.portal.workflow.kaleo.model.KaleoNode;
 import com.liferay.portal.workflow.kaleo.model.KaleoTask;
 import com.liferay.portal.workflow.kaleo.model.KaleoTaskAssignmentInstance;
 import com.liferay.portal.workflow.kaleo.model.KaleoTaskInstanceToken;
@@ -93,8 +96,8 @@ public class DefaultTaskManagerImpl
 
 		try {
 			return doCompleteWorkflowTask(
-				workflowTaskInstanceId, comment, workflowContext,
-				serviceContext);
+				workflowTaskInstanceId, transitionName, comment,
+				workflowContext, serviceContext);
 		}
 		catch (Exception e) {
 			throw new WorkflowException(e);
@@ -177,13 +180,16 @@ public class DefaultTaskManagerImpl
 
 		KaleoTask kaleoTask = kaleoTaskInstanceToken.getKaleoTask();
 
+		workflowContext.put(
+			WorkflowConstants.CONTEXT_TASK_COMMENTS, comment);
+
 		ActionExecutorUtil.executeKaleoActions(
-			kaleoTask.getKaleoNodeId(), ExecutionType.ON_ASSIGNMENT,
-			executionContext);
+			KaleoNode.class.getName(), kaleoTask.getKaleoNodeId(),
+			ExecutionType.ON_ASSIGNMENT, executionContext);
 
 		NotificationUtil.sendKaleoNotifications(
-			kaleoTask.getKaleoNodeId(), ExecutionType.ON_ASSIGNMENT,
-			executionContext);
+			KaleoNode.class.getName(), kaleoTask.getKaleoNodeId(),
+			ExecutionType.ON_ASSIGNMENT, executionContext);
 
 		kaleoLogLocalService.addTaskAssignmentKaleoLog(
 			previousTaskAssignmentInstances, kaleoTaskInstanceToken,
@@ -194,7 +200,7 @@ public class DefaultTaskManagerImpl
 	}
 
 	protected WorkflowTask doCompleteWorkflowTask(
-			long workflowTaskInstanceId, String comment,
+			long workflowTaskInstanceId, String transitionName, String comment,
 			Map<String, Serializable> workflowContext,
 			ServiceContext serviceContext)
 		throws Exception {
@@ -202,6 +208,18 @@ public class DefaultTaskManagerImpl
 		KaleoTaskInstanceToken kaleoTaskInstanceToken =
 			kaleoTaskInstanceTokenLocalService.getKaleoTaskInstanceToken(
 				workflowTaskInstanceId);
+
+		if (Validator.isNotNull(transitionName)) {
+
+			// Validate that the transition actually exists before moving
+			// forward
+
+			KaleoTask kaleoTask = kaleoTaskInstanceToken.getKaleoTask();
+
+			KaleoNode currentKaleoNode = kaleoTask.getKaleoNode();
+
+			currentKaleoNode.getKaleoTransition(transitionName);
+		}
 
 		workflowContext = updateWorkflowContext(
 			workflowContext, kaleoTaskInstanceToken);

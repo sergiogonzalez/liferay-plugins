@@ -168,6 +168,13 @@ public class MicroblogsEntryLocalServiceWrapper
 		return _microblogsEntryLocalService.getMicroblogsEntry(microblogsEntryId);
 	}
 
+	public com.liferay.portal.model.PersistedModel getPersistedModel(
+		java.io.Serializable primaryKeyObj)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _microblogsEntryLocalService.getPersistedModel(primaryKeyObj);
+	}
+
 	/**
 	* Returns a range of all the microblogs entries.
 	*
@@ -198,7 +205,7 @@ public class MicroblogsEntryLocalServiceWrapper
 	}
 
 	/**
-	* Updates the microblogs entry in the database. Also notifies the appropriate model listeners.
+	* Updates the microblogs entry in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
 	*
 	* @param microblogsEntry the microblogs entry
 	* @return the microblogs entry that was updated
@@ -211,7 +218,7 @@ public class MicroblogsEntryLocalServiceWrapper
 	}
 
 	/**
-	* Updates the microblogs entry in the database. Also notifies the appropriate model listeners.
+	* Updates the microblogs entry in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
 	*
 	* @param microblogsEntry the microblogs entry
 	* @param merge whether to merge the microblogs entry with the current session. See {@link com.liferay.portal.service.persistence.BatchSession#update(com.liferay.portal.kernel.dao.orm.Session, com.liferay.portal.model.BaseModel, boolean)} for an explanation.
@@ -255,13 +262,6 @@ public class MicroblogsEntryLocalServiceWrapper
 			socialRelationType, serviceContext);
 	}
 
-	public void addMicroblogsEntryResources(
-		com.liferay.microblogs.model.MicroblogsEntry microblogsEntry)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
-		_microblogsEntryLocalService.addMicroblogsEntryResources(microblogsEntry);
-	}
-
 	public void deleteUserMicroblogsEntries(long userId)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
@@ -281,10 +281,11 @@ public class MicroblogsEntryLocalServiceWrapper
 	}
 
 	public java.util.List<com.liferay.microblogs.model.MicroblogsEntry> getReceiverMicroblogsEntryMicroblogsEntries(
-		int type, long receiverMicroblogsEntryId, int start, int end)
+		int type, long receiverMicroblogsEntryId, int start, int end,
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
 		throws com.liferay.portal.kernel.exception.SystemException {
 		return _microblogsEntryLocalService.getReceiverMicroblogsEntryMicroblogsEntries(type,
-			receiverMicroblogsEntryId, start, end);
+			receiverMicroblogsEntryId, start, end, orderByComparator);
 	}
 
 	public int getReceiverMicroblogsEntryMicroblogsEntriesCount(int type,

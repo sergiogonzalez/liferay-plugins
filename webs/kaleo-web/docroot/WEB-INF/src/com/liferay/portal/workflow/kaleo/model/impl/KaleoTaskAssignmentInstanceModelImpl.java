@@ -17,8 +17,10 @@ package com.liferay.portal.workflow.kaleo.model.impl;
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.impl.BaseModelImpl;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.util.PortalUtil;
@@ -29,8 +31,6 @@ import com.liferay.portlet.expando.model.ExpandoBridge;
 import com.liferay.portlet.expando.util.ExpandoBridgeFactoryUtil;
 
 import java.io.Serializable;
-
-import java.lang.reflect.Proxy;
 
 import java.sql.Types;
 
@@ -290,8 +290,13 @@ public class KaleoTaskAssignmentInstanceModelImpl extends BaseModelImpl<KaleoTas
 			return (KaleoTaskAssignmentInstance)this;
 		}
 		else {
-			return (KaleoTaskAssignmentInstance)Proxy.newProxyInstance(_classLoader,
-				_escapedModelProxyInterfaces, new AutoEscapeBeanHandler(this));
+			if (_escapedModelProxy == null) {
+				_escapedModelProxy = (KaleoTaskAssignmentInstance)ProxyUtil.newProxyInstance(_classLoader,
+						_escapedModelProxyInterfaces,
+						new AutoEscapeBeanHandler(this));
+			}
+
+			return _escapedModelProxy;
 		}
 	}
 
@@ -390,6 +395,87 @@ public class KaleoTaskAssignmentInstanceModelImpl extends BaseModelImpl<KaleoTas
 
 	@Override
 	public void resetOriginalValues() {
+	}
+
+	@Override
+	public CacheModel<KaleoTaskAssignmentInstance> toCacheModel() {
+		KaleoTaskAssignmentInstanceCacheModel kaleoTaskAssignmentInstanceCacheModel =
+			new KaleoTaskAssignmentInstanceCacheModel();
+
+		kaleoTaskAssignmentInstanceCacheModel.kaleoTaskAssignmentInstanceId = getKaleoTaskAssignmentInstanceId();
+
+		kaleoTaskAssignmentInstanceCacheModel.groupId = getGroupId();
+
+		kaleoTaskAssignmentInstanceCacheModel.companyId = getCompanyId();
+
+		kaleoTaskAssignmentInstanceCacheModel.userId = getUserId();
+
+		kaleoTaskAssignmentInstanceCacheModel.userName = getUserName();
+
+		String userName = kaleoTaskAssignmentInstanceCacheModel.userName;
+
+		if ((userName != null) && (userName.length() == 0)) {
+			kaleoTaskAssignmentInstanceCacheModel.userName = null;
+		}
+
+		Date createDate = getCreateDate();
+
+		if (createDate != null) {
+			kaleoTaskAssignmentInstanceCacheModel.createDate = createDate.getTime();
+		}
+		else {
+			kaleoTaskAssignmentInstanceCacheModel.createDate = Long.MIN_VALUE;
+		}
+
+		Date modifiedDate = getModifiedDate();
+
+		if (modifiedDate != null) {
+			kaleoTaskAssignmentInstanceCacheModel.modifiedDate = modifiedDate.getTime();
+		}
+		else {
+			kaleoTaskAssignmentInstanceCacheModel.modifiedDate = Long.MIN_VALUE;
+		}
+
+		kaleoTaskAssignmentInstanceCacheModel.kaleoDefinitionId = getKaleoDefinitionId();
+
+		kaleoTaskAssignmentInstanceCacheModel.kaleoInstanceId = getKaleoInstanceId();
+
+		kaleoTaskAssignmentInstanceCacheModel.kaleoInstanceTokenId = getKaleoInstanceTokenId();
+
+		kaleoTaskAssignmentInstanceCacheModel.kaleoTaskInstanceTokenId = getKaleoTaskInstanceTokenId();
+
+		kaleoTaskAssignmentInstanceCacheModel.kaleoTaskId = getKaleoTaskId();
+
+		kaleoTaskAssignmentInstanceCacheModel.kaleoTaskName = getKaleoTaskName();
+
+		String kaleoTaskName = kaleoTaskAssignmentInstanceCacheModel.kaleoTaskName;
+
+		if ((kaleoTaskName != null) && (kaleoTaskName.length() == 0)) {
+			kaleoTaskAssignmentInstanceCacheModel.kaleoTaskName = null;
+		}
+
+		kaleoTaskAssignmentInstanceCacheModel.assigneeClassName = getAssigneeClassName();
+
+		String assigneeClassName = kaleoTaskAssignmentInstanceCacheModel.assigneeClassName;
+
+		if ((assigneeClassName != null) && (assigneeClassName.length() == 0)) {
+			kaleoTaskAssignmentInstanceCacheModel.assigneeClassName = null;
+		}
+
+		kaleoTaskAssignmentInstanceCacheModel.assigneeClassPK = getAssigneeClassPK();
+
+		kaleoTaskAssignmentInstanceCacheModel.completed = getCompleted();
+
+		Date completionDate = getCompletionDate();
+
+		if (completionDate != null) {
+			kaleoTaskAssignmentInstanceCacheModel.completionDate = completionDate.getTime();
+		}
+		else {
+			kaleoTaskAssignmentInstanceCacheModel.completionDate = Long.MIN_VALUE;
+		}
+
+		return kaleoTaskAssignmentInstanceCacheModel;
 	}
 
 	@Override
@@ -540,4 +626,5 @@ public class KaleoTaskAssignmentInstanceModelImpl extends BaseModelImpl<KaleoTas
 	private boolean _completed;
 	private Date _completionDate;
 	private transient ExpandoBridge _expandoBridge;
+	private KaleoTaskAssignmentInstance _escapedModelProxy;
 }

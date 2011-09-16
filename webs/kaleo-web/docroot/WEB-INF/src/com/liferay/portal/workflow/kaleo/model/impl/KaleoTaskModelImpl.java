@@ -17,8 +17,10 @@ package com.liferay.portal.workflow.kaleo.model.impl;
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.impl.BaseModelImpl;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.util.PortalUtil;
@@ -29,8 +31,6 @@ import com.liferay.portlet.expando.model.ExpandoBridge;
 import com.liferay.portlet.expando.util.ExpandoBridgeFactoryUtil;
 
 import java.io.Serializable;
-
-import java.lang.reflect.Proxy;
 
 import java.sql.Types;
 
@@ -241,8 +241,13 @@ public class KaleoTaskModelImpl extends BaseModelImpl<KaleoTask>
 			return (KaleoTask)this;
 		}
 		else {
-			return (KaleoTask)Proxy.newProxyInstance(_classLoader,
-				_escapedModelProxyInterfaces, new AutoEscapeBeanHandler(this));
+			if (_escapedModelProxy == null) {
+				_escapedModelProxy = (KaleoTask)ProxyUtil.newProxyInstance(_classLoader,
+						_escapedModelProxyInterfaces,
+						new AutoEscapeBeanHandler(this));
+			}
+
+			return _escapedModelProxy;
 		}
 	}
 
@@ -339,6 +344,67 @@ public class KaleoTaskModelImpl extends BaseModelImpl<KaleoTask>
 		kaleoTaskModelImpl._originalKaleoNodeId = kaleoTaskModelImpl._kaleoNodeId;
 
 		kaleoTaskModelImpl._setOriginalKaleoNodeId = false;
+	}
+
+	@Override
+	public CacheModel<KaleoTask> toCacheModel() {
+		KaleoTaskCacheModel kaleoTaskCacheModel = new KaleoTaskCacheModel();
+
+		kaleoTaskCacheModel.kaleoTaskId = getKaleoTaskId();
+
+		kaleoTaskCacheModel.groupId = getGroupId();
+
+		kaleoTaskCacheModel.companyId = getCompanyId();
+
+		kaleoTaskCacheModel.userId = getUserId();
+
+		kaleoTaskCacheModel.userName = getUserName();
+
+		String userName = kaleoTaskCacheModel.userName;
+
+		if ((userName != null) && (userName.length() == 0)) {
+			kaleoTaskCacheModel.userName = null;
+		}
+
+		Date createDate = getCreateDate();
+
+		if (createDate != null) {
+			kaleoTaskCacheModel.createDate = createDate.getTime();
+		}
+		else {
+			kaleoTaskCacheModel.createDate = Long.MIN_VALUE;
+		}
+
+		Date modifiedDate = getModifiedDate();
+
+		if (modifiedDate != null) {
+			kaleoTaskCacheModel.modifiedDate = modifiedDate.getTime();
+		}
+		else {
+			kaleoTaskCacheModel.modifiedDate = Long.MIN_VALUE;
+		}
+
+		kaleoTaskCacheModel.kaleoDefinitionId = getKaleoDefinitionId();
+
+		kaleoTaskCacheModel.kaleoNodeId = getKaleoNodeId();
+
+		kaleoTaskCacheModel.name = getName();
+
+		String name = kaleoTaskCacheModel.name;
+
+		if ((name != null) && (name.length() == 0)) {
+			kaleoTaskCacheModel.name = null;
+		}
+
+		kaleoTaskCacheModel.description = getDescription();
+
+		String description = kaleoTaskCacheModel.description;
+
+		if ((description != null) && (description.length() == 0)) {
+			kaleoTaskCacheModel.description = null;
+		}
+
+		return kaleoTaskCacheModel;
 	}
 
 	@Override
@@ -448,4 +514,5 @@ public class KaleoTaskModelImpl extends BaseModelImpl<KaleoTask>
 	private String _name;
 	private String _description;
 	private transient ExpandoBridge _expandoBridge;
+	private KaleoTask _escapedModelProxy;
 }

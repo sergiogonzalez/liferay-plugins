@@ -41,6 +41,7 @@ import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.ModelListener;
 import com.liferay.portal.service.persistence.BatchSessionUtil;
 import com.liferay.portal.service.persistence.ResourcePersistence;
@@ -77,17 +78,18 @@ public class HRProjectStatusPersistenceImpl extends BasePersistenceImpl<HRProjec
 		".List";
 	public static final FinderPath FINDER_PATH_FETCH_BY_G_C = new FinderPath(HRProjectStatusModelImpl.ENTITY_CACHE_ENABLED,
 			HRProjectStatusModelImpl.FINDER_CACHE_ENABLED,
-			FINDER_CLASS_NAME_ENTITY, "fetchByG_C",
+			HRProjectStatusImpl.class, FINDER_CLASS_NAME_ENTITY, "fetchByG_C",
 			new String[] { Long.class.getName(), String.class.getName() });
 	public static final FinderPath FINDER_PATH_COUNT_BY_G_C = new FinderPath(HRProjectStatusModelImpl.ENTITY_CACHE_ENABLED,
-			HRProjectStatusModelImpl.FINDER_CACHE_ENABLED,
+			HRProjectStatusModelImpl.FINDER_CACHE_ENABLED, Long.class,
 			FINDER_CLASS_NAME_LIST, "countByG_C",
 			new String[] { Long.class.getName(), String.class.getName() });
 	public static final FinderPath FINDER_PATH_FIND_ALL = new FinderPath(HRProjectStatusModelImpl.ENTITY_CACHE_ENABLED,
 			HRProjectStatusModelImpl.FINDER_CACHE_ENABLED,
-			FINDER_CLASS_NAME_LIST, "findAll", new String[0]);
+			HRProjectStatusImpl.class, FINDER_CLASS_NAME_LIST, "findAll",
+			new String[0]);
 	public static final FinderPath FINDER_PATH_COUNT_ALL = new FinderPath(HRProjectStatusModelImpl.ENTITY_CACHE_ENABLED,
-			HRProjectStatusModelImpl.FINDER_CACHE_ENABLED,
+			HRProjectStatusModelImpl.FINDER_CACHE_ENABLED, Long.class,
 			FINDER_CLASS_NAME_LIST, "countAll", new String[0]);
 
 	/**
@@ -120,7 +122,7 @@ public class HRProjectStatusPersistenceImpl extends BasePersistenceImpl<HRProjec
 			if (EntityCacheUtil.getResult(
 						HRProjectStatusModelImpl.ENTITY_CACHE_ENABLED,
 						HRProjectStatusImpl.class,
-						hrProjectStatus.getPrimaryKey(), this) == null) {
+						hrProjectStatus.getPrimaryKey()) == null) {
 				cacheResult(hrProjectStatus);
 			}
 		}
@@ -155,6 +157,8 @@ public class HRProjectStatusPersistenceImpl extends BasePersistenceImpl<HRProjec
 	public void clearCache(HRProjectStatus hrProjectStatus) {
 		EntityCacheUtil.removeResult(HRProjectStatusModelImpl.ENTITY_CACHE_ENABLED,
 			HRProjectStatusImpl.class, hrProjectStatus.getPrimaryKey());
+
+		FinderCacheUtil.removeResult(FINDER_PATH_FIND_ALL, FINDER_ARGS_EMPTY);
 
 		FinderCacheUtil.removeResult(FINDER_PATH_FETCH_BY_G_C,
 			new Object[] {
@@ -427,10 +431,16 @@ public class HRProjectStatusPersistenceImpl extends BasePersistenceImpl<HRProjec
 	public HRProjectStatus fetchByPrimaryKey(long hrProjectStatusId)
 		throws SystemException {
 		HRProjectStatus hrProjectStatus = (HRProjectStatus)EntityCacheUtil.getResult(HRProjectStatusModelImpl.ENTITY_CACHE_ENABLED,
-				HRProjectStatusImpl.class, hrProjectStatusId, this);
+				HRProjectStatusImpl.class, hrProjectStatusId);
+
+		if (hrProjectStatus == _nullHRProjectStatus) {
+			return null;
+		}
 
 		if (hrProjectStatus == null) {
 			Session session = null;
+
+			boolean hasException = false;
 
 			try {
 				session = openSession();
@@ -439,11 +449,18 @@ public class HRProjectStatusPersistenceImpl extends BasePersistenceImpl<HRProjec
 						Long.valueOf(hrProjectStatusId));
 			}
 			catch (Exception e) {
+				hasException = true;
+
 				throw processException(e);
 			}
 			finally {
 				if (hrProjectStatus != null) {
 					cacheResult(hrProjectStatus);
+				}
+				else if (!hasException) {
+					EntityCacheUtil.putResult(HRProjectStatusModelImpl.ENTITY_CACHE_ENABLED,
+						HRProjectStatusImpl.class, hrProjectStatusId,
+						_nullHRProjectStatus);
 				}
 
 				closeSession(session);
@@ -507,6 +524,7 @@ public class HRProjectStatusPersistenceImpl extends BasePersistenceImpl<HRProjec
 	 *
 	 * @param groupId the group ID
 	 * @param code the code
+	 * @param retrieveFromCache whether to use the finder cache
 	 * @return the matching h r project status, or <code>null</code> if a matching h r project status could not be found
 	 * @throws SystemException if a system exception occurred
 	 */
@@ -646,10 +664,7 @@ public class HRProjectStatusPersistenceImpl extends BasePersistenceImpl<HRProjec
 	 */
 	public List<HRProjectStatus> findAll(int start, int end,
 		OrderByComparator orderByComparator) throws SystemException {
-		Object[] finderArgs = new Object[] {
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
-			};
+		Object[] finderArgs = new Object[] { start, end, orderByComparator };
 
 		List<HRProjectStatus> list = (List<HRProjectStatus>)FinderCacheUtil.getResult(FINDER_PATH_FIND_ALL,
 				finderArgs, this);
@@ -815,10 +830,8 @@ public class HRProjectStatusPersistenceImpl extends BasePersistenceImpl<HRProjec
 	 * @throws SystemException if a system exception occurred
 	 */
 	public int countAll() throws SystemException {
-		Object[] finderArgs = new Object[0];
-
 		Long count = (Long)FinderCacheUtil.getResult(FINDER_PATH_COUNT_ALL,
-				finderArgs, this);
+				FINDER_ARGS_EMPTY, this);
 
 		if (count == null) {
 			Session session = null;
@@ -838,8 +851,8 @@ public class HRProjectStatusPersistenceImpl extends BasePersistenceImpl<HRProjec
 					count = Long.valueOf(0);
 				}
 
-				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL, finderArgs,
-					count);
+				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL,
+					FINDER_ARGS_EMPTY, count);
 
 				closeSession(session);
 			}
@@ -973,4 +986,21 @@ public class HRProjectStatusPersistenceImpl extends BasePersistenceImpl<HRProjec
 	private static final boolean _HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE = GetterUtil.getBoolean(PropsUtil.get(
 				PropsKeys.HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE));
 	private static Log _log = LogFactoryUtil.getLog(HRProjectStatusPersistenceImpl.class);
+	private static HRProjectStatus _nullHRProjectStatus = new HRProjectStatusImpl() {
+			@Override
+			public Object clone() {
+				return this;
+			}
+
+			@Override
+			public CacheModel<HRProjectStatus> toCacheModel() {
+				return _nullHRProjectStatusCacheModel;
+			}
+		};
+
+	private static CacheModel<HRProjectStatus> _nullHRProjectStatusCacheModel = new CacheModel<HRProjectStatus>() {
+			public HRProjectStatus toEntityModel() {
+				return _nullHRProjectStatus;
+			}
+		};
 }

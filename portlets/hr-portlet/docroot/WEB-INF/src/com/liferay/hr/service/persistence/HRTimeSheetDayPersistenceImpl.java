@@ -38,6 +38,7 @@ import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.ModelListener;
 import com.liferay.portal.service.persistence.BatchSessionUtil;
 import com.liferay.portal.service.persistence.ResourcePersistence;
@@ -74,9 +75,10 @@ public class HRTimeSheetDayPersistenceImpl extends BasePersistenceImpl<HRTimeShe
 		".List";
 	public static final FinderPath FINDER_PATH_FIND_ALL = new FinderPath(HRTimeSheetDayModelImpl.ENTITY_CACHE_ENABLED,
 			HRTimeSheetDayModelImpl.FINDER_CACHE_ENABLED,
-			FINDER_CLASS_NAME_LIST, "findAll", new String[0]);
+			HRTimeSheetDayImpl.class, FINDER_CLASS_NAME_LIST, "findAll",
+			new String[0]);
 	public static final FinderPath FINDER_PATH_COUNT_ALL = new FinderPath(HRTimeSheetDayModelImpl.ENTITY_CACHE_ENABLED,
-			HRTimeSheetDayModelImpl.FINDER_CACHE_ENABLED,
+			HRTimeSheetDayModelImpl.FINDER_CACHE_ENABLED, Long.class,
 			FINDER_CLASS_NAME_LIST, "countAll", new String[0]);
 
 	/**
@@ -101,8 +103,7 @@ public class HRTimeSheetDayPersistenceImpl extends BasePersistenceImpl<HRTimeShe
 		for (HRTimeSheetDay hrTimeSheetDay : hrTimeSheetDaies) {
 			if (EntityCacheUtil.getResult(
 						HRTimeSheetDayModelImpl.ENTITY_CACHE_ENABLED,
-						HRTimeSheetDayImpl.class,
-						hrTimeSheetDay.getPrimaryKey(), this) == null) {
+						HRTimeSheetDayImpl.class, hrTimeSheetDay.getPrimaryKey()) == null) {
 				cacheResult(hrTimeSheetDay);
 			}
 		}
@@ -137,6 +138,8 @@ public class HRTimeSheetDayPersistenceImpl extends BasePersistenceImpl<HRTimeShe
 	public void clearCache(HRTimeSheetDay hrTimeSheetDay) {
 		EntityCacheUtil.removeResult(HRTimeSheetDayModelImpl.ENTITY_CACHE_ENABLED,
 			HRTimeSheetDayImpl.class, hrTimeSheetDay.getPrimaryKey());
+
+		FinderCacheUtil.removeResult(FINDER_PATH_FIND_ALL, FINDER_ARGS_EMPTY);
 	}
 
 	/**
@@ -367,10 +370,16 @@ public class HRTimeSheetDayPersistenceImpl extends BasePersistenceImpl<HRTimeShe
 	public HRTimeSheetDay fetchByPrimaryKey(long hrTimeSheetDayId)
 		throws SystemException {
 		HRTimeSheetDay hrTimeSheetDay = (HRTimeSheetDay)EntityCacheUtil.getResult(HRTimeSheetDayModelImpl.ENTITY_CACHE_ENABLED,
-				HRTimeSheetDayImpl.class, hrTimeSheetDayId, this);
+				HRTimeSheetDayImpl.class, hrTimeSheetDayId);
+
+		if (hrTimeSheetDay == _nullHRTimeSheetDay) {
+			return null;
+		}
 
 		if (hrTimeSheetDay == null) {
 			Session session = null;
+
+			boolean hasException = false;
 
 			try {
 				session = openSession();
@@ -379,11 +388,18 @@ public class HRTimeSheetDayPersistenceImpl extends BasePersistenceImpl<HRTimeShe
 						Long.valueOf(hrTimeSheetDayId));
 			}
 			catch (Exception e) {
+				hasException = true;
+
 				throw processException(e);
 			}
 			finally {
 				if (hrTimeSheetDay != null) {
 					cacheResult(hrTimeSheetDay);
+				}
+				else if (!hasException) {
+					EntityCacheUtil.putResult(HRTimeSheetDayModelImpl.ENTITY_CACHE_ENABLED,
+						HRTimeSheetDayImpl.class, hrTimeSheetDayId,
+						_nullHRTimeSheetDay);
 				}
 
 				closeSession(session);
@@ -435,10 +451,7 @@ public class HRTimeSheetDayPersistenceImpl extends BasePersistenceImpl<HRTimeShe
 	 */
 	public List<HRTimeSheetDay> findAll(int start, int end,
 		OrderByComparator orderByComparator) throws SystemException {
-		Object[] finderArgs = new Object[] {
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
-			};
+		Object[] finderArgs = new Object[] { start, end, orderByComparator };
 
 		List<HRTimeSheetDay> list = (List<HRTimeSheetDay>)FinderCacheUtil.getResult(FINDER_PATH_FIND_ALL,
 				finderArgs, this);
@@ -520,10 +533,8 @@ public class HRTimeSheetDayPersistenceImpl extends BasePersistenceImpl<HRTimeShe
 	 * @throws SystemException if a system exception occurred
 	 */
 	public int countAll() throws SystemException {
-		Object[] finderArgs = new Object[0];
-
 		Long count = (Long)FinderCacheUtil.getResult(FINDER_PATH_COUNT_ALL,
-				finderArgs, this);
+				FINDER_ARGS_EMPTY, this);
 
 		if (count == null) {
 			Session session = null;
@@ -543,8 +554,8 @@ public class HRTimeSheetDayPersistenceImpl extends BasePersistenceImpl<HRTimeShe
 					count = Long.valueOf(0);
 				}
 
-				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL, finderArgs,
-					count);
+				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL,
+					FINDER_ARGS_EMPTY, count);
 
 				closeSession(session);
 			}
@@ -671,4 +682,21 @@ public class HRTimeSheetDayPersistenceImpl extends BasePersistenceImpl<HRTimeShe
 	private static final boolean _HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE = GetterUtil.getBoolean(PropsUtil.get(
 				PropsKeys.HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE));
 	private static Log _log = LogFactoryUtil.getLog(HRTimeSheetDayPersistenceImpl.class);
+	private static HRTimeSheetDay _nullHRTimeSheetDay = new HRTimeSheetDayImpl() {
+			@Override
+			public Object clone() {
+				return this;
+			}
+
+			@Override
+			public CacheModel<HRTimeSheetDay> toCacheModel() {
+				return _nullHRTimeSheetDayCacheModel;
+			}
+		};
+
+	private static CacheModel<HRTimeSheetDay> _nullHRTimeSheetDayCacheModel = new CacheModel<HRTimeSheetDay>() {
+			public HRTimeSheetDay toEntityModel() {
+				return _nullHRTimeSheetDay;
+			}
+		};
 }

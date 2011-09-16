@@ -22,6 +22,7 @@ import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.mail.MailMessage;
+import com.liferay.portal.kernel.portlet.PortletResponseUtil;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.servlet.SessionMessages;
 import com.liferay.portal.kernel.util.Constants;
@@ -43,7 +44,6 @@ import com.liferay.portlet.expando.service.ExpandoRowLocalServiceUtil;
 import com.liferay.portlet.expando.service.ExpandoTableLocalServiceUtil;
 import com.liferay.portlet.expando.service.ExpandoValueLocalServiceUtil;
 import com.liferay.util.bridges.mvc.MVCPortlet;
-import com.liferay.util.servlet.PortletResponseUtil;
 import com.liferay.webform.util.WebFormUtil;
 
 import java.util.ArrayList;
@@ -381,11 +381,10 @@ public class WebFormPortlet extends MVCPortlet {
 		Map<String,String> fieldsMap, PortletPreferences preferences) {
 
 		try {
-			String subject = preferences.getValue("subject", StringPool.BLANK);
-			String emailAddress = preferences.getValue(
+			String emailAddresses = preferences.getValue(
 				"emailAddress", StringPool.BLANK);
 
-			if (Validator.isNull(emailAddress)) {
+			if (Validator.isNull(emailAddresses)) {
 				_log.error(
 					"The web form email cannot be sent because no email " +
 						"address is configured");
@@ -393,6 +392,7 @@ public class WebFormPortlet extends MVCPortlet {
 				return false;
 			}
 
+			String subject = preferences.getValue("subject", StringPool.BLANK);
 			String body = getMailBody(fieldsMap);
 
 			InternetAddress fromAddress = null;
@@ -409,14 +409,17 @@ public class WebFormPortlet extends MVCPortlet {
 				_log.error(e, e);
 			}
 
+			InternetAddress[] toAddresses = InternetAddress.parse(
+				emailAddresses);
+
 			if (fromAddress == null) {
-				fromAddress = new InternetAddress(emailAddress);
+				fromAddress = toAddresses[0];
 			}
 
-			InternetAddress toAddress = new InternetAddress(emailAddress);
-
 			MailMessage mailMessage = new MailMessage(
-				fromAddress, toAddress, subject, body, false);
+				fromAddress, subject, body, false);
+
+			mailMessage.setTo(toAddresses);
 
 			MailServiceUtil.sendEmail(mailMessage);
 

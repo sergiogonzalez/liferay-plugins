@@ -42,6 +42,7 @@ import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.uuid.PortalUUIDUtil;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.ModelListener;
 import com.liferay.portal.service.persistence.BatchSessionUtil;
 import com.liferay.portal.service.persistence.ResourcePersistence;
@@ -79,8 +80,8 @@ public class KBCommentPersistenceImpl extends BasePersistenceImpl<KBComment>
 	public static final String FINDER_CLASS_NAME_LIST = FINDER_CLASS_NAME_ENTITY +
 		".List";
 	public static final FinderPath FINDER_PATH_FIND_BY_UUID = new FinderPath(KBCommentModelImpl.ENTITY_CACHE_ENABLED,
-			KBCommentModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"findByUuid",
+			KBCommentModelImpl.FINDER_CACHE_ENABLED, KBCommentImpl.class,
+			FINDER_CLASS_NAME_LIST, "findByUuid",
 			new String[] {
 				String.class.getName(),
 				
@@ -88,19 +89,20 @@ public class KBCommentPersistenceImpl extends BasePersistenceImpl<KBComment>
 				"com.liferay.portal.kernel.util.OrderByComparator"
 			});
 	public static final FinderPath FINDER_PATH_COUNT_BY_UUID = new FinderPath(KBCommentModelImpl.ENTITY_CACHE_ENABLED,
-			KBCommentModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"countByUuid", new String[] { String.class.getName() });
+			KBCommentModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST, "countByUuid",
+			new String[] { String.class.getName() });
 	public static final FinderPath FINDER_PATH_FETCH_BY_UUID_G = new FinderPath(KBCommentModelImpl.ENTITY_CACHE_ENABLED,
-			KBCommentModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_ENTITY,
-			"fetchByUUID_G",
+			KBCommentModelImpl.FINDER_CACHE_ENABLED, KBCommentImpl.class,
+			FINDER_CLASS_NAME_ENTITY, "fetchByUUID_G",
 			new String[] { String.class.getName(), Long.class.getName() });
 	public static final FinderPath FINDER_PATH_COUNT_BY_UUID_G = new FinderPath(KBCommentModelImpl.ENTITY_CACHE_ENABLED,
-			KBCommentModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"countByUUID_G",
+			KBCommentModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST, "countByUUID_G",
 			new String[] { String.class.getName(), Long.class.getName() });
 	public static final FinderPath FINDER_PATH_FIND_BY_GROUPID = new FinderPath(KBCommentModelImpl.ENTITY_CACHE_ENABLED,
-			KBCommentModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"findByGroupId",
+			KBCommentModelImpl.FINDER_CACHE_ENABLED, KBCommentImpl.class,
+			FINDER_CLASS_NAME_LIST, "findByGroupId",
 			new String[] {
 				Long.class.getName(),
 				
@@ -108,11 +110,12 @@ public class KBCommentPersistenceImpl extends BasePersistenceImpl<KBComment>
 				"com.liferay.portal.kernel.util.OrderByComparator"
 			});
 	public static final FinderPath FINDER_PATH_COUNT_BY_GROUPID = new FinderPath(KBCommentModelImpl.ENTITY_CACHE_ENABLED,
-			KBCommentModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"countByGroupId", new String[] { Long.class.getName() });
+			KBCommentModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST, "countByGroupId",
+			new String[] { Long.class.getName() });
 	public static final FinderPath FINDER_PATH_FIND_BY_G_C = new FinderPath(KBCommentModelImpl.ENTITY_CACHE_ENABLED,
-			KBCommentModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"findByG_C",
+			KBCommentModelImpl.FINDER_CACHE_ENABLED, KBCommentImpl.class,
+			FINDER_CLASS_NAME_LIST, "findByG_C",
 			new String[] {
 				Long.class.getName(), Long.class.getName(),
 				
@@ -120,12 +123,12 @@ public class KBCommentPersistenceImpl extends BasePersistenceImpl<KBComment>
 				"com.liferay.portal.kernel.util.OrderByComparator"
 			});
 	public static final FinderPath FINDER_PATH_COUNT_BY_G_C = new FinderPath(KBCommentModelImpl.ENTITY_CACHE_ENABLED,
-			KBCommentModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"countByG_C",
+			KBCommentModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST, "countByG_C",
 			new String[] { Long.class.getName(), Long.class.getName() });
 	public static final FinderPath FINDER_PATH_FIND_BY_C_C = new FinderPath(KBCommentModelImpl.ENTITY_CACHE_ENABLED,
-			KBCommentModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"findByC_C",
+			KBCommentModelImpl.FINDER_CACHE_ENABLED, KBCommentImpl.class,
+			FINDER_CLASS_NAME_LIST, "findByC_C",
 			new String[] {
 				Long.class.getName(), Long.class.getName(),
 				
@@ -133,27 +136,27 @@ public class KBCommentPersistenceImpl extends BasePersistenceImpl<KBComment>
 				"com.liferay.portal.kernel.util.OrderByComparator"
 			});
 	public static final FinderPath FINDER_PATH_COUNT_BY_C_C = new FinderPath(KBCommentModelImpl.ENTITY_CACHE_ENABLED,
-			KBCommentModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"countByC_C",
+			KBCommentModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST, "countByC_C",
 			new String[] { Long.class.getName(), Long.class.getName() });
 	public static final FinderPath FINDER_PATH_FETCH_BY_U_C_C = new FinderPath(KBCommentModelImpl.ENTITY_CACHE_ENABLED,
-			KBCommentModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_ENTITY,
-			"fetchByU_C_C",
+			KBCommentModelImpl.FINDER_CACHE_ENABLED, KBCommentImpl.class,
+			FINDER_CLASS_NAME_ENTITY, "fetchByU_C_C",
 			new String[] {
 				Long.class.getName(), Long.class.getName(), Long.class.getName()
 			});
 	public static final FinderPath FINDER_PATH_COUNT_BY_U_C_C = new FinderPath(KBCommentModelImpl.ENTITY_CACHE_ENABLED,
-			KBCommentModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"countByU_C_C",
+			KBCommentModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST, "countByU_C_C",
 			new String[] {
 				Long.class.getName(), Long.class.getName(), Long.class.getName()
 			});
 	public static final FinderPath FINDER_PATH_FIND_ALL = new FinderPath(KBCommentModelImpl.ENTITY_CACHE_ENABLED,
-			KBCommentModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"findAll", new String[0]);
+			KBCommentModelImpl.FINDER_CACHE_ENABLED, KBCommentImpl.class,
+			FINDER_CLASS_NAME_LIST, "findAll", new String[0]);
 	public static final FinderPath FINDER_PATH_COUNT_ALL = new FinderPath(KBCommentModelImpl.ENTITY_CACHE_ENABLED,
-			KBCommentModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"countAll", new String[0]);
+			KBCommentModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST, "countAll", new String[0]);
 
 	/**
 	 * Caches the k b comment in the entity cache if it is enabled.
@@ -188,7 +191,7 @@ public class KBCommentPersistenceImpl extends BasePersistenceImpl<KBComment>
 		for (KBComment kbComment : kbComments) {
 			if (EntityCacheUtil.getResult(
 						KBCommentModelImpl.ENTITY_CACHE_ENABLED,
-						KBCommentImpl.class, kbComment.getPrimaryKey(), this) == null) {
+						KBCommentImpl.class, kbComment.getPrimaryKey()) == null) {
 				cacheResult(kbComment);
 			}
 		}
@@ -223,6 +226,8 @@ public class KBCommentPersistenceImpl extends BasePersistenceImpl<KBComment>
 	public void clearCache(KBComment kbComment) {
 		EntityCacheUtil.removeResult(KBCommentModelImpl.ENTITY_CACHE_ENABLED,
 			KBCommentImpl.class, kbComment.getPrimaryKey());
+
+		FinderCacheUtil.removeResult(FINDER_PATH_FIND_ALL, FINDER_ARGS_EMPTY);
 
 		FinderCacheUtil.removeResult(FINDER_PATH_FETCH_BY_UUID_G,
 			new Object[] {
@@ -536,10 +541,16 @@ public class KBCommentPersistenceImpl extends BasePersistenceImpl<KBComment>
 	public KBComment fetchByPrimaryKey(long kbCommentId)
 		throws SystemException {
 		KBComment kbComment = (KBComment)EntityCacheUtil.getResult(KBCommentModelImpl.ENTITY_CACHE_ENABLED,
-				KBCommentImpl.class, kbCommentId, this);
+				KBCommentImpl.class, kbCommentId);
+
+		if (kbComment == _nullKBComment) {
+			return null;
+		}
 
 		if (kbComment == null) {
 			Session session = null;
+
+			boolean hasException = false;
 
 			try {
 				session = openSession();
@@ -548,11 +559,17 @@ public class KBCommentPersistenceImpl extends BasePersistenceImpl<KBComment>
 						Long.valueOf(kbCommentId));
 			}
 			catch (Exception e) {
+				hasException = true;
+
 				throw processException(e);
 			}
 			finally {
 				if (kbComment != null) {
 					cacheResult(kbComment);
+				}
+				else if (!hasException) {
+					EntityCacheUtil.putResult(KBCommentModelImpl.ENTITY_CACHE_ENABLED,
+						KBCommentImpl.class, kbCommentId, _nullKBComment);
 				}
 
 				closeSession(session);
@@ -607,12 +624,7 @@ public class KBCommentPersistenceImpl extends BasePersistenceImpl<KBComment>
 	 */
 	public List<KBComment> findByUuid(String uuid, int start, int end,
 		OrderByComparator orderByComparator) throws SystemException {
-		Object[] finderArgs = new Object[] {
-				uuid,
-				
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
-			};
+		Object[] finderArgs = new Object[] { uuid, start, end, orderByComparator };
 
 		List<KBComment> list = (List<KBComment>)FinderCacheUtil.getResult(FINDER_PATH_FIND_BY_UUID,
 				finderArgs, this);
@@ -978,6 +990,7 @@ public class KBCommentPersistenceImpl extends BasePersistenceImpl<KBComment>
 	 *
 	 * @param uuid the uuid
 	 * @param groupId the group ID
+	 * @param retrieveFromCache whether to use the finder cache
 	 * @return the matching k b comment, or <code>null</code> if a matching k b comment could not be found
 	 * @throws SystemException if a system exception occurred
 	 */
@@ -1126,8 +1139,7 @@ public class KBCommentPersistenceImpl extends BasePersistenceImpl<KBComment>
 		Object[] finderArgs = new Object[] {
 				groupId,
 				
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
+				start, end, orderByComparator
 			};
 
 		List<KBComment> list = (List<KBComment>)FinderCacheUtil.getResult(FINDER_PATH_FIND_BY_GROUPID,
@@ -1469,8 +1481,7 @@ public class KBCommentPersistenceImpl extends BasePersistenceImpl<KBComment>
 		Object[] finderArgs = new Object[] {
 				groupId, classNameId,
 				
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
+				start, end, orderByComparator
 			};
 
 		List<KBComment> list = (List<KBComment>)FinderCacheUtil.getResult(FINDER_PATH_FIND_BY_G_C,
@@ -1830,8 +1841,7 @@ public class KBCommentPersistenceImpl extends BasePersistenceImpl<KBComment>
 		Object[] finderArgs = new Object[] {
 				classNameId, classPK,
 				
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
+				start, end, orderByComparator
 			};
 
 		List<KBComment> list = (List<KBComment>)FinderCacheUtil.getResult(FINDER_PATH_FIND_BY_C_C,
@@ -2198,6 +2208,7 @@ public class KBCommentPersistenceImpl extends BasePersistenceImpl<KBComment>
 	 * @param userId the user ID
 	 * @param classNameId the class name ID
 	 * @param classPK the class p k
+	 * @param retrieveFromCache whether to use the finder cache
 	 * @return the matching k b comment, or <code>null</code> if a matching k b comment could not be found
 	 * @throws SystemException if a system exception occurred
 	 */
@@ -2331,10 +2342,7 @@ public class KBCommentPersistenceImpl extends BasePersistenceImpl<KBComment>
 	 */
 	public List<KBComment> findAll(int start, int end,
 		OrderByComparator orderByComparator) throws SystemException {
-		Object[] finderArgs = new Object[] {
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
-			};
+		Object[] finderArgs = new Object[] { start, end, orderByComparator };
 
 		List<KBComment> list = (List<KBComment>)FinderCacheUtil.getResult(FINDER_PATH_FIND_ALL,
 				finderArgs, this);
@@ -2868,10 +2876,8 @@ public class KBCommentPersistenceImpl extends BasePersistenceImpl<KBComment>
 	 * @throws SystemException if a system exception occurred
 	 */
 	public int countAll() throws SystemException {
-		Object[] finderArgs = new Object[0];
-
 		Long count = (Long)FinderCacheUtil.getResult(FINDER_PATH_COUNT_ALL,
-				finderArgs, this);
+				FINDER_ARGS_EMPTY, this);
 
 		if (count == null) {
 			Session session = null;
@@ -2891,8 +2897,8 @@ public class KBCommentPersistenceImpl extends BasePersistenceImpl<KBComment>
 					count = Long.valueOf(0);
 				}
 
-				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL, finderArgs,
-					count);
+				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL,
+					FINDER_ARGS_EMPTY, count);
 
 				closeSession(session);
 			}
@@ -2936,8 +2942,6 @@ public class KBCommentPersistenceImpl extends BasePersistenceImpl<KBComment>
 	protected KBArticlePersistence kbArticlePersistence;
 	@BeanReference(type = KBCommentPersistence.class)
 	protected KBCommentPersistence kbCommentPersistence;
-	@BeanReference(type = KBStructurePersistence.class)
-	protected KBStructurePersistence kbStructurePersistence;
 	@BeanReference(type = KBTemplatePersistence.class)
 	protected KBTemplatePersistence kbTemplatePersistence;
 	@BeanReference(type = ResourcePersistence.class)
@@ -2971,4 +2975,21 @@ public class KBCommentPersistenceImpl extends BasePersistenceImpl<KBComment>
 	private static final boolean _HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE = GetterUtil.getBoolean(PropsUtil.get(
 				PropsKeys.HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE));
 	private static Log _log = LogFactoryUtil.getLog(KBCommentPersistenceImpl.class);
+	private static KBComment _nullKBComment = new KBCommentImpl() {
+			@Override
+			public Object clone() {
+				return this;
+			}
+
+			@Override
+			public CacheModel<KBComment> toCacheModel() {
+				return _nullKBCommentCacheModel;
+			}
+		};
+
+	private static CacheModel<KBComment> _nullKBCommentCacheModel = new CacheModel<KBComment>() {
+			public KBComment toEntityModel() {
+				return _nullKBComment;
+			}
+		};
 }

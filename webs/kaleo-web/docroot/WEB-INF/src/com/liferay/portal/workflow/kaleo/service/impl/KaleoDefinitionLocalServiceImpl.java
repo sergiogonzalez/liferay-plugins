@@ -88,12 +88,12 @@ public class KaleoDefinitionLocalServiceImpl
 	}
 
 	public KaleoDefinition addKaleoDefinition(
-			String name, String title, String description, int version,
-			ServiceContext serviceContext)
+			String name, String title, String description, String content,
+			int version, ServiceContext serviceContext)
 		throws PortalException, SystemException {
 
 		User user = userPersistence.findByPrimaryKey(
-			serviceContext.getUserId());
+			serviceContext.getGuestOrUserId());
 		Date now = new Date();
 
 		long kaleoDefinitionId = counterLocalService.increment();
@@ -109,6 +109,7 @@ public class KaleoDefinitionLocalServiceImpl
 		kaleoDefinition.setName(name);
 		kaleoDefinition.setTitle(title);
 		kaleoDefinition.setDescription(description);
+		kaleoDefinition.setContent(content);
 		kaleoDefinition.setVersion(version);
 		kaleoDefinition.setActive(false);
 
@@ -285,6 +286,21 @@ public class KaleoDefinitionLocalServiceImpl
 			serviceContext.getCompanyId(), name);
 	}
 
+	public KaleoDefinition getLatestKaleoDefinition(
+			String name, ServiceContext serviceContext)
+		throws PortalException, SystemException {
+
+		List<KaleoDefinition> kaleoDefinitions =
+			kaleoDefinitionPersistence.findByC_N(
+				serviceContext.getCompanyId(), name, 0, 1);
+
+		if (kaleoDefinitions.isEmpty()) {
+			throw new NoSuchDefinitionException();
+		}
+
+		return kaleoDefinitions.get(0);
+	}
+
 	public KaleoDefinition incrementKaleoDefinition(
 			String name, String title, ServiceContext serviceContext)
 		throws PortalException, SystemException {
@@ -294,7 +310,8 @@ public class KaleoDefinitionLocalServiceImpl
 
 		return addKaleoDefinition(
 			kaleoDefinition.getName(), title, kaleoDefinition.getDescription(),
-			kaleoDefinition.getVersion() + 1, serviceContext);
+			kaleoDefinition.getContent(), kaleoDefinition.getVersion() + 1,
+			serviceContext);
 	}
 
 	public KaleoDefinition updateTitle(
@@ -311,21 +328,6 @@ public class KaleoDefinitionLocalServiceImpl
 		kaleoDefinitionPersistence.update(kaleoDefinition, false);
 
 		return kaleoDefinition;
-	}
-
-	protected KaleoDefinition getLatestKaleoDefinition(
-			String name, ServiceContext serviceContext)
-		throws PortalException, SystemException {
-
-		List<KaleoDefinition> kaleoDefinitions =
-			kaleoDefinitionPersistence.findByC_N(
-				serviceContext.getCompanyId(), name, 0, 1);
-
-		if (kaleoDefinitions.isEmpty()) {
-			throw new NoSuchDefinitionException();
-		}
-
-		return kaleoDefinitions.get(0);
 	}
 
 }

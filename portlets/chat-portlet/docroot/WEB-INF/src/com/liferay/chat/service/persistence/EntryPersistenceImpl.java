@@ -40,6 +40,7 @@ import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.ModelListener;
 import com.liferay.portal.service.persistence.BatchSessionUtil;
 import com.liferay.portal.service.persistence.ResourcePersistence;
@@ -75,8 +76,8 @@ public class EntryPersistenceImpl extends BasePersistenceImpl<Entry>
 	public static final String FINDER_CLASS_NAME_LIST = FINDER_CLASS_NAME_ENTITY +
 		".List";
 	public static final FinderPath FINDER_PATH_FIND_BY_CREATEDATE = new FinderPath(EntryModelImpl.ENTITY_CACHE_ENABLED,
-			EntryModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"findByCreateDate",
+			EntryModelImpl.FINDER_CACHE_ENABLED, EntryImpl.class,
+			FINDER_CLASS_NAME_LIST, "findByCreateDate",
 			new String[] {
 				Long.class.getName(),
 				
@@ -84,11 +85,12 @@ public class EntryPersistenceImpl extends BasePersistenceImpl<Entry>
 				"com.liferay.portal.kernel.util.OrderByComparator"
 			});
 	public static final FinderPath FINDER_PATH_COUNT_BY_CREATEDATE = new FinderPath(EntryModelImpl.ENTITY_CACHE_ENABLED,
-			EntryModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"countByCreateDate", new String[] { Long.class.getName() });
+			EntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST, "countByCreateDate",
+			new String[] { Long.class.getName() });
 	public static final FinderPath FINDER_PATH_FIND_BY_FROMUSERID = new FinderPath(EntryModelImpl.ENTITY_CACHE_ENABLED,
-			EntryModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"findByFromUserId",
+			EntryModelImpl.FINDER_CACHE_ENABLED, EntryImpl.class,
+			FINDER_CLASS_NAME_LIST, "findByFromUserId",
 			new String[] {
 				Long.class.getName(),
 				
@@ -96,11 +98,12 @@ public class EntryPersistenceImpl extends BasePersistenceImpl<Entry>
 				"com.liferay.portal.kernel.util.OrderByComparator"
 			});
 	public static final FinderPath FINDER_PATH_COUNT_BY_FROMUSERID = new FinderPath(EntryModelImpl.ENTITY_CACHE_ENABLED,
-			EntryModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"countByFromUserId", new String[] { Long.class.getName() });
+			EntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST, "countByFromUserId",
+			new String[] { Long.class.getName() });
 	public static final FinderPath FINDER_PATH_FIND_BY_TOUSERID = new FinderPath(EntryModelImpl.ENTITY_CACHE_ENABLED,
-			EntryModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"findByToUserId",
+			EntryModelImpl.FINDER_CACHE_ENABLED, EntryImpl.class,
+			FINDER_CLASS_NAME_LIST, "findByToUserId",
 			new String[] {
 				Long.class.getName(),
 				
@@ -108,11 +111,12 @@ public class EntryPersistenceImpl extends BasePersistenceImpl<Entry>
 				"com.liferay.portal.kernel.util.OrderByComparator"
 			});
 	public static final FinderPath FINDER_PATH_COUNT_BY_TOUSERID = new FinderPath(EntryModelImpl.ENTITY_CACHE_ENABLED,
-			EntryModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"countByToUserId", new String[] { Long.class.getName() });
+			EntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST, "countByToUserId",
+			new String[] { Long.class.getName() });
 	public static final FinderPath FINDER_PATH_FIND_BY_C_F = new FinderPath(EntryModelImpl.ENTITY_CACHE_ENABLED,
-			EntryModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"findByC_F",
+			EntryModelImpl.FINDER_CACHE_ENABLED, EntryImpl.class,
+			FINDER_CLASS_NAME_LIST, "findByC_F",
 			new String[] {
 				Long.class.getName(), Long.class.getName(),
 				
@@ -120,12 +124,12 @@ public class EntryPersistenceImpl extends BasePersistenceImpl<Entry>
 				"com.liferay.portal.kernel.util.OrderByComparator"
 			});
 	public static final FinderPath FINDER_PATH_COUNT_BY_C_F = new FinderPath(EntryModelImpl.ENTITY_CACHE_ENABLED,
-			EntryModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"countByC_F",
+			EntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST, "countByC_F",
 			new String[] { Long.class.getName(), Long.class.getName() });
 	public static final FinderPath FINDER_PATH_FIND_BY_C_T = new FinderPath(EntryModelImpl.ENTITY_CACHE_ENABLED,
-			EntryModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"findByC_T",
+			EntryModelImpl.FINDER_CACHE_ENABLED, EntryImpl.class,
+			FINDER_CLASS_NAME_LIST, "findByC_T",
 			new String[] {
 				Long.class.getName(), Long.class.getName(),
 				
@@ -133,12 +137,12 @@ public class EntryPersistenceImpl extends BasePersistenceImpl<Entry>
 				"com.liferay.portal.kernel.util.OrderByComparator"
 			});
 	public static final FinderPath FINDER_PATH_COUNT_BY_C_T = new FinderPath(EntryModelImpl.ENTITY_CACHE_ENABLED,
-			EntryModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"countByC_T",
+			EntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST, "countByC_T",
 			new String[] { Long.class.getName(), Long.class.getName() });
 	public static final FinderPath FINDER_PATH_FIND_BY_C_F_T = new FinderPath(EntryModelImpl.ENTITY_CACHE_ENABLED,
-			EntryModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"findByC_F_T",
+			EntryModelImpl.FINDER_CACHE_ENABLED, EntryImpl.class,
+			FINDER_CLASS_NAME_LIST, "findByC_F_T",
 			new String[] {
 				Long.class.getName(), Long.class.getName(), Long.class.getName(),
 				
@@ -146,14 +150,14 @@ public class EntryPersistenceImpl extends BasePersistenceImpl<Entry>
 				"com.liferay.portal.kernel.util.OrderByComparator"
 			});
 	public static final FinderPath FINDER_PATH_COUNT_BY_C_F_T = new FinderPath(EntryModelImpl.ENTITY_CACHE_ENABLED,
-			EntryModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"countByC_F_T",
+			EntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST, "countByC_F_T",
 			new String[] {
 				Long.class.getName(), Long.class.getName(), Long.class.getName()
 			});
 	public static final FinderPath FINDER_PATH_FIND_BY_F_T_C = new FinderPath(EntryModelImpl.ENTITY_CACHE_ENABLED,
-			EntryModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"findByF_T_C",
+			EntryModelImpl.FINDER_CACHE_ENABLED, EntryImpl.class,
+			FINDER_CLASS_NAME_LIST, "findByF_T_C",
 			new String[] {
 				Long.class.getName(), Long.class.getName(),
 				String.class.getName(),
@@ -162,18 +166,18 @@ public class EntryPersistenceImpl extends BasePersistenceImpl<Entry>
 				"com.liferay.portal.kernel.util.OrderByComparator"
 			});
 	public static final FinderPath FINDER_PATH_COUNT_BY_F_T_C = new FinderPath(EntryModelImpl.ENTITY_CACHE_ENABLED,
-			EntryModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"countByF_T_C",
+			EntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST, "countByF_T_C",
 			new String[] {
 				Long.class.getName(), Long.class.getName(),
 				String.class.getName()
 			});
 	public static final FinderPath FINDER_PATH_FIND_ALL = new FinderPath(EntryModelImpl.ENTITY_CACHE_ENABLED,
-			EntryModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"findAll", new String[0]);
+			EntryModelImpl.FINDER_CACHE_ENABLED, EntryImpl.class,
+			FINDER_CLASS_NAME_LIST, "findAll", new String[0]);
 	public static final FinderPath FINDER_PATH_COUNT_ALL = new FinderPath(EntryModelImpl.ENTITY_CACHE_ENABLED,
-			EntryModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"countAll", new String[0]);
+			EntryModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST, "countAll", new String[0]);
 
 	/**
 	 * Caches the entry in the entity cache if it is enabled.
@@ -195,7 +199,7 @@ public class EntryPersistenceImpl extends BasePersistenceImpl<Entry>
 	public void cacheResult(List<Entry> entries) {
 		for (Entry entry : entries) {
 			if (EntityCacheUtil.getResult(EntryModelImpl.ENTITY_CACHE_ENABLED,
-						EntryImpl.class, entry.getPrimaryKey(), this) == null) {
+						EntryImpl.class, entry.getPrimaryKey()) == null) {
 				cacheResult(entry);
 			}
 		}
@@ -230,6 +234,8 @@ public class EntryPersistenceImpl extends BasePersistenceImpl<Entry>
 	public void clearCache(Entry entry) {
 		EntityCacheUtil.removeResult(EntryModelImpl.ENTITY_CACHE_ENABLED,
 			EntryImpl.class, entry.getPrimaryKey());
+
+		FinderCacheUtil.removeResult(FINDER_PATH_FIND_ALL, FINDER_ARGS_EMPTY);
 	}
 
 	/**
@@ -447,10 +453,16 @@ public class EntryPersistenceImpl extends BasePersistenceImpl<Entry>
 	 */
 	public Entry fetchByPrimaryKey(long entryId) throws SystemException {
 		Entry entry = (Entry)EntityCacheUtil.getResult(EntryModelImpl.ENTITY_CACHE_ENABLED,
-				EntryImpl.class, entryId, this);
+				EntryImpl.class, entryId);
+
+		if (entry == _nullEntry) {
+			return null;
+		}
 
 		if (entry == null) {
 			Session session = null;
+
+			boolean hasException = false;
 
 			try {
 				session = openSession();
@@ -459,11 +471,17 @@ public class EntryPersistenceImpl extends BasePersistenceImpl<Entry>
 						Long.valueOf(entryId));
 			}
 			catch (Exception e) {
+				hasException = true;
+
 				throw processException(e);
 			}
 			finally {
 				if (entry != null) {
 					cacheResult(entry);
+				}
+				else if (!hasException) {
+					EntityCacheUtil.putResult(EntryModelImpl.ENTITY_CACHE_ENABLED,
+						EntryImpl.class, entryId, _nullEntry);
 				}
 
 				closeSession(session);
@@ -523,8 +541,7 @@ public class EntryPersistenceImpl extends BasePersistenceImpl<Entry>
 		Object[] finderArgs = new Object[] {
 				createDate,
 				
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
+				start, end, orderByComparator
 			};
 
 		List<Entry> list = (List<Entry>)FinderCacheUtil.getResult(FINDER_PATH_FIND_BY_CREATEDATE,
@@ -861,8 +878,7 @@ public class EntryPersistenceImpl extends BasePersistenceImpl<Entry>
 		Object[] finderArgs = new Object[] {
 				fromUserId,
 				
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
+				start, end, orderByComparator
 			};
 
 		List<Entry> list = (List<Entry>)FinderCacheUtil.getResult(FINDER_PATH_FIND_BY_FROMUSERID,
@@ -1198,8 +1214,7 @@ public class EntryPersistenceImpl extends BasePersistenceImpl<Entry>
 		Object[] finderArgs = new Object[] {
 				toUserId,
 				
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
+				start, end, orderByComparator
 			};
 
 		List<Entry> list = (List<Entry>)FinderCacheUtil.getResult(FINDER_PATH_FIND_BY_TOUSERID,
@@ -1539,8 +1554,7 @@ public class EntryPersistenceImpl extends BasePersistenceImpl<Entry>
 		Object[] finderArgs = new Object[] {
 				createDate, fromUserId,
 				
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
+				start, end, orderByComparator
 			};
 
 		List<Entry> list = (List<Entry>)FinderCacheUtil.getResult(FINDER_PATH_FIND_BY_C_F,
@@ -1899,8 +1913,7 @@ public class EntryPersistenceImpl extends BasePersistenceImpl<Entry>
 		Object[] finderArgs = new Object[] {
 				createDate, toUserId,
 				
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
+				start, end, orderByComparator
 			};
 
 		List<Entry> list = (List<Entry>)FinderCacheUtil.getResult(FINDER_PATH_FIND_BY_C_T,
@@ -2263,8 +2276,7 @@ public class EntryPersistenceImpl extends BasePersistenceImpl<Entry>
 		Object[] finderArgs = new Object[] {
 				createDate, fromUserId, toUserId,
 				
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
+				start, end, orderByComparator
 			};
 
 		List<Entry> list = (List<Entry>)FinderCacheUtil.getResult(FINDER_PATH_FIND_BY_C_F_T,
@@ -2644,8 +2656,7 @@ public class EntryPersistenceImpl extends BasePersistenceImpl<Entry>
 		Object[] finderArgs = new Object[] {
 				fromUserId, toUserId, content,
 				
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
+				start, end, orderByComparator
 			};
 
 		List<Entry> list = (List<Entry>)FinderCacheUtil.getResult(FINDER_PATH_FIND_BY_F_T_C,
@@ -3033,10 +3044,7 @@ public class EntryPersistenceImpl extends BasePersistenceImpl<Entry>
 	 */
 	public List<Entry> findAll(int start, int end,
 		OrderByComparator orderByComparator) throws SystemException {
-		Object[] finderArgs = new Object[] {
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
-			};
+		Object[] finderArgs = new Object[] { start, end, orderByComparator };
 
 		List<Entry> list = (List<Entry>)FinderCacheUtil.getResult(FINDER_PATH_FIND_ALL,
 				finderArgs, this);
@@ -3629,10 +3637,8 @@ public class EntryPersistenceImpl extends BasePersistenceImpl<Entry>
 	 * @throws SystemException if a system exception occurred
 	 */
 	public int countAll() throws SystemException {
-		Object[] finderArgs = new Object[0];
-
 		Long count = (Long)FinderCacheUtil.getResult(FINDER_PATH_COUNT_ALL,
-				finderArgs, this);
+				FINDER_ARGS_EMPTY, this);
 
 		if (count == null) {
 			Session session = null;
@@ -3652,8 +3658,8 @@ public class EntryPersistenceImpl extends BasePersistenceImpl<Entry>
 					count = Long.valueOf(0);
 				}
 
-				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL, finderArgs,
-					count);
+				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL,
+					FINDER_ARGS_EMPTY, count);
 
 				closeSession(session);
 			}
@@ -3726,4 +3732,21 @@ public class EntryPersistenceImpl extends BasePersistenceImpl<Entry>
 	private static final boolean _HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE = GetterUtil.getBoolean(PropsUtil.get(
 				PropsKeys.HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE));
 	private static Log _log = LogFactoryUtil.getLog(EntryPersistenceImpl.class);
+	private static Entry _nullEntry = new EntryImpl() {
+			@Override
+			public Object clone() {
+				return this;
+			}
+
+			@Override
+			public CacheModel<Entry> toCacheModel() {
+				return _nullEntryCacheModel;
+			}
+		};
+
+	private static CacheModel<Entry> _nullEntryCacheModel = new CacheModel<Entry>() {
+			public Entry toEntityModel() {
+				return _nullEntry;
+			}
+		};
 }

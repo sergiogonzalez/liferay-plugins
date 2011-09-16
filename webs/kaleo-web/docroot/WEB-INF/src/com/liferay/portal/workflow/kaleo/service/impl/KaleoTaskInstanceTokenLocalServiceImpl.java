@@ -23,16 +23,14 @@ import com.liferay.portal.kernel.util.CalendarFactoryUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.model.Role;
 import com.liferay.portal.model.User;
 import com.liferay.portal.service.ServiceContext;
-import com.liferay.portal.workflow.kaleo.NoSuchTimerException;
 import com.liferay.portal.workflow.kaleo.model.KaleoInstanceToken;
-import com.liferay.portal.workflow.kaleo.model.KaleoTask;
 import com.liferay.portal.workflow.kaleo.model.KaleoTaskAssignment;
 import com.liferay.portal.workflow.kaleo.model.KaleoTaskInstanceToken;
-import com.liferay.portal.workflow.kaleo.model.KaleoTimer;
 import com.liferay.portal.workflow.kaleo.service.base.KaleoTaskInstanceTokenLocalServiceBaseImpl;
 import com.liferay.portal.workflow.kaleo.service.persistence.KaleoTaskInstanceTokenQuery;
 import com.liferay.portal.workflow.kaleo.util.GroupUtil;
@@ -48,6 +46,7 @@ import java.util.Map;
 
 /**
  * @author Brian Wing Shun Chan
+ * @author Marcellus Tavares
  */
 public class KaleoTaskInstanceTokenLocalServiceImpl
 	extends KaleoTaskInstanceTokenLocalServiceBaseImpl {
@@ -62,8 +61,9 @@ public class KaleoTaskInstanceTokenLocalServiceImpl
 		KaleoInstanceToken kaleoInstanceToken =
 			kaleoInstanceTokenPersistence.findByPrimaryKey(
 				kaleoInstanceTokenId);
+
 		User user = userPersistence.findByPrimaryKey(
-			serviceContext.getUserId());
+			serviceContext.getGuestOrUserId());
 		Date now = new Date();
 
 		long kaleoTaskInstanceTokenId = counterLocalService.increment();
@@ -165,14 +165,8 @@ public class KaleoTaskInstanceTokenLocalServiceImpl
 
 		// Kaleo timers
 
-		KaleoTask kaleoTask = kaleoTaskInstanceToken.getKaleoTask();
-
-		List<KaleoTimer> kaleoTimers = kaleoTimerLocalService.getKaleoTimers(
-			kaleoTask.getKaleoNodeId());
-
 		kaleoTimerInstanceTokenLocalService.completeKaleoTimerInstanceTokens(
-			kaleoTaskInstanceToken.getKaleoInstanceId(), kaleoTimers,
-			serviceContext);
+			kaleoTaskInstanceToken.getKaleoInstanceTokenId(), serviceContext);
 
 		return kaleoTaskInstanceToken;
 	}
@@ -218,6 +212,14 @@ public class KaleoTaskInstanceTokenLocalServiceImpl
 
 		kaleoTaskAssignmentInstanceLocalService.
 			deleteKaleoInstanceKaleoTaskAssignmentInstances(kaleoInstanceId);
+	}
+
+	public KaleoTaskInstanceToken fetchKaleoTaskInstanceToken(
+			long kaleoTaskInstanceTokenId)
+		throws SystemException {
+
+		return kaleoTaskInstanceTokenPersistence.fetchByPrimaryKey(
+			kaleoTaskInstanceTokenId);
 	}
 
 	public List<KaleoTaskInstanceToken> getCompanyKaleoTaskInstanceTokens(
@@ -453,11 +455,36 @@ public class KaleoTaskInstanceTokenLocalServiceImpl
 			OrderByComparator orderByComparator, ServiceContext serviceContext)
 		throws SystemException {
 
+		return search(
+			taskName, getAssetTypes(assetType), assetPrimaryKeys, dueDateGT,
+			dueDateLT, completed, searchByUserRoles, andOperator, start, end,
+			orderByComparator, serviceContext);
+	}
+
+	public List<KaleoTaskInstanceToken> search(
+			String keywords, String[] assetTypes, Boolean completed,
+			Boolean searchByUserRoles, int start, int end,
+			OrderByComparator orderByComparator, ServiceContext serviceContext)
+		throws SystemException {
+
+		return search(
+			keywords, assetTypes, null, null, null, completed,
+			searchByUserRoles, true, start, end, orderByComparator,
+			serviceContext);
+	}
+
+	public List<KaleoTaskInstanceToken> search(
+			String taskName, String[] assetTypes, Long[] assetPrimaryKeys,
+			Date dueDateGT, Date dueDateLT, Boolean completed,
+			Boolean searchByUserRoles, boolean andOperator, int start, int end,
+			OrderByComparator orderByComparator, ServiceContext serviceContext)
+		throws SystemException {
+
 		KaleoTaskInstanceTokenQuery kaleoTaskInstanceTokenQuery =
 			new KaleoTaskInstanceTokenQuery(serviceContext);
 
 		kaleoTaskInstanceTokenQuery.setAssetPrimaryKeys(assetPrimaryKeys);
-		kaleoTaskInstanceTokenQuery.setAssetType(assetType);
+		kaleoTaskInstanceTokenQuery.setAssetTypes(assetTypes);
 		kaleoTaskInstanceTokenQuery.setCompleted(completed);
 		kaleoTaskInstanceTokenQuery.setDueDateGT(dueDateGT);
 		kaleoTaskInstanceTokenQuery.setDueDateLT(dueDateLT);
@@ -489,11 +516,34 @@ public class KaleoTaskInstanceTokenLocalServiceImpl
 			ServiceContext serviceContext)
 		throws SystemException {
 
+		return searchCount(
+			taskName, getAssetTypes(assetType), assetPrimaryKeys, dueDateGT,
+			dueDateLT, completed, searchByUserRoles, andOperator,
+			serviceContext);
+	}
+
+	public int searchCount(
+			String keywords, String[] assetTypes, Boolean completed,
+			Boolean searchByUserRoles, ServiceContext serviceContext)
+		throws SystemException {
+
+		return searchCount(
+			keywords, assetTypes, null, null, null, completed,
+			searchByUserRoles, true, serviceContext);
+	}
+
+	public int searchCount(
+			String taskName, String[] assetTypes, Long[] assetPrimaryKeys,
+			Date dueDateGT, Date dueDateLT, Boolean completed,
+			Boolean searchByUserRoles, boolean andOperator,
+			ServiceContext serviceContext)
+		throws SystemException {
+
 		KaleoTaskInstanceTokenQuery kaleoTaskInstanceTokenQuery =
 			new KaleoTaskInstanceTokenQuery(serviceContext);
 
 		kaleoTaskInstanceTokenQuery.setAssetPrimaryKeys(assetPrimaryKeys);
-		kaleoTaskInstanceTokenQuery.setAssetType(assetType);
+		kaleoTaskInstanceTokenQuery.setAssetTypes(assetTypes);
 		kaleoTaskInstanceTokenQuery.setCompleted(completed);
 		kaleoTaskInstanceTokenQuery.setDueDateGT(dueDateGT);
 		kaleoTaskInstanceTokenQuery.setDueDateLT(dueDateLT);
@@ -526,30 +576,6 @@ public class KaleoTaskInstanceTokenLocalServiceImpl
 		}
 
 		kaleoTaskInstanceTokenPersistence.update(kaleoTaskInstance, false);
-
-		KaleoTimer kaleoTimer = null;
-
-		try {
-			kaleoTimer = kaleoTimerLocalService.getDefaultKaleoTimer(
-				kaleoTaskInstance.getKaleoTaskId());
-		}
-		catch (NoSuchTimerException nste) {
-		}
-
-		if (kaleoTimer != null) {
-			kaleoTimerInstanceTokenLocalService.deleteKaleoTimerInstanceToken(
-				kaleoTaskInstance.getKaleoInstanceId(),
-				kaleoTimer.getKaleoTimerId());
-
-			Map<String, Serializable> workflowContext =
-				WorkflowContextUtil.convert(
-					kaleoTaskInstance.getWorkflowContext());
-
-			kaleoTimerInstanceTokenLocalService.addKaleoTimerInstanceToken(
-				kaleoTaskInstance.getKaleoInstanceTokenId(),
-				kaleoTimer.getKaleoTimerId(), kaleoTimer.getName(),
-				workflowContext, serviceContext);
-		}
 
 		return kaleoTaskInstance;
 	}
@@ -597,6 +623,14 @@ public class KaleoTaskInstanceTokenLocalServiceImpl
 		addCompletedCriterion(dynamicQuery, completed);
 
 		return dynamicQuery;
+	}
+
+	protected String[] getAssetTypes(String assetType) {
+		if (Validator.isNull(assetType)) {
+			return null;
+		}
+
+		return new String[] {assetType};
 	}
 
 }

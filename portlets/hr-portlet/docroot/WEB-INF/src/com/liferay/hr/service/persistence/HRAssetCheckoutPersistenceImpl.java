@@ -38,6 +38,7 @@ import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.ModelListener;
 import com.liferay.portal.service.persistence.BatchSessionUtil;
 import com.liferay.portal.service.persistence.ResourcePersistence;
@@ -74,9 +75,10 @@ public class HRAssetCheckoutPersistenceImpl extends BasePersistenceImpl<HRAssetC
 		".List";
 	public static final FinderPath FINDER_PATH_FIND_ALL = new FinderPath(HRAssetCheckoutModelImpl.ENTITY_CACHE_ENABLED,
 			HRAssetCheckoutModelImpl.FINDER_CACHE_ENABLED,
-			FINDER_CLASS_NAME_LIST, "findAll", new String[0]);
+			HRAssetCheckoutImpl.class, FINDER_CLASS_NAME_LIST, "findAll",
+			new String[0]);
 	public static final FinderPath FINDER_PATH_COUNT_ALL = new FinderPath(HRAssetCheckoutModelImpl.ENTITY_CACHE_ENABLED,
-			HRAssetCheckoutModelImpl.FINDER_CACHE_ENABLED,
+			HRAssetCheckoutModelImpl.FINDER_CACHE_ENABLED, Long.class,
 			FINDER_CLASS_NAME_LIST, "countAll", new String[0]);
 
 	/**
@@ -102,7 +104,7 @@ public class HRAssetCheckoutPersistenceImpl extends BasePersistenceImpl<HRAssetC
 			if (EntityCacheUtil.getResult(
 						HRAssetCheckoutModelImpl.ENTITY_CACHE_ENABLED,
 						HRAssetCheckoutImpl.class,
-						hrAssetCheckout.getPrimaryKey(), this) == null) {
+						hrAssetCheckout.getPrimaryKey()) == null) {
 				cacheResult(hrAssetCheckout);
 			}
 		}
@@ -137,6 +139,8 @@ public class HRAssetCheckoutPersistenceImpl extends BasePersistenceImpl<HRAssetC
 	public void clearCache(HRAssetCheckout hrAssetCheckout) {
 		EntityCacheUtil.removeResult(HRAssetCheckoutModelImpl.ENTITY_CACHE_ENABLED,
 			HRAssetCheckoutImpl.class, hrAssetCheckout.getPrimaryKey());
+
+		FinderCacheUtil.removeResult(FINDER_PATH_FIND_ALL, FINDER_ARGS_EMPTY);
 	}
 
 	/**
@@ -367,10 +371,16 @@ public class HRAssetCheckoutPersistenceImpl extends BasePersistenceImpl<HRAssetC
 	public HRAssetCheckout fetchByPrimaryKey(long hrAssetCheckoutId)
 		throws SystemException {
 		HRAssetCheckout hrAssetCheckout = (HRAssetCheckout)EntityCacheUtil.getResult(HRAssetCheckoutModelImpl.ENTITY_CACHE_ENABLED,
-				HRAssetCheckoutImpl.class, hrAssetCheckoutId, this);
+				HRAssetCheckoutImpl.class, hrAssetCheckoutId);
+
+		if (hrAssetCheckout == _nullHRAssetCheckout) {
+			return null;
+		}
 
 		if (hrAssetCheckout == null) {
 			Session session = null;
+
+			boolean hasException = false;
 
 			try {
 				session = openSession();
@@ -379,11 +389,18 @@ public class HRAssetCheckoutPersistenceImpl extends BasePersistenceImpl<HRAssetC
 						Long.valueOf(hrAssetCheckoutId));
 			}
 			catch (Exception e) {
+				hasException = true;
+
 				throw processException(e);
 			}
 			finally {
 				if (hrAssetCheckout != null) {
 					cacheResult(hrAssetCheckout);
+				}
+				else if (!hasException) {
+					EntityCacheUtil.putResult(HRAssetCheckoutModelImpl.ENTITY_CACHE_ENABLED,
+						HRAssetCheckoutImpl.class, hrAssetCheckoutId,
+						_nullHRAssetCheckout);
 				}
 
 				closeSession(session);
@@ -435,10 +452,7 @@ public class HRAssetCheckoutPersistenceImpl extends BasePersistenceImpl<HRAssetC
 	 */
 	public List<HRAssetCheckout> findAll(int start, int end,
 		OrderByComparator orderByComparator) throws SystemException {
-		Object[] finderArgs = new Object[] {
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
-			};
+		Object[] finderArgs = new Object[] { start, end, orderByComparator };
 
 		List<HRAssetCheckout> list = (List<HRAssetCheckout>)FinderCacheUtil.getResult(FINDER_PATH_FIND_ALL,
 				finderArgs, this);
@@ -520,10 +534,8 @@ public class HRAssetCheckoutPersistenceImpl extends BasePersistenceImpl<HRAssetC
 	 * @throws SystemException if a system exception occurred
 	 */
 	public int countAll() throws SystemException {
-		Object[] finderArgs = new Object[0];
-
 		Long count = (Long)FinderCacheUtil.getResult(FINDER_PATH_COUNT_ALL,
-				finderArgs, this);
+				FINDER_ARGS_EMPTY, this);
 
 		if (count == null) {
 			Session session = null;
@@ -543,8 +555,8 @@ public class HRAssetCheckoutPersistenceImpl extends BasePersistenceImpl<HRAssetC
 					count = Long.valueOf(0);
 				}
 
-				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL, finderArgs,
-					count);
+				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL,
+					FINDER_ARGS_EMPTY, count);
 
 				closeSession(session);
 			}
@@ -671,4 +683,21 @@ public class HRAssetCheckoutPersistenceImpl extends BasePersistenceImpl<HRAssetC
 	private static final boolean _HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE = GetterUtil.getBoolean(PropsUtil.get(
 				PropsKeys.HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE));
 	private static Log _log = LogFactoryUtil.getLog(HRAssetCheckoutPersistenceImpl.class);
+	private static HRAssetCheckout _nullHRAssetCheckout = new HRAssetCheckoutImpl() {
+			@Override
+			public Object clone() {
+				return this;
+			}
+
+			@Override
+			public CacheModel<HRAssetCheckout> toCacheModel() {
+				return _nullHRAssetCheckoutCacheModel;
+			}
+		};
+
+	private static CacheModel<HRAssetCheckout> _nullHRAssetCheckoutCacheModel = new CacheModel<HRAssetCheckout>() {
+			public HRAssetCheckout toEntityModel() {
+				return _nullHRAssetCheckout;
+			}
+		};
 }

@@ -41,6 +41,7 @@ import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.ModelListener;
 import com.liferay.portal.service.persistence.BatchSessionUtil;
 import com.liferay.portal.service.persistence.ResourcePersistence;
@@ -77,17 +78,19 @@ public class HRTerminationTypePersistenceImpl extends BasePersistenceImpl<HRTerm
 		".List";
 	public static final FinderPath FINDER_PATH_FETCH_BY_G_C = new FinderPath(HRTerminationTypeModelImpl.ENTITY_CACHE_ENABLED,
 			HRTerminationTypeModelImpl.FINDER_CACHE_ENABLED,
-			FINDER_CLASS_NAME_ENTITY, "fetchByG_C",
+			HRTerminationTypeImpl.class, FINDER_CLASS_NAME_ENTITY,
+			"fetchByG_C",
 			new String[] { Long.class.getName(), String.class.getName() });
 	public static final FinderPath FINDER_PATH_COUNT_BY_G_C = new FinderPath(HRTerminationTypeModelImpl.ENTITY_CACHE_ENABLED,
-			HRTerminationTypeModelImpl.FINDER_CACHE_ENABLED,
+			HRTerminationTypeModelImpl.FINDER_CACHE_ENABLED, Long.class,
 			FINDER_CLASS_NAME_LIST, "countByG_C",
 			new String[] { Long.class.getName(), String.class.getName() });
 	public static final FinderPath FINDER_PATH_FIND_ALL = new FinderPath(HRTerminationTypeModelImpl.ENTITY_CACHE_ENABLED,
 			HRTerminationTypeModelImpl.FINDER_CACHE_ENABLED,
-			FINDER_CLASS_NAME_LIST, "findAll", new String[0]);
+			HRTerminationTypeImpl.class, FINDER_CLASS_NAME_LIST, "findAll",
+			new String[0]);
 	public static final FinderPath FINDER_PATH_COUNT_ALL = new FinderPath(HRTerminationTypeModelImpl.ENTITY_CACHE_ENABLED,
-			HRTerminationTypeModelImpl.FINDER_CACHE_ENABLED,
+			HRTerminationTypeModelImpl.FINDER_CACHE_ENABLED, Long.class,
 			FINDER_CLASS_NAME_LIST, "countAll", new String[0]);
 
 	/**
@@ -120,7 +123,7 @@ public class HRTerminationTypePersistenceImpl extends BasePersistenceImpl<HRTerm
 			if (EntityCacheUtil.getResult(
 						HRTerminationTypeModelImpl.ENTITY_CACHE_ENABLED,
 						HRTerminationTypeImpl.class,
-						hrTerminationType.getPrimaryKey(), this) == null) {
+						hrTerminationType.getPrimaryKey()) == null) {
 				cacheResult(hrTerminationType);
 			}
 		}
@@ -155,6 +158,8 @@ public class HRTerminationTypePersistenceImpl extends BasePersistenceImpl<HRTerm
 	public void clearCache(HRTerminationType hrTerminationType) {
 		EntityCacheUtil.removeResult(HRTerminationTypeModelImpl.ENTITY_CACHE_ENABLED,
 			HRTerminationTypeImpl.class, hrTerminationType.getPrimaryKey());
+
+		FinderCacheUtil.removeResult(FINDER_PATH_FIND_ALL, FINDER_ARGS_EMPTY);
 
 		FinderCacheUtil.removeResult(FINDER_PATH_FETCH_BY_G_C,
 			new Object[] {
@@ -430,10 +435,16 @@ public class HRTerminationTypePersistenceImpl extends BasePersistenceImpl<HRTerm
 	public HRTerminationType fetchByPrimaryKey(long hrTerminationTypeId)
 		throws SystemException {
 		HRTerminationType hrTerminationType = (HRTerminationType)EntityCacheUtil.getResult(HRTerminationTypeModelImpl.ENTITY_CACHE_ENABLED,
-				HRTerminationTypeImpl.class, hrTerminationTypeId, this);
+				HRTerminationTypeImpl.class, hrTerminationTypeId);
+
+		if (hrTerminationType == _nullHRTerminationType) {
+			return null;
+		}
 
 		if (hrTerminationType == null) {
 			Session session = null;
+
+			boolean hasException = false;
 
 			try {
 				session = openSession();
@@ -442,11 +453,18 @@ public class HRTerminationTypePersistenceImpl extends BasePersistenceImpl<HRTerm
 						Long.valueOf(hrTerminationTypeId));
 			}
 			catch (Exception e) {
+				hasException = true;
+
 				throw processException(e);
 			}
 			finally {
 				if (hrTerminationType != null) {
 					cacheResult(hrTerminationType);
+				}
+				else if (!hasException) {
+					EntityCacheUtil.putResult(HRTerminationTypeModelImpl.ENTITY_CACHE_ENABLED,
+						HRTerminationTypeImpl.class, hrTerminationTypeId,
+						_nullHRTerminationType);
 				}
 
 				closeSession(session);
@@ -510,6 +528,7 @@ public class HRTerminationTypePersistenceImpl extends BasePersistenceImpl<HRTerm
 	 *
 	 * @param groupId the group ID
 	 * @param code the code
+	 * @param retrieveFromCache whether to use the finder cache
 	 * @return the matching h r termination type, or <code>null</code> if a matching h r termination type could not be found
 	 * @throws SystemException if a system exception occurred
 	 */
@@ -649,10 +668,7 @@ public class HRTerminationTypePersistenceImpl extends BasePersistenceImpl<HRTerm
 	 */
 	public List<HRTerminationType> findAll(int start, int end,
 		OrderByComparator orderByComparator) throws SystemException {
-		Object[] finderArgs = new Object[] {
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
-			};
+		Object[] finderArgs = new Object[] { start, end, orderByComparator };
 
 		List<HRTerminationType> list = (List<HRTerminationType>)FinderCacheUtil.getResult(FINDER_PATH_FIND_ALL,
 				finderArgs, this);
@@ -818,10 +834,8 @@ public class HRTerminationTypePersistenceImpl extends BasePersistenceImpl<HRTerm
 	 * @throws SystemException if a system exception occurred
 	 */
 	public int countAll() throws SystemException {
-		Object[] finderArgs = new Object[0];
-
 		Long count = (Long)FinderCacheUtil.getResult(FINDER_PATH_COUNT_ALL,
-				finderArgs, this);
+				FINDER_ARGS_EMPTY, this);
 
 		if (count == null) {
 			Session session = null;
@@ -841,8 +855,8 @@ public class HRTerminationTypePersistenceImpl extends BasePersistenceImpl<HRTerm
 					count = Long.valueOf(0);
 				}
 
-				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL, finderArgs,
-					count);
+				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL,
+					FINDER_ARGS_EMPTY, count);
 
 				closeSession(session);
 			}
@@ -976,4 +990,22 @@ public class HRTerminationTypePersistenceImpl extends BasePersistenceImpl<HRTerm
 	private static final boolean _HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE = GetterUtil.getBoolean(PropsUtil.get(
 				PropsKeys.HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE));
 	private static Log _log = LogFactoryUtil.getLog(HRTerminationTypePersistenceImpl.class);
+	private static HRTerminationType _nullHRTerminationType = new HRTerminationTypeImpl() {
+			@Override
+			public Object clone() {
+				return this;
+			}
+
+			@Override
+			public CacheModel<HRTerminationType> toCacheModel() {
+				return _nullHRTerminationTypeCacheModel;
+			}
+		};
+
+	private static CacheModel<HRTerminationType> _nullHRTerminationTypeCacheModel =
+		new CacheModel<HRTerminationType>() {
+			public HRTerminationType toEntityModel() {
+				return _nullHRTerminationType;
+			}
+		};
 }

@@ -38,6 +38,7 @@ import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.ModelListener;
 import com.liferay.portal.service.persistence.BatchSessionUtil;
 import com.liferay.portal.service.persistence.ResourcePersistence;
@@ -74,9 +75,10 @@ public class HRProjectBillingRatePersistenceImpl extends BasePersistenceImpl<HRP
 		".List";
 	public static final FinderPath FINDER_PATH_FIND_ALL = new FinderPath(HRProjectBillingRateModelImpl.ENTITY_CACHE_ENABLED,
 			HRProjectBillingRateModelImpl.FINDER_CACHE_ENABLED,
-			FINDER_CLASS_NAME_LIST, "findAll", new String[0]);
+			HRProjectBillingRateImpl.class, FINDER_CLASS_NAME_LIST, "findAll",
+			new String[0]);
 	public static final FinderPath FINDER_PATH_COUNT_ALL = new FinderPath(HRProjectBillingRateModelImpl.ENTITY_CACHE_ENABLED,
-			HRProjectBillingRateModelImpl.FINDER_CACHE_ENABLED,
+			HRProjectBillingRateModelImpl.FINDER_CACHE_ENABLED, Long.class,
 			FINDER_CLASS_NAME_LIST, "countAll", new String[0]);
 
 	/**
@@ -102,7 +104,7 @@ public class HRProjectBillingRatePersistenceImpl extends BasePersistenceImpl<HRP
 			if (EntityCacheUtil.getResult(
 						HRProjectBillingRateModelImpl.ENTITY_CACHE_ENABLED,
 						HRProjectBillingRateImpl.class,
-						hrProjectBillingRate.getPrimaryKey(), this) == null) {
+						hrProjectBillingRate.getPrimaryKey()) == null) {
 				cacheResult(hrProjectBillingRate);
 			}
 		}
@@ -137,6 +139,8 @@ public class HRProjectBillingRatePersistenceImpl extends BasePersistenceImpl<HRP
 	public void clearCache(HRProjectBillingRate hrProjectBillingRate) {
 		EntityCacheUtil.removeResult(HRProjectBillingRateModelImpl.ENTITY_CACHE_ENABLED,
 			HRProjectBillingRateImpl.class, hrProjectBillingRate.getPrimaryKey());
+
+		FinderCacheUtil.removeResult(FINDER_PATH_FIND_ALL, FINDER_ARGS_EMPTY);
 	}
 
 	/**
@@ -367,10 +371,16 @@ public class HRProjectBillingRatePersistenceImpl extends BasePersistenceImpl<HRP
 	public HRProjectBillingRate fetchByPrimaryKey(long hrProjectBillingRateId)
 		throws SystemException {
 		HRProjectBillingRate hrProjectBillingRate = (HRProjectBillingRate)EntityCacheUtil.getResult(HRProjectBillingRateModelImpl.ENTITY_CACHE_ENABLED,
-				HRProjectBillingRateImpl.class, hrProjectBillingRateId, this);
+				HRProjectBillingRateImpl.class, hrProjectBillingRateId);
+
+		if (hrProjectBillingRate == _nullHRProjectBillingRate) {
+			return null;
+		}
 
 		if (hrProjectBillingRate == null) {
 			Session session = null;
+
+			boolean hasException = false;
 
 			try {
 				session = openSession();
@@ -379,11 +389,18 @@ public class HRProjectBillingRatePersistenceImpl extends BasePersistenceImpl<HRP
 						Long.valueOf(hrProjectBillingRateId));
 			}
 			catch (Exception e) {
+				hasException = true;
+
 				throw processException(e);
 			}
 			finally {
 				if (hrProjectBillingRate != null) {
 					cacheResult(hrProjectBillingRate);
+				}
+				else if (!hasException) {
+					EntityCacheUtil.putResult(HRProjectBillingRateModelImpl.ENTITY_CACHE_ENABLED,
+						HRProjectBillingRateImpl.class, hrProjectBillingRateId,
+						_nullHRProjectBillingRate);
 				}
 
 				closeSession(session);
@@ -435,10 +452,7 @@ public class HRProjectBillingRatePersistenceImpl extends BasePersistenceImpl<HRP
 	 */
 	public List<HRProjectBillingRate> findAll(int start, int end,
 		OrderByComparator orderByComparator) throws SystemException {
-		Object[] finderArgs = new Object[] {
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
-			};
+		Object[] finderArgs = new Object[] { start, end, orderByComparator };
 
 		List<HRProjectBillingRate> list = (List<HRProjectBillingRate>)FinderCacheUtil.getResult(FINDER_PATH_FIND_ALL,
 				finderArgs, this);
@@ -520,10 +534,8 @@ public class HRProjectBillingRatePersistenceImpl extends BasePersistenceImpl<HRP
 	 * @throws SystemException if a system exception occurred
 	 */
 	public int countAll() throws SystemException {
-		Object[] finderArgs = new Object[0];
-
 		Long count = (Long)FinderCacheUtil.getResult(FINDER_PATH_COUNT_ALL,
-				finderArgs, this);
+				FINDER_ARGS_EMPTY, this);
 
 		if (count == null) {
 			Session session = null;
@@ -543,8 +555,8 @@ public class HRProjectBillingRatePersistenceImpl extends BasePersistenceImpl<HRP
 					count = Long.valueOf(0);
 				}
 
-				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL, finderArgs,
-					count);
+				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL,
+					FINDER_ARGS_EMPTY, count);
 
 				closeSession(session);
 			}
@@ -671,4 +683,22 @@ public class HRProjectBillingRatePersistenceImpl extends BasePersistenceImpl<HRP
 	private static final boolean _HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE = GetterUtil.getBoolean(PropsUtil.get(
 				PropsKeys.HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE));
 	private static Log _log = LogFactoryUtil.getLog(HRProjectBillingRatePersistenceImpl.class);
+	private static HRProjectBillingRate _nullHRProjectBillingRate = new HRProjectBillingRateImpl() {
+			@Override
+			public Object clone() {
+				return this;
+			}
+
+			@Override
+			public CacheModel<HRProjectBillingRate> toCacheModel() {
+				return _nullHRProjectBillingRateCacheModel;
+			}
+		};
+
+	private static CacheModel<HRProjectBillingRate> _nullHRProjectBillingRateCacheModel =
+		new CacheModel<HRProjectBillingRate>() {
+			public HRProjectBillingRate toEntityModel() {
+				return _nullHRProjectBillingRate;
+			}
+		};
 }

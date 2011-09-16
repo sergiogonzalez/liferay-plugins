@@ -68,7 +68,8 @@ import org.apache.solr.common.SolrDocumentList;
 public class SolrIndexSearcherImpl implements IndexSearcher {
 
 	public Hits search(
-			long companyId, Query query, Sort[] sorts, int start, int end)
+			String searchEngineId, long companyId, Query query, Sort[] sorts,
+			int start, int end)
 		throws SearchException {
 
 		try {
@@ -102,83 +103,7 @@ public class SolrIndexSearcherImpl implements IndexSearcher {
 		throws SearchException {
 
 		try {
-			SolrQuery solrQuery = translateQuery(
-				searchContext.getCompanyId(), query, searchContext.getSorts(),
-				searchContext.getStart(), searchContext.getEnd());
-
-			Map<String, Facet> facets = searchContext.getFacets();
-
-			for (Facet facet : facets.values()) {
-				if (facet.isStatic()) {
-					continue;
-				}
-
-				FacetConfiguration facetConfiguration =
-					facet.getFacetConfiguration();
-
-				if (facet instanceof RangeFacet) {
-					solrQuery.addFacetField(facetConfiguration.getFieldName());
-
-					JSONObject dataJSONObject = facetConfiguration.getData();
-
-					JSONArray rangesJSONArray = dataJSONObject.getJSONArray(
-						"ranges");
-
-					if (rangesJSONArray != null) {
-						for (int i = 0; i < rangesJSONArray.length(); i++) {
-							JSONObject rangeJSONObject =
-								rangesJSONArray.getJSONObject(i);
-
-							String range = rangeJSONObject.getString("range");
-
-							String facetQuery =
-								facetConfiguration.getFieldName() +
-									StringPool.COLON + range;
-
-							solrQuery.addFacetQuery(facetQuery);
-						}
-					}
-				}
-				else {
-					solrQuery.addFacetField(facetConfiguration.getFieldName());
-				}
-			}
-
-			solrQuery.setFacetLimit(-1);
-
-			QueryResponse queryResponse = _solrServer.query(solrQuery);
-
-			boolean allResults = false;
-
-			if (solrQuery.getRows() == 0) {
-				allResults = true;
-			}
-
-			List<FacetField> facetFields = queryResponse.getFacetFields();
-
-			if (facetFields != null) {
-				for (FacetField facetField : facetFields) {
-					Facet facet = facets.get(facetField.getName());
-
-					FacetCollector facetCollector = null;
-
-					if (facet instanceof RangeFacet) {
-						facetCollector = new SolrFacetQueryCollector(
-							facetField.getName(),
-							queryResponse.getFacetQuery());
-					}
-					else {
-						facetCollector = new SolrFacetFieldCollector(
-							facetField.getName(), facetField);
-					}
-
-					facet.setFacetCollector(facetCollector);
-				}
-			}
-
-			return subset(
-				solrQuery, query, query.getQueryConfig(), queryResponse,
-				allResults);
+			return doSearch(searchContext, query);
 		}
 		catch (Exception e) {
 			_log.error(e, e);
@@ -193,6 +118,90 @@ public class SolrIndexSearcherImpl implements IndexSearcher {
 
 	public void setSwallowException(boolean swallowException) {
 		_swallowException = swallowException;
+	}
+
+	protected Hits doSearch(SearchContext searchContext, Query query)
+		throws Exception {
+
+		SolrQuery solrQuery = translateQuery(
+			searchContext.getCompanyId(), query, searchContext.getSorts(),
+			searchContext.getStart(), searchContext.getEnd());
+
+		Map<String, Facet> facets = searchContext.getFacets();
+
+		for (Facet facet : facets.values()) {
+			if (facet.isStatic()) {
+				continue;
+			}
+
+			FacetConfiguration facetConfiguration =
+				facet.getFacetConfiguration();
+
+			if (facet instanceof RangeFacet) {
+				solrQuery.addFacetField(facetConfiguration.getFieldName());
+
+				JSONObject dataJSONObject = facetConfiguration.getData();
+
+				JSONArray rangesJSONArray = dataJSONObject.getJSONArray(
+					"ranges");
+
+				if (rangesJSONArray == null) {
+					continue;
+				}
+
+				for (int i = 0; i < rangesJSONArray.length(); i++) {
+					JSONObject rangeJSONObject =
+						rangesJSONArray.getJSONObject(i);
+
+					String range = rangeJSONObject.getString("range");
+
+					String facetQuery =
+						facetConfiguration.getFieldName() +
+							StringPool.COLON + range;
+
+					solrQuery.addFacetQuery(facetQuery);
+				}
+			}
+			else {
+				solrQuery.addFacetField(facetConfiguration.getFieldName());
+			}
+		}
+
+		solrQuery.setFacetLimit(-1);
+
+		QueryResponse queryResponse = _solrServer.query(solrQuery);
+
+		boolean allResults = false;
+
+		if (solrQuery.getRows() == 0) {
+			allResults = true;
+		}
+
+		List<FacetField> facetFields = queryResponse.getFacetFields();
+
+		if (facetFields != null) {
+			for (FacetField facetField : facetFields) {
+				Facet facet = facets.get(facetField.getName());
+
+				FacetCollector facetCollector = null;
+
+				if (facet instanceof RangeFacet) {
+					facetCollector = new SolrFacetQueryCollector(
+						facetField.getName(),
+						queryResponse.getFacetQuery());
+				}
+				else {
+					facetCollector = new SolrFacetFieldCollector(
+						facetField.getName(), facetField);
+				}
+
+				facet.setFacetCollector(facetCollector);
+			}
+		}
+
+		return subset(
+			solrQuery, query, query.getQueryConfig(), queryResponse,
+			allResults);
 	}
 
 	protected String getSnippet(
@@ -235,14 +244,14 @@ public class SolrIndexSearcherImpl implements IndexSearcher {
 
 		long startTime = System.currentTimeMillis();
 
-		Hits subset = new HitsImpl();
+		Hits hits = new HitsImpl();
 
-		SolrDocumentList results = queryResponse.getResults();
+		SolrDocumentList solrDocumentList = queryResponse.getResults();
 
-		long length = results.getNumFound();
+		long total = solrDocumentList.getNumFound();
 
-		if (allResults && (length > 0)) {
-			solrQuery.setRows((int)length);
+		if (allResults && (total > 0)) {
+			solrQuery.setRows((int)total);
 
 			queryResponse = _solrServer.query(solrQuery);
 
@@ -251,28 +260,24 @@ public class SolrIndexSearcherImpl implements IndexSearcher {
 
 		float maxScore = 1;
 
-		boolean scoreEnabled = queryConfig.isScoreEnabled();
-
-		if (scoreEnabled) {
-			maxScore = results.getMaxScore();
+		if (queryConfig.isScoreEnabled()) {
+			maxScore = solrDocumentList.getMaxScore();
 		}
 
-		int subsetTotal = results.size();
+		int subsetTotal = solrDocumentList.size();
 
-		Document[] subsetDocs = new DocumentImpl[subsetTotal];
-		String[] subsetSnippets = new String[subsetTotal];
-		float[] subsetScores = new float[subsetTotal];
+		Document[] documents = new DocumentImpl[subsetTotal];
+		String[] snippets = new String[subsetTotal];
+		float[] scores = new float[subsetTotal];
 
 		int j = 0;
-
-		boolean highlightEnabled = queryConfig.isHighlightEnabled();
 
 		Set<String> queryTerms = new HashSet<String>();
 
 		Map<String, Map<String, List<String>>> highlights =
 			queryResponse.getHighlighting();
 
-		for (SolrDocument solrDocument : results) {
+		for (SolrDocument solrDocument : solrDocumentList) {
 			Document document = new DocumentImpl();
 
 			Collection<String> names = solrDocument.getFieldNames();
@@ -291,22 +296,22 @@ public class SolrIndexSearcherImpl implements IndexSearcher {
 
 			float score = 1;
 
-			if (scoreEnabled) {
+			if (queryConfig.isScoreEnabled()) {
 				score = GetterUtil.getFloat(
-					solrDocument.getFieldValue("score").toString());
+					String.valueOf(solrDocument.getFieldValue("score")));
 			}
 
-			subsetDocs[j] = document;
+			documents[j] = document;
 
-			if (highlightEnabled) {
-				subsetSnippets[j] = getSnippet(
+			if (queryConfig.isHighlightEnabled()) {
+				snippets[j] = getSnippet(
 					solrDocument, queryTerms, highlights);
 			}
 			else {
-				subsetSnippets[j] = StringPool.BLANK;
+				snippets[j] = StringPool.BLANK;
 			}
 
-			subsetScores[j] = score / maxScore;
+			scores[j] = score / maxScore;
 
 			j++;
 		}
@@ -314,16 +319,16 @@ public class SolrIndexSearcherImpl implements IndexSearcher {
 		float searchTime =
 			(float)(System.currentTimeMillis() - startTime) / Time.SECOND;
 
-		subset.setDocs(subsetDocs);
-		subset.setLength((int)length);
-		subset.setQuery(query);
-		subset.setQueryTerms(queryTerms.toArray(new String[queryTerms.size()]));
-		subset.setScores(subsetScores);
-		subset.setSearchTime(searchTime);
-		subset.setSnippets(subsetSnippets);
-		subset.setStart(startTime);
+		hits.setDocs(documents);
+		hits.setLength((int)total);
+		hits.setQuery(query);
+		hits.setQueryTerms(queryTerms.toArray(new String[queryTerms.size()]));
+		hits.setScores(scores);
+		hits.setSearchTime(searchTime);
+		hits.setSnippets(snippets);
+		hits.setStart(startTime);
 
-		return subset;
+		return hits;
 	}
 
 	protected SolrQuery translateQuery(

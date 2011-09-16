@@ -22,6 +22,7 @@ import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.impl.BaseModelImpl;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.util.PortalUtil;
@@ -89,8 +90,15 @@ public class HRJobTitleModelImpl extends BaseModelImpl<HRJobTitle>
 		return HRJobTitle.class.getName();
 	}
 
-	public static final String MAPPING_TABLE_HRBRANCHES_HRJOBTITLES_NAME = com.liferay.hr.model.impl.HRBranchModelImpl.MAPPING_TABLE_HRBRANCHES_HRJOBTITLES_NAME;
-	public static final boolean FINDER_CACHE_ENABLED_HRBRANCHES_HRJOBTITLES = com.liferay.hr.model.impl.HRBranchModelImpl.FINDER_CACHE_ENABLED_HRBRANCHES_HRJOBTITLES;
+	public static final String MAPPING_TABLE_HRBRANCHES_HRJOBTITLES_NAME = "HRBranches_HRJobTitles";
+	public static final Object[][] MAPPING_TABLE_HRBRANCHES_HRJOBTITLES_COLUMNS = {
+			{ "hrBranchId", Types.BIGINT },
+			{ "hrJobTitleId", Types.BIGINT }
+		};
+	public static final String MAPPING_TABLE_HRBRANCHES_HRJOBTITLES_SQL_CREATE = "create table HRBranches_HRJobTitles (hrBranchId LONG not null,hrJobTitleId LONG not null,primary key (hrBranchId, hrJobTitleId))";
+	public static final boolean FINDER_CACHE_ENABLED_HRBRANCHES_HRJOBTITLES = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
+				"value.object.finder.cache.enabled.HRBranches_HRJobTitles"),
+			true);
 	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(com.liferay.util.service.ServiceProps.get(
 				"lock.expiration.time.com.liferay.hr.model.HRJobTitle"));
 
@@ -214,8 +222,13 @@ public class HRJobTitleModelImpl extends BaseModelImpl<HRJobTitle>
 			return (HRJobTitle)this;
 		}
 		else {
-			return (HRJobTitle)Proxy.newProxyInstance(_classLoader,
-				_escapedModelProxyInterfaces, new AutoEscapeBeanHandler(this));
+			if (_escapedModelProxy == null) {
+				_escapedModelProxy = (HRJobTitle)Proxy.newProxyInstance(_classLoader,
+						_escapedModelProxyInterfaces,
+						new AutoEscapeBeanHandler(this));
+			}
+
+			return _escapedModelProxy;
 		}
 	}
 
@@ -299,6 +312,63 @@ public class HRJobTitleModelImpl extends BaseModelImpl<HRJobTitle>
 
 	@Override
 	public void resetOriginalValues() {
+	}
+
+	@Override
+	public CacheModel<HRJobTitle> toCacheModel() {
+		HRJobTitleCacheModel hrJobTitleCacheModel = new HRJobTitleCacheModel();
+
+		hrJobTitleCacheModel.hrJobTitleId = getHrJobTitleId();
+
+		hrJobTitleCacheModel.groupId = getGroupId();
+
+		hrJobTitleCacheModel.companyId = getCompanyId();
+
+		hrJobTitleCacheModel.userId = getUserId();
+
+		hrJobTitleCacheModel.userName = getUserName();
+
+		String userName = hrJobTitleCacheModel.userName;
+
+		if ((userName != null) && (userName.length() == 0)) {
+			hrJobTitleCacheModel.userName = null;
+		}
+
+		Date createDate = getCreateDate();
+
+		if (createDate != null) {
+			hrJobTitleCacheModel.createDate = createDate.getTime();
+		}
+		else {
+			hrJobTitleCacheModel.createDate = Long.MIN_VALUE;
+		}
+
+		Date modifiedDate = getModifiedDate();
+
+		if (modifiedDate != null) {
+			hrJobTitleCacheModel.modifiedDate = modifiedDate.getTime();
+		}
+		else {
+			hrJobTitleCacheModel.modifiedDate = Long.MIN_VALUE;
+		}
+
+		hrJobTitleCacheModel.name = getName();
+
+		String name = hrJobTitleCacheModel.name;
+
+		if ((name != null) && (name.length() == 0)) {
+			hrJobTitleCacheModel.name = null;
+		}
+
+		hrJobTitleCacheModel.description = getDescription();
+
+		String description = hrJobTitleCacheModel.description;
+
+		if ((description != null) && (description.length() == 0)) {
+			hrJobTitleCacheModel.description = null;
+		}
+
+		return hrJobTitleCacheModel;
 	}
 
 	@Override
@@ -392,4 +462,5 @@ public class HRJobTitleModelImpl extends BaseModelImpl<HRJobTitle>
 	private String _name;
 	private String _description;
 	private transient ExpandoBridge _expandoBridge;
+	private HRJobTitle _escapedModelProxy;
 }

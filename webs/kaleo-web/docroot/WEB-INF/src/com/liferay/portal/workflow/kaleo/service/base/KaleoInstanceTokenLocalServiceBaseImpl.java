@@ -29,6 +29,8 @@ import com.liferay.portal.kernel.search.Indexer;
 import com.liferay.portal.kernel.search.IndexerRegistryUtil;
 import com.liferay.portal.kernel.search.SearchException;
 import com.liferay.portal.kernel.util.OrderByComparator;
+import com.liferay.portal.model.PersistedModel;
+import com.liferay.portal.service.PersistedModelLocalServiceRegistryUtil;
 import com.liferay.portal.service.ResourceLocalService;
 import com.liferay.portal.service.ResourceService;
 import com.liferay.portal.service.UserLocalService;
@@ -47,6 +49,7 @@ import com.liferay.portal.workflow.kaleo.service.KaleoNotificationLocalService;
 import com.liferay.portal.workflow.kaleo.service.KaleoNotificationRecipientLocalService;
 import com.liferay.portal.workflow.kaleo.service.KaleoTaskAssignmentInstanceLocalService;
 import com.liferay.portal.workflow.kaleo.service.KaleoTaskAssignmentLocalService;
+import com.liferay.portal.workflow.kaleo.service.KaleoTaskFormLocalService;
 import com.liferay.portal.workflow.kaleo.service.KaleoTaskInstanceTokenLocalService;
 import com.liferay.portal.workflow.kaleo.service.KaleoTaskLocalService;
 import com.liferay.portal.workflow.kaleo.service.KaleoTimerInstanceTokenLocalService;
@@ -63,12 +66,15 @@ import com.liferay.portal.workflow.kaleo.service.persistence.KaleoNotificationPe
 import com.liferay.portal.workflow.kaleo.service.persistence.KaleoNotificationRecipientPersistence;
 import com.liferay.portal.workflow.kaleo.service.persistence.KaleoTaskAssignmentInstancePersistence;
 import com.liferay.portal.workflow.kaleo.service.persistence.KaleoTaskAssignmentPersistence;
+import com.liferay.portal.workflow.kaleo.service.persistence.KaleoTaskFormPersistence;
 import com.liferay.portal.workflow.kaleo.service.persistence.KaleoTaskInstanceTokenFinder;
 import com.liferay.portal.workflow.kaleo.service.persistence.KaleoTaskInstanceTokenPersistence;
 import com.liferay.portal.workflow.kaleo.service.persistence.KaleoTaskPersistence;
 import com.liferay.portal.workflow.kaleo.service.persistence.KaleoTimerInstanceTokenPersistence;
 import com.liferay.portal.workflow.kaleo.service.persistence.KaleoTimerPersistence;
 import com.liferay.portal.workflow.kaleo.service.persistence.KaleoTransitionPersistence;
+
+import java.io.Serializable;
 
 import java.util.List;
 
@@ -263,6 +269,11 @@ public abstract class KaleoInstanceTokenLocalServiceBaseImpl
 		return kaleoInstanceTokenPersistence.findByPrimaryKey(kaleoInstanceTokenId);
 	}
 
+	public PersistedModel getPersistedModel(Serializable primaryKeyObj)
+		throws PortalException, SystemException {
+		return kaleoInstanceTokenPersistence.findByPrimaryKey(primaryKeyObj);
+	}
+
 	/**
 	 * Returns a range of all the kaleo instance tokens.
 	 *
@@ -291,7 +302,7 @@ public abstract class KaleoInstanceTokenLocalServiceBaseImpl
 	}
 
 	/**
-	 * Updates the kaleo instance token in the database. Also notifies the appropriate model listeners.
+	 * Updates the kaleo instance token in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
 	 *
 	 * @param kaleoInstanceToken the kaleo instance token
 	 * @return the kaleo instance token that was updated
@@ -303,7 +314,7 @@ public abstract class KaleoInstanceTokenLocalServiceBaseImpl
 	}
 
 	/**
-	 * Updates the kaleo instance token in the database. Also notifies the appropriate model listeners.
+	 * Updates the kaleo instance token in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
 	 *
 	 * @param kaleoInstanceToken the kaleo instance token
 	 * @param merge whether to merge the kaleo instance token with the current session. See {@link com.liferay.portal.service.persistence.BatchSession#update(com.liferay.portal.kernel.dao.orm.Session, com.liferay.portal.model.BaseModel, boolean)} for an explanation.
@@ -790,6 +801,44 @@ public abstract class KaleoInstanceTokenLocalServiceBaseImpl
 	}
 
 	/**
+	 * Returns the kaleo task form local service.
+	 *
+	 * @return the kaleo task form local service
+	 */
+	public KaleoTaskFormLocalService getKaleoTaskFormLocalService() {
+		return kaleoTaskFormLocalService;
+	}
+
+	/**
+	 * Sets the kaleo task form local service.
+	 *
+	 * @param kaleoTaskFormLocalService the kaleo task form local service
+	 */
+	public void setKaleoTaskFormLocalService(
+		KaleoTaskFormLocalService kaleoTaskFormLocalService) {
+		this.kaleoTaskFormLocalService = kaleoTaskFormLocalService;
+	}
+
+	/**
+	 * Returns the kaleo task form persistence.
+	 *
+	 * @return the kaleo task form persistence
+	 */
+	public KaleoTaskFormPersistence getKaleoTaskFormPersistence() {
+		return kaleoTaskFormPersistence;
+	}
+
+	/**
+	 * Sets the kaleo task form persistence.
+	 *
+	 * @param kaleoTaskFormPersistence the kaleo task form persistence
+	 */
+	public void setKaleoTaskFormPersistence(
+		KaleoTaskFormPersistence kaleoTaskFormPersistence) {
+		this.kaleoTaskFormPersistence = kaleoTaskFormPersistence;
+	}
+
+	/**
 	 * Returns the kaleo task instance token local service.
 	 *
 	 * @return the kaleo task instance token local service
@@ -1087,6 +1136,16 @@ public abstract class KaleoInstanceTokenLocalServiceBaseImpl
 		this.userPersistence = userPersistence;
 	}
 
+	public void afterPropertiesSet() {
+		PersistedModelLocalServiceRegistryUtil.register("com.liferay.portal.workflow.kaleo.model.KaleoInstanceToken",
+			kaleoInstanceTokenLocalService);
+	}
+
+	public void destroy() {
+		PersistedModelLocalServiceRegistryUtil.unregister(
+			"com.liferay.portal.workflow.kaleo.model.KaleoInstanceToken");
+	}
+
 	/**
 	 * Returns the Spring bean ID for this bean.
 	 *
@@ -1180,6 +1239,10 @@ public abstract class KaleoInstanceTokenLocalServiceBaseImpl
 	protected KaleoTaskAssignmentInstanceLocalService kaleoTaskAssignmentInstanceLocalService;
 	@BeanReference(type = KaleoTaskAssignmentInstancePersistence.class)
 	protected KaleoTaskAssignmentInstancePersistence kaleoTaskAssignmentInstancePersistence;
+	@BeanReference(type = KaleoTaskFormLocalService.class)
+	protected KaleoTaskFormLocalService kaleoTaskFormLocalService;
+	@BeanReference(type = KaleoTaskFormPersistence.class)
+	protected KaleoTaskFormPersistence kaleoTaskFormPersistence;
 	@BeanReference(type = KaleoTaskInstanceTokenLocalService.class)
 	protected KaleoTaskInstanceTokenLocalService kaleoTaskInstanceTokenLocalService;
 	@BeanReference(type = KaleoTaskInstanceTokenPersistence.class)
