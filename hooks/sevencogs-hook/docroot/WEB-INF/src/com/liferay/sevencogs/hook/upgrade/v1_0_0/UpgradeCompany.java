@@ -41,7 +41,11 @@ import com.liferay.portal.model.ResourceConstants;
 import com.liferay.portal.model.Role;
 import com.liferay.portal.model.RoleConstants;
 import com.liferay.portal.model.User;
+import com.liferay.portal.security.auth.PrincipalThreadLocal;
 import com.liferay.portal.security.permission.ActionKeys;
+import com.liferay.portal.security.permission.PermissionChecker;
+import com.liferay.portal.security.permission.PermissionCheckerFactoryUtil;
+import com.liferay.portal.security.permission.PermissionThreadLocal;
 import com.liferay.portal.service.GroupLocalServiceUtil;
 import com.liferay.portal.service.LayoutLocalServiceUtil;
 import com.liferay.portal.service.LayoutSetLocalServiceUtil;
@@ -602,7 +606,7 @@ public class UpgradeCompany extends UpgradeProcess {
 			companyId, null, null, null, QueryUtil.ALL_POS, QueryUtil.ALL_POS);
 
 		for (Group group : groups) {
-			DLAppLocalServiceUtil.deleteFolder(group.getGroupId());
+			DLAppLocalServiceUtil.deleteAll(group.getGroupId());
 
 			JournalArticleLocalServiceUtil.deleteArticles(group.getGroupId());
 			JournalTemplateLocalServiceUtil.deleteTemplates(group.getGroupId());
@@ -685,9 +689,24 @@ public class UpgradeCompany extends UpgradeProcess {
 
 		long defaultUserId = UserLocalServiceUtil.getDefaultUserId(companyId);
 
+		User admin = UserLocalServiceUtil.fetchUserByScreenName(
+			companyId, "joebloggs");
+
+		if (admin == null) {
+			admin = UserLocalServiceUtil.fetchUserByScreenName(
+				companyId, "test");
+		}
+
+		long adminId = admin.getUserId();
+
+		PrincipalThreadLocal.setName(admin.getUserId());
+		PermissionChecker permissionChecker =
+			PermissionCheckerFactoryUtil.create(admin, true);
+		PermissionThreadLocal.setPermissionChecker(permissionChecker);
+
 		clearData(companyId);
-		setupCommunities(companyId, defaultUserId);
-		setupOrganizations(companyId, defaultUserId);
+		setupCommunities(companyId, defaultUserId, adminId);
+		setupOrganizations(companyId, defaultUserId, adminId);
 		setupRoles(companyId, defaultUserId);
 		setupUsers(companyId);
 		setupWorkflow(companyId, defaultUserId);
@@ -754,7 +773,8 @@ public class UpgradeCompany extends UpgradeProcess {
 		}
 	}
 
-	protected void setupCommunities(long companyId, long defaultUserId)
+	protected void setupCommunities(
+			long companyId, long defaultUserId, long adminId)
 		throws Exception {
 
 		// Guest community
@@ -780,35 +800,35 @@ public class UpgradeCompany extends UpgradeProcess {
 		serviceContext.setScopeGroupId(group.getGroupId());
 
 		Folder folder = DLAppLocalServiceUtil.addFolder(
-			defaultUserId, 0, 0, "Web Content", "Images used for content",
-			serviceContext);
+			defaultUserId, group.getGroupId(), 0, "Web Content",
+			"Images used for content", serviceContext);
 
 		FileEntry cellBgFileEntry = addDLFileEntry(
-			defaultUserId, folder.getFolderId(), "cell_bg.png",
+			adminId, folder.getFolderId(), "cell_bg.png",
 			"/guest/images/cell_bg.png", serviceContext);
 
 		FileEntry portalMashupFileEntry = addDLFileEntry(
-			defaultUserId, folder.getFolderId(), "portal_mashup.png",
+			adminId, folder.getFolderId(), "portal_mashup.png",
 			"/guest/images/portal_mashup.png", serviceContext);
 
 		FileEntry sevenCogsAdFileEntry = addDLFileEntry(
-			defaultUserId, folder.getFolderId(), "sevencogs_ad.png",
+			adminId, folder.getFolderId(), "sevencogs_ad.png",
 			"/guest/images/sevencogs_ad.png", serviceContext);
 
 		FileEntry sevenCogsMobileAdFileEntry = addDLFileEntry(
-			defaultUserId, folder.getFolderId(), "sevencogs_mobile_ad.png",
+			adminId, folder.getFolderId(), "sevencogs_mobile_ad.png",
 			"/guest/images/sevencogs_mobile_ad.png", serviceContext);
 
 		FileEntry sharedWorkspacesFileEntry = addDLFileEntry(
-			defaultUserId, folder.getFolderId(), "shared_workspaces.png",
+			adminId, folder.getFolderId(), "shared_workspaces.png",
 			"/guest/images/shared_workspaces.png", serviceContext);
 
 		FileEntry socialNetworkingFileEntry = addDLFileEntry(
-			defaultUserId, folder.getFolderId(), "social_network.png",
+			adminId, folder.getFolderId(), "social_network.png",
 			"/guest/images/social_network.png", serviceContext);
 
 		FileEntry webPublishingFileEntry = addDLFileEntry(
-			defaultUserId, folder.getFolderId(), "web_publishing.png",
+			adminId, folder.getFolderId(), "web_publishing.png",
 			"/guest/images/web_publishing.png", serviceContext);
 
 		// Welcome layout
@@ -967,7 +987,8 @@ public class UpgradeCompany extends UpgradeProcess {
 		addPortletId(layout, PortletKeys.LOGIN, "column-2");
 	}
 
-	protected void setupOrganizations(long companyId, long defaultUserId)
+	protected void setupOrganizations(
+			long companyId, long defaultUserId, long adminId)
 		throws Exception {
 
 		// 7Cogs, Inc. organization
@@ -1062,23 +1083,23 @@ public class UpgradeCompany extends UpgradeProcess {
 		serviceContext.setScopeGroupId(group.getGroupId());
 
 		Folder folder = DLAppLocalServiceUtil.addFolder(
-			defaultUserId, 0, 0, "7Cogs Web Content", "Images used for content",
-			serviceContext);
+			defaultUserId, group.getGroupId(), 0, "7Cogs Web Content",
+			"Images used for content", serviceContext);
 
 		serviceContext.setAssetTagNames(new String[] {"icons"});
 		serviceContext.setAssetCategoryIds(
 			new long[] {iconAssetCategory.getCategoryId()});
 
 		FileEntry cogBlueIconFileEntry = addDLFileEntry(
-			defaultUserId, folder.getFolderId(), "cog_blue.png",
+			adminId, folder.getFolderId(), "cog_blue.png",
 			"/sample/images/cog_blue.png", serviceContext);
 
 		FileEntry cogLightBlueIconFileEntry = addDLFileEntry(
-			defaultUserId, folder.getFolderId(), "cog_light_blue.png",
+			adminId, folder.getFolderId(), "cog_light_blue.png",
 			"/sample/images/cog_light_blue.png", serviceContext);
 
 		FileEntry cogOrangeIconFileEntry = addDLFileEntry(
-			defaultUserId, folder.getFolderId(), "cog_orange.png",
+			adminId, folder.getFolderId(), "cog_orange.png",
 			"/sample/images/cog_orange.png", serviceContext);
 
 		serviceContext.setAssetTagNames(new String[] {"home page", "blogs"});
@@ -1086,7 +1107,7 @@ public class UpgradeCompany extends UpgradeProcess {
 			new long[] {iconAssetCategory.getCategoryId()});
 
 		FileEntry blogsIconFileEntry = addDLFileEntry(
-			defaultUserId, folder.getFolderId(), "blogs_icon.png",
+			adminId, folder.getFolderId(), "blogs_icon.png",
 			"/sample/images/blogs_icon.png", serviceContext);
 
 		serviceContext.setAssetTagNames(new String[] {"home page"});
@@ -1094,7 +1115,7 @@ public class UpgradeCompany extends UpgradeProcess {
 			new long[] {productsAssetCategory.getCategoryId()});
 
 		FileEntry cogNetworkAdFileEntry = addDLFileEntry(
-			defaultUserId, folder.getFolderId(),
+			adminId, folder.getFolderId(),
 			"cog_network_advertisement.png",
 			"/sample/images/cog_network_advertisement.png",
 			serviceContext);
@@ -1104,7 +1125,7 @@ public class UpgradeCompany extends UpgradeProcess {
 			new long[] {iconAssetCategory.getCategoryId()});
 
 		FileEntry forumsIconFileEntry = addDLFileEntry(
-			defaultUserId, folder.getFolderId(), "forums_icon.png",
+			adminId, folder.getFolderId(), "forums_icon.png",
 			"/sample/images/forums_icon.png", serviceContext);
 
 		serviceContext.setAssetTagNames(new String[] {"liferay", "logo"});
@@ -1112,7 +1133,7 @@ public class UpgradeCompany extends UpgradeProcess {
 			new long[] {liferayAssetCategory.getCategoryId()});
 
 		FileEntry liferayLogoFileEntry = addDLFileEntry(
-			defaultUserId, folder.getFolderId(), "liferay_logo.png",
+			adminId, folder.getFolderId(), "liferay_logo.png",
 			"/sample/images/liferay_logo.png", serviceContext);
 
 		serviceContext.setAssetTagNames(new String[] {"home page"});
@@ -1120,7 +1141,7 @@ public class UpgradeCompany extends UpgradeProcess {
 			new long[] {bannerAssetCategory.getCategoryId()});
 
 		FileEntry homePageBannerFileEntry = addDLFileEntry(
-			defaultUserId, folder.getFolderId(), "home_page_banner.png",
+			adminId, folder.getFolderId(), "home_page_banner.png",
 			"/sample/images/home_page_banner.png", serviceContext);
 
 		serviceContext.setAssetTagNames(new String[] {"home page", "products"});
@@ -1128,7 +1149,7 @@ public class UpgradeCompany extends UpgradeProcess {
 			new long[] {iconAssetCategory.getCategoryId()});
 
 		FileEntry productsIconFileEntry = addDLFileEntry(
-			defaultUserId, folder.getFolderId(), "products_icon.png",
+			adminId, folder.getFolderId(), "products_icon.png",
 			"/sample/images/products_icon.png", serviceContext);
 
 		serviceContext.setAssetTagNames(new String[] {"products"});
@@ -1136,7 +1157,7 @@ public class UpgradeCompany extends UpgradeProcess {
 			new long[] {productsAssetCategory.getCategoryId()});
 
 		FileEntry productLandingFileEntry = addDLFileEntry(
-			defaultUserId, folder.getFolderId(), "product_landing.png",
+			adminId, folder.getFolderId(), "product_landing.png",
 			"/sample/images/product_landing.png", serviceContext);
 
 		// Home layout
@@ -1675,7 +1696,7 @@ public class UpgradeCompany extends UpgradeProcess {
 		serviceContext.setScopeGroupId(group.getGroupId());
 
 		folder = DLAppLocalServiceUtil.addFolder(
-			defaultUserId, 0, 0, "7Cogs Mobile Content",
+			defaultUserId, group.getGroupId(), 0, "7Cogs Mobile Content",
 			"Images used for mobile content", serviceContext);
 
 		serviceContext.setAssetTagNames(null);
