@@ -35,7 +35,7 @@ portletURL.setParameter("jspPage", "/status_update/view.jsp");
 %>
 
 <c:if test="<%= MicroblogsPermission.contains(permissionChecker, scopeGroupId, ActionKeys.ADD_ENTRY) && (microblogsEntryUserId == themeDisplay.getUserId()) %>">
-	<liferay-util:include page="/microblogs/edit_microblogs_entry.jsp" portletId="<%= portletDisplay.getId() %>" />
+	<liferay-util:include page="/microblogs/edit_microblogs_entry.jsp" servletContext="<%= application %>" />
 </c:if>
 
 <div class="microblogs-container">
@@ -44,17 +44,17 @@ portletURL.setParameter("jspPage", "/status_update/view.jsp");
 	List<MicroblogsEntry> microblogsEntries = null;
 
 	if (microblogsEntryUserId == themeDisplay.getUserId()) {
-		microblogsEntries = MicroblogsEntryLocalServiceUtil.getUserMicroblogsEntries(microblogsEntryUserId, 0, 1);
+		microblogsEntries = MicroblogsEntryLocalServiceUtil.getUserMicroblogsEntries(microblogsEntryUserId, 0, 0, 1);
 	}
 	else {
-		microblogsEntries = MicroblogsEntryServiceUtil.getUserMicroblogsEntries(microblogsEntryUserId, 0, 1);
+		microblogsEntries = MicroblogsEntryServiceUtil.getUserMicroblogsEntries(microblogsEntryUserId, 0, 0, 1);
 	}
 
 	request.setAttribute(WebKeys.MICROBLOGS_ENTRIES, microblogsEntries);
 	request.setAttribute(WebKeys.MICROBLOGS_ENTRIES_URL, portletURL);
 	%>
 
-	<liferay-util:include page="/microblogs/view_microblogs_entries.jsp" portletId="<%= portletDisplay.getId() %>" />
+	<liferay-util:include page="/microblogs/view_microblogs_entries.jsp" servletContext="<%= application %>" />
 </div>
 
 <aui:script use="aui-base">

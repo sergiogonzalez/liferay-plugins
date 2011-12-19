@@ -162,6 +162,13 @@ public class GadgetLocalServiceWrapper implements GadgetLocalService {
 		return _gadgetLocalService.getGadget(gadgetId);
 	}
 
+	public com.liferay.portal.model.PersistedModel getPersistedModel(
+		java.io.Serializable primaryKeyObj)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _gadgetLocalService.getPersistedModel(primaryKeyObj);
+	}
+
 	/**
 	* Returns a range of all the gadgets.
 	*
@@ -192,7 +199,7 @@ public class GadgetLocalServiceWrapper implements GadgetLocalService {
 	}
 
 	/**
-	* Updates the gadget in the database. Also notifies the appropriate model listeners.
+	* Updates the gadget in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
 	*
 	* @param gadget the gadget
 	* @return the gadget that was updated
@@ -205,7 +212,7 @@ public class GadgetLocalServiceWrapper implements GadgetLocalService {
 	}
 
 	/**
-	* Updates the gadget in the database. Also notifies the appropriate model listeners.
+	* Updates the gadget in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
 	*
 	* @param gadget the gadget
 	* @param merge whether to merge the gadget with the current session. See {@link com.liferay.portal.service.persistence.BatchSession#update(com.liferay.portal.kernel.dao.orm.Session, com.liferay.portal.model.BaseModel, boolean)} for an explanation.
@@ -256,6 +263,17 @@ public class GadgetLocalServiceWrapper implements GadgetLocalService {
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		_gadgetLocalService.destroyGadgets();
+	}
+
+	public com.liferay.opensocial.model.Gadget fetchGadget(long gadgetId)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _gadgetLocalService.fetchGadget(gadgetId);
+	}
+
+	public com.liferay.opensocial.model.Gadget fetchGadget(long companyId,
+		java.lang.String url)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _gadgetLocalService.fetchGadget(companyId, url);
 	}
 
 	public com.liferay.opensocial.model.Gadget getGadget(java.lang.String uuid)

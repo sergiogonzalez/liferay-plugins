@@ -17,13 +17,13 @@ package com.liferay.testmisc.portlet;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portlet.LiferayPortlet;
+import com.liferay.portal.kernel.portlet.PortletResponseUtil;
+import com.liferay.portal.kernel.servlet.ServletResponseUtil;
 import com.liferay.portal.kernel.upload.UploadPortletRequest;
 import com.liferay.portal.kernel.util.MimeTypesUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.util.portlet.PortletRequestUtil;
-import com.liferay.util.servlet.PortletResponseUtil;
-import com.liferay.util.servlet.ServletResponseUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -106,17 +106,18 @@ public class TestPortlet extends LiferayPortlet {
 			ActionRequest actionRequest, ActionResponse actionResponse)
 		throws Exception {
 
-		UploadPortletRequest uploadRequest = PortalUtil.getUploadPortletRequest(
-			actionRequest);
+		UploadPortletRequest uploadPortletRequest =
+			PortalUtil.getUploadPortletRequest(actionRequest);
 
 		String actionRequestTitle = ParamUtil.getString(actionRequest, "title");
-		String uploadRequestTitle = ParamUtil.getString(uploadRequest, "title");
+		String uploadPortletRequestTitle = ParamUtil.getString(
+			uploadPortletRequest, "title");
 
-		File file = uploadRequest.getFile("fileName");
+		File file = uploadPortletRequest.getFile("fileName");
 
 		if (_log.isInfoEnabled()) {
 			_log.info("actionRequestTitle " + actionRequestTitle);
-			_log.info("uploadRequestTitle " + uploadRequestTitle);
+			_log.info("uploadPortletRequestTitle " + uploadPortletRequestTitle);
 			_log.info("File " + file + " " + file.length());
 		}
 	}

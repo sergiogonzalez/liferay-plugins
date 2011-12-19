@@ -35,7 +35,7 @@ import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
-import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.ModelListener;
 import com.liferay.portal.service.persistence.BatchSessionUtil;
 import com.liferay.portal.service.persistence.ResourcePersistence;
@@ -73,22 +73,30 @@ public class SVNRepositoryPersistenceImpl extends BasePersistenceImpl<SVNReposit
 	 * Never modify or reference this class directly. Always use {@link SVNRepositoryUtil} to access the s v n repository persistence. Modify <code>service.xml</code> and rerun ServiceBuilder to regenerate this class.
 	 */
 	public static final String FINDER_CLASS_NAME_ENTITY = SVNRepositoryImpl.class.getName();
-	public static final String FINDER_CLASS_NAME_LIST = FINDER_CLASS_NAME_ENTITY +
-		".List";
+	public static final String FINDER_CLASS_NAME_LIST_WITH_PAGINATION = FINDER_CLASS_NAME_ENTITY +
+		".List1";
+	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION = FINDER_CLASS_NAME_ENTITY +
+		".List2";
 	public static final FinderPath FINDER_PATH_FETCH_BY_URL = new FinderPath(SVNRepositoryModelImpl.ENTITY_CACHE_ENABLED,
 			SVNRepositoryModelImpl.FINDER_CACHE_ENABLED,
-			FINDER_CLASS_NAME_ENTITY, "fetchByUrl",
-			new String[] { String.class.getName() });
+			SVNRepositoryImpl.class, FINDER_CLASS_NAME_ENTITY, "fetchByUrl",
+			new String[] { String.class.getName() },
+			SVNRepositoryModelImpl.URL_COLUMN_BITMASK);
 	public static final FinderPath FINDER_PATH_COUNT_BY_URL = new FinderPath(SVNRepositoryModelImpl.ENTITY_CACHE_ENABLED,
-			SVNRepositoryModelImpl.FINDER_CACHE_ENABLED,
-			FINDER_CLASS_NAME_LIST, "countByUrl",
+			SVNRepositoryModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUrl",
 			new String[] { String.class.getName() });
-	public static final FinderPath FINDER_PATH_FIND_ALL = new FinderPath(SVNRepositoryModelImpl.ENTITY_CACHE_ENABLED,
+	public static final FinderPath FINDER_PATH_WITH_PAGINATION_FIND_ALL = new FinderPath(SVNRepositoryModelImpl.ENTITY_CACHE_ENABLED,
 			SVNRepositoryModelImpl.FINDER_CACHE_ENABLED,
-			FINDER_CLASS_NAME_LIST, "findAll", new String[0]);
+			SVNRepositoryImpl.class, FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
+			"findAll", new String[0]);
+	public static final FinderPath FINDER_PATH_WITHOUT_PAGINATION_FIND_ALL = new FinderPath(SVNRepositoryModelImpl.ENTITY_CACHE_ENABLED,
+			SVNRepositoryModelImpl.FINDER_CACHE_ENABLED,
+			SVNRepositoryImpl.class, FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
+			"findAll", new String[0]);
 	public static final FinderPath FINDER_PATH_COUNT_ALL = new FinderPath(SVNRepositoryModelImpl.ENTITY_CACHE_ENABLED,
-			SVNRepositoryModelImpl.FINDER_CACHE_ENABLED,
-			FINDER_CLASS_NAME_LIST, "countAll", new String[0]);
+			SVNRepositoryModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll", new String[0]);
 
 	/**
 	 * Caches the s v n repository in the entity cache if it is enabled.
@@ -115,8 +123,7 @@ public class SVNRepositoryPersistenceImpl extends BasePersistenceImpl<SVNReposit
 		for (SVNRepository svnRepository : svnRepositories) {
 			if (EntityCacheUtil.getResult(
 						SVNRepositoryModelImpl.ENTITY_CACHE_ENABLED,
-						SVNRepositoryImpl.class, svnRepository.getPrimaryKey(),
-						this) == null) {
+						SVNRepositoryImpl.class, svnRepository.getPrimaryKey()) == null) {
 				cacheResult(svnRepository);
 			}
 		}
@@ -136,8 +143,10 @@ public class SVNRepositoryPersistenceImpl extends BasePersistenceImpl<SVNReposit
 		}
 
 		EntityCacheUtil.clearCache(SVNRepositoryImpl.class.getName());
+
 		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_ENTITY);
-		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST);
+		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
+		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 	}
 
 	/**
@@ -151,6 +160,9 @@ public class SVNRepositoryPersistenceImpl extends BasePersistenceImpl<SVNReposit
 	public void clearCache(SVNRepository svnRepository) {
 		EntityCacheUtil.removeResult(SVNRepositoryModelImpl.ENTITY_CACHE_ENABLED,
 			SVNRepositoryImpl.class, svnRepository.getPrimaryKey());
+
+		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
+		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 
 		FinderCacheUtil.removeResult(FINDER_PATH_FETCH_BY_URL,
 			new Object[] { svnRepository.getUrl() });
@@ -258,7 +270,8 @@ public class SVNRepositoryPersistenceImpl extends BasePersistenceImpl<SVNReposit
 			closeSession(session);
 		}
 
-		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST);
+		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
+		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 
 		SVNRepositoryModelImpl svnRepositoryModelImpl = (SVNRepositoryModelImpl)svnRepository;
 
@@ -297,24 +310,33 @@ public class SVNRepositoryPersistenceImpl extends BasePersistenceImpl<SVNReposit
 			closeSession(session);
 		}
 
-		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST);
+		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
+
+		if (isNew || !SVNRepositoryModelImpl.COLUMN_BITMASK_ENABLED) {
+			FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
+		}
 
 		EntityCacheUtil.putResult(SVNRepositoryModelImpl.ENTITY_CACHE_ENABLED,
 			SVNRepositoryImpl.class, svnRepository.getPrimaryKey(),
 			svnRepository);
 
-		if (!isNew &&
-				(!Validator.equals(svnRepository.getUrl(),
-					svnRepositoryModelImpl.getOriginalUrl()))) {
-			FinderCacheUtil.removeResult(FINDER_PATH_FETCH_BY_URL,
-				new Object[] { svnRepositoryModelImpl.getOriginalUrl() });
-		}
-
-		if (isNew ||
-				(!Validator.equals(svnRepository.getUrl(),
-					svnRepositoryModelImpl.getOriginalUrl()))) {
+		if (isNew) {
 			FinderCacheUtil.putResult(FINDER_PATH_FETCH_BY_URL,
 				new Object[] { svnRepository.getUrl() }, svnRepository);
+		}
+		else {
+			if ((svnRepositoryModelImpl.getColumnBitmask() &
+					FINDER_PATH_FETCH_BY_URL.getColumnBitmask()) != 0) {
+				Object[] args = new Object[] {
+						svnRepositoryModelImpl.getOriginalUrl()
+					};
+
+				FinderCacheUtil.removeResult(FINDER_PATH_COUNT_BY_URL, args);
+				FinderCacheUtil.removeResult(FINDER_PATH_FETCH_BY_URL, args);
+
+				FinderCacheUtil.putResult(FINDER_PATH_FETCH_BY_URL,
+					new Object[] { svnRepository.getUrl() }, svnRepository);
+			}
 		}
 
 		return svnRepository;
@@ -398,10 +420,16 @@ public class SVNRepositoryPersistenceImpl extends BasePersistenceImpl<SVNReposit
 	public SVNRepository fetchByPrimaryKey(long svnRepositoryId)
 		throws SystemException {
 		SVNRepository svnRepository = (SVNRepository)EntityCacheUtil.getResult(SVNRepositoryModelImpl.ENTITY_CACHE_ENABLED,
-				SVNRepositoryImpl.class, svnRepositoryId, this);
+				SVNRepositoryImpl.class, svnRepositoryId);
+
+		if (svnRepository == _nullSVNRepository) {
+			return null;
+		}
 
 		if (svnRepository == null) {
 			Session session = null;
+
+			boolean hasException = false;
 
 			try {
 				session = openSession();
@@ -410,11 +438,18 @@ public class SVNRepositoryPersistenceImpl extends BasePersistenceImpl<SVNReposit
 						Long.valueOf(svnRepositoryId));
 			}
 			catch (Exception e) {
+				hasException = true;
+
 				throw processException(e);
 			}
 			finally {
 				if (svnRepository != null) {
 					cacheResult(svnRepository);
+				}
+				else if (!hasException) {
+					EntityCacheUtil.putResult(SVNRepositoryModelImpl.ENTITY_CACHE_ENABLED,
+						SVNRepositoryImpl.class, svnRepositoryId,
+						_nullSVNRepository);
 				}
 
 				closeSession(session);
@@ -471,6 +506,7 @@ public class SVNRepositoryPersistenceImpl extends BasePersistenceImpl<SVNReposit
 	 * Returns the s v n repository where url = &#63; or returns <code>null</code> if it could not be found, optionally using the finder cache.
 	 *
 	 * @param url the url
+	 * @param retrieveFromCache whether to use the finder cache
 	 * @return the matching s v n repository, or <code>null</code> if a matching s v n repository could not be found
 	 * @throws SystemException if a system exception occurred
 	 */
@@ -607,12 +643,20 @@ public class SVNRepositoryPersistenceImpl extends BasePersistenceImpl<SVNReposit
 	 */
 	public List<SVNRepository> findAll(int start, int end,
 		OrderByComparator orderByComparator) throws SystemException {
-		Object[] finderArgs = new Object[] {
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
-			};
+		FinderPath finderPath = null;
+		Object[] finderArgs = new Object[] { start, end, orderByComparator };
 
-		List<SVNRepository> list = (List<SVNRepository>)FinderCacheUtil.getResult(FINDER_PATH_FIND_ALL,
+		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
+				(orderByComparator == null)) {
+			finderPath = FINDER_PATH_WITH_PAGINATION_FIND_ALL;
+			finderArgs = FINDER_ARGS_EMPTY;
+		}
+		else {
+			finderPath = FINDER_PATH_WITHOUT_PAGINATION_FIND_ALL;
+			finderArgs = new Object[] { start, end, orderByComparator };
+		}
+
+		List<SVNRepository> list = (List<SVNRepository>)FinderCacheUtil.getResult(finderPath,
 				finderArgs, this);
 
 		if (list == null) {
@@ -657,14 +701,12 @@ public class SVNRepositoryPersistenceImpl extends BasePersistenceImpl<SVNReposit
 			}
 			finally {
 				if (list == null) {
-					FinderCacheUtil.removeResult(FINDER_PATH_FIND_ALL,
-						finderArgs);
+					FinderCacheUtil.removeResult(finderPath, finderArgs);
 				}
 				else {
 					cacheResult(list);
 
-					FinderCacheUtil.putResult(FINDER_PATH_FIND_ALL, finderArgs,
-						list);
+					FinderCacheUtil.putResult(finderPath, finderArgs, list);
 				}
 
 				closeSession(session);
@@ -770,10 +812,8 @@ public class SVNRepositoryPersistenceImpl extends BasePersistenceImpl<SVNReposit
 	 * @throws SystemException if a system exception occurred
 	 */
 	public int countAll() throws SystemException {
-		Object[] finderArgs = new Object[0];
-
 		Long count = (Long)FinderCacheUtil.getResult(FINDER_PATH_COUNT_ALL,
-				finderArgs, this);
+				FINDER_ARGS_EMPTY, this);
 
 		if (count == null) {
 			Session session = null;
@@ -793,8 +833,8 @@ public class SVNRepositoryPersistenceImpl extends BasePersistenceImpl<SVNReposit
 					count = Long.valueOf(0);
 				}
 
-				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL, finderArgs,
-					count);
+				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL,
+					FINDER_ARGS_EMPTY, count);
 
 				closeSession(session);
 			}
@@ -831,7 +871,7 @@ public class SVNRepositoryPersistenceImpl extends BasePersistenceImpl<SVNReposit
 	public void destroy() {
 		EntityCacheUtil.removeCache(SVNRepositoryImpl.class.getName());
 		FinderCacheUtil.removeCache(FINDER_CLASS_NAME_ENTITY);
-		FinderCacheUtil.removeCache(FINDER_CLASS_NAME_LIST);
+		FinderCacheUtil.removeCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 	}
 
 	@BeanReference(type = JIRAActionPersistence.class)
@@ -863,4 +903,21 @@ public class SVNRepositoryPersistenceImpl extends BasePersistenceImpl<SVNReposit
 	private static final boolean _HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE = GetterUtil.getBoolean(PropsUtil.get(
 				PropsKeys.HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE));
 	private static Log _log = LogFactoryUtil.getLog(SVNRepositoryPersistenceImpl.class);
+	private static SVNRepository _nullSVNRepository = new SVNRepositoryImpl() {
+			@Override
+			public Object clone() {
+				return this;
+			}
+
+			@Override
+			public CacheModel<SVNRepository> toCacheModel() {
+				return _nullSVNRepositoryCacheModel;
+			}
+		};
+
+	private static CacheModel<SVNRepository> _nullSVNRepositoryCacheModel = new CacheModel<SVNRepository>() {
+			public SVNRepository toEntityModel() {
+				return _nullSVNRepository;
+			}
+		};
 }

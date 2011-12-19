@@ -24,7 +24,7 @@ $theme.include($top_messages_include)
 	<header id="banner" role="banner">
 		<hgroup id="heading">
 			<h1 class="company-title">
-				<a class="logo" href="$company_url" title="#language("go-to") $company_name">
+				<a class="$logo_css_class" href="$company_url" title="#language("go-to") $company_name">
 					<span>$company_name</span>
 				</a>
 			</h1>
@@ -37,12 +37,6 @@ $theme.include($top_messages_include)
 		<div id="page-search">
 			$theme.journalContentSearch()
 		</div>
-
-		#if ($update_available_url)
-			<div class="popup-alert-notice">
-				<a class="update-available" href="$update_available_url">#language ("updates-are-available-for-liferay")</a>
-			</div>
-		#end
 	</header>
 
 	#if ($has_navigation)

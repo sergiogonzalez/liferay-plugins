@@ -17,8 +17,10 @@ package com.liferay.portal.workflow.kaleo.model.impl;
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.impl.BaseModelImpl;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.util.PortalUtil;
@@ -29,8 +31,6 @@ import com.liferay.portlet.expando.model.ExpandoBridge;
 import com.liferay.portlet.expando.util.ExpandoBridgeFactoryUtil;
 
 import java.io.Serializable;
-
-import java.lang.reflect.Proxy;
 
 import java.sql.Types;
 
@@ -65,16 +65,17 @@ public class KaleoTaskAssignmentModelImpl extends BaseModelImpl<KaleoTaskAssignm
 			{ "userName", Types.VARCHAR },
 			{ "createDate", Types.TIMESTAMP },
 			{ "modifiedDate", Types.TIMESTAMP },
+			{ "kaleoClassName", Types.VARCHAR },
+			{ "kaleoClassPK", Types.BIGINT },
 			{ "kaleoDefinitionId", Types.BIGINT },
 			{ "kaleoNodeId", Types.BIGINT },
-			{ "kaleoTaskId", Types.BIGINT },
 			{ "assigneeClassName", Types.VARCHAR },
 			{ "assigneeClassPK", Types.BIGINT },
 			{ "assigneeActionId", Types.VARCHAR },
 			{ "assigneeScript", Types.CLOB },
 			{ "assigneeScriptLanguage", Types.VARCHAR }
 		};
-	public static final String TABLE_SQL_CREATE = "create table KaleoTaskAssignment (kaleoTaskAssignmentId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(200) null,createDate DATE null,modifiedDate DATE null,kaleoDefinitionId LONG,kaleoNodeId LONG,kaleoTaskId LONG,assigneeClassName VARCHAR(200) null,assigneeClassPK LONG,assigneeActionId VARCHAR(75) null,assigneeScript TEXT null,assigneeScriptLanguage VARCHAR(75) null)";
+	public static final String TABLE_SQL_CREATE = "create table KaleoTaskAssignment (kaleoTaskAssignmentId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(200) null,createDate DATE null,modifiedDate DATE null,kaleoClassName VARCHAR(200) null,kaleoClassPK LONG,kaleoDefinitionId LONG,kaleoNodeId LONG,assigneeClassName VARCHAR(200) null,assigneeClassPK LONG,assigneeActionId VARCHAR(75) null,assigneeScript TEXT null,assigneeScriptLanguage VARCHAR(75) null)";
 	public static final String TABLE_SQL_DROP = "drop table KaleoTaskAssignment";
 	public static final String ORDER_BY_JPQL = " ORDER BY kaleoTaskAssignment.kaleoTaskAssignmentId ASC";
 	public static final String ORDER_BY_SQL = " ORDER BY KaleoTaskAssignment.kaleoTaskAssignmentId ASC";
@@ -87,15 +88,14 @@ public class KaleoTaskAssignmentModelImpl extends BaseModelImpl<KaleoTaskAssignm
 	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
 				"value.object.finder.cache.enabled.com.liferay.portal.workflow.kaleo.model.KaleoTaskAssignment"),
 			true);
-
-	public Class<?> getModelClass() {
-		return KaleoTaskAssignment.class;
-	}
-
-	public String getModelClassName() {
-		return KaleoTaskAssignment.class.getName();
-	}
-
+	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
+				"value.object.column.bitmask.enabled.com.liferay.portal.workflow.kaleo.model.KaleoTaskAssignment"),
+			true);
+	public static long ASSIGNEECLASSNAME_COLUMN_BITMASK = 1L;
+	public static long COMPANYID_COLUMN_BITMASK = 2L;
+	public static long KALEOCLASSNAME_COLUMN_BITMASK = 4L;
+	public static long KALEOCLASSPK_COLUMN_BITMASK = 8L;
+	public static long KALEODEFINITIONID_COLUMN_BITMASK = 16L;
 	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(com.liferay.util.service.ServiceProps.get(
 				"lock.expiration.time.com.liferay.portal.workflow.kaleo.model.KaleoTaskAssignment"));
 
@@ -116,6 +116,14 @@ public class KaleoTaskAssignmentModelImpl extends BaseModelImpl<KaleoTaskAssignm
 
 	public void setPrimaryKeyObj(Serializable primaryKeyObj) {
 		setPrimaryKey(((Long)primaryKeyObj).longValue());
+	}
+
+	public Class<?> getModelClass() {
+		return KaleoTaskAssignment.class;
+	}
+
+	public String getModelClassName() {
+		return KaleoTaskAssignment.class.getName();
 	}
 
 	public long getKaleoTaskAssignmentId() {
@@ -139,7 +147,19 @@ public class KaleoTaskAssignmentModelImpl extends BaseModelImpl<KaleoTaskAssignm
 	}
 
 	public void setCompanyId(long companyId) {
+		_columnBitmask |= COMPANYID_COLUMN_BITMASK;
+
+		if (!_setOriginalCompanyId) {
+			_setOriginalCompanyId = true;
+
+			_originalCompanyId = _companyId;
+		}
+
 		_companyId = companyId;
+	}
+
+	public long getOriginalCompanyId() {
+		return _originalCompanyId;
 	}
 
 	public long getUserId() {
@@ -187,12 +207,67 @@ public class KaleoTaskAssignmentModelImpl extends BaseModelImpl<KaleoTaskAssignm
 		_modifiedDate = modifiedDate;
 	}
 
+	public String getKaleoClassName() {
+		if (_kaleoClassName == null) {
+			return StringPool.BLANK;
+		}
+		else {
+			return _kaleoClassName;
+		}
+	}
+
+	public void setKaleoClassName(String kaleoClassName) {
+		_columnBitmask |= KALEOCLASSNAME_COLUMN_BITMASK;
+
+		if (_originalKaleoClassName == null) {
+			_originalKaleoClassName = _kaleoClassName;
+		}
+
+		_kaleoClassName = kaleoClassName;
+	}
+
+	public String getOriginalKaleoClassName() {
+		return GetterUtil.getString(_originalKaleoClassName);
+	}
+
+	public long getKaleoClassPK() {
+		return _kaleoClassPK;
+	}
+
+	public void setKaleoClassPK(long kaleoClassPK) {
+		_columnBitmask |= KALEOCLASSPK_COLUMN_BITMASK;
+
+		if (!_setOriginalKaleoClassPK) {
+			_setOriginalKaleoClassPK = true;
+
+			_originalKaleoClassPK = _kaleoClassPK;
+		}
+
+		_kaleoClassPK = kaleoClassPK;
+	}
+
+	public long getOriginalKaleoClassPK() {
+		return _originalKaleoClassPK;
+	}
+
 	public long getKaleoDefinitionId() {
 		return _kaleoDefinitionId;
 	}
 
 	public void setKaleoDefinitionId(long kaleoDefinitionId) {
+		_columnBitmask |= KALEODEFINITIONID_COLUMN_BITMASK;
+
+		if (!_setOriginalKaleoDefinitionId) {
+			_setOriginalKaleoDefinitionId = true;
+
+			_originalKaleoDefinitionId = _kaleoDefinitionId;
+		}
+
 		_kaleoDefinitionId = kaleoDefinitionId;
+	}
+
+	public long getOriginalKaleoDefinitionId() {
+		return _originalKaleoDefinitionId;
 	}
 
 	public long getKaleoNodeId() {
@@ -201,14 +276,6 @@ public class KaleoTaskAssignmentModelImpl extends BaseModelImpl<KaleoTaskAssignm
 
 	public void setKaleoNodeId(long kaleoNodeId) {
 		_kaleoNodeId = kaleoNodeId;
-	}
-
-	public long getKaleoTaskId() {
-		return _kaleoTaskId;
-	}
-
-	public void setKaleoTaskId(long kaleoTaskId) {
-		_kaleoTaskId = kaleoTaskId;
 	}
 
 	public String getAssigneeClassName() {
@@ -221,7 +288,17 @@ public class KaleoTaskAssignmentModelImpl extends BaseModelImpl<KaleoTaskAssignm
 	}
 
 	public void setAssigneeClassName(String assigneeClassName) {
+		_columnBitmask |= ASSIGNEECLASSNAME_COLUMN_BITMASK;
+
+		if (_originalAssigneeClassName == null) {
+			_originalAssigneeClassName = _assigneeClassName;
+		}
+
 		_assigneeClassName = assigneeClassName;
+	}
+
+	public String getOriginalAssigneeClassName() {
+		return GetterUtil.getString(_originalAssigneeClassName);
 	}
 
 	public long getAssigneeClassPK() {
@@ -271,14 +348,23 @@ public class KaleoTaskAssignmentModelImpl extends BaseModelImpl<KaleoTaskAssignm
 		_assigneeScriptLanguage = assigneeScriptLanguage;
 	}
 
+	public long getColumnBitmask() {
+		return _columnBitmask;
+	}
+
 	@Override
 	public KaleoTaskAssignment toEscapedModel() {
 		if (isEscapedModel()) {
 			return (KaleoTaskAssignment)this;
 		}
 		else {
-			return (KaleoTaskAssignment)Proxy.newProxyInstance(_classLoader,
-				_escapedModelProxyInterfaces, new AutoEscapeBeanHandler(this));
+			if (_escapedModelProxy == null) {
+				_escapedModelProxy = (KaleoTaskAssignment)ProxyUtil.newProxyInstance(_classLoader,
+						_escapedModelProxyInterfaces,
+						new AutoEscapeBeanHandler(this));
+			}
+
+			return _escapedModelProxy;
 		}
 	}
 
@@ -308,9 +394,10 @@ public class KaleoTaskAssignmentModelImpl extends BaseModelImpl<KaleoTaskAssignm
 		kaleoTaskAssignmentImpl.setUserName(getUserName());
 		kaleoTaskAssignmentImpl.setCreateDate(getCreateDate());
 		kaleoTaskAssignmentImpl.setModifiedDate(getModifiedDate());
+		kaleoTaskAssignmentImpl.setKaleoClassName(getKaleoClassName());
+		kaleoTaskAssignmentImpl.setKaleoClassPK(getKaleoClassPK());
 		kaleoTaskAssignmentImpl.setKaleoDefinitionId(getKaleoDefinitionId());
 		kaleoTaskAssignmentImpl.setKaleoNodeId(getKaleoNodeId());
-		kaleoTaskAssignmentImpl.setKaleoTaskId(getKaleoTaskId());
 		kaleoTaskAssignmentImpl.setAssigneeClassName(getAssigneeClassName());
 		kaleoTaskAssignmentImpl.setAssigneeClassPK(getAssigneeClassPK());
 		kaleoTaskAssignmentImpl.setAssigneeActionId(getAssigneeActionId());
@@ -374,11 +461,120 @@ public class KaleoTaskAssignmentModelImpl extends BaseModelImpl<KaleoTaskAssignm
 
 	@Override
 	public void resetOriginalValues() {
+		KaleoTaskAssignmentModelImpl kaleoTaskAssignmentModelImpl = this;
+
+		kaleoTaskAssignmentModelImpl._originalCompanyId = kaleoTaskAssignmentModelImpl._companyId;
+
+		kaleoTaskAssignmentModelImpl._setOriginalCompanyId = false;
+
+		kaleoTaskAssignmentModelImpl._originalKaleoClassName = kaleoTaskAssignmentModelImpl._kaleoClassName;
+
+		kaleoTaskAssignmentModelImpl._originalKaleoClassPK = kaleoTaskAssignmentModelImpl._kaleoClassPK;
+
+		kaleoTaskAssignmentModelImpl._setOriginalKaleoClassPK = false;
+
+		kaleoTaskAssignmentModelImpl._originalKaleoDefinitionId = kaleoTaskAssignmentModelImpl._kaleoDefinitionId;
+
+		kaleoTaskAssignmentModelImpl._setOriginalKaleoDefinitionId = false;
+
+		kaleoTaskAssignmentModelImpl._originalAssigneeClassName = kaleoTaskAssignmentModelImpl._assigneeClassName;
+
+		kaleoTaskAssignmentModelImpl._columnBitmask = 0;
+	}
+
+	@Override
+	public CacheModel<KaleoTaskAssignment> toCacheModel() {
+		KaleoTaskAssignmentCacheModel kaleoTaskAssignmentCacheModel = new KaleoTaskAssignmentCacheModel();
+
+		kaleoTaskAssignmentCacheModel.kaleoTaskAssignmentId = getKaleoTaskAssignmentId();
+
+		kaleoTaskAssignmentCacheModel.groupId = getGroupId();
+
+		kaleoTaskAssignmentCacheModel.companyId = getCompanyId();
+
+		kaleoTaskAssignmentCacheModel.userId = getUserId();
+
+		kaleoTaskAssignmentCacheModel.userName = getUserName();
+
+		String userName = kaleoTaskAssignmentCacheModel.userName;
+
+		if ((userName != null) && (userName.length() == 0)) {
+			kaleoTaskAssignmentCacheModel.userName = null;
+		}
+
+		Date createDate = getCreateDate();
+
+		if (createDate != null) {
+			kaleoTaskAssignmentCacheModel.createDate = createDate.getTime();
+		}
+		else {
+			kaleoTaskAssignmentCacheModel.createDate = Long.MIN_VALUE;
+		}
+
+		Date modifiedDate = getModifiedDate();
+
+		if (modifiedDate != null) {
+			kaleoTaskAssignmentCacheModel.modifiedDate = modifiedDate.getTime();
+		}
+		else {
+			kaleoTaskAssignmentCacheModel.modifiedDate = Long.MIN_VALUE;
+		}
+
+		kaleoTaskAssignmentCacheModel.kaleoClassName = getKaleoClassName();
+
+		String kaleoClassName = kaleoTaskAssignmentCacheModel.kaleoClassName;
+
+		if ((kaleoClassName != null) && (kaleoClassName.length() == 0)) {
+			kaleoTaskAssignmentCacheModel.kaleoClassName = null;
+		}
+
+		kaleoTaskAssignmentCacheModel.kaleoClassPK = getKaleoClassPK();
+
+		kaleoTaskAssignmentCacheModel.kaleoDefinitionId = getKaleoDefinitionId();
+
+		kaleoTaskAssignmentCacheModel.kaleoNodeId = getKaleoNodeId();
+
+		kaleoTaskAssignmentCacheModel.assigneeClassName = getAssigneeClassName();
+
+		String assigneeClassName = kaleoTaskAssignmentCacheModel.assigneeClassName;
+
+		if ((assigneeClassName != null) && (assigneeClassName.length() == 0)) {
+			kaleoTaskAssignmentCacheModel.assigneeClassName = null;
+		}
+
+		kaleoTaskAssignmentCacheModel.assigneeClassPK = getAssigneeClassPK();
+
+		kaleoTaskAssignmentCacheModel.assigneeActionId = getAssigneeActionId();
+
+		String assigneeActionId = kaleoTaskAssignmentCacheModel.assigneeActionId;
+
+		if ((assigneeActionId != null) && (assigneeActionId.length() == 0)) {
+			kaleoTaskAssignmentCacheModel.assigneeActionId = null;
+		}
+
+		kaleoTaskAssignmentCacheModel.assigneeScript = getAssigneeScript();
+
+		String assigneeScript = kaleoTaskAssignmentCacheModel.assigneeScript;
+
+		if ((assigneeScript != null) && (assigneeScript.length() == 0)) {
+			kaleoTaskAssignmentCacheModel.assigneeScript = null;
+		}
+
+		kaleoTaskAssignmentCacheModel.assigneeScriptLanguage = getAssigneeScriptLanguage();
+
+		String assigneeScriptLanguage = kaleoTaskAssignmentCacheModel.assigneeScriptLanguage;
+
+		if ((assigneeScriptLanguage != null) &&
+				(assigneeScriptLanguage.length() == 0)) {
+			kaleoTaskAssignmentCacheModel.assigneeScriptLanguage = null;
+		}
+
+		return kaleoTaskAssignmentCacheModel;
 	}
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(31);
+		StringBundler sb = new StringBundler(33);
 
 		sb.append("{kaleoTaskAssignmentId=");
 		sb.append(getKaleoTaskAssignmentId());
@@ -394,12 +590,14 @@ public class KaleoTaskAssignmentModelImpl extends BaseModelImpl<KaleoTaskAssignm
 		sb.append(getCreateDate());
 		sb.append(", modifiedDate=");
 		sb.append(getModifiedDate());
+		sb.append(", kaleoClassName=");
+		sb.append(getKaleoClassName());
+		sb.append(", kaleoClassPK=");
+		sb.append(getKaleoClassPK());
 		sb.append(", kaleoDefinitionId=");
 		sb.append(getKaleoDefinitionId());
 		sb.append(", kaleoNodeId=");
 		sb.append(getKaleoNodeId());
-		sb.append(", kaleoTaskId=");
-		sb.append(getKaleoTaskId());
 		sb.append(", assigneeClassName=");
 		sb.append(getAssigneeClassName());
 		sb.append(", assigneeClassPK=");
@@ -416,7 +614,7 @@ public class KaleoTaskAssignmentModelImpl extends BaseModelImpl<KaleoTaskAssignm
 	}
 
 	public String toXmlString() {
-		StringBundler sb = new StringBundler(49);
+		StringBundler sb = new StringBundler(52);
 
 		sb.append("<model><model-name>");
 		sb.append("com.liferay.portal.workflow.kaleo.model.KaleoTaskAssignment");
@@ -451,16 +649,20 @@ public class KaleoTaskAssignmentModelImpl extends BaseModelImpl<KaleoTaskAssignm
 		sb.append(getModifiedDate());
 		sb.append("]]></column-value></column>");
 		sb.append(
+			"<column><column-name>kaleoClassName</column-name><column-value><![CDATA[");
+		sb.append(getKaleoClassName());
+		sb.append("]]></column-value></column>");
+		sb.append(
+			"<column><column-name>kaleoClassPK</column-name><column-value><![CDATA[");
+		sb.append(getKaleoClassPK());
+		sb.append("]]></column-value></column>");
+		sb.append(
 			"<column><column-name>kaleoDefinitionId</column-name><column-value><![CDATA[");
 		sb.append(getKaleoDefinitionId());
 		sb.append("]]></column-value></column>");
 		sb.append(
 			"<column><column-name>kaleoNodeId</column-name><column-value><![CDATA[");
 		sb.append(getKaleoNodeId());
-		sb.append("]]></column-value></column>");
-		sb.append(
-			"<column><column-name>kaleoTaskId</column-name><column-value><![CDATA[");
-		sb.append(getKaleoTaskId());
 		sb.append("]]></column-value></column>");
 		sb.append(
 			"<column><column-name>assigneeClassName</column-name><column-value><![CDATA[");
@@ -495,18 +697,29 @@ public class KaleoTaskAssignmentModelImpl extends BaseModelImpl<KaleoTaskAssignm
 	private long _kaleoTaskAssignmentId;
 	private long _groupId;
 	private long _companyId;
+	private long _originalCompanyId;
+	private boolean _setOriginalCompanyId;
 	private long _userId;
 	private String _userUuid;
 	private String _userName;
 	private Date _createDate;
 	private Date _modifiedDate;
+	private String _kaleoClassName;
+	private String _originalKaleoClassName;
+	private long _kaleoClassPK;
+	private long _originalKaleoClassPK;
+	private boolean _setOriginalKaleoClassPK;
 	private long _kaleoDefinitionId;
+	private long _originalKaleoDefinitionId;
+	private boolean _setOriginalKaleoDefinitionId;
 	private long _kaleoNodeId;
-	private long _kaleoTaskId;
 	private String _assigneeClassName;
+	private String _originalAssigneeClassName;
 	private long _assigneeClassPK;
 	private String _assigneeActionId;
 	private String _assigneeScript;
 	private String _assigneeScriptLanguage;
 	private transient ExpandoBridge _expandoBridge;
+	private long _columnBitmask;
+	private KaleoTaskAssignment _escapedModelProxy;
 }

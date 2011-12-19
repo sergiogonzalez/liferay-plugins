@@ -165,6 +165,13 @@ public class KaleoInstanceLocalServiceWrapper
 		return _kaleoInstanceLocalService.getKaleoInstance(kaleoInstanceId);
 	}
 
+	public com.liferay.portal.model.PersistedModel getPersistedModel(
+		java.io.Serializable primaryKeyObj)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _kaleoInstanceLocalService.getPersistedModel(primaryKeyObj);
+	}
+
 	/**
 	* Returns a range of all the kaleo instances.
 	*
@@ -195,7 +202,7 @@ public class KaleoInstanceLocalServiceWrapper
 	}
 
 	/**
-	* Updates the kaleo instance in the database. Also notifies the appropriate model listeners.
+	* Updates the kaleo instance in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
 	*
 	* @param kaleoInstance the kaleo instance
 	* @return the kaleo instance that was updated
@@ -208,7 +215,7 @@ public class KaleoInstanceLocalServiceWrapper
 	}
 
 	/**
-	* Updates the kaleo instance in the database. Also notifies the appropriate model listeners.
+	* Updates the kaleo instance in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
 	*
 	* @param kaleoInstance the kaleo instance
 	* @param merge whether to merge the kaleo instance with the current session. See {@link com.liferay.portal.service.persistence.BatchSession#update(com.liferay.portal.kernel.dao.orm.Session, com.liferay.portal.model.BaseModel, boolean)} for an explanation.
@@ -283,6 +290,17 @@ public class KaleoInstanceLocalServiceWrapper
 	}
 
 	public java.util.List<com.liferay.portal.workflow.kaleo.model.KaleoInstance> getKaleoInstances(
+		java.lang.Long userId, java.lang.String[] assetClassNames,
+		java.lang.Boolean completed, int start, int end,
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator,
+		com.liferay.portal.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _kaleoInstanceLocalService.getKaleoInstances(userId,
+			assetClassNames, completed, start, end, orderByComparator,
+			serviceContext);
+	}
+
+	public java.util.List<com.liferay.portal.workflow.kaleo.model.KaleoInstance> getKaleoInstances(
 		java.lang.String kaleoDefinitionName, int kaleoDefinitionVersion,
 		boolean completed, int start, int end,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator,
@@ -306,6 +324,14 @@ public class KaleoInstanceLocalServiceWrapper
 		throws com.liferay.portal.kernel.exception.SystemException {
 		return _kaleoInstanceLocalService.getKaleoInstancesCount(userId,
 			assetClassName, assetClassPK, completed, serviceContext);
+	}
+
+	public int getKaleoInstancesCount(java.lang.Long userId,
+		java.lang.String[] assetClassNames, java.lang.Boolean completed,
+		com.liferay.portal.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _kaleoInstanceLocalService.getKaleoInstancesCount(userId,
+			assetClassNames, completed, serviceContext);
 	}
 
 	public int getKaleoInstancesCount(java.lang.String kaleoDefinitionName,

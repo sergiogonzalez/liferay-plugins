@@ -19,8 +19,10 @@ import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.json.JSON;
 import com.liferay.portal.kernel.util.DateUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.impl.BaseModelImpl;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.util.PortalUtil;
@@ -33,8 +35,6 @@ import com.liferay.tasks.model.TasksEntryModel;
 import com.liferay.tasks.model.TasksEntrySoap;
 
 import java.io.Serializable;
-
-import java.lang.reflect.Proxy;
 
 import java.sql.Types;
 
@@ -93,6 +93,13 @@ public class TasksEntryModelImpl extends BaseModelImpl<TasksEntry>
 	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
 				"value.object.finder.cache.enabled.com.liferay.tasks.model.TasksEntry"),
 			true);
+	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
+				"value.object.column.bitmask.enabled.com.liferay.tasks.model.TasksEntry"),
+			true);
+	public static long ASSIGNEEUSERID_COLUMN_BITMASK = 1L;
+	public static long GROUPID_COLUMN_BITMASK = 2L;
+	public static long RESOLVERUSERID_COLUMN_BITMASK = 4L;
+	public static long USERID_COLUMN_BITMASK = 8L;
 
 	/**
 	 * Converts the soap model instance into a normal model instance.
@@ -137,14 +144,6 @@ public class TasksEntryModelImpl extends BaseModelImpl<TasksEntry>
 		return models;
 	}
 
-	public Class<?> getModelClass() {
-		return TasksEntry.class;
-	}
-
-	public String getModelClassName() {
-		return TasksEntry.class.getName();
-	}
-
 	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(com.liferay.util.service.ServiceProps.get(
 				"lock.expiration.time.com.liferay.tasks.model.TasksEntry"));
 
@@ -167,6 +166,14 @@ public class TasksEntryModelImpl extends BaseModelImpl<TasksEntry>
 		setPrimaryKey(((Long)primaryKeyObj).longValue());
 	}
 
+	public Class<?> getModelClass() {
+		return TasksEntry.class;
+	}
+
+	public String getModelClassName() {
+		return TasksEntry.class.getName();
+	}
+
 	@JSON
 	public long getTasksEntryId() {
 		return _tasksEntryId;
@@ -182,7 +189,19 @@ public class TasksEntryModelImpl extends BaseModelImpl<TasksEntry>
 	}
 
 	public void setGroupId(long groupId) {
+		_columnBitmask |= GROUPID_COLUMN_BITMASK;
+
+		if (!_setOriginalGroupId) {
+			_setOriginalGroupId = true;
+
+			_originalGroupId = _groupId;
+		}
+
 		_groupId = groupId;
+	}
+
+	public long getOriginalGroupId() {
+		return _originalGroupId;
 	}
 
 	@JSON
@@ -200,6 +219,14 @@ public class TasksEntryModelImpl extends BaseModelImpl<TasksEntry>
 	}
 
 	public void setUserId(long userId) {
+		_columnBitmask |= USERID_COLUMN_BITMASK;
+
+		if (!_setOriginalUserId) {
+			_setOriginalUserId = true;
+
+			_originalUserId = _userId;
+		}
+
 		_userId = userId;
 	}
 
@@ -209,6 +236,10 @@ public class TasksEntryModelImpl extends BaseModelImpl<TasksEntry>
 
 	public void setUserUuid(String userUuid) {
 		_userUuid = userUuid;
+	}
+
+	public long getOriginalUserId() {
+		return _originalUserId;
 	}
 
 	@JSON
@@ -272,6 +303,14 @@ public class TasksEntryModelImpl extends BaseModelImpl<TasksEntry>
 	}
 
 	public void setAssigneeUserId(long assigneeUserId) {
+		_columnBitmask |= ASSIGNEEUSERID_COLUMN_BITMASK;
+
+		if (!_setOriginalAssigneeUserId) {
+			_setOriginalAssigneeUserId = true;
+
+			_originalAssigneeUserId = _assigneeUserId;
+		}
+
 		_assigneeUserId = assigneeUserId;
 	}
 
@@ -284,12 +323,24 @@ public class TasksEntryModelImpl extends BaseModelImpl<TasksEntry>
 		_assigneeUserUuid = assigneeUserUuid;
 	}
 
+	public long getOriginalAssigneeUserId() {
+		return _originalAssigneeUserId;
+	}
+
 	@JSON
 	public long getResolverUserId() {
 		return _resolverUserId;
 	}
 
 	public void setResolverUserId(long resolverUserId) {
+		_columnBitmask |= RESOLVERUSERID_COLUMN_BITMASK;
+
+		if (!_setOriginalResolverUserId) {
+			_setOriginalResolverUserId = true;
+
+			_originalResolverUserId = _resolverUserId;
+		}
+
 		_resolverUserId = resolverUserId;
 	}
 
@@ -300,6 +351,10 @@ public class TasksEntryModelImpl extends BaseModelImpl<TasksEntry>
 
 	public void setResolverUserUuid(String resolverUserUuid) {
 		_resolverUserUuid = resolverUserUuid;
+	}
+
+	public long getOriginalResolverUserId() {
+		return _originalResolverUserId;
 	}
 
 	@JSON
@@ -329,14 +384,23 @@ public class TasksEntryModelImpl extends BaseModelImpl<TasksEntry>
 		_status = status;
 	}
 
+	public long getColumnBitmask() {
+		return _columnBitmask;
+	}
+
 	@Override
 	public TasksEntry toEscapedModel() {
 		if (isEscapedModel()) {
 			return (TasksEntry)this;
 		}
 		else {
-			return (TasksEntry)Proxy.newProxyInstance(_classLoader,
-				_escapedModelProxyInterfaces, new AutoEscapeBeanHandler(this));
+			if (_escapedModelProxy == null) {
+				_escapedModelProxy = (TasksEntry)ProxyUtil.newProxyInstance(_classLoader,
+						_escapedModelProxyInterfaces,
+						new AutoEscapeBeanHandler(this));
+			}
+
+			return _escapedModelProxy;
 		}
 	}
 
@@ -443,6 +507,100 @@ public class TasksEntryModelImpl extends BaseModelImpl<TasksEntry>
 
 	@Override
 	public void resetOriginalValues() {
+		TasksEntryModelImpl tasksEntryModelImpl = this;
+
+		tasksEntryModelImpl._originalGroupId = tasksEntryModelImpl._groupId;
+
+		tasksEntryModelImpl._setOriginalGroupId = false;
+
+		tasksEntryModelImpl._originalUserId = tasksEntryModelImpl._userId;
+
+		tasksEntryModelImpl._setOriginalUserId = false;
+
+		tasksEntryModelImpl._originalAssigneeUserId = tasksEntryModelImpl._assigneeUserId;
+
+		tasksEntryModelImpl._setOriginalAssigneeUserId = false;
+
+		tasksEntryModelImpl._originalResolverUserId = tasksEntryModelImpl._resolverUserId;
+
+		tasksEntryModelImpl._setOriginalResolverUserId = false;
+
+		tasksEntryModelImpl._columnBitmask = 0;
+	}
+
+	@Override
+	public CacheModel<TasksEntry> toCacheModel() {
+		TasksEntryCacheModel tasksEntryCacheModel = new TasksEntryCacheModel();
+
+		tasksEntryCacheModel.tasksEntryId = getTasksEntryId();
+
+		tasksEntryCacheModel.groupId = getGroupId();
+
+		tasksEntryCacheModel.companyId = getCompanyId();
+
+		tasksEntryCacheModel.userId = getUserId();
+
+		tasksEntryCacheModel.userName = getUserName();
+
+		String userName = tasksEntryCacheModel.userName;
+
+		if ((userName != null) && (userName.length() == 0)) {
+			tasksEntryCacheModel.userName = null;
+		}
+
+		Date createDate = getCreateDate();
+
+		if (createDate != null) {
+			tasksEntryCacheModel.createDate = createDate.getTime();
+		}
+		else {
+			tasksEntryCacheModel.createDate = Long.MIN_VALUE;
+		}
+
+		Date modifiedDate = getModifiedDate();
+
+		if (modifiedDate != null) {
+			tasksEntryCacheModel.modifiedDate = modifiedDate.getTime();
+		}
+		else {
+			tasksEntryCacheModel.modifiedDate = Long.MIN_VALUE;
+		}
+
+		tasksEntryCacheModel.title = getTitle();
+
+		String title = tasksEntryCacheModel.title;
+
+		if ((title != null) && (title.length() == 0)) {
+			tasksEntryCacheModel.title = null;
+		}
+
+		tasksEntryCacheModel.priority = getPriority();
+
+		tasksEntryCacheModel.assigneeUserId = getAssigneeUserId();
+
+		tasksEntryCacheModel.resolverUserId = getResolverUserId();
+
+		Date dueDate = getDueDate();
+
+		if (dueDate != null) {
+			tasksEntryCacheModel.dueDate = dueDate.getTime();
+		}
+		else {
+			tasksEntryCacheModel.dueDate = Long.MIN_VALUE;
+		}
+
+		Date finishDate = getFinishDate();
+
+		if (finishDate != null) {
+			tasksEntryCacheModel.finishDate = finishDate.getTime();
+		}
+		else {
+			tasksEntryCacheModel.finishDate = Long.MIN_VALUE;
+		}
+
+		tasksEntryCacheModel.status = getStatus();
+
+		return tasksEntryCacheModel;
 	}
 
 	@Override
@@ -557,9 +715,13 @@ public class TasksEntryModelImpl extends BaseModelImpl<TasksEntry>
 		};
 	private long _tasksEntryId;
 	private long _groupId;
+	private long _originalGroupId;
+	private boolean _setOriginalGroupId;
 	private long _companyId;
 	private long _userId;
 	private String _userUuid;
+	private long _originalUserId;
+	private boolean _setOriginalUserId;
 	private String _userName;
 	private Date _createDate;
 	private Date _modifiedDate;
@@ -567,10 +729,16 @@ public class TasksEntryModelImpl extends BaseModelImpl<TasksEntry>
 	private int _priority;
 	private long _assigneeUserId;
 	private String _assigneeUserUuid;
+	private long _originalAssigneeUserId;
+	private boolean _setOriginalAssigneeUserId;
 	private long _resolverUserId;
 	private String _resolverUserUuid;
+	private long _originalResolverUserId;
+	private boolean _setOriginalResolverUserId;
 	private Date _dueDate;
 	private Date _finishDate;
 	private int _status;
 	private transient ExpandoBridge _expandoBridge;
+	private long _columnBitmask;
+	private TasksEntry _escapedModelProxy;
 }

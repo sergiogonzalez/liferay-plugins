@@ -21,8 +21,10 @@ import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.util.DateUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.impl.BaseModelImpl;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.util.PortalUtil;
@@ -31,8 +33,6 @@ import com.liferay.portlet.expando.model.ExpandoBridge;
 import com.liferay.portlet.expando.util.ExpandoBridgeFactoryUtil;
 
 import java.io.Serializable;
-
-import java.lang.reflect.Proxy;
 
 import java.sql.Types;
 
@@ -86,15 +86,14 @@ public class KBCommentModelImpl extends BaseModelImpl<KBComment>
 	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
 				"value.object.finder.cache.enabled.com.liferay.knowledgebase.model.KBComment"),
 			true);
-
-	public Class<?> getModelClass() {
-		return KBComment.class;
-	}
-
-	public String getModelClassName() {
-		return KBComment.class.getName();
-	}
-
+	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
+				"value.object.column.bitmask.enabled.com.liferay.knowledgebase.model.KBComment"),
+			true);
+	public static long CLASSNAMEID_COLUMN_BITMASK = 1L;
+	public static long CLASSPK_COLUMN_BITMASK = 2L;
+	public static long GROUPID_COLUMN_BITMASK = 4L;
+	public static long USERID_COLUMN_BITMASK = 8L;
+	public static long UUID_COLUMN_BITMASK = 16L;
 	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(com.liferay.util.service.ServiceProps.get(
 				"lock.expiration.time.com.liferay.knowledgebase.model.KBComment"));
 
@@ -115,6 +114,14 @@ public class KBCommentModelImpl extends BaseModelImpl<KBComment>
 
 	public void setPrimaryKeyObj(Serializable primaryKeyObj) {
 		setPrimaryKey(((Long)primaryKeyObj).longValue());
+	}
+
+	public Class<?> getModelClass() {
+		return KBComment.class;
+	}
+
+	public String getModelClassName() {
+		return KBComment.class.getName();
 	}
 
 	public String getUuid() {
@@ -151,6 +158,8 @@ public class KBCommentModelImpl extends BaseModelImpl<KBComment>
 	}
 
 	public void setGroupId(long groupId) {
+		_columnBitmask |= GROUPID_COLUMN_BITMASK;
+
 		if (!_setOriginalGroupId) {
 			_setOriginalGroupId = true;
 
@@ -177,6 +186,8 @@ public class KBCommentModelImpl extends BaseModelImpl<KBComment>
 	}
 
 	public void setUserId(long userId) {
+		_columnBitmask |= USERID_COLUMN_BITMASK;
+
 		if (!_setOriginalUserId) {
 			_setOriginalUserId = true;
 
@@ -240,6 +251,8 @@ public class KBCommentModelImpl extends BaseModelImpl<KBComment>
 	}
 
 	public void setClassNameId(long classNameId) {
+		_columnBitmask |= CLASSNAMEID_COLUMN_BITMASK;
+
 		if (!_setOriginalClassNameId) {
 			_setOriginalClassNameId = true;
 
@@ -258,6 +271,8 @@ public class KBCommentModelImpl extends BaseModelImpl<KBComment>
 	}
 
 	public void setClassPK(long classPK) {
+		_columnBitmask |= CLASSPK_COLUMN_BITMASK;
+
 		if (!_setOriginalClassPK) {
 			_setOriginalClassPK = true;
 
@@ -296,14 +311,23 @@ public class KBCommentModelImpl extends BaseModelImpl<KBComment>
 		_helpful = helpful;
 	}
 
+	public long getColumnBitmask() {
+		return _columnBitmask;
+	}
+
 	@Override
 	public KBComment toEscapedModel() {
 		if (isEscapedModel()) {
 			return (KBComment)this;
 		}
 		else {
-			return (KBComment)Proxy.newProxyInstance(_classLoader,
-				_escapedModelProxyInterfaces, new AutoEscapeBeanHandler(this));
+			if (_escapedModelProxy == null) {
+				_escapedModelProxy = (KBComment)ProxyUtil.newProxyInstance(_classLoader,
+						_escapedModelProxyInterfaces,
+						new AutoEscapeBeanHandler(this));
+			}
+
+			return _escapedModelProxy;
 		}
 	}
 
@@ -410,6 +434,71 @@ public class KBCommentModelImpl extends BaseModelImpl<KBComment>
 		kbCommentModelImpl._originalClassPK = kbCommentModelImpl._classPK;
 
 		kbCommentModelImpl._setOriginalClassPK = false;
+
+		kbCommentModelImpl._columnBitmask = 0;
+	}
+
+	@Override
+	public CacheModel<KBComment> toCacheModel() {
+		KBCommentCacheModel kbCommentCacheModel = new KBCommentCacheModel();
+
+		kbCommentCacheModel.uuid = getUuid();
+
+		String uuid = kbCommentCacheModel.uuid;
+
+		if ((uuid != null) && (uuid.length() == 0)) {
+			kbCommentCacheModel.uuid = null;
+		}
+
+		kbCommentCacheModel.kbCommentId = getKbCommentId();
+
+		kbCommentCacheModel.groupId = getGroupId();
+
+		kbCommentCacheModel.companyId = getCompanyId();
+
+		kbCommentCacheModel.userId = getUserId();
+
+		kbCommentCacheModel.userName = getUserName();
+
+		String userName = kbCommentCacheModel.userName;
+
+		if ((userName != null) && (userName.length() == 0)) {
+			kbCommentCacheModel.userName = null;
+		}
+
+		Date createDate = getCreateDate();
+
+		if (createDate != null) {
+			kbCommentCacheModel.createDate = createDate.getTime();
+		}
+		else {
+			kbCommentCacheModel.createDate = Long.MIN_VALUE;
+		}
+
+		Date modifiedDate = getModifiedDate();
+
+		if (modifiedDate != null) {
+			kbCommentCacheModel.modifiedDate = modifiedDate.getTime();
+		}
+		else {
+			kbCommentCacheModel.modifiedDate = Long.MIN_VALUE;
+		}
+
+		kbCommentCacheModel.classNameId = getClassNameId();
+
+		kbCommentCacheModel.classPK = getClassPK();
+
+		kbCommentCacheModel.content = getContent();
+
+		String content = kbCommentCacheModel.content;
+
+		if ((content != null) && (content.length() == 0)) {
+			kbCommentCacheModel.content = null;
+		}
+
+		kbCommentCacheModel.helpful = getHelpful();
+
+		return kbCommentCacheModel;
 	}
 
 	@Override
@@ -533,4 +622,6 @@ public class KBCommentModelImpl extends BaseModelImpl<KBComment>
 	private String _content;
 	private boolean _helpful;
 	private transient ExpandoBridge _expandoBridge;
+	private long _columnBitmask;
+	private KBComment _escapedModelProxy;
 }

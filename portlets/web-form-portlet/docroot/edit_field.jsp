@@ -14,11 +14,11 @@
  */
 --%>
 
-<%@ include file="init.jsp" %>
+<%@ include file="/init.jsp" %>
 
 <%
 int index = ParamUtil.getInteger(renderRequest, "index", GetterUtil.getInteger((String)request.getAttribute("configuration.jsp-index")));
-int formFieldsIndex = GetterUtil.getInteger((String)request.getAttribute("configuration.jsp-formFieldsindex"));
+int formFieldsIndex = GetterUtil.getInteger((String)request.getAttribute("configuration.jsp-formFieldsIndex"));
 boolean fieldsEditingDisabled = GetterUtil.getBoolean((String)request.getAttribute("configuration.jsp-fieldsEditingDisabled"));
 
 String fieldLabelXml = LocalizationUtil.getLocalizationXmlFromPreferences(preferences, renderRequest, "fieldLabel" + formFieldsIndex);
@@ -35,6 +35,8 @@ if (WebFormUtil.VALIDATION_SCRIPT_ENABLED) {
 	fieldValidationErrorMessage = PrefsParamUtil.getString(preferences, request, "fieldValidationErrorMessage" + formFieldsIndex);
 }
 %>
+
+<liferay-ui:error key='<%= "fieldSizeInvalid" + formFieldsIndex %>' message="please-enter-no-more-than-75-characters" />
 
 <div class="aui-field-row field-row">
 	<div class="field-title">

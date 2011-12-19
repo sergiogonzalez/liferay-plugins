@@ -131,6 +131,7 @@ AUI().add(
 					editorGadgetURL: {},
 					gadgetPortletId: {},
 					gadgetServerBase: {},
+					publishGadgetPermission: {},
 					repositoryId: {},
 					resourceURL: {},
 					rootFolderId: {}
@@ -356,7 +357,7 @@ AUI().add(
 
 						var permissions = node.get('permissions');
 
-						permissions.deletePermission = event.deletePermission;
+						permissions.unpublishPermission = event.unpublishPermission;
 
 						node.setAttrs(
 							{
@@ -1554,6 +1555,23 @@ AUI().add(
 							}
 						);
 
+						var formatEditorButton = new A.ButtonItem(
+							{
+								handler: function(event) {
+									if (!event.target.get(DISABLED)) {
+										var editor = instance._tabViewEditor.get(ACTIVE_TAB).get(EDITOR);
+
+										var lineCount = editor.lineCount();
+
+										for (var i = 1; i <= lineCount; i++) {
+											editor.indentLine(i);
+										}
+									}
+								},
+								icon: 'arrowthickstop-1-r'
+							}
+						);
+
 						var searchEditorButton = new A.ButtonItem(
 							{
 								activeState: true,
@@ -1588,6 +1606,8 @@ AUI().add(
 									undoEditorButton,
 									redoEditorButton,
 									CONFIG_SPACER,
+									formatEditorButton,
+									CONFIG_SPACER,
 									searchEditorButton
 								]
 							}
@@ -1602,6 +1622,7 @@ AUI().add(
 						instance._decreaseEditorFontSizeButton = decreaseFontSizeButton;
 						instance._undoContentButton = undoEditorButton;
 						instance._redoEditorButton = redoEditorButton;
+						instance._formatEditorButton = formatEditorButton;
 						instance._searchEditorButton = searchEditorButton;
 
 						instance._editorToolbar = editorToolbar;
@@ -1637,6 +1658,7 @@ AUI().add(
 									},
 									url: instance._getResourceURL(GET_FOLDER_CHILDREN)
 								},
+								publishGadgetPermission: instance.get('publishGadgetPermission'),
 								rootFolderId: instance.get(ROOT_FOLDER_ID)
 							}
 						).render();
@@ -1943,22 +1965,26 @@ AUI().add(
 						var args = arguments;
 
 						var buttons = [
-							{
-								handler: function(event) {
-									if (callback) {
-										callback.apply(instance, A.Array(args, 2, true));
-									}
+							new A.ButtonItem(
+								{
+									handler: function(event) {
+										if (callback) {
+											callback.apply(instance, A.Array(args, 2, true));
+										}
 
-									instance._confirmationDialog.close();
-								},
-								text: 'Yes'
-							},
-							{
-								handler: function(event) {
-									instance._confirmationDialog.close();
-								},
-								text: 'No'
-							}
+										instance._confirmationDialog.close();
+									},
+									label: 'Yes'
+								}
+							),
+							new A.ButtonItem(
+								{
+									handler: function(event) {
+										instance._confirmationDialog.close();
+									},
+									label: 'No'
+								}
+							)
 						];
 
 						var confirmationDialog = instance._createDialog('Confirm', message, true, false, buttons).render();
@@ -2020,34 +2046,40 @@ AUI().add(
 						form.add(replaceField, true);
 
 						var buttons = [
-							{
-								handler: function(event) {
-									var tab = instance._tabViewEditor.get(ACTIVE_TAB);
+							new A.ButtonItem(
+								{
+									handler: function(event) {
+										var tab = instance._tabViewEditor.get(ACTIVE_TAB);
 
-									var searchText = searchField.get(VALUE);
+										var searchText = searchField.get(VALUE);
 
-									tab.searchEditorText(searchText, false);
-								},
-								text: 'Search'
-							},
-							{
-								handler: function(event) {
-									var tab = instance._tabViewEditor.get(ACTIVE_TAB);
+										tab.searchEditorText(searchText, false);
+									},
+									label: 'Search'
+								}
+							),
+							new A.ButtonItem(
+								{
+									handler: function(event) {
+										var tab = instance._tabViewEditor.get(ACTIVE_TAB);
 
-									var searchText = searchField.get(VALUE);
+										var searchText = searchField.get(VALUE);
 
-									var replaceText = replaceField.get(VALUE);
+										var replaceText = replaceField.get(VALUE);
 
-									tab.searchEditorText(searchText, false, replaceText, true);
-								},
-								text: 'Replace'
-							},
-							{
-								handler: function(event) {
-									instance._closeSearchDialog();
-								},
-								text: 'Close'
-							}
+										tab.searchEditorText(searchText, false, replaceText, true);
+									},
+									label: 'Replace'
+								}
+							),
+							new A.ButtonItem(
+								{
+									handler: function(event) {
+										instance._closeSearchDialog();
+									},
+									label: 'Close'
+								}
+							)
 						];
 
 						instance._searchDialog = instance._createDialog('Search', form.get(BOUNDING_BOX), false, false, buttons).render();
@@ -2113,6 +2145,6 @@ AUI().add(
 	},
 	'',
 	{
-		requires: [ 'gadget-editor-tree','gadget-editor-tabs','aui-toolbar','aui-loading-mask','aui-dialog','aui-resize','aui-panel','stylesheet','liferay-open-social-gadget','liferay-util-window' ]
+		requires: ['aui-dialog', 'aui-form', 'aui-loading-mask', 'aui-panel', 'aui-resize', 'aui-toolbar', 'gadget-editor-tabs', 'gadget-editor-tree', 'liferay-open-social-gadget', 'liferay-util-window', 'stylesheet']
 	}
 );

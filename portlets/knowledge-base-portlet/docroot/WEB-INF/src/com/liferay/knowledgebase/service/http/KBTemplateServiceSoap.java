@@ -67,12 +67,12 @@ import java.rmi.RemoteException;
 public class KBTemplateServiceSoap {
 	public static com.liferay.knowledgebase.model.KBTemplateSoap addKBTemplate(
 		java.lang.String portletId, java.lang.String title,
-		java.lang.String content, int engineType, boolean cacheable,
+		java.lang.String content,
 		com.liferay.portal.service.ServiceContext serviceContext)
 		throws RemoteException {
 		try {
 			com.liferay.knowledgebase.model.KBTemplate returnValue = KBTemplateServiceUtil.addKBTemplate(portletId,
-					title, content, engineType, cacheable, serviceContext);
+					title, content, serviceContext);
 
 			return com.liferay.knowledgebase.model.KBTemplateSoap.toSoapModel(returnValue);
 		}
@@ -107,7 +107,7 @@ public class KBTemplateServiceSoap {
 		}
 	}
 
-	public static com.liferay.knowledgebase.model.KBTemplateSoap[] getGroupKBTemplates(
+	public static com.liferay.knowledgebase.model.KBTemplate[] getGroupKBTemplates(
 		long groupId, int start, int end,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
 		throws RemoteException {
@@ -116,7 +116,7 @@ public class KBTemplateServiceSoap {
 				KBTemplateServiceUtil.getGroupKBTemplates(groupId, start, end,
 					orderByComparator);
 
-			return com.liferay.knowledgebase.model.KBTemplateSoap.toSoapModels(returnValue);
+			return returnValue.toArray(new com.liferay.knowledgebase.model.KBTemplate[returnValue.size()]);
 		}
 		catch (Exception e) {
 			_log.error(e, e);
@@ -175,12 +175,11 @@ public class KBTemplateServiceSoap {
 
 	public static com.liferay.knowledgebase.model.KBTemplateSoap updateKBTemplate(
 		long kbTemplateId, java.lang.String title, java.lang.String content,
-		int engineType, boolean cacheable,
 		com.liferay.portal.service.ServiceContext serviceContext)
 		throws RemoteException {
 		try {
 			com.liferay.knowledgebase.model.KBTemplate returnValue = KBTemplateServiceUtil.updateKBTemplate(kbTemplateId,
-					title, content, engineType, cacheable, serviceContext);
+					title, content, serviceContext);
 
 			return com.liferay.knowledgebase.model.KBTemplateSoap.toSoapModel(returnValue);
 		}

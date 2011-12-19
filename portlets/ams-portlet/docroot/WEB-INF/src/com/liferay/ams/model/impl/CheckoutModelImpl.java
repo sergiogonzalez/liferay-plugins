@@ -20,8 +20,10 @@ import com.liferay.ams.model.CheckoutModel;
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.impl.BaseModelImpl;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.util.PortalUtil;
@@ -30,8 +32,6 @@ import com.liferay.portlet.expando.model.ExpandoBridge;
 import com.liferay.portlet.expando.util.ExpandoBridgeFactoryUtil;
 
 import java.io.Serializable;
-
-import java.lang.reflect.Proxy;
 
 import java.sql.Types;
 
@@ -81,15 +81,7 @@ public class CheckoutModelImpl extends BaseModelImpl<Checkout>
 	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
 				"value.object.finder.cache.enabled.com.liferay.ams.model.Checkout"),
 			true);
-
-	public Class<?> getModelClass() {
-		return Checkout.class;
-	}
-
-	public String getModelClassName() {
-		return Checkout.class.getName();
-	}
-
+	public static final boolean COLUMN_BITMASK_ENABLED = false;
 	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(com.liferay.util.service.ServiceProps.get(
 				"lock.expiration.time.com.liferay.ams.model.Checkout"));
 
@@ -110,6 +102,14 @@ public class CheckoutModelImpl extends BaseModelImpl<Checkout>
 
 	public void setPrimaryKeyObj(Serializable primaryKeyObj) {
 		setPrimaryKey(((Long)primaryKeyObj).longValue());
+	}
+
+	public Class<?> getModelClass() {
+		return Checkout.class;
+	}
+
+	public String getModelClassName() {
+		return Checkout.class.getName();
 	}
 
 	public long getCheckoutId() {
@@ -211,8 +211,13 @@ public class CheckoutModelImpl extends BaseModelImpl<Checkout>
 			return (Checkout)this;
 		}
 		else {
-			return (Checkout)Proxy.newProxyInstance(_classLoader,
-				_escapedModelProxyInterfaces, new AutoEscapeBeanHandler(this));
+			if (_escapedModelProxy == null) {
+				_escapedModelProxy = (Checkout)ProxyUtil.newProxyInstance(_classLoader,
+						_escapedModelProxyInterfaces,
+						new AutoEscapeBeanHandler(this));
+			}
+
+			return _escapedModelProxy;
 		}
 	}
 
@@ -297,6 +302,74 @@ public class CheckoutModelImpl extends BaseModelImpl<Checkout>
 
 	@Override
 	public void resetOriginalValues() {
+	}
+
+	@Override
+	public CacheModel<Checkout> toCacheModel() {
+		CheckoutCacheModel checkoutCacheModel = new CheckoutCacheModel();
+
+		checkoutCacheModel.checkoutId = getCheckoutId();
+
+		checkoutCacheModel.companyId = getCompanyId();
+
+		checkoutCacheModel.userId = getUserId();
+
+		checkoutCacheModel.userName = getUserName();
+
+		String userName = checkoutCacheModel.userName;
+
+		if ((userName != null) && (userName.length() == 0)) {
+			checkoutCacheModel.userName = null;
+		}
+
+		Date createDate = getCreateDate();
+
+		if (createDate != null) {
+			checkoutCacheModel.createDate = createDate.getTime();
+		}
+		else {
+			checkoutCacheModel.createDate = Long.MIN_VALUE;
+		}
+
+		Date modifiedDate = getModifiedDate();
+
+		if (modifiedDate != null) {
+			checkoutCacheModel.modifiedDate = modifiedDate.getTime();
+		}
+		else {
+			checkoutCacheModel.modifiedDate = Long.MIN_VALUE;
+		}
+
+		checkoutCacheModel.assetId = getAssetId();
+
+		Date checkOutDate = getCheckOutDate();
+
+		if (checkOutDate != null) {
+			checkoutCacheModel.checkOutDate = checkOutDate.getTime();
+		}
+		else {
+			checkoutCacheModel.checkOutDate = Long.MIN_VALUE;
+		}
+
+		Date expectedCheckInDate = getExpectedCheckInDate();
+
+		if (expectedCheckInDate != null) {
+			checkoutCacheModel.expectedCheckInDate = expectedCheckInDate.getTime();
+		}
+		else {
+			checkoutCacheModel.expectedCheckInDate = Long.MIN_VALUE;
+		}
+
+		Date actualCheckInDate = getActualCheckInDate();
+
+		if (actualCheckInDate != null) {
+			checkoutCacheModel.actualCheckInDate = actualCheckInDate.getTime();
+		}
+		else {
+			checkoutCacheModel.actualCheckInDate = Long.MIN_VALUE;
+		}
+
+		return checkoutCacheModel;
 	}
 
 	@Override
@@ -397,4 +470,5 @@ public class CheckoutModelImpl extends BaseModelImpl<Checkout>
 	private Date _expectedCheckInDate;
 	private Date _actualCheckInDate;
 	private transient ExpandoBridge _expandoBridge;
+	private Checkout _escapedModelProxy;
 }

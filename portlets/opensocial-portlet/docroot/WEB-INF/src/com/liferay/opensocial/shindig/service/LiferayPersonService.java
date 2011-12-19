@@ -17,9 +17,9 @@ package com.liferay.opensocial.shindig.service;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.servlet.ImageServletTokenUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.StringBundler;
+import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.model.Contact;
 import com.liferay.portal.model.EmailAddress;
 import com.liferay.portal.model.Group;
@@ -31,6 +31,7 @@ import com.liferay.portal.service.OrganizationLocalServiceUtil;
 import com.liferay.portal.service.PhoneServiceUtil;
 import com.liferay.portal.service.UserLocalServiceUtil;
 import com.liferay.portal.util.PortalUtil;
+import com.liferay.portal.webserver.WebServerServletTokenUtil;
 import com.liferay.portlet.social.model.SocialRelationConstants;
 
 import java.util.ArrayList;
@@ -258,10 +259,11 @@ public class LiferayPersonService implements PersonService {
 		Person person = new PersonImpl(
 			String.valueOf(user.getUserId()), user.getScreenName(), name);
 
-		StringBundler sb = new StringBundler();
+		StringBundler sb = new StringBundler(4);
 
 		sb.append(securityToken.getDomain());
 		sb.append(PortalUtil.getPathFriendlyURLPublic());
+		sb.append(StringPool.SLASH);
 		sb.append(user.getScreenName());
 
 		person.setProfileUrl(sb.toString());
@@ -275,7 +277,7 @@ public class LiferayPersonService implements PersonService {
 		sb.append("_portrait?img_id=");
 		sb.append(user.getPortraitId());
 		sb.append("&t=");
-		sb.append(ImageServletTokenUtil.getToken(user.getPortraitId()));
+		sb.append(WebServerServletTokenUtil.getToken(user.getPortraitId()));
 
 		person.setThumbnailUrl(sb.toString());
 

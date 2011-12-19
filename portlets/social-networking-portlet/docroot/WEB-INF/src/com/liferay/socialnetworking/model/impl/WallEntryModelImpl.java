@@ -18,8 +18,10 @@ import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.util.DateUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.impl.BaseModelImpl;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.util.PortalUtil;
@@ -31,8 +33,6 @@ import com.liferay.socialnetworking.model.WallEntry;
 import com.liferay.socialnetworking.model.WallEntryModel;
 
 import java.io.Serializable;
-
-import java.lang.reflect.Proxy;
 
 import java.sql.Types;
 
@@ -82,15 +82,11 @@ public class WallEntryModelImpl extends BaseModelImpl<WallEntry>
 	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
 				"value.object.finder.cache.enabled.com.liferay.socialnetworking.model.WallEntry"),
 			true);
-
-	public Class<?> getModelClass() {
-		return WallEntry.class;
-	}
-
-	public String getModelClassName() {
-		return WallEntry.class.getName();
-	}
-
+	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
+				"value.object.column.bitmask.enabled.com.liferay.socialnetworking.model.WallEntry"),
+			true);
+	public static long GROUPID_COLUMN_BITMASK = 1L;
+	public static long USERID_COLUMN_BITMASK = 2L;
 	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(com.liferay.util.service.ServiceProps.get(
 				"lock.expiration.time.com.liferay.socialnetworking.model.WallEntry"));
 
@@ -113,6 +109,14 @@ public class WallEntryModelImpl extends BaseModelImpl<WallEntry>
 		setPrimaryKey(((Long)primaryKeyObj).longValue());
 	}
 
+	public Class<?> getModelClass() {
+		return WallEntry.class;
+	}
+
+	public String getModelClassName() {
+		return WallEntry.class.getName();
+	}
+
 	public long getWallEntryId() {
 		return _wallEntryId;
 	}
@@ -126,7 +130,19 @@ public class WallEntryModelImpl extends BaseModelImpl<WallEntry>
 	}
 
 	public void setGroupId(long groupId) {
+		_columnBitmask |= GROUPID_COLUMN_BITMASK;
+
+		if (!_setOriginalGroupId) {
+			_setOriginalGroupId = true;
+
+			_originalGroupId = _groupId;
+		}
+
 		_groupId = groupId;
+	}
+
+	public long getOriginalGroupId() {
+		return _originalGroupId;
 	}
 
 	public long getCompanyId() {
@@ -142,6 +158,14 @@ public class WallEntryModelImpl extends BaseModelImpl<WallEntry>
 	}
 
 	public void setUserId(long userId) {
+		_columnBitmask |= USERID_COLUMN_BITMASK;
+
+		if (!_setOriginalUserId) {
+			_setOriginalUserId = true;
+
+			_originalUserId = _userId;
+		}
+
 		_userId = userId;
 	}
 
@@ -151,6 +175,10 @@ public class WallEntryModelImpl extends BaseModelImpl<WallEntry>
 
 	public void setUserUuid(String userUuid) {
 		_userUuid = userUuid;
+	}
+
+	public long getOriginalUserId() {
+		return _originalUserId;
 	}
 
 	public String getUserName() {
@@ -195,14 +223,23 @@ public class WallEntryModelImpl extends BaseModelImpl<WallEntry>
 		_comments = comments;
 	}
 
+	public long getColumnBitmask() {
+		return _columnBitmask;
+	}
+
 	@Override
 	public WallEntry toEscapedModel() {
 		if (isEscapedModel()) {
 			return (WallEntry)this;
 		}
 		else {
-			return (WallEntry)Proxy.newProxyInstance(_classLoader,
-				_escapedModelProxyInterfaces, new AutoEscapeBeanHandler(this));
+			if (_escapedModelProxy == null) {
+				_escapedModelProxy = (WallEntry)ProxyUtil.newProxyInstance(_classLoader,
+						_escapedModelProxyInterfaces,
+						new AutoEscapeBeanHandler(this));
+			}
+
+			return _escapedModelProxy;
 		}
 	}
 
@@ -285,6 +322,66 @@ public class WallEntryModelImpl extends BaseModelImpl<WallEntry>
 
 	@Override
 	public void resetOriginalValues() {
+		WallEntryModelImpl wallEntryModelImpl = this;
+
+		wallEntryModelImpl._originalGroupId = wallEntryModelImpl._groupId;
+
+		wallEntryModelImpl._setOriginalGroupId = false;
+
+		wallEntryModelImpl._originalUserId = wallEntryModelImpl._userId;
+
+		wallEntryModelImpl._setOriginalUserId = false;
+
+		wallEntryModelImpl._columnBitmask = 0;
+	}
+
+	@Override
+	public CacheModel<WallEntry> toCacheModel() {
+		WallEntryCacheModel wallEntryCacheModel = new WallEntryCacheModel();
+
+		wallEntryCacheModel.wallEntryId = getWallEntryId();
+
+		wallEntryCacheModel.groupId = getGroupId();
+
+		wallEntryCacheModel.companyId = getCompanyId();
+
+		wallEntryCacheModel.userId = getUserId();
+
+		wallEntryCacheModel.userName = getUserName();
+
+		String userName = wallEntryCacheModel.userName;
+
+		if ((userName != null) && (userName.length() == 0)) {
+			wallEntryCacheModel.userName = null;
+		}
+
+		Date createDate = getCreateDate();
+
+		if (createDate != null) {
+			wallEntryCacheModel.createDate = createDate.getTime();
+		}
+		else {
+			wallEntryCacheModel.createDate = Long.MIN_VALUE;
+		}
+
+		Date modifiedDate = getModifiedDate();
+
+		if (modifiedDate != null) {
+			wallEntryCacheModel.modifiedDate = modifiedDate.getTime();
+		}
+		else {
+			wallEntryCacheModel.modifiedDate = Long.MIN_VALUE;
+		}
+
+		wallEntryCacheModel.comments = getComments();
+
+		String comments = wallEntryCacheModel.comments;
+
+		if ((comments != null) && (comments.length() == 0)) {
+			wallEntryCacheModel.comments = null;
+		}
+
+		return wallEntryCacheModel;
 	}
 
 	@Override
@@ -363,12 +460,18 @@ public class WallEntryModelImpl extends BaseModelImpl<WallEntry>
 		};
 	private long _wallEntryId;
 	private long _groupId;
+	private long _originalGroupId;
+	private boolean _setOriginalGroupId;
 	private long _companyId;
 	private long _userId;
 	private String _userUuid;
+	private long _originalUserId;
+	private boolean _setOriginalUserId;
 	private String _userName;
 	private Date _createDate;
 	private Date _modifiedDate;
 	private String _comments;
 	private transient ExpandoBridge _expandoBridge;
+	private long _columnBitmask;
+	private WallEntry _escapedModelProxy;
 }

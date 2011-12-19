@@ -25,6 +25,7 @@ import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.impl.BaseModelImpl;
 import com.liferay.portal.util.PortalUtil;
+import com.liferay.portal.workflow.kaleo.service.KaleoDefinitionLocalServiceUtil;
 
 import java.io.Serializable;
 
@@ -246,6 +247,14 @@ public class KaleoDefinitionClp extends BaseModelImpl<KaleoDefinition>
 		_description = description;
 	}
 
+	public String getContent() {
+		return _content;
+	}
+
+	public void setContent(String content) {
+		_content = content;
+	}
+
 	public int getVersion() {
 		return _version;
 	}
@@ -282,6 +291,10 @@ public class KaleoDefinitionClp extends BaseModelImpl<KaleoDefinition>
 		throw new UnsupportedOperationException();
 	}
 
+	public void persist() throws SystemException {
+		KaleoDefinitionLocalServiceUtil.updateKaleoDefinition(this);
+	}
+
 	@Override
 	public KaleoDefinition toEscapedModel() {
 		if (isEscapedModel()) {
@@ -308,6 +321,7 @@ public class KaleoDefinitionClp extends BaseModelImpl<KaleoDefinition>
 		clone.setName(getName());
 		clone.setTitle(getTitle());
 		clone.setDescription(getDescription());
+		clone.setContent(getContent());
 		clone.setVersion(getVersion());
 		clone.setActive(getActive());
 		clone.setStartKaleoNodeId(getStartKaleoNodeId());
@@ -369,7 +383,7 @@ public class KaleoDefinitionClp extends BaseModelImpl<KaleoDefinition>
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(27);
+		StringBundler sb = new StringBundler(29);
 
 		sb.append("{kaleoDefinitionId=");
 		sb.append(getKaleoDefinitionId());
@@ -391,6 +405,8 @@ public class KaleoDefinitionClp extends BaseModelImpl<KaleoDefinition>
 		sb.append(getTitle());
 		sb.append(", description=");
 		sb.append(getDescription());
+		sb.append(", content=");
+		sb.append(getContent());
 		sb.append(", version=");
 		sb.append(getVersion());
 		sb.append(", active=");
@@ -403,7 +419,7 @@ public class KaleoDefinitionClp extends BaseModelImpl<KaleoDefinition>
 	}
 
 	public String toXmlString() {
-		StringBundler sb = new StringBundler(43);
+		StringBundler sb = new StringBundler(46);
 
 		sb.append("<model><model-name>");
 		sb.append("com.liferay.portal.workflow.kaleo.model.KaleoDefinition");
@@ -450,6 +466,10 @@ public class KaleoDefinitionClp extends BaseModelImpl<KaleoDefinition>
 		sb.append(getDescription());
 		sb.append("]]></column-value></column>");
 		sb.append(
+			"<column><column-name>content</column-name><column-value><![CDATA[");
+		sb.append(getContent());
+		sb.append("]]></column-value></column>");
+		sb.append(
 			"<column><column-name>version</column-name><column-value><![CDATA[");
 		sb.append(getVersion());
 		sb.append("]]></column-value></column>");
@@ -478,6 +498,7 @@ public class KaleoDefinitionClp extends BaseModelImpl<KaleoDefinition>
 	private String _name;
 	private String _title;
 	private String _description;
+	private String _content;
 	private int _version;
 	private boolean _active;
 	private long _startKaleoNodeId;

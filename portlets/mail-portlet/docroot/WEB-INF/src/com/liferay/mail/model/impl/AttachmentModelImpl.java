@@ -20,8 +20,10 @@ import com.liferay.mail.model.AttachmentModel;
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.impl.BaseModelImpl;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.util.PortalUtil;
@@ -30,8 +32,6 @@ import com.liferay.portlet.expando.model.ExpandoBridge;
 import com.liferay.portlet.expando.util.ExpandoBridgeFactoryUtil;
 
 import java.io.Serializable;
-
-import java.lang.reflect.Proxy;
 
 import java.sql.Types;
 
@@ -78,15 +78,10 @@ public class AttachmentModelImpl extends BaseModelImpl<Attachment>
 	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
 				"value.object.finder.cache.enabled.com.liferay.mail.model.Attachment"),
 			true);
-
-	public Class<?> getModelClass() {
-		return Attachment.class;
-	}
-
-	public String getModelClassName() {
-		return Attachment.class.getName();
-	}
-
+	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
+				"value.object.column.bitmask.enabled.com.liferay.mail.model.Attachment"),
+			true);
+	public static long MESSAGEID_COLUMN_BITMASK = 1L;
 	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(com.liferay.util.service.ServiceProps.get(
 				"lock.expiration.time.com.liferay.mail.model.Attachment"));
 
@@ -107,6 +102,14 @@ public class AttachmentModelImpl extends BaseModelImpl<Attachment>
 
 	public void setPrimaryKeyObj(Serializable primaryKeyObj) {
 		setPrimaryKey(((Long)primaryKeyObj).longValue());
+	}
+
+	public Class<?> getModelClass() {
+		return Attachment.class;
+	}
+
+	public String getModelClassName() {
+		return Attachment.class.getName();
 	}
 
 	public long getAttachmentId() {
@@ -162,7 +165,19 @@ public class AttachmentModelImpl extends BaseModelImpl<Attachment>
 	}
 
 	public void setMessageId(long messageId) {
+		_columnBitmask |= MESSAGEID_COLUMN_BITMASK;
+
+		if (!_setOriginalMessageId) {
+			_setOriginalMessageId = true;
+
+			_originalMessageId = _messageId;
+		}
+
 		_messageId = messageId;
+	}
+
+	public long getOriginalMessageId() {
+		return _originalMessageId;
 	}
 
 	public String getContentPath() {
@@ -199,14 +214,23 @@ public class AttachmentModelImpl extends BaseModelImpl<Attachment>
 		_size = size;
 	}
 
+	public long getColumnBitmask() {
+		return _columnBitmask;
+	}
+
 	@Override
 	public Attachment toEscapedModel() {
 		if (isEscapedModel()) {
 			return (Attachment)this;
 		}
 		else {
-			return (Attachment)Proxy.newProxyInstance(_classLoader,
-				_escapedModelProxyInterfaces, new AutoEscapeBeanHandler(this));
+			if (_escapedModelProxy == null) {
+				_escapedModelProxy = (Attachment)ProxyUtil.newProxyInstance(_classLoader,
+						_escapedModelProxyInterfaces,
+						new AutoEscapeBeanHandler(this));
+			}
+
+			return _escapedModelProxy;
 		}
 	}
 
@@ -290,6 +314,50 @@ public class AttachmentModelImpl extends BaseModelImpl<Attachment>
 
 	@Override
 	public void resetOriginalValues() {
+		AttachmentModelImpl attachmentModelImpl = this;
+
+		attachmentModelImpl._originalMessageId = attachmentModelImpl._messageId;
+
+		attachmentModelImpl._setOriginalMessageId = false;
+
+		attachmentModelImpl._columnBitmask = 0;
+	}
+
+	@Override
+	public CacheModel<Attachment> toCacheModel() {
+		AttachmentCacheModel attachmentCacheModel = new AttachmentCacheModel();
+
+		attachmentCacheModel.attachmentId = getAttachmentId();
+
+		attachmentCacheModel.companyId = getCompanyId();
+
+		attachmentCacheModel.userId = getUserId();
+
+		attachmentCacheModel.accountId = getAccountId();
+
+		attachmentCacheModel.folderId = getFolderId();
+
+		attachmentCacheModel.messageId = getMessageId();
+
+		attachmentCacheModel.contentPath = getContentPath();
+
+		String contentPath = attachmentCacheModel.contentPath;
+
+		if ((contentPath != null) && (contentPath.length() == 0)) {
+			attachmentCacheModel.contentPath = null;
+		}
+
+		attachmentCacheModel.fileName = getFileName();
+
+		String fileName = attachmentCacheModel.fileName;
+
+		if ((fileName != null) && (fileName.length() == 0)) {
+			attachmentCacheModel.fileName = null;
+		}
+
+		attachmentCacheModel.size = getSize();
+
+		return attachmentCacheModel;
 	}
 
 	@Override
@@ -379,8 +447,12 @@ public class AttachmentModelImpl extends BaseModelImpl<Attachment>
 	private long _accountId;
 	private long _folderId;
 	private long _messageId;
+	private long _originalMessageId;
+	private boolean _setOriginalMessageId;
 	private String _contentPath;
 	private String _fileName;
 	private long _size;
 	private transient ExpandoBridge _expandoBridge;
+	private long _columnBitmask;
+	private Attachment _escapedModelProxy;
 }

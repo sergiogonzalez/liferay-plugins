@@ -18,8 +18,10 @@ import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.json.JSON;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.impl.BaseModelImpl;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.util.PortalUtil;
@@ -32,8 +34,6 @@ import com.liferay.sampleservicebuilder.model.FooModel;
 import com.liferay.sampleservicebuilder.model.FooSoap;
 
 import java.io.Serializable;
-
-import java.lang.reflect.Proxy;
 
 import java.sql.Types;
 
@@ -90,6 +90,12 @@ public class FooModelImpl extends BaseModelImpl<Foo> implements FooModel {
 	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
 				"value.object.finder.cache.enabled.com.liferay.sampleservicebuilder.model.Foo"),
 			true);
+	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
+				"value.object.column.bitmask.enabled.com.liferay.sampleservicebuilder.model.Foo"),
+			true);
+	public static long FIELD2_COLUMN_BITMASK = 1L;
+	public static long GROUPID_COLUMN_BITMASK = 2L;
+	public static long UUID_COLUMN_BITMASK = 4L;
 
 	/**
 	 * Converts the soap model instance into a normal model instance.
@@ -133,14 +139,6 @@ public class FooModelImpl extends BaseModelImpl<Foo> implements FooModel {
 		return models;
 	}
 
-	public Class<?> getModelClass() {
-		return Foo.class;
-	}
-
-	public String getModelClassName() {
-		return Foo.class.getName();
-	}
-
 	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(com.liferay.util.service.ServiceProps.get(
 				"lock.expiration.time.com.liferay.sampleservicebuilder.model.Foo"));
 
@@ -161,6 +159,14 @@ public class FooModelImpl extends BaseModelImpl<Foo> implements FooModel {
 
 	public void setPrimaryKeyObj(Serializable primaryKeyObj) {
 		setPrimaryKey(((Long)primaryKeyObj).longValue());
+	}
+
+	public Class<?> getModelClass() {
+		return Foo.class;
+	}
+
+	public String getModelClassName() {
+		return Foo.class.getName();
 	}
 
 	@JSON
@@ -200,6 +206,8 @@ public class FooModelImpl extends BaseModelImpl<Foo> implements FooModel {
 	}
 
 	public void setGroupId(long groupId) {
+		_columnBitmask |= GROUPID_COLUMN_BITMASK;
+
 		if (!_setOriginalGroupId) {
 			_setOriginalGroupId = true;
 
@@ -295,7 +303,19 @@ public class FooModelImpl extends BaseModelImpl<Foo> implements FooModel {
 	}
 
 	public void setField2(boolean field2) {
+		_columnBitmask |= FIELD2_COLUMN_BITMASK;
+
+		if (!_setOriginalField2) {
+			_setOriginalField2 = true;
+
+			_originalField2 = _field2;
+		}
+
 		_field2 = field2;
+	}
+
+	public boolean getOriginalField2() {
+		return _originalField2;
 	}
 
 	@JSON
@@ -330,14 +350,23 @@ public class FooModelImpl extends BaseModelImpl<Foo> implements FooModel {
 		_field5 = field5;
 	}
 
+	public long getColumnBitmask() {
+		return _columnBitmask;
+	}
+
 	@Override
 	public Foo toEscapedModel() {
 		if (isEscapedModel()) {
 			return (Foo)this;
 		}
 		else {
-			return (Foo)Proxy.newProxyInstance(_classLoader,
-				_escapedModelProxyInterfaces, new AutoEscapeBeanHandler(this));
+			if (_escapedModelProxy == null) {
+				_escapedModelProxy = (Foo)ProxyUtil.newProxyInstance(_classLoader,
+						_escapedModelProxyInterfaces,
+						new AutoEscapeBeanHandler(this));
+			}
+
+			return _escapedModelProxy;
 		}
 	}
 
@@ -430,6 +459,90 @@ public class FooModelImpl extends BaseModelImpl<Foo> implements FooModel {
 		fooModelImpl._originalGroupId = fooModelImpl._groupId;
 
 		fooModelImpl._setOriginalGroupId = false;
+
+		fooModelImpl._originalField2 = fooModelImpl._field2;
+
+		fooModelImpl._setOriginalField2 = false;
+
+		fooModelImpl._columnBitmask = 0;
+	}
+
+	@Override
+	public CacheModel<Foo> toCacheModel() {
+		FooCacheModel fooCacheModel = new FooCacheModel();
+
+		fooCacheModel.uuid = getUuid();
+
+		String uuid = fooCacheModel.uuid;
+
+		if ((uuid != null) && (uuid.length() == 0)) {
+			fooCacheModel.uuid = null;
+		}
+
+		fooCacheModel.fooId = getFooId();
+
+		fooCacheModel.groupId = getGroupId();
+
+		fooCacheModel.companyId = getCompanyId();
+
+		fooCacheModel.userId = getUserId();
+
+		fooCacheModel.userName = getUserName();
+
+		String userName = fooCacheModel.userName;
+
+		if ((userName != null) && (userName.length() == 0)) {
+			fooCacheModel.userName = null;
+		}
+
+		Date createDate = getCreateDate();
+
+		if (createDate != null) {
+			fooCacheModel.createDate = createDate.getTime();
+		}
+		else {
+			fooCacheModel.createDate = Long.MIN_VALUE;
+		}
+
+		Date modifiedDate = getModifiedDate();
+
+		if (modifiedDate != null) {
+			fooCacheModel.modifiedDate = modifiedDate.getTime();
+		}
+		else {
+			fooCacheModel.modifiedDate = Long.MIN_VALUE;
+		}
+
+		fooCacheModel.field1 = getField1();
+
+		String field1 = fooCacheModel.field1;
+
+		if ((field1 != null) && (field1.length() == 0)) {
+			fooCacheModel.field1 = null;
+		}
+
+		fooCacheModel.field2 = getField2();
+
+		fooCacheModel.field3 = getField3();
+
+		Date field4 = getField4();
+
+		if (field4 != null) {
+			fooCacheModel.field4 = field4.getTime();
+		}
+		else {
+			fooCacheModel.field4 = Long.MIN_VALUE;
+		}
+
+		fooCacheModel.field5 = getField5();
+
+		String field5 = fooCacheModel.field5;
+
+		if ((field5 != null) && (field5.length() == 0)) {
+			fooCacheModel.field5 = null;
+		}
+
+		return fooCacheModel;
 	}
 
 	@Override
@@ -550,8 +663,12 @@ public class FooModelImpl extends BaseModelImpl<Foo> implements FooModel {
 	private Date _modifiedDate;
 	private String _field1;
 	private boolean _field2;
+	private boolean _originalField2;
+	private boolean _setOriginalField2;
 	private int _field3;
 	private Date _field4;
 	private String _field5;
 	private transient ExpandoBridge _expandoBridge;
+	private long _columnBitmask;
+	private Foo _escapedModelProxy;
 }

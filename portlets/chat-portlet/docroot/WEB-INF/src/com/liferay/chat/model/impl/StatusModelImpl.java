@@ -20,8 +20,10 @@ import com.liferay.chat.model.StatusModel;
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.impl.BaseModelImpl;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.util.PortalUtil;
@@ -30,8 +32,6 @@ import com.liferay.portlet.expando.model.ExpandoBridge;
 import com.liferay.portlet.expando.util.ExpandoBridgeFactoryUtil;
 
 import java.io.Serializable;
-
-import java.lang.reflect.Proxy;
 
 import java.sql.Types;
 
@@ -77,15 +77,12 @@ public class StatusModelImpl extends BaseModelImpl<Status>
 	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
 				"value.object.finder.cache.enabled.com.liferay.chat.model.Status"),
 			true);
-
-	public Class<?> getModelClass() {
-		return Status.class;
-	}
-
-	public String getModelClassName() {
-		return Status.class.getName();
-	}
-
+	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
+				"value.object.column.bitmask.enabled.com.liferay.chat.model.Status"),
+			true);
+	public static long MODIFIEDDATE_COLUMN_BITMASK = 1L;
+	public static long ONLINE_COLUMN_BITMASK = 2L;
+	public static long USERID_COLUMN_BITMASK = 4L;
 	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(com.liferay.util.service.ServiceProps.get(
 				"lock.expiration.time.com.liferay.chat.model.Status"));
 
@@ -108,6 +105,14 @@ public class StatusModelImpl extends BaseModelImpl<Status>
 		setPrimaryKey(((Long)primaryKeyObj).longValue());
 	}
 
+	public Class<?> getModelClass() {
+		return Status.class;
+	}
+
+	public String getModelClassName() {
+		return Status.class.getName();
+	}
+
 	public long getStatusId() {
 		return _statusId;
 	}
@@ -121,6 +126,8 @@ public class StatusModelImpl extends BaseModelImpl<Status>
 	}
 
 	public void setUserId(long userId) {
+		_columnBitmask |= USERID_COLUMN_BITMASK;
+
 		if (!_setOriginalUserId) {
 			_setOriginalUserId = true;
 
@@ -147,7 +154,19 @@ public class StatusModelImpl extends BaseModelImpl<Status>
 	}
 
 	public void setModifiedDate(long modifiedDate) {
+		_columnBitmask |= MODIFIEDDATE_COLUMN_BITMASK;
+
+		if (!_setOriginalModifiedDate) {
+			_setOriginalModifiedDate = true;
+
+			_originalModifiedDate = _modifiedDate;
+		}
+
 		_modifiedDate = modifiedDate;
+	}
+
+	public long getOriginalModifiedDate() {
+		return _originalModifiedDate;
 	}
 
 	public boolean getOnline() {
@@ -159,7 +178,19 @@ public class StatusModelImpl extends BaseModelImpl<Status>
 	}
 
 	public void setOnline(boolean online) {
+		_columnBitmask |= ONLINE_COLUMN_BITMASK;
+
+		if (!_setOriginalOnline) {
+			_setOriginalOnline = true;
+
+			_originalOnline = _online;
+		}
+
 		_online = online;
+	}
+
+	public boolean getOriginalOnline() {
+		return _originalOnline;
 	}
 
 	public boolean getAwake() {
@@ -212,14 +243,23 @@ public class StatusModelImpl extends BaseModelImpl<Status>
 		_playSound = playSound;
 	}
 
+	public long getColumnBitmask() {
+		return _columnBitmask;
+	}
+
 	@Override
 	public Status toEscapedModel() {
 		if (isEscapedModel()) {
 			return (Status)this;
 		}
 		else {
-			return (Status)Proxy.newProxyInstance(_classLoader,
-				_escapedModelProxyInterfaces, new AutoEscapeBeanHandler(this));
+			if (_escapedModelProxy == null) {
+				_escapedModelProxy = (Status)ProxyUtil.newProxyInstance(_classLoader,
+						_escapedModelProxyInterfaces,
+						new AutoEscapeBeanHandler(this));
+			}
+
+			return _escapedModelProxy;
 		}
 	}
 
@@ -307,6 +347,51 @@ public class StatusModelImpl extends BaseModelImpl<Status>
 		statusModelImpl._originalUserId = statusModelImpl._userId;
 
 		statusModelImpl._setOriginalUserId = false;
+
+		statusModelImpl._originalModifiedDate = statusModelImpl._modifiedDate;
+
+		statusModelImpl._setOriginalModifiedDate = false;
+
+		statusModelImpl._originalOnline = statusModelImpl._online;
+
+		statusModelImpl._setOriginalOnline = false;
+
+		statusModelImpl._columnBitmask = 0;
+	}
+
+	@Override
+	public CacheModel<Status> toCacheModel() {
+		StatusCacheModel statusCacheModel = new StatusCacheModel();
+
+		statusCacheModel.statusId = getStatusId();
+
+		statusCacheModel.userId = getUserId();
+
+		statusCacheModel.modifiedDate = getModifiedDate();
+
+		statusCacheModel.online = getOnline();
+
+		statusCacheModel.awake = getAwake();
+
+		statusCacheModel.activePanelId = getActivePanelId();
+
+		String activePanelId = statusCacheModel.activePanelId;
+
+		if ((activePanelId != null) && (activePanelId.length() == 0)) {
+			statusCacheModel.activePanelId = null;
+		}
+
+		statusCacheModel.message = getMessage();
+
+		String message = statusCacheModel.message;
+
+		if ((message != null) && (message.length() == 0)) {
+			statusCacheModel.message = null;
+		}
+
+		statusCacheModel.playSound = getPlaySound();
+
+		return statusCacheModel;
 	}
 
 	@Override
@@ -389,10 +474,16 @@ public class StatusModelImpl extends BaseModelImpl<Status>
 	private long _originalUserId;
 	private boolean _setOriginalUserId;
 	private long _modifiedDate;
+	private long _originalModifiedDate;
+	private boolean _setOriginalModifiedDate;
 	private boolean _online;
+	private boolean _originalOnline;
+	private boolean _setOriginalOnline;
 	private boolean _awake;
 	private String _activePanelId;
 	private String _message;
 	private boolean _playSound;
 	private transient ExpandoBridge _expandoBridge;
+	private long _columnBitmask;
+	private Status _escapedModelProxy;
 }

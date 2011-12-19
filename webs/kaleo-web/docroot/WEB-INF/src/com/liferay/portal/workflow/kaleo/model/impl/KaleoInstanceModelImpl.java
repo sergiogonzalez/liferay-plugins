@@ -17,8 +17,10 @@ package com.liferay.portal.workflow.kaleo.model.impl;
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.impl.BaseModelImpl;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.util.PortalUtil;
@@ -29,8 +31,6 @@ import com.liferay.portlet.expando.model.ExpandoBridge;
 import com.liferay.portlet.expando.util.ExpandoBridgeFactoryUtil;
 
 import java.io.Serializable;
-
-import java.lang.reflect.Proxy;
 
 import java.sql.Types;
 
@@ -88,15 +88,15 @@ public class KaleoInstanceModelImpl extends BaseModelImpl<KaleoInstance>
 	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
 				"value.object.finder.cache.enabled.com.liferay.portal.workflow.kaleo.model.KaleoInstance"),
 			true);
-
-	public Class<?> getModelClass() {
-		return KaleoInstance.class;
-	}
-
-	public String getModelClassName() {
-		return KaleoInstance.class.getName();
-	}
-
+	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
+				"value.object.column.bitmask.enabled.com.liferay.portal.workflow.kaleo.model.KaleoInstance"),
+			true);
+	public static long COMPANYID_COLUMN_BITMASK = 1L;
+	public static long COMPLETED_COLUMN_BITMASK = 2L;
+	public static long COMPLETIONDATE_COLUMN_BITMASK = 4L;
+	public static long KALEODEFINITIONID_COLUMN_BITMASK = 8L;
+	public static long KALEODEFINITIONNAME_COLUMN_BITMASK = 16L;
+	public static long KALEODEFINITIONVERSION_COLUMN_BITMASK = 32L;
 	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(com.liferay.util.service.ServiceProps.get(
 				"lock.expiration.time.com.liferay.portal.workflow.kaleo.model.KaleoInstance"));
 
@@ -117,6 +117,14 @@ public class KaleoInstanceModelImpl extends BaseModelImpl<KaleoInstance>
 
 	public void setPrimaryKeyObj(Serializable primaryKeyObj) {
 		setPrimaryKey(((Long)primaryKeyObj).longValue());
+	}
+
+	public Class<?> getModelClass() {
+		return KaleoInstance.class;
+	}
+
+	public String getModelClassName() {
+		return KaleoInstance.class.getName();
 	}
 
 	public long getKaleoInstanceId() {
@@ -140,7 +148,19 @@ public class KaleoInstanceModelImpl extends BaseModelImpl<KaleoInstance>
 	}
 
 	public void setCompanyId(long companyId) {
+		_columnBitmask |= COMPANYID_COLUMN_BITMASK;
+
+		if (!_setOriginalCompanyId) {
+			_setOriginalCompanyId = true;
+
+			_originalCompanyId = _companyId;
+		}
+
 		_companyId = companyId;
+	}
+
+	public long getOriginalCompanyId() {
+		return _originalCompanyId;
 	}
 
 	public long getUserId() {
@@ -193,7 +213,19 @@ public class KaleoInstanceModelImpl extends BaseModelImpl<KaleoInstance>
 	}
 
 	public void setKaleoDefinitionId(long kaleoDefinitionId) {
+		_columnBitmask |= KALEODEFINITIONID_COLUMN_BITMASK;
+
+		if (!_setOriginalKaleoDefinitionId) {
+			_setOriginalKaleoDefinitionId = true;
+
+			_originalKaleoDefinitionId = _kaleoDefinitionId;
+		}
+
 		_kaleoDefinitionId = kaleoDefinitionId;
+	}
+
+	public long getOriginalKaleoDefinitionId() {
+		return _originalKaleoDefinitionId;
 	}
 
 	public String getKaleoDefinitionName() {
@@ -206,7 +238,17 @@ public class KaleoInstanceModelImpl extends BaseModelImpl<KaleoInstance>
 	}
 
 	public void setKaleoDefinitionName(String kaleoDefinitionName) {
+		_columnBitmask |= KALEODEFINITIONNAME_COLUMN_BITMASK;
+
+		if (_originalKaleoDefinitionName == null) {
+			_originalKaleoDefinitionName = _kaleoDefinitionName;
+		}
+
 		_kaleoDefinitionName = kaleoDefinitionName;
+	}
+
+	public String getOriginalKaleoDefinitionName() {
+		return GetterUtil.getString(_originalKaleoDefinitionName);
 	}
 
 	public int getKaleoDefinitionVersion() {
@@ -214,7 +256,19 @@ public class KaleoInstanceModelImpl extends BaseModelImpl<KaleoInstance>
 	}
 
 	public void setKaleoDefinitionVersion(int kaleoDefinitionVersion) {
+		_columnBitmask |= KALEODEFINITIONVERSION_COLUMN_BITMASK;
+
+		if (!_setOriginalKaleoDefinitionVersion) {
+			_setOriginalKaleoDefinitionVersion = true;
+
+			_originalKaleoDefinitionVersion = _kaleoDefinitionVersion;
+		}
+
 		_kaleoDefinitionVersion = kaleoDefinitionVersion;
+	}
+
+	public int getOriginalKaleoDefinitionVersion() {
+		return _originalKaleoDefinitionVersion;
 	}
 
 	public long getRootKaleoInstanceTokenId() {
@@ -255,7 +309,19 @@ public class KaleoInstanceModelImpl extends BaseModelImpl<KaleoInstance>
 	}
 
 	public void setCompleted(boolean completed) {
+		_columnBitmask |= COMPLETED_COLUMN_BITMASK;
+
+		if (!_setOriginalCompleted) {
+			_setOriginalCompleted = true;
+
+			_originalCompleted = _completed;
+		}
+
 		_completed = completed;
+	}
+
+	public boolean getOriginalCompleted() {
+		return _originalCompleted;
 	}
 
 	public Date getCompletionDate() {
@@ -263,7 +329,17 @@ public class KaleoInstanceModelImpl extends BaseModelImpl<KaleoInstance>
 	}
 
 	public void setCompletionDate(Date completionDate) {
+		_columnBitmask |= COMPLETIONDATE_COLUMN_BITMASK;
+
+		if (_originalCompletionDate == null) {
+			_originalCompletionDate = _completionDate;
+		}
+
 		_completionDate = completionDate;
+	}
+
+	public Date getOriginalCompletionDate() {
+		return _originalCompletionDate;
 	}
 
 	public String getWorkflowContext() {
@@ -279,14 +355,23 @@ public class KaleoInstanceModelImpl extends BaseModelImpl<KaleoInstance>
 		_workflowContext = workflowContext;
 	}
 
+	public long getColumnBitmask() {
+		return _columnBitmask;
+	}
+
 	@Override
 	public KaleoInstance toEscapedModel() {
 		if (isEscapedModel()) {
 			return (KaleoInstance)this;
 		}
 		else {
-			return (KaleoInstance)Proxy.newProxyInstance(_classLoader,
-				_escapedModelProxyInterfaces, new AutoEscapeBeanHandler(this));
+			if (_escapedModelProxy == null) {
+				_escapedModelProxy = (KaleoInstance)ProxyUtil.newProxyInstance(_classLoader,
+						_escapedModelProxyInterfaces,
+						new AutoEscapeBeanHandler(this));
+			}
+
+			return _escapedModelProxy;
 		}
 	}
 
@@ -383,6 +468,114 @@ public class KaleoInstanceModelImpl extends BaseModelImpl<KaleoInstance>
 
 	@Override
 	public void resetOriginalValues() {
+		KaleoInstanceModelImpl kaleoInstanceModelImpl = this;
+
+		kaleoInstanceModelImpl._originalCompanyId = kaleoInstanceModelImpl._companyId;
+
+		kaleoInstanceModelImpl._setOriginalCompanyId = false;
+
+		kaleoInstanceModelImpl._originalKaleoDefinitionId = kaleoInstanceModelImpl._kaleoDefinitionId;
+
+		kaleoInstanceModelImpl._setOriginalKaleoDefinitionId = false;
+
+		kaleoInstanceModelImpl._originalKaleoDefinitionName = kaleoInstanceModelImpl._kaleoDefinitionName;
+
+		kaleoInstanceModelImpl._originalKaleoDefinitionVersion = kaleoInstanceModelImpl._kaleoDefinitionVersion;
+
+		kaleoInstanceModelImpl._setOriginalKaleoDefinitionVersion = false;
+
+		kaleoInstanceModelImpl._originalCompleted = kaleoInstanceModelImpl._completed;
+
+		kaleoInstanceModelImpl._setOriginalCompleted = false;
+
+		kaleoInstanceModelImpl._originalCompletionDate = kaleoInstanceModelImpl._completionDate;
+
+		kaleoInstanceModelImpl._columnBitmask = 0;
+	}
+
+	@Override
+	public CacheModel<KaleoInstance> toCacheModel() {
+		KaleoInstanceCacheModel kaleoInstanceCacheModel = new KaleoInstanceCacheModel();
+
+		kaleoInstanceCacheModel.kaleoInstanceId = getKaleoInstanceId();
+
+		kaleoInstanceCacheModel.groupId = getGroupId();
+
+		kaleoInstanceCacheModel.companyId = getCompanyId();
+
+		kaleoInstanceCacheModel.userId = getUserId();
+
+		kaleoInstanceCacheModel.userName = getUserName();
+
+		String userName = kaleoInstanceCacheModel.userName;
+
+		if ((userName != null) && (userName.length() == 0)) {
+			kaleoInstanceCacheModel.userName = null;
+		}
+
+		Date createDate = getCreateDate();
+
+		if (createDate != null) {
+			kaleoInstanceCacheModel.createDate = createDate.getTime();
+		}
+		else {
+			kaleoInstanceCacheModel.createDate = Long.MIN_VALUE;
+		}
+
+		Date modifiedDate = getModifiedDate();
+
+		if (modifiedDate != null) {
+			kaleoInstanceCacheModel.modifiedDate = modifiedDate.getTime();
+		}
+		else {
+			kaleoInstanceCacheModel.modifiedDate = Long.MIN_VALUE;
+		}
+
+		kaleoInstanceCacheModel.kaleoDefinitionId = getKaleoDefinitionId();
+
+		kaleoInstanceCacheModel.kaleoDefinitionName = getKaleoDefinitionName();
+
+		String kaleoDefinitionName = kaleoInstanceCacheModel.kaleoDefinitionName;
+
+		if ((kaleoDefinitionName != null) &&
+				(kaleoDefinitionName.length() == 0)) {
+			kaleoInstanceCacheModel.kaleoDefinitionName = null;
+		}
+
+		kaleoInstanceCacheModel.kaleoDefinitionVersion = getKaleoDefinitionVersion();
+
+		kaleoInstanceCacheModel.rootKaleoInstanceTokenId = getRootKaleoInstanceTokenId();
+
+		kaleoInstanceCacheModel.className = getClassName();
+
+		String className = kaleoInstanceCacheModel.className;
+
+		if ((className != null) && (className.length() == 0)) {
+			kaleoInstanceCacheModel.className = null;
+		}
+
+		kaleoInstanceCacheModel.classPK = getClassPK();
+
+		kaleoInstanceCacheModel.completed = getCompleted();
+
+		Date completionDate = getCompletionDate();
+
+		if (completionDate != null) {
+			kaleoInstanceCacheModel.completionDate = completionDate.getTime();
+		}
+		else {
+			kaleoInstanceCacheModel.completionDate = Long.MIN_VALUE;
+		}
+
+		kaleoInstanceCacheModel.workflowContext = getWorkflowContext();
+
+		String workflowContext = kaleoInstanceCacheModel.workflowContext;
+
+		if ((workflowContext != null) && (workflowContext.length() == 0)) {
+			kaleoInstanceCacheModel.workflowContext = null;
+		}
+
+		return kaleoInstanceCacheModel;
 	}
 
 	@Override
@@ -510,19 +703,31 @@ public class KaleoInstanceModelImpl extends BaseModelImpl<KaleoInstance>
 	private long _kaleoInstanceId;
 	private long _groupId;
 	private long _companyId;
+	private long _originalCompanyId;
+	private boolean _setOriginalCompanyId;
 	private long _userId;
 	private String _userUuid;
 	private String _userName;
 	private Date _createDate;
 	private Date _modifiedDate;
 	private long _kaleoDefinitionId;
+	private long _originalKaleoDefinitionId;
+	private boolean _setOriginalKaleoDefinitionId;
 	private String _kaleoDefinitionName;
+	private String _originalKaleoDefinitionName;
 	private int _kaleoDefinitionVersion;
+	private int _originalKaleoDefinitionVersion;
+	private boolean _setOriginalKaleoDefinitionVersion;
 	private long _rootKaleoInstanceTokenId;
 	private String _className;
 	private long _classPK;
 	private boolean _completed;
+	private boolean _originalCompleted;
+	private boolean _setOriginalCompleted;
 	private Date _completionDate;
+	private Date _originalCompletionDate;
 	private String _workflowContext;
 	private transient ExpandoBridge _expandoBridge;
+	private long _columnBitmask;
+	private KaleoInstance _escapedModelProxy;
 }

@@ -21,8 +21,10 @@ import com.liferay.opensocial.model.GadgetSoap;
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
 import com.liferay.portal.kernel.json.JSON;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.impl.BaseModelImpl;
 import com.liferay.portal.service.ServiceContext;
 
@@ -30,8 +32,6 @@ import com.liferay.portlet.expando.model.ExpandoBridge;
 import com.liferay.portlet.expando.util.ExpandoBridgeFactoryUtil;
 
 import java.io.Serializable;
-
-import java.lang.reflect.Proxy;
 
 import java.sql.Types;
 
@@ -84,6 +84,12 @@ public class GadgetModelImpl extends BaseModelImpl<Gadget>
 	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
 				"value.object.finder.cache.enabled.com.liferay.opensocial.model.Gadget"),
 			true);
+	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
+				"value.object.column.bitmask.enabled.com.liferay.opensocial.model.Gadget"),
+			true);
+	public static long COMPANYID_COLUMN_BITMASK = 1L;
+	public static long URL_COLUMN_BITMASK = 2L;
+	public static long UUID_COLUMN_BITMASK = 4L;
 
 	/**
 	 * Converts the soap model instance into a normal model instance.
@@ -122,14 +128,6 @@ public class GadgetModelImpl extends BaseModelImpl<Gadget>
 		return models;
 	}
 
-	public Class<?> getModelClass() {
-		return Gadget.class;
-	}
-
-	public String getModelClassName() {
-		return Gadget.class.getName();
-	}
-
 	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(com.liferay.util.service.ServiceProps.get(
 				"lock.expiration.time.com.liferay.opensocial.model.Gadget"));
 
@@ -152,6 +150,14 @@ public class GadgetModelImpl extends BaseModelImpl<Gadget>
 		setPrimaryKey(((Long)primaryKeyObj).longValue());
 	}
 
+	public Class<?> getModelClass() {
+		return Gadget.class;
+	}
+
+	public String getModelClassName() {
+		return Gadget.class.getName();
+	}
+
 	@JSON
 	public String getUuid() {
 		if (_uuid == null) {
@@ -163,7 +169,15 @@ public class GadgetModelImpl extends BaseModelImpl<Gadget>
 	}
 
 	public void setUuid(String uuid) {
+		if (_originalUuid == null) {
+			_originalUuid = _uuid;
+		}
+
 		_uuid = uuid;
+	}
+
+	public String getOriginalUuid() {
+		return GetterUtil.getString(_originalUuid);
 	}
 
 	@JSON
@@ -181,6 +195,8 @@ public class GadgetModelImpl extends BaseModelImpl<Gadget>
 	}
 
 	public void setCompanyId(long companyId) {
+		_columnBitmask |= COMPANYID_COLUMN_BITMASK;
+
 		if (!_setOriginalCompanyId) {
 			_setOriginalCompanyId = true;
 
@@ -237,6 +253,8 @@ public class GadgetModelImpl extends BaseModelImpl<Gadget>
 	}
 
 	public void setUrl(String url) {
+		_columnBitmask |= URL_COLUMN_BITMASK;
+
 		if (_originalUrl == null) {
 			_originalUrl = _url;
 		}
@@ -262,14 +280,23 @@ public class GadgetModelImpl extends BaseModelImpl<Gadget>
 		_portletCategoryNames = portletCategoryNames;
 	}
 
+	public long getColumnBitmask() {
+		return _columnBitmask;
+	}
+
 	@Override
 	public Gadget toEscapedModel() {
 		if (isEscapedModel()) {
 			return (Gadget)this;
 		}
 		else {
-			return (Gadget)Proxy.newProxyInstance(_classLoader,
-				_escapedModelProxyInterfaces, new AutoEscapeBeanHandler(this));
+			if (_escapedModelProxy == null) {
+				_escapedModelProxy = (Gadget)ProxyUtil.newProxyInstance(_classLoader,
+						_escapedModelProxyInterfaces,
+						new AutoEscapeBeanHandler(this));
+			}
+
+			return _escapedModelProxy;
 		}
 	}
 
@@ -352,11 +379,77 @@ public class GadgetModelImpl extends BaseModelImpl<Gadget>
 	public void resetOriginalValues() {
 		GadgetModelImpl gadgetModelImpl = this;
 
+		gadgetModelImpl._originalUuid = gadgetModelImpl._uuid;
+
 		gadgetModelImpl._originalCompanyId = gadgetModelImpl._companyId;
 
 		gadgetModelImpl._setOriginalCompanyId = false;
 
 		gadgetModelImpl._originalUrl = gadgetModelImpl._url;
+
+		gadgetModelImpl._columnBitmask = 0;
+	}
+
+	@Override
+	public CacheModel<Gadget> toCacheModel() {
+		GadgetCacheModel gadgetCacheModel = new GadgetCacheModel();
+
+		gadgetCacheModel.uuid = getUuid();
+
+		String uuid = gadgetCacheModel.uuid;
+
+		if ((uuid != null) && (uuid.length() == 0)) {
+			gadgetCacheModel.uuid = null;
+		}
+
+		gadgetCacheModel.gadgetId = getGadgetId();
+
+		gadgetCacheModel.companyId = getCompanyId();
+
+		Date createDate = getCreateDate();
+
+		if (createDate != null) {
+			gadgetCacheModel.createDate = createDate.getTime();
+		}
+		else {
+			gadgetCacheModel.createDate = Long.MIN_VALUE;
+		}
+
+		Date modifiedDate = getModifiedDate();
+
+		if (modifiedDate != null) {
+			gadgetCacheModel.modifiedDate = modifiedDate.getTime();
+		}
+		else {
+			gadgetCacheModel.modifiedDate = Long.MIN_VALUE;
+		}
+
+		gadgetCacheModel.name = getName();
+
+		String name = gadgetCacheModel.name;
+
+		if ((name != null) && (name.length() == 0)) {
+			gadgetCacheModel.name = null;
+		}
+
+		gadgetCacheModel.url = getUrl();
+
+		String url = gadgetCacheModel.url;
+
+		if ((url != null) && (url.length() == 0)) {
+			gadgetCacheModel.url = null;
+		}
+
+		gadgetCacheModel.portletCategoryNames = getPortletCategoryNames();
+
+		String portletCategoryNames = gadgetCacheModel.portletCategoryNames;
+
+		if ((portletCategoryNames != null) &&
+				(portletCategoryNames.length() == 0)) {
+			gadgetCacheModel.portletCategoryNames = null;
+		}
+
+		return gadgetCacheModel;
 	}
 
 	@Override
@@ -434,6 +527,7 @@ public class GadgetModelImpl extends BaseModelImpl<Gadget>
 			Gadget.class
 		};
 	private String _uuid;
+	private String _originalUuid;
 	private long _gadgetId;
 	private long _companyId;
 	private long _originalCompanyId;
@@ -445,4 +539,6 @@ public class GadgetModelImpl extends BaseModelImpl<Gadget>
 	private String _originalUrl;
 	private String _portletCategoryNames;
 	private transient ExpandoBridge _expandoBridge;
+	private long _columnBitmask;
+	private Gadget _escapedModelProxy;
 }

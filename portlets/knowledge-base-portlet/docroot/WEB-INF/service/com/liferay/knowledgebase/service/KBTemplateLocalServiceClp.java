@@ -61,70 +61,63 @@ public class KBTemplateLocalServiceClp implements KBTemplateLocalService {
 		_getKBTemplateMethodKey8 = new MethodKey(_classLoaderProxy.getClassName(),
 				"getKBTemplate", long.class);
 
-		_getKBTemplateByUuidAndGroupIdMethodKey9 = new MethodKey(_classLoaderProxy.getClassName(),
+		_getPersistedModelMethodKey9 = new MethodKey(_classLoaderProxy.getClassName(),
+				"getPersistedModel", java.io.Serializable.class);
+
+		_getKBTemplateByUuidAndGroupIdMethodKey10 = new MethodKey(_classLoaderProxy.getClassName(),
 				"getKBTemplateByUuidAndGroupId", java.lang.String.class,
 				long.class);
 
-		_getKBTemplatesMethodKey10 = new MethodKey(_classLoaderProxy.getClassName(),
+		_getKBTemplatesMethodKey11 = new MethodKey(_classLoaderProxy.getClassName(),
 				"getKBTemplates", int.class, int.class);
 
-		_getKBTemplatesCountMethodKey11 = new MethodKey(_classLoaderProxy.getClassName(),
+		_getKBTemplatesCountMethodKey12 = new MethodKey(_classLoaderProxy.getClassName(),
 				"getKBTemplatesCount");
-
-		_updateKBTemplateMethodKey12 = new MethodKey(_classLoaderProxy.getClassName(),
-				"updateKBTemplate",
-				com.liferay.knowledgebase.model.KBTemplate.class);
 
 		_updateKBTemplateMethodKey13 = new MethodKey(_classLoaderProxy.getClassName(),
 				"updateKBTemplate",
+				com.liferay.knowledgebase.model.KBTemplate.class);
+
+		_updateKBTemplateMethodKey14 = new MethodKey(_classLoaderProxy.getClassName(),
+				"updateKBTemplate",
 				com.liferay.knowledgebase.model.KBTemplate.class, boolean.class);
 
-		_getBeanIdentifierMethodKey14 = new MethodKey(_classLoaderProxy.getClassName(),
+		_getBeanIdentifierMethodKey15 = new MethodKey(_classLoaderProxy.getClassName(),
 				"getBeanIdentifier");
 
-		_setBeanIdentifierMethodKey15 = new MethodKey(_classLoaderProxy.getClassName(),
+		_setBeanIdentifierMethodKey16 = new MethodKey(_classLoaderProxy.getClassName(),
 				"setBeanIdentifier", java.lang.String.class);
 
-		_addKBTemplateMethodKey16 = new MethodKey(_classLoaderProxy.getClassName(),
+		_addKBTemplateMethodKey17 = new MethodKey(_classLoaderProxy.getClassName(),
 				"addKBTemplate", long.class, java.lang.String.class,
-				java.lang.String.class, int.class, boolean.class,
+				java.lang.String.class,
 				com.liferay.portal.service.ServiceContext.class);
 
-		_addKBTemplateResourcesMethodKey17 = new MethodKey(_classLoaderProxy.getClassName(),
-				"addKBTemplateResources",
-				com.liferay.knowledgebase.model.KBTemplate.class,
-				boolean.class, boolean.class);
-
-		_addKBTemplateResourcesMethodKey18 = new MethodKey(_classLoaderProxy.getClassName(),
-				"addKBTemplateResources",
-				com.liferay.knowledgebase.model.KBTemplate.class,
-				java.lang.String[].class, java.lang.String[].class);
-
-		_deleteGroupKBTemplatesMethodKey19 = new MethodKey(_classLoaderProxy.getClassName(),
+		_deleteGroupKBTemplatesMethodKey18 = new MethodKey(_classLoaderProxy.getClassName(),
 				"deleteGroupKBTemplates", long.class);
 
-		_deleteKBTemplatesMethodKey20 = new MethodKey(_classLoaderProxy.getClassName(),
+		_deleteKBTemplatesMethodKey19 = new MethodKey(_classLoaderProxy.getClassName(),
 				"deleteKBTemplates", long[].class);
 
-		_getGroupKBTemplatesMethodKey21 = new MethodKey(_classLoaderProxy.getClassName(),
+		_getGroupKBTemplatesMethodKey20 = new MethodKey(_classLoaderProxy.getClassName(),
 				"getGroupKBTemplates", long.class, int.class, int.class,
 				com.liferay.portal.kernel.util.OrderByComparator.class);
 
-		_getGroupKBTemplatesCountMethodKey22 = new MethodKey(_classLoaderProxy.getClassName(),
+		_getGroupKBTemplatesCountMethodKey21 = new MethodKey(_classLoaderProxy.getClassName(),
 				"getGroupKBTemplatesCount", long.class);
 
-		_searchMethodKey23 = new MethodKey(_classLoaderProxy.getClassName(),
+		_searchMethodKey22 = new MethodKey(_classLoaderProxy.getClassName(),
 				"search", long.class, java.lang.String.class,
 				java.lang.String.class, java.util.Date.class,
 				java.util.Date.class, boolean.class, int.class, int.class,
 				com.liferay.portal.kernel.util.OrderByComparator.class);
 
-		_updateKBTemplateMethodKey24 = new MethodKey(_classLoaderProxy.getClassName(),
+		_updateKBTemplateMethodKey23 = new MethodKey(_classLoaderProxy.getClassName(),
 				"updateKBTemplate", long.class, java.lang.String.class,
-				java.lang.String.class, int.class, boolean.class,
+				java.lang.String.class,
 				com.liferay.portal.service.ServiceContext.class);
 
-		_updateKBTemplateResourcesMethodKey25 = new MethodKey(_classLoaderProxy.getClassName(),
+		_updateKBTemplateResourcesMethodKey24 = new MethodKey(_classLoaderProxy.getClassName(),
 				"updateKBTemplateResources",
 				com.liferay.knowledgebase.model.KBTemplate.class,
 				java.lang.String[].class, java.lang.String[].class);
@@ -389,13 +382,46 @@ public class KBTemplateLocalServiceClp implements KBTemplateLocalService {
 		return (com.liferay.knowledgebase.model.KBTemplate)ClpSerializer.translateOutput(returnObj);
 	}
 
+	public com.liferay.portal.model.PersistedModel getPersistedModel(
+		java.io.Serializable primaryKeyObj)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		Object returnObj = null;
+
+		MethodHandler methodHandler = new MethodHandler(_getPersistedModelMethodKey9,
+				ClpSerializer.translateInput(primaryKeyObj));
+
+		try {
+			returnObj = _classLoaderProxy.invoke(methodHandler);
+		}
+		catch (Throwable t) {
+			if (t instanceof com.liferay.portal.kernel.exception.PortalException) {
+				throw (com.liferay.portal.kernel.exception.PortalException)t;
+			}
+
+			if (t instanceof com.liferay.portal.kernel.exception.SystemException) {
+				throw (com.liferay.portal.kernel.exception.SystemException)t;
+			}
+
+			if (t instanceof RuntimeException) {
+				throw (RuntimeException)t;
+			}
+			else {
+				throw new RuntimeException(t.getClass().getName() +
+					" is not a valid exception");
+			}
+		}
+
+		return (com.liferay.portal.model.PersistedModel)ClpSerializer.translateOutput(returnObj);
+	}
+
 	public com.liferay.knowledgebase.model.KBTemplate getKBTemplateByUuidAndGroupId(
 		java.lang.String uuid, long groupId)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		Object returnObj = null;
 
-		MethodHandler methodHandler = new MethodHandler(_getKBTemplateByUuidAndGroupIdMethodKey9,
+		MethodHandler methodHandler = new MethodHandler(_getKBTemplateByUuidAndGroupIdMethodKey10,
 				ClpSerializer.translateInput(uuid), groupId);
 
 		try {
@@ -427,7 +453,7 @@ public class KBTemplateLocalServiceClp implements KBTemplateLocalService {
 		throws com.liferay.portal.kernel.exception.SystemException {
 		Object returnObj = null;
 
-		MethodHandler methodHandler = new MethodHandler(_getKBTemplatesMethodKey10,
+		MethodHandler methodHandler = new MethodHandler(_getKBTemplatesMethodKey11,
 				start, end);
 
 		try {
@@ -454,7 +480,7 @@ public class KBTemplateLocalServiceClp implements KBTemplateLocalService {
 		throws com.liferay.portal.kernel.exception.SystemException {
 		Object returnObj = null;
 
-		MethodHandler methodHandler = new MethodHandler(_getKBTemplatesCountMethodKey11);
+		MethodHandler methodHandler = new MethodHandler(_getKBTemplatesCountMethodKey12);
 
 		try {
 			returnObj = _classLoaderProxy.invoke(methodHandler);
@@ -481,7 +507,7 @@ public class KBTemplateLocalServiceClp implements KBTemplateLocalService {
 		throws com.liferay.portal.kernel.exception.SystemException {
 		Object returnObj = null;
 
-		MethodHandler methodHandler = new MethodHandler(_updateKBTemplateMethodKey12,
+		MethodHandler methodHandler = new MethodHandler(_updateKBTemplateMethodKey13,
 				ClpSerializer.translateInput(kbTemplate));
 
 		try {
@@ -509,7 +535,7 @@ public class KBTemplateLocalServiceClp implements KBTemplateLocalService {
 		throws com.liferay.portal.kernel.exception.SystemException {
 		Object returnObj = null;
 
-		MethodHandler methodHandler = new MethodHandler(_updateKBTemplateMethodKey13,
+		MethodHandler methodHandler = new MethodHandler(_updateKBTemplateMethodKey14,
 				ClpSerializer.translateInput(kbTemplate), merge);
 
 		try {
@@ -535,7 +561,7 @@ public class KBTemplateLocalServiceClp implements KBTemplateLocalService {
 	public java.lang.String getBeanIdentifier() {
 		Object returnObj = null;
 
-		MethodHandler methodHandler = new MethodHandler(_getBeanIdentifierMethodKey14);
+		MethodHandler methodHandler = new MethodHandler(_getBeanIdentifierMethodKey15);
 
 		try {
 			returnObj = _classLoaderProxy.invoke(methodHandler);
@@ -554,7 +580,7 @@ public class KBTemplateLocalServiceClp implements KBTemplateLocalService {
 	}
 
 	public void setBeanIdentifier(java.lang.String beanIdentifier) {
-		MethodHandler methodHandler = new MethodHandler(_setBeanIdentifierMethodKey15,
+		MethodHandler methodHandler = new MethodHandler(_setBeanIdentifierMethodKey16,
 				ClpSerializer.translateInput(beanIdentifier));
 
 		try {
@@ -573,15 +599,14 @@ public class KBTemplateLocalServiceClp implements KBTemplateLocalService {
 
 	public com.liferay.knowledgebase.model.KBTemplate addKBTemplate(
 		long userId, java.lang.String title, java.lang.String content,
-		int engineType, boolean cacheable,
 		com.liferay.portal.service.ServiceContext serviceContext)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		Object returnObj = null;
 
-		MethodHandler methodHandler = new MethodHandler(_addKBTemplateMethodKey16,
+		MethodHandler methodHandler = new MethodHandler(_addKBTemplateMethodKey17,
 				userId, ClpSerializer.translateInput(title),
-				ClpSerializer.translateInput(content), engineType, cacheable,
+				ClpSerializer.translateInput(content),
 				ClpSerializer.translateInput(serviceContext));
 
 		try {
@@ -608,74 +633,10 @@ public class KBTemplateLocalServiceClp implements KBTemplateLocalService {
 		return (com.liferay.knowledgebase.model.KBTemplate)ClpSerializer.translateOutput(returnObj);
 	}
 
-	public void addKBTemplateResources(
-		com.liferay.knowledgebase.model.KBTemplate kbTemplate,
-		boolean addCommunityPermissions, boolean addGuestPermissions)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
-		MethodHandler methodHandler = new MethodHandler(_addKBTemplateResourcesMethodKey17,
-				ClpSerializer.translateInput(kbTemplate),
-				addCommunityPermissions, addGuestPermissions);
-
-		try {
-			_classLoaderProxy.invoke(methodHandler);
-		}
-		catch (Throwable t) {
-			if (t instanceof com.liferay.portal.kernel.exception.PortalException) {
-				throw (com.liferay.portal.kernel.exception.PortalException)t;
-			}
-
-			if (t instanceof com.liferay.portal.kernel.exception.SystemException) {
-				throw (com.liferay.portal.kernel.exception.SystemException)t;
-			}
-
-			if (t instanceof RuntimeException) {
-				throw (RuntimeException)t;
-			}
-			else {
-				throw new RuntimeException(t.getClass().getName() +
-					" is not a valid exception");
-			}
-		}
-	}
-
-	public void addKBTemplateResources(
-		com.liferay.knowledgebase.model.KBTemplate kbTemplate,
-		java.lang.String[] communityPermissions,
-		java.lang.String[] guestPermissions)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
-		MethodHandler methodHandler = new MethodHandler(_addKBTemplateResourcesMethodKey18,
-				ClpSerializer.translateInput(kbTemplate),
-				ClpSerializer.translateInput(communityPermissions),
-				ClpSerializer.translateInput(guestPermissions));
-
-		try {
-			_classLoaderProxy.invoke(methodHandler);
-		}
-		catch (Throwable t) {
-			if (t instanceof com.liferay.portal.kernel.exception.PortalException) {
-				throw (com.liferay.portal.kernel.exception.PortalException)t;
-			}
-
-			if (t instanceof com.liferay.portal.kernel.exception.SystemException) {
-				throw (com.liferay.portal.kernel.exception.SystemException)t;
-			}
-
-			if (t instanceof RuntimeException) {
-				throw (RuntimeException)t;
-			}
-			else {
-				throw new RuntimeException(t.getClass().getName() +
-					" is not a valid exception");
-			}
-		}
-	}
-
 	public void deleteGroupKBTemplates(long groupId)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
-		MethodHandler methodHandler = new MethodHandler(_deleteGroupKBTemplatesMethodKey19,
+		MethodHandler methodHandler = new MethodHandler(_deleteGroupKBTemplatesMethodKey18,
 				groupId);
 
 		try {
@@ -703,7 +664,7 @@ public class KBTemplateLocalServiceClp implements KBTemplateLocalService {
 	public void deleteKBTemplates(long[] kbTemplateIds)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
-		MethodHandler methodHandler = new MethodHandler(_deleteKBTemplatesMethodKey20,
+		MethodHandler methodHandler = new MethodHandler(_deleteKBTemplatesMethodKey19,
 				ClpSerializer.translateInput(kbTemplateIds));
 
 		try {
@@ -734,7 +695,7 @@ public class KBTemplateLocalServiceClp implements KBTemplateLocalService {
 		throws com.liferay.portal.kernel.exception.SystemException {
 		Object returnObj = null;
 
-		MethodHandler methodHandler = new MethodHandler(_getGroupKBTemplatesMethodKey21,
+		MethodHandler methodHandler = new MethodHandler(_getGroupKBTemplatesMethodKey20,
 				groupId, start, end,
 				ClpSerializer.translateInput(orderByComparator));
 
@@ -762,7 +723,7 @@ public class KBTemplateLocalServiceClp implements KBTemplateLocalService {
 		throws com.liferay.portal.kernel.exception.SystemException {
 		Object returnObj = null;
 
-		MethodHandler methodHandler = new MethodHandler(_getGroupKBTemplatesCountMethodKey22,
+		MethodHandler methodHandler = new MethodHandler(_getGroupKBTemplatesCountMethodKey21,
 				groupId);
 
 		try {
@@ -793,7 +754,7 @@ public class KBTemplateLocalServiceClp implements KBTemplateLocalService {
 		throws com.liferay.portal.kernel.exception.SystemException {
 		Object returnObj = null;
 
-		MethodHandler methodHandler = new MethodHandler(_searchMethodKey23,
+		MethodHandler methodHandler = new MethodHandler(_searchMethodKey22,
 				groupId, ClpSerializer.translateInput(title),
 				ClpSerializer.translateInput(content),
 				ClpSerializer.translateInput(startDate),
@@ -822,15 +783,14 @@ public class KBTemplateLocalServiceClp implements KBTemplateLocalService {
 
 	public com.liferay.knowledgebase.model.KBTemplate updateKBTemplate(
 		long kbTemplateId, java.lang.String title, java.lang.String content,
-		int engineType, boolean cacheable,
 		com.liferay.portal.service.ServiceContext serviceContext)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		Object returnObj = null;
 
-		MethodHandler methodHandler = new MethodHandler(_updateKBTemplateMethodKey24,
+		MethodHandler methodHandler = new MethodHandler(_updateKBTemplateMethodKey23,
 				kbTemplateId, ClpSerializer.translateInput(title),
-				ClpSerializer.translateInput(content), engineType, cacheable,
+				ClpSerializer.translateInput(content),
 				ClpSerializer.translateInput(serviceContext));
 
 		try {
@@ -859,13 +819,12 @@ public class KBTemplateLocalServiceClp implements KBTemplateLocalService {
 
 	public void updateKBTemplateResources(
 		com.liferay.knowledgebase.model.KBTemplate kbTemplate,
-		java.lang.String[] communityPermissions,
-		java.lang.String[] guestPermissions)
+		java.lang.String[] groupPermissions, java.lang.String[] guestPermissions)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
-		MethodHandler methodHandler = new MethodHandler(_updateKBTemplateResourcesMethodKey25,
+		MethodHandler methodHandler = new MethodHandler(_updateKBTemplateResourcesMethodKey24,
 				ClpSerializer.translateInput(kbTemplate),
-				ClpSerializer.translateInput(communityPermissions),
+				ClpSerializer.translateInput(groupPermissions),
 				ClpSerializer.translateInput(guestPermissions));
 
 		try {
@@ -904,21 +863,20 @@ public class KBTemplateLocalServiceClp implements KBTemplateLocalService {
 	private MethodKey _dynamicQueryMethodKey6;
 	private MethodKey _dynamicQueryCountMethodKey7;
 	private MethodKey _getKBTemplateMethodKey8;
-	private MethodKey _getKBTemplateByUuidAndGroupIdMethodKey9;
-	private MethodKey _getKBTemplatesMethodKey10;
-	private MethodKey _getKBTemplatesCountMethodKey11;
-	private MethodKey _updateKBTemplateMethodKey12;
+	private MethodKey _getPersistedModelMethodKey9;
+	private MethodKey _getKBTemplateByUuidAndGroupIdMethodKey10;
+	private MethodKey _getKBTemplatesMethodKey11;
+	private MethodKey _getKBTemplatesCountMethodKey12;
 	private MethodKey _updateKBTemplateMethodKey13;
-	private MethodKey _getBeanIdentifierMethodKey14;
-	private MethodKey _setBeanIdentifierMethodKey15;
-	private MethodKey _addKBTemplateMethodKey16;
-	private MethodKey _addKBTemplateResourcesMethodKey17;
-	private MethodKey _addKBTemplateResourcesMethodKey18;
-	private MethodKey _deleteGroupKBTemplatesMethodKey19;
-	private MethodKey _deleteKBTemplatesMethodKey20;
-	private MethodKey _getGroupKBTemplatesMethodKey21;
-	private MethodKey _getGroupKBTemplatesCountMethodKey22;
-	private MethodKey _searchMethodKey23;
-	private MethodKey _updateKBTemplateMethodKey24;
-	private MethodKey _updateKBTemplateResourcesMethodKey25;
+	private MethodKey _updateKBTemplateMethodKey14;
+	private MethodKey _getBeanIdentifierMethodKey15;
+	private MethodKey _setBeanIdentifierMethodKey16;
+	private MethodKey _addKBTemplateMethodKey17;
+	private MethodKey _deleteGroupKBTemplatesMethodKey18;
+	private MethodKey _deleteKBTemplatesMethodKey19;
+	private MethodKey _getGroupKBTemplatesMethodKey20;
+	private MethodKey _getGroupKBTemplatesCountMethodKey21;
+	private MethodKey _searchMethodKey22;
+	private MethodKey _updateKBTemplateMethodKey23;
+	private MethodKey _updateKBTemplateResourcesMethodKey24;
 }

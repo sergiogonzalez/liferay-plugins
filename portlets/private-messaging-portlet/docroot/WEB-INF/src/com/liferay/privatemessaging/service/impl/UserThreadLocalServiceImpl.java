@@ -19,7 +19,6 @@ import com.liferay.portal.NoSuchUserException;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.mail.MailMessage;
-import com.liferay.portal.kernel.servlet.ImageServletTokenUtil;
 import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.FastDateFormatFactoryUtil;
 import com.liferay.portal.kernel.util.ObjectValuePair;
@@ -35,6 +34,7 @@ import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.UserLocalServiceUtil;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
+import com.liferay.portal.webserver.WebServerServletTokenUtil;
 import com.liferay.portlet.messageboards.model.MBMessage;
 import com.liferay.portlet.messageboards.model.MBMessageConstants;
 import com.liferay.portlet.messageboards.service.MBMessageLocalServiceUtil;
@@ -44,6 +44,8 @@ import com.liferay.privatemessaging.portlet.PrivateMessagingPortlet;
 import com.liferay.privatemessaging.service.UserThreadLocalServiceUtil;
 import com.liferay.privatemessaging.service.base.UserThreadLocalServiceBaseImpl;
 import com.liferay.privatemessaging.util.PrivateMessagingConstants;
+
+import java.io.InputStream;
 
 import java.text.Format;
 
@@ -60,7 +62,8 @@ public class UserThreadLocalServiceImpl extends UserThreadLocalServiceBaseImpl {
 
 	public MBMessage addPrivateMessage(
 			long userId, long mbThreadId, String to, String subject,
-			String body, List<ObjectValuePair<String, byte[]>> files,
+			String body,
+			List<ObjectValuePair<String, InputStream>> inputStreamOVPs,
 			ThemeDisplay themeDisplay)
 		throws PortalException, SystemException {
 
@@ -81,12 +84,12 @@ public class UserThreadLocalServiceImpl extends UserThreadLocalServiceBaseImpl {
 
 		return addPrivateMessage(
 			userId, mbThreadId, parentMBMessageId, recipients, subject,
-			body, files, themeDisplay);
+			body, inputStreamOVPs, themeDisplay);
 	}
 
 	public MBMessage addPrivateMessageBranch(
 			long userId, long parentMBMessageId, String body,
-			List<ObjectValuePair<String, byte[]>> files,
+			List<ObjectValuePair<String, InputStream>> inputStreamOVPs,
 			ThemeDisplay themeDisplay)
 		throws PortalException, SystemException {
 
@@ -101,7 +104,7 @@ public class UserThreadLocalServiceImpl extends UserThreadLocalServiceBaseImpl {
 
 		return addPrivateMessage(
 			userId, mbThreadId, parentMBMessageId, recipients,
-			parentMessage.getSubject(), body, files, themeDisplay);
+			parentMessage.getSubject(), body, inputStreamOVPs, themeDisplay);
 	}
 
 	public void addUserThread(
@@ -221,7 +224,7 @@ public class UserThreadLocalServiceImpl extends UserThreadLocalServiceBaseImpl {
 	protected MBMessage addPrivateMessage(
 			long userId, long mbThreadId, long parentMBMessageId,
 			List<User> recipients, String subject, String body,
-			List<ObjectValuePair<String, byte[]>> files,
+			List<ObjectValuePair<String, InputStream>> inputStreamOVPs,
 			ThemeDisplay themeDisplay)
 		throws PortalException, SystemException {
 
@@ -246,8 +249,8 @@ public class UserThreadLocalServiceImpl extends UserThreadLocalServiceBaseImpl {
 		MBMessage mbMessage = MBMessageLocalServiceUtil.addMessage(
 			userId, user.getScreenName(), group.getGroupId(), categoryId,
 			mbThreadId, parentMBMessageId, subject, body,
-			MBMessageConstants.DEFAULT_FORMAT, files, anonymous, priority,
-			allowPingbacks, serviceContext);
+			MBMessageConstants.DEFAULT_FORMAT, inputStreamOVPs, anonymous,
+			priority, allowPingbacks, serviceContext);
 
 		if (mbThreadId == 0) {
 			for (User recipient : recipients) {
@@ -371,7 +374,8 @@ public class UserThreadLocalServiceImpl extends UserThreadLocalServiceBaseImpl {
 				"dependencies/notification_message_body.tmpl"));
 
 		long portraitId = sender.getPortraitId();
-		String tokenId = ImageServletTokenUtil.getToken(sender.getPortraitId());
+		String tokenId = WebServerServletTokenUtil.getToken(
+			sender.getPortraitId());
 		String portraitURL =
 			themeDisplay.getPortalURL() + themeDisplay.getPathImage() +
 				"/user_" + (sender.isFemale() ? "female" : "male") +

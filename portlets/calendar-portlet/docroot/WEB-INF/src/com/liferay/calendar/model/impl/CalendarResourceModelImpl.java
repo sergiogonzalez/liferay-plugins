@@ -26,9 +26,11 @@ import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.LocalizationUtil;
+import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.impl.BaseModelImpl;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.util.PortalUtil;
@@ -37,8 +39,6 @@ import com.liferay.portlet.expando.model.ExpandoBridge;
 import com.liferay.portlet.expando.util.ExpandoBridgeFactoryUtil;
 
 import java.io.Serializable;
-
-import java.lang.reflect.Proxy;
 
 import java.sql.Types;
 
@@ -99,6 +99,16 @@ public class CalendarResourceModelImpl extends BaseModelImpl<CalendarResource>
 	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
 				"value.object.finder.cache.enabled.com.liferay.calendar.model.CalendarResource"),
 			true);
+	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
+				"value.object.column.bitmask.enabled.com.liferay.calendar.model.CalendarResource"),
+			true);
+	public static long ACTIVE_COLUMN_BITMASK = 1L;
+	public static long CLASSNAMEID_COLUMN_BITMASK = 2L;
+	public static long CLASSPK_COLUMN_BITMASK = 4L;
+	public static long COMPANYID_COLUMN_BITMASK = 8L;
+	public static long GROUPID_COLUMN_BITMASK = 16L;
+	public static long NAME_COLUMN_BITMASK = 32L;
+	public static long UUID_COLUMN_BITMASK = 64L;
 
 	/**
 	 * Converts the soap model instance into a normal model instance.
@@ -144,14 +154,6 @@ public class CalendarResourceModelImpl extends BaseModelImpl<CalendarResource>
 		return models;
 	}
 
-	public Class<?> getModelClass() {
-		return CalendarResource.class;
-	}
-
-	public String getModelClassName() {
-		return CalendarResource.class.getName();
-	}
-
 	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(com.liferay.util.service.ServiceProps.get(
 				"lock.expiration.time.com.liferay.calendar.model.CalendarResource"));
 
@@ -172,6 +174,14 @@ public class CalendarResourceModelImpl extends BaseModelImpl<CalendarResource>
 
 	public void setPrimaryKeyObj(Serializable primaryKeyObj) {
 		setPrimaryKey(((Long)primaryKeyObj).longValue());
+	}
+
+	public Class<?> getModelClass() {
+		return CalendarResource.class;
+	}
+
+	public String getModelClassName() {
+		return CalendarResource.class.getName();
 	}
 
 	@JSON
@@ -211,6 +221,8 @@ public class CalendarResourceModelImpl extends BaseModelImpl<CalendarResource>
 	}
 
 	public void setGroupId(long groupId) {
+		_columnBitmask |= GROUPID_COLUMN_BITMASK;
+
 		if (!_setOriginalGroupId) {
 			_setOriginalGroupId = true;
 
@@ -230,7 +242,19 @@ public class CalendarResourceModelImpl extends BaseModelImpl<CalendarResource>
 	}
 
 	public void setCompanyId(long companyId) {
+		_columnBitmask |= COMPANYID_COLUMN_BITMASK;
+
+		if (!_setOriginalCompanyId) {
+			_setOriginalCompanyId = true;
+
+			_originalCompanyId = _companyId;
+		}
+
 		_companyId = companyId;
+	}
+
+	public long getOriginalCompanyId() {
+		return _originalCompanyId;
 	}
 
 	@JSON
@@ -296,6 +320,8 @@ public class CalendarResourceModelImpl extends BaseModelImpl<CalendarResource>
 	}
 
 	public void setClassNameId(long classNameId) {
+		_columnBitmask |= CLASSNAMEID_COLUMN_BITMASK;
+
 		if (!_setOriginalClassNameId) {
 			_setOriginalClassNameId = true;
 
@@ -315,6 +341,8 @@ public class CalendarResourceModelImpl extends BaseModelImpl<CalendarResource>
 	}
 
 	public void setClassPK(long classPK) {
+		_columnBitmask |= CLASSPK_COLUMN_BITMASK;
+
 		if (!_setOriginalClassPK) {
 			_setOriginalClassPK = true;
 
@@ -392,6 +420,12 @@ public class CalendarResourceModelImpl extends BaseModelImpl<CalendarResource>
 	}
 
 	public void setName(String name) {
+		_columnBitmask |= NAME_COLUMN_BITMASK;
+
+		if (_originalName == null) {
+			_originalName = _name;
+		}
+
 		_name = name;
 	}
 
@@ -429,6 +463,10 @@ public class CalendarResourceModelImpl extends BaseModelImpl<CalendarResource>
 
 			setName(name, locale, defaultLocale);
 		}
+	}
+
+	public String getOriginalName() {
+		return GetterUtil.getString(_originalName);
 	}
 
 	@JSON
@@ -534,7 +572,23 @@ public class CalendarResourceModelImpl extends BaseModelImpl<CalendarResource>
 	}
 
 	public void setActive(boolean active) {
+		_columnBitmask |= ACTIVE_COLUMN_BITMASK;
+
+		if (!_setOriginalActive) {
+			_setOriginalActive = true;
+
+			_originalActive = _active;
+		}
+
 		_active = active;
+	}
+
+	public boolean getOriginalActive() {
+		return _originalActive;
+	}
+
+	public long getColumnBitmask() {
+		return _columnBitmask;
 	}
 
 	@Override
@@ -543,8 +597,13 @@ public class CalendarResourceModelImpl extends BaseModelImpl<CalendarResource>
 			return (CalendarResource)this;
 		}
 		else {
-			return (CalendarResource)Proxy.newProxyInstance(_classLoader,
-				_escapedModelProxyInterfaces, new AutoEscapeBeanHandler(this));
+			if (_escapedModelProxy == null) {
+				_escapedModelProxy = (CalendarResource)ProxyUtil.newProxyInstance(_classLoader,
+						_escapedModelProxyInterfaces,
+						new AutoEscapeBeanHandler(this));
+			}
+
+			return _escapedModelProxy;
 		}
 	}
 
@@ -640,6 +699,10 @@ public class CalendarResourceModelImpl extends BaseModelImpl<CalendarResource>
 
 		calendarResourceModelImpl._setOriginalGroupId = false;
 
+		calendarResourceModelImpl._originalCompanyId = calendarResourceModelImpl._companyId;
+
+		calendarResourceModelImpl._setOriginalCompanyId = false;
+
 		calendarResourceModelImpl._originalClassNameId = calendarResourceModelImpl._classNameId;
 
 		calendarResourceModelImpl._setOriginalClassNameId = false;
@@ -647,6 +710,93 @@ public class CalendarResourceModelImpl extends BaseModelImpl<CalendarResource>
 		calendarResourceModelImpl._originalClassPK = calendarResourceModelImpl._classPK;
 
 		calendarResourceModelImpl._setOriginalClassPK = false;
+
+		calendarResourceModelImpl._originalName = calendarResourceModelImpl._name;
+
+		calendarResourceModelImpl._originalActive = calendarResourceModelImpl._active;
+
+		calendarResourceModelImpl._setOriginalActive = false;
+
+		calendarResourceModelImpl._columnBitmask = 0;
+	}
+
+	@Override
+	public CacheModel<CalendarResource> toCacheModel() {
+		CalendarResourceCacheModel calendarResourceCacheModel = new CalendarResourceCacheModel();
+
+		calendarResourceCacheModel.uuid = getUuid();
+
+		String uuid = calendarResourceCacheModel.uuid;
+
+		if ((uuid != null) && (uuid.length() == 0)) {
+			calendarResourceCacheModel.uuid = null;
+		}
+
+		calendarResourceCacheModel.calendarResourceId = getCalendarResourceId();
+
+		calendarResourceCacheModel.groupId = getGroupId();
+
+		calendarResourceCacheModel.companyId = getCompanyId();
+
+		calendarResourceCacheModel.userId = getUserId();
+
+		calendarResourceCacheModel.userName = getUserName();
+
+		String userName = calendarResourceCacheModel.userName;
+
+		if ((userName != null) && (userName.length() == 0)) {
+			calendarResourceCacheModel.userName = null;
+		}
+
+		Date createDate = getCreateDate();
+
+		if (createDate != null) {
+			calendarResourceCacheModel.createDate = createDate.getTime();
+		}
+		else {
+			calendarResourceCacheModel.createDate = Long.MIN_VALUE;
+		}
+
+		Date modifiedDate = getModifiedDate();
+
+		if (modifiedDate != null) {
+			calendarResourceCacheModel.modifiedDate = modifiedDate.getTime();
+		}
+		else {
+			calendarResourceCacheModel.modifiedDate = Long.MIN_VALUE;
+		}
+
+		calendarResourceCacheModel.classNameId = getClassNameId();
+
+		calendarResourceCacheModel.classPK = getClassPK();
+
+		calendarResourceCacheModel.classUuid = getClassUuid();
+
+		String classUuid = calendarResourceCacheModel.classUuid;
+
+		if ((classUuid != null) && (classUuid.length() == 0)) {
+			calendarResourceCacheModel.classUuid = null;
+		}
+
+		calendarResourceCacheModel.name = getName();
+
+		String name = calendarResourceCacheModel.name;
+
+		if ((name != null) && (name.length() == 0)) {
+			calendarResourceCacheModel.name = null;
+		}
+
+		calendarResourceCacheModel.description = getDescription();
+
+		String description = calendarResourceCacheModel.description;
+
+		if ((description != null) && (description.length() == 0)) {
+			calendarResourceCacheModel.description = null;
+		}
+
+		calendarResourceCacheModel.active = getActive();
+
+		return calendarResourceCacheModel;
 	}
 
 	@Override
@@ -766,6 +916,8 @@ public class CalendarResourceModelImpl extends BaseModelImpl<CalendarResource>
 	private long _originalGroupId;
 	private boolean _setOriginalGroupId;
 	private long _companyId;
+	private long _originalCompanyId;
+	private boolean _setOriginalCompanyId;
 	private long _userId;
 	private String _userUuid;
 	private String _userName;
@@ -779,7 +931,12 @@ public class CalendarResourceModelImpl extends BaseModelImpl<CalendarResource>
 	private boolean _setOriginalClassPK;
 	private String _classUuid;
 	private String _name;
+	private String _originalName;
 	private String _description;
 	private boolean _active;
+	private boolean _originalActive;
+	private boolean _setOriginalActive;
 	private transient ExpandoBridge _expandoBridge;
+	private long _columnBitmask;
+	private CalendarResource _escapedModelProxy;
 }

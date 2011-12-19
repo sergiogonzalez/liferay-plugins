@@ -17,8 +17,10 @@ package com.liferay.socialcoding.model.impl;
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
 import com.liferay.portal.kernel.util.DateUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.impl.BaseModelImpl;
 import com.liferay.portal.service.ServiceContext;
 
@@ -29,8 +31,6 @@ import com.liferay.socialcoding.model.JIRAAction;
 import com.liferay.socialcoding.model.JIRAActionModel;
 
 import java.io.Serializable;
-
-import java.lang.reflect.Proxy;
 
 import java.sql.Types;
 
@@ -80,15 +80,12 @@ public class JIRAActionModelImpl extends BaseModelImpl<JIRAAction>
 	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
 				"value.object.finder.cache.enabled.com.liferay.socialcoding.model.JIRAAction"),
 			true);
-
-	public Class<?> getModelClass() {
-		return JIRAAction.class;
-	}
-
-	public String getModelClassName() {
-		return JIRAAction.class.getName();
-	}
-
+	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
+				"value.object.column.bitmask.enabled.com.liferay.socialcoding.model.JIRAAction"),
+			true);
+	public static long JIRAISSUEID_COLUMN_BITMASK = 1L;
+	public static long JIRAUSERID_COLUMN_BITMASK = 2L;
+	public static long TYPE_COLUMN_BITMASK = 4L;
 	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(com.liferay.util.service.ServiceProps.get(
 				"lock.expiration.time.com.liferay.socialcoding.model.JIRAAction"));
 
@@ -111,6 +108,14 @@ public class JIRAActionModelImpl extends BaseModelImpl<JIRAAction>
 		setPrimaryKey(((Long)primaryKeyObj).longValue());
 	}
 
+	public Class<?> getModelClass() {
+		return JIRAAction.class;
+	}
+
+	public String getModelClassName() {
+		return JIRAAction.class.getName();
+	}
+
 	public long getJiraActionId() {
 		return _jiraActionId;
 	}
@@ -129,7 +134,17 @@ public class JIRAActionModelImpl extends BaseModelImpl<JIRAAction>
 	}
 
 	public void setJiraUserId(String jiraUserId) {
+		_columnBitmask |= JIRAUSERID_COLUMN_BITMASK;
+
+		if (_originalJiraUserId == null) {
+			_originalJiraUserId = _jiraUserId;
+		}
+
 		_jiraUserId = jiraUserId;
+	}
+
+	public String getOriginalJiraUserId() {
+		return GetterUtil.getString(_originalJiraUserId);
 	}
 
 	public Date getCreateDate() {
@@ -153,7 +168,19 @@ public class JIRAActionModelImpl extends BaseModelImpl<JIRAAction>
 	}
 
 	public void setJiraIssueId(long jiraIssueId) {
+		_columnBitmask |= JIRAISSUEID_COLUMN_BITMASK;
+
+		if (!_setOriginalJiraIssueId) {
+			_setOriginalJiraIssueId = true;
+
+			_originalJiraIssueId = _jiraIssueId;
+		}
+
 		_jiraIssueId = jiraIssueId;
+	}
+
+	public long getOriginalJiraIssueId() {
+		return _originalJiraIssueId;
 	}
 
 	public String getType() {
@@ -166,7 +193,17 @@ public class JIRAActionModelImpl extends BaseModelImpl<JIRAAction>
 	}
 
 	public void setType(String type) {
+		_columnBitmask |= TYPE_COLUMN_BITMASK;
+
+		if (_originalType == null) {
+			_originalType = _type;
+		}
+
 		_type = type;
+	}
+
+	public String getOriginalType() {
+		return GetterUtil.getString(_originalType);
 	}
 
 	public String getBody() {
@@ -195,14 +232,23 @@ public class JIRAActionModelImpl extends BaseModelImpl<JIRAAction>
 		_jiraGroupName = jiraGroupName;
 	}
 
+	public long getColumnBitmask() {
+		return _columnBitmask;
+	}
+
 	@Override
 	public JIRAAction toEscapedModel() {
 		if (isEscapedModel()) {
 			return (JIRAAction)this;
 		}
 		else {
-			return (JIRAAction)Proxy.newProxyInstance(_classLoader,
-				_escapedModelProxyInterfaces, new AutoEscapeBeanHandler(this));
+			if (_escapedModelProxy == null) {
+				_escapedModelProxy = (JIRAAction)ProxyUtil.newProxyInstance(_classLoader,
+						_escapedModelProxyInterfaces,
+						new AutoEscapeBeanHandler(this));
+			}
+
+			return _escapedModelProxy;
 		}
 	}
 
@@ -286,6 +332,78 @@ public class JIRAActionModelImpl extends BaseModelImpl<JIRAAction>
 
 	@Override
 	public void resetOriginalValues() {
+		JIRAActionModelImpl jiraActionModelImpl = this;
+
+		jiraActionModelImpl._originalJiraUserId = jiraActionModelImpl._jiraUserId;
+
+		jiraActionModelImpl._originalJiraIssueId = jiraActionModelImpl._jiraIssueId;
+
+		jiraActionModelImpl._setOriginalJiraIssueId = false;
+
+		jiraActionModelImpl._originalType = jiraActionModelImpl._type;
+
+		jiraActionModelImpl._columnBitmask = 0;
+	}
+
+	@Override
+	public CacheModel<JIRAAction> toCacheModel() {
+		JIRAActionCacheModel jiraActionCacheModel = new JIRAActionCacheModel();
+
+		jiraActionCacheModel.jiraActionId = getJiraActionId();
+
+		jiraActionCacheModel.jiraUserId = getJiraUserId();
+
+		String jiraUserId = jiraActionCacheModel.jiraUserId;
+
+		if ((jiraUserId != null) && (jiraUserId.length() == 0)) {
+			jiraActionCacheModel.jiraUserId = null;
+		}
+
+		Date createDate = getCreateDate();
+
+		if (createDate != null) {
+			jiraActionCacheModel.createDate = createDate.getTime();
+		}
+		else {
+			jiraActionCacheModel.createDate = Long.MIN_VALUE;
+		}
+
+		Date modifiedDate = getModifiedDate();
+
+		if (modifiedDate != null) {
+			jiraActionCacheModel.modifiedDate = modifiedDate.getTime();
+		}
+		else {
+			jiraActionCacheModel.modifiedDate = Long.MIN_VALUE;
+		}
+
+		jiraActionCacheModel.jiraIssueId = getJiraIssueId();
+
+		jiraActionCacheModel.type = getType();
+
+		String type = jiraActionCacheModel.type;
+
+		if ((type != null) && (type.length() == 0)) {
+			jiraActionCacheModel.type = null;
+		}
+
+		jiraActionCacheModel.body = getBody();
+
+		String body = jiraActionCacheModel.body;
+
+		if ((body != null) && (body.length() == 0)) {
+			jiraActionCacheModel.body = null;
+		}
+
+		jiraActionCacheModel.jiraGroupName = getJiraGroupName();
+
+		String jiraGroupName = jiraActionCacheModel.jiraGroupName;
+
+		if ((jiraGroupName != null) && (jiraGroupName.length() == 0)) {
+			jiraActionCacheModel.jiraGroupName = null;
+		}
+
+		return jiraActionCacheModel;
 	}
 
 	@Override
@@ -364,11 +482,17 @@ public class JIRAActionModelImpl extends BaseModelImpl<JIRAAction>
 		};
 	private long _jiraActionId;
 	private String _jiraUserId;
+	private String _originalJiraUserId;
 	private Date _createDate;
 	private Date _modifiedDate;
 	private long _jiraIssueId;
+	private long _originalJiraIssueId;
+	private boolean _setOriginalJiraIssueId;
 	private String _type;
+	private String _originalType;
 	private String _body;
 	private String _jiraGroupName;
 	private transient ExpandoBridge _expandoBridge;
+	private long _columnBitmask;
+	private JIRAAction _escapedModelProxy;
 }

@@ -38,6 +38,7 @@ import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.ModelListener;
 import com.liferay.portal.service.persistence.BatchSessionUtil;
 import com.liferay.portal.service.persistence.ResourcePersistence;
@@ -70,14 +71,19 @@ public class TypePersistenceImpl extends BasePersistenceImpl<Type>
 	 * Never modify or reference this class directly. Always use {@link TypeUtil} to access the type persistence. Modify <code>service.xml</code> and rerun ServiceBuilder to regenerate this class.
 	 */
 	public static final String FINDER_CLASS_NAME_ENTITY = TypeImpl.class.getName();
-	public static final String FINDER_CLASS_NAME_LIST = FINDER_CLASS_NAME_ENTITY +
-		".List";
-	public static final FinderPath FINDER_PATH_FIND_ALL = new FinderPath(TypeModelImpl.ENTITY_CACHE_ENABLED,
-			TypeModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"findAll", new String[0]);
+	public static final String FINDER_CLASS_NAME_LIST_WITH_PAGINATION = FINDER_CLASS_NAME_ENTITY +
+		".List1";
+	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION = FINDER_CLASS_NAME_ENTITY +
+		".List2";
+	public static final FinderPath FINDER_PATH_WITH_PAGINATION_FIND_ALL = new FinderPath(TypeModelImpl.ENTITY_CACHE_ENABLED,
+			TypeModelImpl.FINDER_CACHE_ENABLED, TypeImpl.class,
+			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0]);
+	public static final FinderPath FINDER_PATH_WITHOUT_PAGINATION_FIND_ALL = new FinderPath(TypeModelImpl.ENTITY_CACHE_ENABLED,
+			TypeModelImpl.FINDER_CACHE_ENABLED, TypeImpl.class,
+			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0]);
 	public static final FinderPath FINDER_PATH_COUNT_ALL = new FinderPath(TypeModelImpl.ENTITY_CACHE_ENABLED,
-			TypeModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"countAll", new String[0]);
+			TypeModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll", new String[0]);
 
 	/**
 	 * Caches the type in the entity cache if it is enabled.
@@ -99,7 +105,7 @@ public class TypePersistenceImpl extends BasePersistenceImpl<Type>
 	public void cacheResult(List<Type> types) {
 		for (Type type : types) {
 			if (EntityCacheUtil.getResult(TypeModelImpl.ENTITY_CACHE_ENABLED,
-						TypeImpl.class, type.getPrimaryKey(), this) == null) {
+						TypeImpl.class, type.getPrimaryKey()) == null) {
 				cacheResult(type);
 			}
 		}
@@ -119,8 +125,10 @@ public class TypePersistenceImpl extends BasePersistenceImpl<Type>
 		}
 
 		EntityCacheUtil.clearCache(TypeImpl.class.getName());
+
 		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_ENTITY);
-		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST);
+		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
+		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 	}
 
 	/**
@@ -134,6 +142,9 @@ public class TypePersistenceImpl extends BasePersistenceImpl<Type>
 	public void clearCache(Type type) {
 		EntityCacheUtil.removeResult(TypeModelImpl.ENTITY_CACHE_ENABLED,
 			TypeImpl.class, type.getPrimaryKey());
+
+		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
+		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 	}
 
 	/**
@@ -233,7 +244,8 @@ public class TypePersistenceImpl extends BasePersistenceImpl<Type>
 			closeSession(session);
 		}
 
-		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST);
+		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
+		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 
 		EntityCacheUtil.removeResult(TypeModelImpl.ENTITY_CACHE_ENABLED,
 			TypeImpl.class, type.getPrimaryKey());
@@ -262,7 +274,7 @@ public class TypePersistenceImpl extends BasePersistenceImpl<Type>
 			closeSession(session);
 		}
 
-		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST);
+		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 
 		EntityCacheUtil.putResult(TypeModelImpl.ENTITY_CACHE_ENABLED,
 			TypeImpl.class, type.getPrimaryKey(), type);
@@ -347,10 +359,16 @@ public class TypePersistenceImpl extends BasePersistenceImpl<Type>
 	 */
 	public Type fetchByPrimaryKey(long typeId) throws SystemException {
 		Type type = (Type)EntityCacheUtil.getResult(TypeModelImpl.ENTITY_CACHE_ENABLED,
-				TypeImpl.class, typeId, this);
+				TypeImpl.class, typeId);
+
+		if (type == _nullType) {
+			return null;
+		}
 
 		if (type == null) {
 			Session session = null;
+
+			boolean hasException = false;
 
 			try {
 				session = openSession();
@@ -358,11 +376,17 @@ public class TypePersistenceImpl extends BasePersistenceImpl<Type>
 				type = (Type)session.get(TypeImpl.class, Long.valueOf(typeId));
 			}
 			catch (Exception e) {
+				hasException = true;
+
 				throw processException(e);
 			}
 			finally {
 				if (type != null) {
 					cacheResult(type);
+				}
+				else if (!hasException) {
+					EntityCacheUtil.putResult(TypeModelImpl.ENTITY_CACHE_ENABLED,
+						TypeImpl.class, typeId, _nullType);
 				}
 
 				closeSession(session);
@@ -413,12 +437,20 @@ public class TypePersistenceImpl extends BasePersistenceImpl<Type>
 	 */
 	public List<Type> findAll(int start, int end,
 		OrderByComparator orderByComparator) throws SystemException {
-		Object[] finderArgs = new Object[] {
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
-			};
+		FinderPath finderPath = null;
+		Object[] finderArgs = new Object[] { start, end, orderByComparator };
 
-		List<Type> list = (List<Type>)FinderCacheUtil.getResult(FINDER_PATH_FIND_ALL,
+		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
+				(orderByComparator == null)) {
+			finderPath = FINDER_PATH_WITH_PAGINATION_FIND_ALL;
+			finderArgs = FINDER_ARGS_EMPTY;
+		}
+		else {
+			finderPath = FINDER_PATH_WITHOUT_PAGINATION_FIND_ALL;
+			finderArgs = new Object[] { start, end, orderByComparator };
+		}
+
+		List<Type> list = (List<Type>)FinderCacheUtil.getResult(finderPath,
 				finderArgs, this);
 
 		if (list == null) {
@@ -463,14 +495,12 @@ public class TypePersistenceImpl extends BasePersistenceImpl<Type>
 			}
 			finally {
 				if (list == null) {
-					FinderCacheUtil.removeResult(FINDER_PATH_FIND_ALL,
-						finderArgs);
+					FinderCacheUtil.removeResult(finderPath, finderArgs);
 				}
 				else {
 					cacheResult(list);
 
-					FinderCacheUtil.putResult(FINDER_PATH_FIND_ALL, finderArgs,
-						list);
+					FinderCacheUtil.putResult(finderPath, finderArgs, list);
 				}
 
 				closeSession(session);
@@ -498,10 +528,8 @@ public class TypePersistenceImpl extends BasePersistenceImpl<Type>
 	 * @throws SystemException if a system exception occurred
 	 */
 	public int countAll() throws SystemException {
-		Object[] finderArgs = new Object[0];
-
 		Long count = (Long)FinderCacheUtil.getResult(FINDER_PATH_COUNT_ALL,
-				finderArgs, this);
+				FINDER_ARGS_EMPTY, this);
 
 		if (count == null) {
 			Session session = null;
@@ -521,8 +549,8 @@ public class TypePersistenceImpl extends BasePersistenceImpl<Type>
 					count = Long.valueOf(0);
 				}
 
-				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL, finderArgs,
-					count);
+				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL,
+					FINDER_ARGS_EMPTY, count);
 
 				closeSession(session);
 			}
@@ -559,7 +587,7 @@ public class TypePersistenceImpl extends BasePersistenceImpl<Type>
 	public void destroy() {
 		EntityCacheUtil.removeCache(TypeImpl.class.getName());
 		FinderCacheUtil.removeCache(FINDER_CLASS_NAME_ENTITY);
-		FinderCacheUtil.removeCache(FINDER_CLASS_NAME_LIST);
+		FinderCacheUtil.removeCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 	}
 
 	@BeanReference(type = AssetPersistence.class)
@@ -581,4 +609,21 @@ public class TypePersistenceImpl extends BasePersistenceImpl<Type>
 	private static final boolean _HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE = GetterUtil.getBoolean(PropsUtil.get(
 				PropsKeys.HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE));
 	private static Log _log = LogFactoryUtil.getLog(TypePersistenceImpl.class);
+	private static Type _nullType = new TypeImpl() {
+			@Override
+			public Object clone() {
+				return this;
+			}
+
+			@Override
+			public CacheModel<Type> toCacheModel() {
+				return _nullTypeCacheModel;
+			}
+		};
+
+	private static CacheModel<Type> _nullTypeCacheModel = new CacheModel<Type>() {
+			public Type toEntityModel() {
+				return _nullType;
+			}
+		};
 }

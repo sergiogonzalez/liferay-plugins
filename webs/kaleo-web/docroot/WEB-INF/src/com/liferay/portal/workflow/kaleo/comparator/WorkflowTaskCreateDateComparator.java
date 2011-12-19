@@ -22,15 +22,14 @@ import com.liferay.portal.kernel.workflow.comparator.BaseWorkflowTaskCreateDateC
 public class WorkflowTaskCreateDateComparator
 	extends BaseWorkflowTaskCreateDateComparator {
 
-	public static String ORDER_BY_ASC =
+	public static final String ORDER_BY_ASC =
 		"createDate ASC, kaleoTaskInstanceId ASC";
 
-	public static String ORDER_BY_DESC =
+	public static final String ORDER_BY_DESC =
 		"createDate DESC, kaleoTaskInstanceId DESC";
 
-	public static String[] ORDER_BY_FIELDS = {
-		"createDate", "kaleoTaskInstanceId"
-	};
+	public static final String[] ORDER_BY_FIELDS =
+		{"createDate", "kaleoTaskInstanceId"};
 
 	public WorkflowTaskCreateDateComparator() {
 		super();

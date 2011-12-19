@@ -18,8 +18,10 @@ import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.util.DateUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.impl.BaseModelImpl;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.util.PortalUtil;
@@ -31,8 +33,6 @@ import com.liferay.socialnetworking.model.MeetupsEntry;
 import com.liferay.socialnetworking.model.MeetupsEntryModel;
 
 import java.io.Serializable;
-
-import java.lang.reflect.Proxy;
 
 import java.sql.Types;
 
@@ -88,15 +88,11 @@ public class MeetupsEntryModelImpl extends BaseModelImpl<MeetupsEntry>
 	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
 				"value.object.finder.cache.enabled.com.liferay.socialnetworking.model.MeetupsEntry"),
 			true);
-
-	public Class<?> getModelClass() {
-		return MeetupsEntry.class;
-	}
-
-	public String getModelClassName() {
-		return MeetupsEntry.class.getName();
-	}
-
+	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
+				"value.object.column.bitmask.enabled.com.liferay.socialnetworking.model.MeetupsEntry"),
+			true);
+	public static long COMPANYID_COLUMN_BITMASK = 1L;
+	public static long USERID_COLUMN_BITMASK = 2L;
 	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(com.liferay.util.service.ServiceProps.get(
 				"lock.expiration.time.com.liferay.socialnetworking.model.MeetupsEntry"));
 
@@ -119,6 +115,14 @@ public class MeetupsEntryModelImpl extends BaseModelImpl<MeetupsEntry>
 		setPrimaryKey(((Long)primaryKeyObj).longValue());
 	}
 
+	public Class<?> getModelClass() {
+		return MeetupsEntry.class;
+	}
+
+	public String getModelClassName() {
+		return MeetupsEntry.class.getName();
+	}
+
 	public long getMeetupsEntryId() {
 		return _meetupsEntryId;
 	}
@@ -132,7 +136,19 @@ public class MeetupsEntryModelImpl extends BaseModelImpl<MeetupsEntry>
 	}
 
 	public void setCompanyId(long companyId) {
+		_columnBitmask |= COMPANYID_COLUMN_BITMASK;
+
+		if (!_setOriginalCompanyId) {
+			_setOriginalCompanyId = true;
+
+			_originalCompanyId = _companyId;
+		}
+
 		_companyId = companyId;
+	}
+
+	public long getOriginalCompanyId() {
+		return _originalCompanyId;
 	}
 
 	public long getUserId() {
@@ -140,6 +156,14 @@ public class MeetupsEntryModelImpl extends BaseModelImpl<MeetupsEntry>
 	}
 
 	public void setUserId(long userId) {
+		_columnBitmask |= USERID_COLUMN_BITMASK;
+
+		if (!_setOriginalUserId) {
+			_setOriginalUserId = true;
+
+			_originalUserId = _userId;
+		}
+
 		_userId = userId;
 	}
 
@@ -149,6 +173,10 @@ public class MeetupsEntryModelImpl extends BaseModelImpl<MeetupsEntry>
 
 	public void setUserUuid(String userUuid) {
 		_userUuid = userUuid;
+	}
+
+	public long getOriginalUserId() {
+		return _originalUserId;
 	}
 
 	public String getUserName() {
@@ -254,14 +282,23 @@ public class MeetupsEntryModelImpl extends BaseModelImpl<MeetupsEntry>
 		_thumbnailId = thumbnailId;
 	}
 
+	public long getColumnBitmask() {
+		return _columnBitmask;
+	}
+
 	@Override
 	public MeetupsEntry toEscapedModel() {
 		if (isEscapedModel()) {
 			return (MeetupsEntry)this;
 		}
 		else {
-			return (MeetupsEntry)Proxy.newProxyInstance(_classLoader,
-				_escapedModelProxyInterfaces, new AutoEscapeBeanHandler(this));
+			if (_escapedModelProxy == null) {
+				_escapedModelProxy = (MeetupsEntry)ProxyUtil.newProxyInstance(_classLoader,
+						_escapedModelProxyInterfaces,
+						new AutoEscapeBeanHandler(this));
+			}
+
+			return _escapedModelProxy;
 		}
 	}
 
@@ -350,6 +387,98 @@ public class MeetupsEntryModelImpl extends BaseModelImpl<MeetupsEntry>
 
 	@Override
 	public void resetOriginalValues() {
+		MeetupsEntryModelImpl meetupsEntryModelImpl = this;
+
+		meetupsEntryModelImpl._originalCompanyId = meetupsEntryModelImpl._companyId;
+
+		meetupsEntryModelImpl._setOriginalCompanyId = false;
+
+		meetupsEntryModelImpl._originalUserId = meetupsEntryModelImpl._userId;
+
+		meetupsEntryModelImpl._setOriginalUserId = false;
+
+		meetupsEntryModelImpl._columnBitmask = 0;
+	}
+
+	@Override
+	public CacheModel<MeetupsEntry> toCacheModel() {
+		MeetupsEntryCacheModel meetupsEntryCacheModel = new MeetupsEntryCacheModel();
+
+		meetupsEntryCacheModel.meetupsEntryId = getMeetupsEntryId();
+
+		meetupsEntryCacheModel.companyId = getCompanyId();
+
+		meetupsEntryCacheModel.userId = getUserId();
+
+		meetupsEntryCacheModel.userName = getUserName();
+
+		String userName = meetupsEntryCacheModel.userName;
+
+		if ((userName != null) && (userName.length() == 0)) {
+			meetupsEntryCacheModel.userName = null;
+		}
+
+		Date createDate = getCreateDate();
+
+		if (createDate != null) {
+			meetupsEntryCacheModel.createDate = createDate.getTime();
+		}
+		else {
+			meetupsEntryCacheModel.createDate = Long.MIN_VALUE;
+		}
+
+		Date modifiedDate = getModifiedDate();
+
+		if (modifiedDate != null) {
+			meetupsEntryCacheModel.modifiedDate = modifiedDate.getTime();
+		}
+		else {
+			meetupsEntryCacheModel.modifiedDate = Long.MIN_VALUE;
+		}
+
+		meetupsEntryCacheModel.title = getTitle();
+
+		String title = meetupsEntryCacheModel.title;
+
+		if ((title != null) && (title.length() == 0)) {
+			meetupsEntryCacheModel.title = null;
+		}
+
+		meetupsEntryCacheModel.description = getDescription();
+
+		String description = meetupsEntryCacheModel.description;
+
+		if ((description != null) && (description.length() == 0)) {
+			meetupsEntryCacheModel.description = null;
+		}
+
+		Date startDate = getStartDate();
+
+		if (startDate != null) {
+			meetupsEntryCacheModel.startDate = startDate.getTime();
+		}
+		else {
+			meetupsEntryCacheModel.startDate = Long.MIN_VALUE;
+		}
+
+		Date endDate = getEndDate();
+
+		if (endDate != null) {
+			meetupsEntryCacheModel.endDate = endDate.getTime();
+		}
+		else {
+			meetupsEntryCacheModel.endDate = Long.MIN_VALUE;
+		}
+
+		meetupsEntryCacheModel.totalAttendees = getTotalAttendees();
+
+		meetupsEntryCacheModel.maxAttendees = getMaxAttendees();
+
+		meetupsEntryCacheModel.price = getPrice();
+
+		meetupsEntryCacheModel.thumbnailId = getThumbnailId();
+
+		return meetupsEntryCacheModel;
 	}
 
 	@Override
@@ -464,8 +593,12 @@ public class MeetupsEntryModelImpl extends BaseModelImpl<MeetupsEntry>
 		};
 	private long _meetupsEntryId;
 	private long _companyId;
+	private long _originalCompanyId;
+	private boolean _setOriginalCompanyId;
 	private long _userId;
 	private String _userUuid;
+	private long _originalUserId;
+	private boolean _setOriginalUserId;
 	private String _userName;
 	private Date _createDate;
 	private Date _modifiedDate;
@@ -478,4 +611,6 @@ public class MeetupsEntryModelImpl extends BaseModelImpl<MeetupsEntry>
 	private double _price;
 	private long _thumbnailId;
 	private transient ExpandoBridge _expandoBridge;
+	private long _columnBitmask;
+	private MeetupsEntry _escapedModelProxy;
 }

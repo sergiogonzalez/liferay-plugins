@@ -25,13 +25,16 @@ import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portlet.PortletPreferencesFactoryUtil;
+import com.liferay.portlet.expando.DuplicateColumnNameException;
 import com.liferay.webform.util.WebFormUtil;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
@@ -234,22 +237,28 @@ public class ConfigurationActionImpl extends DefaultConfigurationAction {
 			SessionErrors.add(actionRequest, "titleRequired");
 		}
 
-		if (Validator.isNull(subject)) {
-			SessionErrors.add(actionRequest, "subjectRequired");
-		}
-
 		if (!sendAsEmail && !saveToDatabase && !saveToFile) {
 			SessionErrors.add(actionRequest, "handlingRequired");
 		}
 
 		if (sendAsEmail) {
-			String emailAddress = getParameter(actionRequest, "emailAddress");
+			if (Validator.isNull(subject)) {
+				SessionErrors.add(actionRequest, "subjectRequired");
+			}
 
-			if (Validator.isNull(emailAddress)) {
+			String[] emailAdresses = WebFormUtil.split(
+				getParameter(actionRequest, "emailAddress"));
+
+			if (emailAdresses.length == 0) {
 				SessionErrors.add(actionRequest, "emailAddressRequired");
 			}
-			else if (!Validator.isEmailAddress(emailAddress)) {
-				SessionErrors.add(actionRequest, "emailAddressInvalid");
+
+			for (String emailAdress : emailAdresses) {
+				emailAdress = emailAdress.trim();
+
+				if (!Validator.isEmailAddress(emailAdress)) {
+					SessionErrors.add(actionRequest, "emailAddressInvalid");
+				}
 			}
 		}
 
@@ -271,6 +280,69 @@ public class ConfigurationActionImpl extends DefaultConfigurationAction {
 				SessionErrors.add(actionRequest, "fileNameInvalid");
 			}
 		}
+
+		if (saveToDatabase) {
+			int i = 1;
+
+			String languageId = LocaleUtil.toLanguageId(
+				actionRequest.getLocale());
+
+			String fieldLabel = ParamUtil.getString(
+				actionRequest, "fieldLabel" + i + "_" + languageId);
+
+			while ((i == 1) || (Validator.isNotNull(fieldLabel))) {
+				if (fieldLabel.length() > 75 ) {
+					SessionErrors.add(actionRequest, "fieldSizeInvalid" + i);
+				}
+
+				i++;
+
+				fieldLabel = ParamUtil.getString(
+					actionRequest, "fieldLabel" + i + "_" + languageId);
+			}
+		}
+
+		if (!validateUniqueFieldNames(actionRequest)) {
+			SessionErrors.add(
+				actionRequest, DuplicateColumnNameException.class.getName());
+		}
+	}
+
+	protected boolean validateUniqueFieldNames(ActionRequest actionRequest) {
+		Locale defaultLocale = LocaleUtil.getDefault();
+
+		Set<String> localizedUniqueFieldNames = new HashSet<String>();
+
+		int[] formFieldsIndexes = StringUtil.split(
+			ParamUtil.getString(actionRequest, "formFieldsIndexes"), 0);
+
+		for (int formFieldsIndex : formFieldsIndexes) {
+			Map<Locale, String> fieldLabelMap =
+				LocalizationUtil.getLocalizationMap(
+					actionRequest, "fieldLabel" + formFieldsIndex);
+
+			if (Validator.isNull(fieldLabelMap.get(defaultLocale))) {
+				continue;
+			}
+
+			for (Locale locale : fieldLabelMap.keySet()) {
+				String fieldLabelValue = fieldLabelMap.get(locale);
+
+				if (Validator.isNull(fieldLabelValue)) {
+					continue;
+				}
+
+				String languageId = LocaleUtil.toLanguageId(locale);
+
+				if (!localizedUniqueFieldNames.add(
+						languageId + "_" + fieldLabelValue)) {
+
+					return false;
+				}
+			}
+		}
+
+		return true;
 	}
 
 }

@@ -8,7 +8,7 @@
  *
  * Liferay Social Office is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
  * for more details.
  *
  * You should have received a copy of the GNU General Public License along with
@@ -63,7 +63,7 @@ public class LayoutUtil {
 		Layout layout = LayoutLocalServiceUtil.addLayout(
 			group.getCreatorUserId(), group.getGroupId(), privateLayout,
 			parentLayoutId, name, StringPool.BLANK, StringPool.BLANK,
-			LayoutConstants.TYPE_PORTLET, false, null, serviceContext);
+			LayoutConstants.TYPE_PORTLET, false, null, false, serviceContext);
 
 		LayoutTypePortlet layoutTypePortlet =
 			(LayoutTypePortlet)layout.getLayoutType();
@@ -126,9 +126,6 @@ public class LayoutUtil {
 				removePortletBorder(layout, portletId);
 				configureNavigation(layout, portletId);
 			}
-			else if (portletId.equals(PortletKeys.ALERTS)) {
-				updatePortletTitle(layout, portletId, "Announcements");
-			}
 		}
 	}
 
@@ -152,8 +149,8 @@ public class LayoutUtil {
 			PortletPreferencesFactoryUtil.getLayoutPortletSetup(
 				layout, "101_INSTANCE_abcd");
 
-		portletSetup.setValue("display-style", "title-list");
-		portletSetup.setValue("asset-link-behaviour", "viewInPortlet");
+		portletSetup.setValue("displayStyle", "title-list");
+		portletSetup.setValue("assetLinkBehaviour", "viewInPortlet");
 
 		portletSetup.store();
 	}
@@ -200,15 +197,15 @@ public class LayoutUtil {
 			PortletPreferencesFactoryUtil.getLayoutPortletSetup(
 				layout, "39_INSTANCE_abcd");
 
-		portletSetup.setValue("items-per-channel", "3");
-		portletSetup.setValue("show-feed-title", "false");
-		portletSetup.setValue("show-feed-published-date", "false");
-		portletSetup.setValue("show-feed-description", "false");
-		portletSetup.setValue("show-feed-image", "false");
-		portletSetup.setValue("show-feed-item-author", "false");
 		portletSetup.setValue(
-			"urls",
-			"http://www.economist.com/rss/daily_news_and_views_rss.xml");
+			"urls", "http://partners.userland.com/nytRss/technology.xml");
+		portletSetup.setValue("expandedEntriesPerFeed", "0");
+		portletSetup.setValue("entriesPerFeed", "3");
+		portletSetup.setValue("showFeedTitle", "false");
+		portletSetup.setValue("showFeedPublishedDate", "false");
+		portletSetup.setValue("showFeedDescription", "false");
+		portletSetup.setValue("showFeedImage", "false");
+		portletSetup.setValue("showFeedItemAuthor", "false");
 
 		portletSetup.store();
 	}
@@ -221,7 +218,7 @@ public class LayoutUtil {
 				layout, portletId);
 
 		portletSetup.setValue(
-			"portlet-setup-show-borders", String.valueOf(Boolean.FALSE));
+			"portletSetupShowBorders", String.valueOf(Boolean.FALSE));
 
 		portletSetup.store();
 	}
@@ -277,12 +274,12 @@ public class LayoutUtil {
 				String localizedTitle = LanguageUtil.get(locale, title);
 
 				portletSetup.setValue(
-					"portlet-setup-title-" + languageId, localizedTitle);
+					"portletSetupTitle_" + languageId, localizedTitle);
 			}
 		}
 
 		portletSetup.setValue(
-			"portlet-setup-use-custom-title", String.valueOf(Boolean.TRUE));
+			"portletSetupUseCustomTitle", String.valueOf(Boolean.TRUE));
 
 		portletSetup.store();
 	}

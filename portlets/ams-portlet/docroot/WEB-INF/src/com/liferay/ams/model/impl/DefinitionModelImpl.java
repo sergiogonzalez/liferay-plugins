@@ -20,8 +20,10 @@ import com.liferay.ams.model.DefinitionModel;
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.impl.BaseModelImpl;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.util.PortalUtil;
@@ -30,8 +32,6 @@ import com.liferay.portlet.expando.model.ExpandoBridge;
 import com.liferay.portlet.expando.util.ExpandoBridgeFactoryUtil;
 
 import java.io.Serializable;
-
-import java.lang.reflect.Proxy;
 
 import java.sql.Types;
 
@@ -84,15 +84,7 @@ public class DefinitionModelImpl extends BaseModelImpl<Definition>
 	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
 				"value.object.finder.cache.enabled.com.liferay.ams.model.Definition"),
 			true);
-
-	public Class<?> getModelClass() {
-		return Definition.class;
-	}
-
-	public String getModelClassName() {
-		return Definition.class.getName();
-	}
-
+	public static final boolean COLUMN_BITMASK_ENABLED = false;
 	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(com.liferay.util.service.ServiceProps.get(
 				"lock.expiration.time.com.liferay.ams.model.Definition"));
 
@@ -113,6 +105,14 @@ public class DefinitionModelImpl extends BaseModelImpl<Definition>
 
 	public void setPrimaryKeyObj(Serializable primaryKeyObj) {
 		setPrimaryKey(((Long)primaryKeyObj).longValue());
+	}
+
+	public Class<?> getModelClass() {
+		return Definition.class;
+	}
+
+	public String getModelClassName() {
+		return Definition.class.getName();
 	}
 
 	public long getDefinitionId() {
@@ -248,8 +248,13 @@ public class DefinitionModelImpl extends BaseModelImpl<Definition>
 			return (Definition)this;
 		}
 		else {
-			return (Definition)Proxy.newProxyInstance(_classLoader,
-				_escapedModelProxyInterfaces, new AutoEscapeBeanHandler(this));
+			if (_escapedModelProxy == null) {
+				_escapedModelProxy = (Definition)ProxyUtil.newProxyInstance(_classLoader,
+						_escapedModelProxyInterfaces,
+						new AutoEscapeBeanHandler(this));
+			}
+
+			return _escapedModelProxy;
 		}
 	}
 
@@ -337,6 +342,78 @@ public class DefinitionModelImpl extends BaseModelImpl<Definition>
 
 	@Override
 	public void resetOriginalValues() {
+	}
+
+	@Override
+	public CacheModel<Definition> toCacheModel() {
+		DefinitionCacheModel definitionCacheModel = new DefinitionCacheModel();
+
+		definitionCacheModel.definitionId = getDefinitionId();
+
+		definitionCacheModel.groupId = getGroupId();
+
+		definitionCacheModel.companyId = getCompanyId();
+
+		definitionCacheModel.userId = getUserId();
+
+		definitionCacheModel.userName = getUserName();
+
+		String userName = definitionCacheModel.userName;
+
+		if ((userName != null) && (userName.length() == 0)) {
+			definitionCacheModel.userName = null;
+		}
+
+		Date createDate = getCreateDate();
+
+		if (createDate != null) {
+			definitionCacheModel.createDate = createDate.getTime();
+		}
+		else {
+			definitionCacheModel.createDate = Long.MIN_VALUE;
+		}
+
+		Date modifiedDate = getModifiedDate();
+
+		if (modifiedDate != null) {
+			definitionCacheModel.modifiedDate = modifiedDate.getTime();
+		}
+		else {
+			definitionCacheModel.modifiedDate = Long.MIN_VALUE;
+		}
+
+		definitionCacheModel.typeId = getTypeId();
+
+		definitionCacheModel.manufacturer = getManufacturer();
+
+		String manufacturer = definitionCacheModel.manufacturer;
+
+		if ((manufacturer != null) && (manufacturer.length() == 0)) {
+			definitionCacheModel.manufacturer = null;
+		}
+
+		definitionCacheModel.model = getModel();
+
+		String model = definitionCacheModel.model;
+
+		if ((model != null) && (model.length() == 0)) {
+			definitionCacheModel.model = null;
+		}
+
+		Date orderDate = getOrderDate();
+
+		if (orderDate != null) {
+			definitionCacheModel.orderDate = orderDate.getTime();
+		}
+		else {
+			definitionCacheModel.orderDate = Long.MIN_VALUE;
+		}
+
+		definitionCacheModel.quantity = getQuantity();
+
+		definitionCacheModel.price = getPrice();
+
+		return definitionCacheModel;
 	}
 
 	@Override
@@ -458,4 +535,5 @@ public class DefinitionModelImpl extends BaseModelImpl<Definition>
 	private int _quantity;
 	private double _price;
 	private transient ExpandoBridge _expandoBridge;
+	private Definition _escapedModelProxy;
 }

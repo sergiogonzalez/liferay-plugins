@@ -67,7 +67,7 @@ AUI().add(
 						value: 1
 					},
 					parentUrl: {
-						value: 'http://' + document.location.host,
+						value: document.location.protocol + '://' + document.location.host,
 						setter: '_setParentUrl'
 					},
 					portletId:{},
@@ -768,7 +768,6 @@ AUI().add(
 	},
 	'',
 	{
-		requires: ['aui-base', 'aui-io', 'cookie', 'json', 'liferay-portlet-url', 'liferay-service', 'querystring', 'substitute'],
-		use: []
+		requires: ['aui-base', 'aui-io', 'cookie', 'json', 'liferay-portlet-url', 'liferay-service', 'querystring', 'substitute']
 	}
 );

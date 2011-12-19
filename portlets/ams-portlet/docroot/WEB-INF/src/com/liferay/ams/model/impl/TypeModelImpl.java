@@ -19,8 +19,10 @@ import com.liferay.ams.model.TypeModel;
 
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.impl.BaseModelImpl;
 import com.liferay.portal.service.ServiceContext;
 
@@ -28,8 +30,6 @@ import com.liferay.portlet.expando.model.ExpandoBridge;
 import com.liferay.portlet.expando.util.ExpandoBridgeFactoryUtil;
 
 import java.io.Serializable;
-
-import java.lang.reflect.Proxy;
 
 import java.sql.Types;
 
@@ -71,15 +71,7 @@ public class TypeModelImpl extends BaseModelImpl<Type> implements TypeModel {
 	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
 				"value.object.finder.cache.enabled.com.liferay.ams.model.Type"),
 			true);
-
-	public Class<?> getModelClass() {
-		return Type.class;
-	}
-
-	public String getModelClassName() {
-		return Type.class.getName();
-	}
-
+	public static final boolean COLUMN_BITMASK_ENABLED = false;
 	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(com.liferay.util.service.ServiceProps.get(
 				"lock.expiration.time.com.liferay.ams.model.Type"));
 
@@ -100,6 +92,14 @@ public class TypeModelImpl extends BaseModelImpl<Type> implements TypeModel {
 
 	public void setPrimaryKeyObj(Serializable primaryKeyObj) {
 		setPrimaryKey(((Long)primaryKeyObj).longValue());
+	}
+
+	public Class<?> getModelClass() {
+		return Type.class;
+	}
+
+	public String getModelClassName() {
+		return Type.class.getName();
 	}
 
 	public long getTypeId() {
@@ -137,8 +137,13 @@ public class TypeModelImpl extends BaseModelImpl<Type> implements TypeModel {
 			return (Type)this;
 		}
 		else {
-			return (Type)Proxy.newProxyInstance(_classLoader,
-				_escapedModelProxyInterfaces, new AutoEscapeBeanHandler(this));
+			if (_escapedModelProxy == null) {
+				_escapedModelProxy = (Type)ProxyUtil.newProxyInstance(_classLoader,
+						_escapedModelProxyInterfaces,
+						new AutoEscapeBeanHandler(this));
+			}
+
+			return _escapedModelProxy;
 		}
 	}
 
@@ -217,6 +222,25 @@ public class TypeModelImpl extends BaseModelImpl<Type> implements TypeModel {
 	}
 
 	@Override
+	public CacheModel<Type> toCacheModel() {
+		TypeCacheModel typeCacheModel = new TypeCacheModel();
+
+		typeCacheModel.typeId = getTypeId();
+
+		typeCacheModel.groupId = getGroupId();
+
+		typeCacheModel.name = getName();
+
+		String name = typeCacheModel.name;
+
+		if ((name != null) && (name.length() == 0)) {
+			typeCacheModel.name = null;
+		}
+
+		return typeCacheModel;
+	}
+
+	@Override
 	public String toString() {
 		StringBundler sb = new StringBundler(7);
 
@@ -264,4 +288,5 @@ public class TypeModelImpl extends BaseModelImpl<Type> implements TypeModel {
 	private long _groupId;
 	private String _name;
 	private transient ExpandoBridge _expandoBridge;
+	private Type _escapedModelProxy;
 }

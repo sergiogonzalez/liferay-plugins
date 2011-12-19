@@ -20,8 +20,10 @@ import com.liferay.chat.model.EntryModel;
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.impl.BaseModelImpl;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.util.PortalUtil;
@@ -30,8 +32,6 @@ import com.liferay.portlet.expando.model.ExpandoBridge;
 import com.liferay.portlet.expando.util.ExpandoBridgeFactoryUtil;
 
 import java.io.Serializable;
-
-import java.lang.reflect.Proxy;
 
 import java.sql.Types;
 
@@ -75,15 +75,13 @@ public class EntryModelImpl extends BaseModelImpl<Entry> implements EntryModel {
 	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
 				"value.object.finder.cache.enabled.com.liferay.chat.model.Entry"),
 			true);
-
-	public Class<?> getModelClass() {
-		return Entry.class;
-	}
-
-	public String getModelClassName() {
-		return Entry.class.getName();
-	}
-
+	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
+				"value.object.column.bitmask.enabled.com.liferay.chat.model.Entry"),
+			true);
+	public static long CONTENT_COLUMN_BITMASK = 1L;
+	public static long CREATEDATE_COLUMN_BITMASK = 2L;
+	public static long FROMUSERID_COLUMN_BITMASK = 4L;
+	public static long TOUSERID_COLUMN_BITMASK = 8L;
 	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(com.liferay.util.service.ServiceProps.get(
 				"lock.expiration.time.com.liferay.chat.model.Entry"));
 
@@ -106,6 +104,14 @@ public class EntryModelImpl extends BaseModelImpl<Entry> implements EntryModel {
 		setPrimaryKey(((Long)primaryKeyObj).longValue());
 	}
 
+	public Class<?> getModelClass() {
+		return Entry.class;
+	}
+
+	public String getModelClassName() {
+		return Entry.class.getName();
+	}
+
 	public long getEntryId() {
 		return _entryId;
 	}
@@ -119,7 +125,19 @@ public class EntryModelImpl extends BaseModelImpl<Entry> implements EntryModel {
 	}
 
 	public void setCreateDate(long createDate) {
+		_columnBitmask |= CREATEDATE_COLUMN_BITMASK;
+
+		if (!_setOriginalCreateDate) {
+			_setOriginalCreateDate = true;
+
+			_originalCreateDate = _createDate;
+		}
+
 		_createDate = createDate;
+	}
+
+	public long getOriginalCreateDate() {
+		return _originalCreateDate;
 	}
 
 	public long getFromUserId() {
@@ -127,6 +145,14 @@ public class EntryModelImpl extends BaseModelImpl<Entry> implements EntryModel {
 	}
 
 	public void setFromUserId(long fromUserId) {
+		_columnBitmask |= FROMUSERID_COLUMN_BITMASK;
+
+		if (!_setOriginalFromUserId) {
+			_setOriginalFromUserId = true;
+
+			_originalFromUserId = _fromUserId;
+		}
+
 		_fromUserId = fromUserId;
 	}
 
@@ -138,11 +164,23 @@ public class EntryModelImpl extends BaseModelImpl<Entry> implements EntryModel {
 		_fromUserUuid = fromUserUuid;
 	}
 
+	public long getOriginalFromUserId() {
+		return _originalFromUserId;
+	}
+
 	public long getToUserId() {
 		return _toUserId;
 	}
 
 	public void setToUserId(long toUserId) {
+		_columnBitmask |= TOUSERID_COLUMN_BITMASK;
+
+		if (!_setOriginalToUserId) {
+			_setOriginalToUserId = true;
+
+			_originalToUserId = _toUserId;
+		}
+
 		_toUserId = toUserId;
 	}
 
@@ -152,6 +190,10 @@ public class EntryModelImpl extends BaseModelImpl<Entry> implements EntryModel {
 
 	public void setToUserUuid(String toUserUuid) {
 		_toUserUuid = toUserUuid;
+	}
+
+	public long getOriginalToUserId() {
+		return _originalToUserId;
 	}
 
 	public String getContent() {
@@ -164,7 +206,21 @@ public class EntryModelImpl extends BaseModelImpl<Entry> implements EntryModel {
 	}
 
 	public void setContent(String content) {
+		_columnBitmask |= CONTENT_COLUMN_BITMASK;
+
+		if (_originalContent == null) {
+			_originalContent = _content;
+		}
+
 		_content = content;
+	}
+
+	public String getOriginalContent() {
+		return GetterUtil.getString(_originalContent);
+	}
+
+	public long getColumnBitmask() {
+		return _columnBitmask;
 	}
 
 	@Override
@@ -173,8 +229,13 @@ public class EntryModelImpl extends BaseModelImpl<Entry> implements EntryModel {
 			return (Entry)this;
 		}
 		else {
-			return (Entry)Proxy.newProxyInstance(_classLoader,
-				_escapedModelProxyInterfaces, new AutoEscapeBeanHandler(this));
+			if (_escapedModelProxy == null) {
+				_escapedModelProxy = (Entry)ProxyUtil.newProxyInstance(_classLoader,
+						_escapedModelProxyInterfaces,
+						new AutoEscapeBeanHandler(this));
+			}
+
+			return _escapedModelProxy;
 		}
 	}
 
@@ -262,6 +323,46 @@ public class EntryModelImpl extends BaseModelImpl<Entry> implements EntryModel {
 
 	@Override
 	public void resetOriginalValues() {
+		EntryModelImpl entryModelImpl = this;
+
+		entryModelImpl._originalCreateDate = entryModelImpl._createDate;
+
+		entryModelImpl._setOriginalCreateDate = false;
+
+		entryModelImpl._originalFromUserId = entryModelImpl._fromUserId;
+
+		entryModelImpl._setOriginalFromUserId = false;
+
+		entryModelImpl._originalToUserId = entryModelImpl._toUserId;
+
+		entryModelImpl._setOriginalToUserId = false;
+
+		entryModelImpl._originalContent = entryModelImpl._content;
+
+		entryModelImpl._columnBitmask = 0;
+	}
+
+	@Override
+	public CacheModel<Entry> toCacheModel() {
+		EntryCacheModel entryCacheModel = new EntryCacheModel();
+
+		entryCacheModel.entryId = getEntryId();
+
+		entryCacheModel.createDate = getCreateDate();
+
+		entryCacheModel.fromUserId = getFromUserId();
+
+		entryCacheModel.toUserId = getToUserId();
+
+		entryCacheModel.content = getContent();
+
+		String content = entryCacheModel.content;
+
+		if ((content != null) && (content.length() == 0)) {
+			entryCacheModel.content = null;
+		}
+
+		return entryCacheModel;
 	}
 
 	@Override
@@ -322,10 +423,19 @@ public class EntryModelImpl extends BaseModelImpl<Entry> implements EntryModel {
 		};
 	private long _entryId;
 	private long _createDate;
+	private long _originalCreateDate;
+	private boolean _setOriginalCreateDate;
 	private long _fromUserId;
 	private String _fromUserUuid;
+	private long _originalFromUserId;
+	private boolean _setOriginalFromUserId;
 	private long _toUserId;
 	private String _toUserUuid;
+	private long _originalToUserId;
+	private boolean _setOriginalToUserId;
 	private String _content;
+	private String _originalContent;
 	private transient ExpandoBridge _expandoBridge;
+	private long _columnBitmask;
+	private Entry _escapedModelProxy;
 }

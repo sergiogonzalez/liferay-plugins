@@ -328,6 +328,10 @@ public class KaleoTaskWrapper implements KaleoTask {
 		return _kaleoTask.hashCode();
 	}
 
+	public com.liferay.portal.model.CacheModel<com.liferay.portal.workflow.kaleo.model.KaleoTask> toCacheModel() {
+		return _kaleoTask.toCacheModel();
+	}
+
 	public com.liferay.portal.workflow.kaleo.model.KaleoTask toEscapedModel() {
 		return new KaleoTaskWrapper(_kaleoTask.toEscapedModel());
 	}
@@ -341,6 +345,11 @@ public class KaleoTaskWrapper implements KaleoTask {
 		return _kaleoTask.toXmlString();
 	}
 
+	public void persist()
+		throws com.liferay.portal.kernel.exception.SystemException {
+		_kaleoTask.persist();
+	}
+
 	public com.liferay.portal.workflow.kaleo.model.KaleoNode getKaleoNode()
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
@@ -350,6 +359,11 @@ public class KaleoTaskWrapper implements KaleoTask {
 	public java.util.List<com.liferay.portal.workflow.kaleo.model.KaleoTaskAssignment> getKaleoTaskAssignments()
 		throws com.liferay.portal.kernel.exception.SystemException {
 		return _kaleoTask.getKaleoTaskAssignments();
+	}
+
+	public java.util.List<com.liferay.portal.workflow.kaleo.model.KaleoTaskForm> getKaleoTaskForms()
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _kaleoTask.getKaleoTaskForms();
 	}
 
 	public KaleoTask getWrappedKaleoTask() {

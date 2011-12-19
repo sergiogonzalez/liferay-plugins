@@ -21,8 +21,10 @@ import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.util.DateUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.impl.BaseModelImpl;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.util.PortalUtil;
@@ -31,8 +33,6 @@ import com.liferay.portlet.expando.model.ExpandoBridge;
 import com.liferay.portlet.expando.util.ExpandoBridgeFactoryUtil;
 
 import java.io.Serializable;
-
-import java.lang.reflect.Proxy;
 
 import java.sql.Types;
 
@@ -93,15 +93,12 @@ public class MessageModelImpl extends BaseModelImpl<Message>
 	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
 				"value.object.finder.cache.enabled.com.liferay.mail.model.Message"),
 			true);
-
-	public Class<?> getModelClass() {
-		return Message.class;
-	}
-
-	public String getModelClassName() {
-		return Message.class.getName();
-	}
-
+	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
+				"value.object.column.bitmask.enabled.com.liferay.mail.model.Message"),
+			true);
+	public static long COMPANYID_COLUMN_BITMASK = 1L;
+	public static long FOLDERID_COLUMN_BITMASK = 2L;
+	public static long REMOTEMESSAGEID_COLUMN_BITMASK = 4L;
 	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(com.liferay.util.service.ServiceProps.get(
 				"lock.expiration.time.com.liferay.mail.model.Message"));
 
@@ -124,6 +121,14 @@ public class MessageModelImpl extends BaseModelImpl<Message>
 		setPrimaryKey(((Long)primaryKeyObj).longValue());
 	}
 
+	public Class<?> getModelClass() {
+		return Message.class;
+	}
+
+	public String getModelClassName() {
+		return Message.class.getName();
+	}
+
 	public long getMessageId() {
 		return _messageId;
 	}
@@ -137,7 +142,19 @@ public class MessageModelImpl extends BaseModelImpl<Message>
 	}
 
 	public void setCompanyId(long companyId) {
+		_columnBitmask |= COMPANYID_COLUMN_BITMASK;
+
+		if (!_setOriginalCompanyId) {
+			_setOriginalCompanyId = true;
+
+			_originalCompanyId = _companyId;
+		}
+
 		_companyId = companyId;
+	}
+
+	public long getOriginalCompanyId() {
+		return _originalCompanyId;
 	}
 
 	public long getUserId() {
@@ -198,6 +215,8 @@ public class MessageModelImpl extends BaseModelImpl<Message>
 	}
 
 	public void setFolderId(long folderId) {
+		_columnBitmask |= FOLDERID_COLUMN_BITMASK;
+
 		if (!_setOriginalFolderId) {
 			_setOriginalFolderId = true;
 
@@ -336,6 +355,8 @@ public class MessageModelImpl extends BaseModelImpl<Message>
 	}
 
 	public void setRemoteMessageId(long remoteMessageId) {
+		_columnBitmask |= REMOTEMESSAGEID_COLUMN_BITMASK;
+
 		if (!_setOriginalRemoteMessageId) {
 			_setOriginalRemoteMessageId = true;
 
@@ -349,16 +370,27 @@ public class MessageModelImpl extends BaseModelImpl<Message>
 		return _originalRemoteMessageId;
 	}
 
+	public long getColumnBitmask() {
+		return _columnBitmask;
+	}
+
+	@Override
 	public Message toEscapedModel() {
 		if (isEscapedModel()) {
 			return (Message)this;
 		}
 		else {
-			return (Message)Proxy.newProxyInstance(_classLoader,
-				_escapedModelProxyInterfaces, new AutoEscapeBeanHandler(this));
+			if (_escapedModelProxy == null) {
+				_escapedModelProxy = (Message)ProxyUtil.newProxyInstance(_classLoader,
+						_escapedModelProxyInterfaces,
+						new AutoEscapeBeanHandler(this));
+			}
+
+			return _escapedModelProxy;
 		}
 	}
 
+	@Override
 	public ExpandoBridge getExpandoBridge() {
 		if (_expandoBridge == null) {
 			_expandoBridge = ExpandoBridgeFactoryUtil.getExpandoBridge(getCompanyId(),
@@ -368,10 +400,12 @@ public class MessageModelImpl extends BaseModelImpl<Message>
 		return _expandoBridge;
 	}
 
+	@Override
 	public void setExpandoBridgeAttributes(ServiceContext serviceContext) {
 		getExpandoBridge().setAttributes(serviceContext);
 	}
 
+	@Override
 	public Object clone() {
 		MessageImpl messageImpl = new MessageImpl();
 
@@ -412,6 +446,7 @@ public class MessageModelImpl extends BaseModelImpl<Message>
 		return 0;
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (obj == null) {
 			return false;
@@ -436,12 +471,18 @@ public class MessageModelImpl extends BaseModelImpl<Message>
 		}
 	}
 
+	@Override
 	public int hashCode() {
 		return (int)getPrimaryKey();
 	}
 
+	@Override
 	public void resetOriginalValues() {
 		MessageModelImpl messageModelImpl = this;
+
+		messageModelImpl._originalCompanyId = messageModelImpl._companyId;
+
+		messageModelImpl._setOriginalCompanyId = false;
 
 		messageModelImpl._originalFolderId = messageModelImpl._folderId;
 
@@ -450,8 +491,131 @@ public class MessageModelImpl extends BaseModelImpl<Message>
 		messageModelImpl._originalRemoteMessageId = messageModelImpl._remoteMessageId;
 
 		messageModelImpl._setOriginalRemoteMessageId = false;
+
+		messageModelImpl._columnBitmask = 0;
 	}
 
+	@Override
+	public CacheModel<Message> toCacheModel() {
+		MessageCacheModel messageCacheModel = new MessageCacheModel();
+
+		messageCacheModel.messageId = getMessageId();
+
+		messageCacheModel.companyId = getCompanyId();
+
+		messageCacheModel.userId = getUserId();
+
+		messageCacheModel.userName = getUserName();
+
+		String userName = messageCacheModel.userName;
+
+		if ((userName != null) && (userName.length() == 0)) {
+			messageCacheModel.userName = null;
+		}
+
+		Date createDate = getCreateDate();
+
+		if (createDate != null) {
+			messageCacheModel.createDate = createDate.getTime();
+		}
+		else {
+			messageCacheModel.createDate = Long.MIN_VALUE;
+		}
+
+		Date modifiedDate = getModifiedDate();
+
+		if (modifiedDate != null) {
+			messageCacheModel.modifiedDate = modifiedDate.getTime();
+		}
+		else {
+			messageCacheModel.modifiedDate = Long.MIN_VALUE;
+		}
+
+		messageCacheModel.accountId = getAccountId();
+
+		messageCacheModel.folderId = getFolderId();
+
+		messageCacheModel.sender = getSender();
+
+		String sender = messageCacheModel.sender;
+
+		if ((sender != null) && (sender.length() == 0)) {
+			messageCacheModel.sender = null;
+		}
+
+		messageCacheModel.to = getTo();
+
+		String to = messageCacheModel.to;
+
+		if ((to != null) && (to.length() == 0)) {
+			messageCacheModel.to = null;
+		}
+
+		messageCacheModel.cc = getCc();
+
+		String cc = messageCacheModel.cc;
+
+		if ((cc != null) && (cc.length() == 0)) {
+			messageCacheModel.cc = null;
+		}
+
+		messageCacheModel.bcc = getBcc();
+
+		String bcc = messageCacheModel.bcc;
+
+		if ((bcc != null) && (bcc.length() == 0)) {
+			messageCacheModel.bcc = null;
+		}
+
+		Date sentDate = getSentDate();
+
+		if (sentDate != null) {
+			messageCacheModel.sentDate = sentDate.getTime();
+		}
+		else {
+			messageCacheModel.sentDate = Long.MIN_VALUE;
+		}
+
+		messageCacheModel.subject = getSubject();
+
+		String subject = messageCacheModel.subject;
+
+		if ((subject != null) && (subject.length() == 0)) {
+			messageCacheModel.subject = null;
+		}
+
+		messageCacheModel.preview = getPreview();
+
+		String preview = messageCacheModel.preview;
+
+		if ((preview != null) && (preview.length() == 0)) {
+			messageCacheModel.preview = null;
+		}
+
+		messageCacheModel.body = getBody();
+
+		String body = messageCacheModel.body;
+
+		if ((body != null) && (body.length() == 0)) {
+			messageCacheModel.body = null;
+		}
+
+		messageCacheModel.flags = getFlags();
+
+		String flags = messageCacheModel.flags;
+
+		if ((flags != null) && (flags.length() == 0)) {
+			messageCacheModel.flags = null;
+		}
+
+		messageCacheModel.size = getSize();
+
+		messageCacheModel.remoteMessageId = getRemoteMessageId();
+
+		return messageCacheModel;
+	}
+
+	@Override
 	public String toString() {
 		StringBundler sb = new StringBundler(39);
 
@@ -593,6 +757,8 @@ public class MessageModelImpl extends BaseModelImpl<Message>
 		};
 	private long _messageId;
 	private long _companyId;
+	private long _originalCompanyId;
+	private boolean _setOriginalCompanyId;
 	private long _userId;
 	private String _userUuid;
 	private String _userName;
@@ -616,4 +782,6 @@ public class MessageModelImpl extends BaseModelImpl<Message>
 	private long _originalRemoteMessageId;
 	private boolean _setOriginalRemoteMessageId;
 	private transient ExpandoBridge _expandoBridge;
+	private long _columnBitmask;
+	private Message _escapedModelProxy;
 }

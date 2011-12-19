@@ -21,6 +21,7 @@ import com.liferay.microblogs.model.MicroblogsEntryConstants;
 import com.liferay.microblogs.service.base.MicroblogsEntryLocalServiceBaseImpl;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.model.Group;
 import com.liferay.portal.model.User;
@@ -76,7 +77,7 @@ public class MicroblogsEntryLocalServiceImpl
 
 		// Resources
 
-		addMicroblogsEntryResources(microblogsEntry);
+		resourceLocalService.addModelResources(microblogsEntry, serviceContext);
 
 		// Asset
 
@@ -100,15 +101,6 @@ public class MicroblogsEntryLocalServiceImpl
 			actitivtyKey, StringPool.BLANK, receiverUserId);
 
 		return microblogsEntry;
-	}
-
-	public void addMicroblogsEntryResources(MicroblogsEntry microblogsEntry)
-		throws PortalException, SystemException {
-
-		resourceLocalService.addResources(
-			microblogsEntry.getCompanyId(), 0, microblogsEntry.getUserId(),
-			MicroblogsEntry.class.getName(),
-			microblogsEntry.getMicroblogsEntryId(), false, true, true);
 	}
 
 	@Override
@@ -175,11 +167,12 @@ public class MicroblogsEntryLocalServiceImpl
 	}
 
 	public List<MicroblogsEntry> getReceiverMicroblogsEntryMicroblogsEntries(
-			int type, long receiverMicroblogsEntryId, int start, int end)
+			int type, long receiverMicroblogsEntryId, int start, int end,
+			OrderByComparator orderByComparator)
 		throws SystemException {
 
 		return microblogsEntryPersistence.findByT_RMEI(
-			type, receiverMicroblogsEntryId, start, end);
+			type, receiverMicroblogsEntryId, start, end, orderByComparator);
 	}
 
 	public int getReceiverMicroblogsEntryMicroblogsEntriesCount(

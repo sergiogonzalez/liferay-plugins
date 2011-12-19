@@ -27,9 +27,11 @@ import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.LocalizationUtil;
+import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.impl.BaseModelImpl;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.util.PortalUtil;
@@ -38,8 +40,6 @@ import com.liferay.portlet.expando.model.ExpandoBridge;
 import com.liferay.portlet.expando.util.ExpandoBridgeFactoryUtil;
 
 import java.io.Serializable;
-
-import java.lang.reflect.Proxy;
 
 import java.sql.Types;
 
@@ -107,6 +107,11 @@ public class CalendarEventModelImpl extends BaseModelImpl<CalendarEvent>
 	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
 				"value.object.finder.cache.enabled.com.liferay.calendar.model.CalendarEvent"),
 			true);
+	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
+				"value.object.column.bitmask.enabled.com.liferay.calendar.model.CalendarEvent"),
+			true);
+	public static long GROUPID_COLUMN_BITMASK = 1L;
+	public static long UUID_COLUMN_BITMASK = 2L;
 
 	/**
 	 * Converts the soap model instance into a normal model instance.
@@ -158,14 +163,6 @@ public class CalendarEventModelImpl extends BaseModelImpl<CalendarEvent>
 		return models;
 	}
 
-	public Class<?> getModelClass() {
-		return CalendarEvent.class;
-	}
-
-	public String getModelClassName() {
-		return CalendarEvent.class.getName();
-	}
-
 	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(com.liferay.util.service.ServiceProps.get(
 				"lock.expiration.time.com.liferay.calendar.model.CalendarEvent"));
 
@@ -186,6 +183,14 @@ public class CalendarEventModelImpl extends BaseModelImpl<CalendarEvent>
 
 	public void setPrimaryKeyObj(Serializable primaryKeyObj) {
 		setPrimaryKey(((Long)primaryKeyObj).longValue());
+	}
+
+	public Class<?> getModelClass() {
+		return CalendarEvent.class;
+	}
+
+	public String getModelClassName() {
+		return CalendarEvent.class.getName();
 	}
 
 	@JSON
@@ -225,6 +230,8 @@ public class CalendarEventModelImpl extends BaseModelImpl<CalendarEvent>
 	}
 
 	public void setGroupId(long groupId) {
+		_columnBitmask |= GROUPID_COLUMN_BITMASK;
+
 		if (!_setOriginalGroupId) {
 			_setOriginalGroupId = true;
 
@@ -596,14 +603,23 @@ public class CalendarEventModelImpl extends BaseModelImpl<CalendarEvent>
 		_secondReminder = secondReminder;
 	}
 
+	public long getColumnBitmask() {
+		return _columnBitmask;
+	}
+
 	@Override
 	public CalendarEvent toEscapedModel() {
 		if (isEscapedModel()) {
 			return (CalendarEvent)this;
 		}
 		else {
-			return (CalendarEvent)Proxy.newProxyInstance(_classLoader,
-				_escapedModelProxyInterfaces, new AutoEscapeBeanHandler(this));
+			if (_escapedModelProxy == null) {
+				_escapedModelProxy = (CalendarEvent)ProxyUtil.newProxyInstance(_classLoader,
+						_escapedModelProxyInterfaces,
+						new AutoEscapeBeanHandler(this));
+			}
+
+			return _escapedModelProxy;
 		}
 	}
 
@@ -711,6 +727,127 @@ public class CalendarEventModelImpl extends BaseModelImpl<CalendarEvent>
 		calendarEventModelImpl._originalGroupId = calendarEventModelImpl._groupId;
 
 		calendarEventModelImpl._setOriginalGroupId = false;
+
+		calendarEventModelImpl._columnBitmask = 0;
+	}
+
+	@Override
+	public CacheModel<CalendarEvent> toCacheModel() {
+		CalendarEventCacheModel calendarEventCacheModel = new CalendarEventCacheModel();
+
+		calendarEventCacheModel.uuid = getUuid();
+
+		String uuid = calendarEventCacheModel.uuid;
+
+		if ((uuid != null) && (uuid.length() == 0)) {
+			calendarEventCacheModel.uuid = null;
+		}
+
+		calendarEventCacheModel.calendarEventId = getCalendarEventId();
+
+		calendarEventCacheModel.groupId = getGroupId();
+
+		calendarEventCacheModel.companyId = getCompanyId();
+
+		calendarEventCacheModel.userId = getUserId();
+
+		calendarEventCacheModel.userName = getUserName();
+
+		String userName = calendarEventCacheModel.userName;
+
+		if ((userName != null) && (userName.length() == 0)) {
+			calendarEventCacheModel.userName = null;
+		}
+
+		Date createDate = getCreateDate();
+
+		if (createDate != null) {
+			calendarEventCacheModel.createDate = createDate.getTime();
+		}
+		else {
+			calendarEventCacheModel.createDate = Long.MIN_VALUE;
+		}
+
+		Date modifiedDate = getModifiedDate();
+
+		if (modifiedDate != null) {
+			calendarEventCacheModel.modifiedDate = modifiedDate.getTime();
+		}
+		else {
+			calendarEventCacheModel.modifiedDate = Long.MIN_VALUE;
+		}
+
+		calendarEventCacheModel.title = getTitle();
+
+		String title = calendarEventCacheModel.title;
+
+		if ((title != null) && (title.length() == 0)) {
+			calendarEventCacheModel.title = null;
+		}
+
+		calendarEventCacheModel.description = getDescription();
+
+		String description = calendarEventCacheModel.description;
+
+		if ((description != null) && (description.length() == 0)) {
+			calendarEventCacheModel.description = null;
+		}
+
+		calendarEventCacheModel.location = getLocation();
+
+		String location = calendarEventCacheModel.location;
+
+		if ((location != null) && (location.length() == 0)) {
+			calendarEventCacheModel.location = null;
+		}
+
+		Date startDate = getStartDate();
+
+		if (startDate != null) {
+			calendarEventCacheModel.startDate = startDate.getTime();
+		}
+		else {
+			calendarEventCacheModel.startDate = Long.MIN_VALUE;
+		}
+
+		Date endDate = getEndDate();
+
+		if (endDate != null) {
+			calendarEventCacheModel.endDate = endDate.getTime();
+		}
+		else {
+			calendarEventCacheModel.endDate = Long.MIN_VALUE;
+		}
+
+		calendarEventCacheModel.durationHour = getDurationHour();
+
+		calendarEventCacheModel.durationMinute = getDurationMinute();
+
+		calendarEventCacheModel.allDay = getAllDay();
+
+		calendarEventCacheModel.recurrence = getRecurrence();
+
+		String recurrence = calendarEventCacheModel.recurrence;
+
+		if ((recurrence != null) && (recurrence.length() == 0)) {
+			calendarEventCacheModel.recurrence = null;
+		}
+
+		calendarEventCacheModel.type = getType();
+
+		String type = calendarEventCacheModel.type;
+
+		if ((type != null) && (type.length() == 0)) {
+			calendarEventCacheModel.type = null;
+		}
+
+		calendarEventCacheModel.remindBy = getRemindBy();
+
+		calendarEventCacheModel.firstReminder = getFirstReminder();
+
+		calendarEventCacheModel.secondReminder = getSecondReminder();
+
+		return calendarEventCacheModel;
 	}
 
 	@Override
@@ -891,4 +1028,6 @@ public class CalendarEventModelImpl extends BaseModelImpl<CalendarEvent>
 	private int _firstReminder;
 	private int _secondReminder;
 	private transient ExpandoBridge _expandoBridge;
+	private long _columnBitmask;
+	private CalendarEvent _escapedModelProxy;
 }

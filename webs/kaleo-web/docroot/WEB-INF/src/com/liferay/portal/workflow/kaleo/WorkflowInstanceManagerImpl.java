@@ -15,6 +15,7 @@
 package com.liferay.portal.workflow.kaleo;
 
 import com.liferay.portal.kernel.util.OrderByComparator;
+import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.kernel.workflow.WorkflowException;
 import com.liferay.portal.kernel.workflow.WorkflowInstance;
 import com.liferay.portal.kernel.workflow.WorkflowInstanceManager;
@@ -31,6 +32,7 @@ import java.util.Map;
 
 /**
  * @author Michael C. Han
+ * @author Marcellus Tavares
  */
 public class WorkflowInstanceManagerImpl implements WorkflowInstanceManager {
 
@@ -76,6 +78,33 @@ public class WorkflowInstanceManagerImpl implements WorkflowInstanceManager {
 	}
 
 	public int getWorkflowInstanceCount(
+			long companyId, Long userId, String assetClassName,
+			Long assetClassPK, Boolean completed)
+		throws WorkflowException {
+
+		ServiceContext serviceContext = new ServiceContext();
+
+		serviceContext.setCompanyId(companyId);
+
+		return _workflowEngine.getWorkflowInstanceCount(
+			userId, assetClassName, assetClassPK, completed,
+			serviceContext);
+	}
+
+	public int getWorkflowInstanceCount(
+			long companyId, Long userId, String[] assetClassNames,
+			Boolean completed)
+		throws WorkflowException {
+
+		ServiceContext serviceContext = new ServiceContext();
+
+		serviceContext.setCompanyId(companyId);
+
+		return _workflowEngine.getWorkflowInstanceCount(
+			userId, assetClassNames, completed, serviceContext);
+	}
+
+	public int getWorkflowInstanceCount(
 			long companyId, String workflowDefinitionName,
 			Integer workflowDefinitionVersion, Boolean completed)
 		throws WorkflowException {
@@ -89,17 +118,33 @@ public class WorkflowInstanceManagerImpl implements WorkflowInstanceManager {
 			serviceContext);
 	}
 
-	public int getWorkflowInstanceCount(
+	public List<WorkflowInstance> getWorkflowInstances(
 			long companyId, Long userId, String assetClassName,
-			Long assetClassPK, Boolean completed)
+			Long assetClassPK, Boolean completed, int start, int end,
+			OrderByComparator orderByComparator)
 		throws WorkflowException {
 
 		ServiceContext serviceContext = new ServiceContext();
 
 		serviceContext.setCompanyId(companyId);
 
-		return _workflowEngine.getWorkflowInstanceCount(
-			userId, assetClassName, assetClassPK, completed,
+		return _workflowEngine.getWorkflowInstances(
+			userId, assetClassName, assetClassPK, completed, start,
+			end, orderByComparator, serviceContext);
+	}
+
+	public List<WorkflowInstance> getWorkflowInstances(
+			long companyId, Long userId, String[] assetClassNames,
+			Boolean completed, int start, int end,
+			OrderByComparator orderByComparator)
+		throws WorkflowException {
+
+		ServiceContext serviceContext = new ServiceContext();
+
+		serviceContext.setCompanyId(companyId);
+
+		return _workflowEngine.getWorkflowInstances(
+			userId, assetClassNames, completed, start, end, orderByComparator,
 			serviceContext);
 	}
 
@@ -115,21 +160,6 @@ public class WorkflowInstanceManagerImpl implements WorkflowInstanceManager {
 
 		return _workflowEngine.getWorkflowInstances(
 			workflowDefinitionName, workflowDefinitionVersion, completed, start,
-			end, orderByComparator, serviceContext);
-	}
-
-	public List<WorkflowInstance> getWorkflowInstances(
-			long companyId, Long userId, String assetClassName,
-			Long assetClassPK, Boolean completed, int start, int end,
-			OrderByComparator orderByComparator)
-		throws WorkflowException {
-
-		ServiceContext serviceContext = new ServiceContext();
-
-		serviceContext.setCompanyId(companyId);
-
-		return _workflowEngine.getWorkflowInstances(
-			userId, assetClassName, assetClassPK, completed, start,
 			end, orderByComparator, serviceContext);
 	}
 
@@ -178,7 +208,8 @@ public class WorkflowInstanceManagerImpl implements WorkflowInstanceManager {
 			String transitionName, Map<String, Serializable> workflowContext)
 		throws WorkflowException {
 
-		ServiceContext serviceContext = new ServiceContext();
+		ServiceContext serviceContext = (ServiceContext)workflowContext.get(
+			WorkflowConstants.CONTEXT_SERVICE_CONTEXT);
 
 		serviceContext.setCompanyId(companyId);
 		serviceContext.setScopeGroupId(groupId);

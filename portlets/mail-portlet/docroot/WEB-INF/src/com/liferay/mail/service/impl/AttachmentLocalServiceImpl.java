@@ -14,11 +14,6 @@
 
 package com.liferay.mail.service.impl;
 
-import com.liferay.documentlibrary.DuplicateDirectoryException;
-import com.liferay.documentlibrary.DuplicateFileException;
-import com.liferay.documentlibrary.NoSuchDirectoryException;
-import com.liferay.documentlibrary.NoSuchFileException;
-import com.liferay.documentlibrary.service.DLLocalServiceUtil;
 import com.liferay.mail.model.Attachment;
 import com.liferay.mail.model.Message;
 import com.liferay.mail.service.base.AttachmentLocalServiceBaseImpl;
@@ -29,15 +24,17 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.model.CompanyConstants;
-import com.liferay.portal.model.GroupConstants;
 import com.liferay.portal.model.User;
-import com.liferay.portal.service.ServiceContext;
+import com.liferay.portlet.documentlibrary.DuplicateDirectoryException;
+import com.liferay.portlet.documentlibrary.DuplicateFileException;
+import com.liferay.portlet.documentlibrary.NoSuchDirectoryException;
+import com.liferay.portlet.documentlibrary.NoSuchFileException;
+import com.liferay.portlet.documentlibrary.store.DLStoreUtil;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -76,7 +73,7 @@ public class AttachmentLocalServiceImpl extends AttachmentLocalServiceBaseImpl {
 			String directoryPath = getDirectoryPath(attachment.getMessageId());
 
 			try {
-				DLLocalServiceUtil.addDirectory(
+				DLStoreUtil.addDirectory(
 					attachment.getCompanyId(), _REPOSITORY_ID, directoryPath);
 			}
 			catch (DuplicateDirectoryException dde) {
@@ -85,11 +82,12 @@ public class AttachmentLocalServiceImpl extends AttachmentLocalServiceBaseImpl {
 			String filePath = getFilePath(
 				attachment.getMessageId(), fileName);
 
+			InputStream is = getInputStream(attachmentId);
+
 			try {
-				DLLocalServiceUtil.addFile(
-					attachment.getCompanyId(), _PORTLET_ID, _GROUP_ID,
-					_REPOSITORY_ID, filePath, 0, StringPool.BLANK, new Date(),
-					new ServiceContext(), file);
+				DLStoreUtil.addFile(
+					attachment.getCompanyId(), _REPOSITORY_ID, filePath, false,
+					is);
 			}
 			catch (DuplicateFileException dfe) {
 				if (_log.isDebugEnabled()) {
@@ -117,9 +115,8 @@ public class AttachmentLocalServiceImpl extends AttachmentLocalServiceBaseImpl {
 			attachment.getMessageId(), attachment.getFileName());
 
 		try {
-			DLLocalServiceUtil.deleteFile(
-				attachment.getCompanyId(), _PORTLET_ID, _REPOSITORY_ID,
-				filePath);
+			DLStoreUtil.deleteFile(
+				attachment.getCompanyId(), _REPOSITORY_ID, filePath);
 		}
 		catch (NoSuchDirectoryException nsde) {
 			if (_log.isDebugEnabled()) {
@@ -150,8 +147,8 @@ public class AttachmentLocalServiceImpl extends AttachmentLocalServiceBaseImpl {
 		String directoryPath = getDirectoryPath(messageId);
 
 		try {
-			DLLocalServiceUtil.deleteDirectory(
-				companyId, _PORTLET_ID, _REPOSITORY_ID, directoryPath);
+			DLStoreUtil.deleteDirectory(
+				companyId, _REPOSITORY_ID, directoryPath);
 		}
 		catch (NoSuchDirectoryException nsde) {
 			if (_log.isDebugEnabled()) {
@@ -190,7 +187,7 @@ public class AttachmentLocalServiceImpl extends AttachmentLocalServiceBaseImpl {
 		String filePath = getFilePath(
 			attachment.getMessageId(), attachment.getFileName());
 
-		return DLLocalServiceUtil.getFileAsStream(
+		return DLStoreUtil.getFileAsStream(
 			attachment.getCompanyId(), _REPOSITORY_ID, filePath);
 	}
 
@@ -204,11 +201,6 @@ public class AttachmentLocalServiceImpl extends AttachmentLocalServiceBaseImpl {
 	}
 
 	private static final String _DIRECTORY_PATH_PREFIX = "mail/";
-
-	private static final long _GROUP_ID =
-		GroupConstants.DEFAULT_PARENT_GROUP_ID;
-
-	private static final String _PORTLET_ID = CompanyConstants.SYSTEM_STRING;
 
 	private static final long _REPOSITORY_ID = CompanyConstants.SYSTEM;
 

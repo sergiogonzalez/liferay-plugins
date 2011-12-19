@@ -9,7 +9,7 @@
  *
  * Liferay Social Office is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
  * for more details.
  *
  * You should have received a copy of the GNU General Public License along with
@@ -19,12 +19,7 @@
 
 <%@ taglib uri="http://liferay.com/tld/util" prefix="liferay-util" %>
 
-<%@ page import="com.liferay.portal.kernel.servlet.HttpHeaders" %>
-<%@ page import="com.liferay.portal.kernel.util.ContentTypes" %>
-<%@ page import="com.liferay.portal.kernel.util.ParamUtil" %>
-<%@ page import="com.liferay.portal.model.Theme" %>
-<%@ page import="com.liferay.portal.service.ThemeLocalServiceUtil" %>
-<%@ page import="com.liferay.portal.util.PortalUtil" %>
+<%@ page import="com.liferay.portal.kernel.servlet.HttpHeaders" %><%@ page import="com.liferay.portal.kernel.util.ContentTypes" %><%@ page import="com.liferay.portal.kernel.util.ParamUtil" %><%@ page import="com.liferay.portal.model.Theme" %><%@ page import="com.liferay.portal.service.ThemeLocalServiceUtil" %><%@ page import="com.liferay.portal.util.PortalUtil" %>
 
 <%
 long companyId = PortalUtil.getCompanyId(request);

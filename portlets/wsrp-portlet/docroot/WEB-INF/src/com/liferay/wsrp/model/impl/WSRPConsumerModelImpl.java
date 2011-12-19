@@ -16,8 +16,10 @@ package com.liferay.wsrp.model.impl;
 
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.impl.BaseModelImpl;
 import com.liferay.portal.service.ServiceContext;
 
@@ -28,8 +30,6 @@ import com.liferay.wsrp.model.WSRPConsumer;
 import com.liferay.wsrp.model.WSRPConsumerModel;
 
 import java.io.Serializable;
-
-import java.lang.reflect.Proxy;
 
 import java.sql.Types;
 
@@ -82,15 +82,11 @@ public class WSRPConsumerModelImpl extends BaseModelImpl<WSRPConsumer>
 	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
 				"value.object.finder.cache.enabled.com.liferay.wsrp.model.WSRPConsumer"),
 			true);
-
-	public Class<?> getModelClass() {
-		return WSRPConsumer.class;
-	}
-
-	public String getModelClassName() {
-		return WSRPConsumer.class.getName();
-	}
-
+	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
+				"value.object.column.bitmask.enabled.com.liferay.wsrp.model.WSRPConsumer"),
+			true);
+	public static long COMPANYID_COLUMN_BITMASK = 1L;
+	public static long UUID_COLUMN_BITMASK = 2L;
 	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(com.liferay.util.service.ServiceProps.get(
 				"lock.expiration.time.com.liferay.wsrp.model.WSRPConsumer"));
 
@@ -113,6 +109,14 @@ public class WSRPConsumerModelImpl extends BaseModelImpl<WSRPConsumer>
 		setPrimaryKey(((Long)primaryKeyObj).longValue());
 	}
 
+	public Class<?> getModelClass() {
+		return WSRPConsumer.class;
+	}
+
+	public String getModelClassName() {
+		return WSRPConsumer.class.getName();
+	}
+
 	public String getUuid() {
 		if (_uuid == null) {
 			return StringPool.BLANK;
@@ -123,7 +127,15 @@ public class WSRPConsumerModelImpl extends BaseModelImpl<WSRPConsumer>
 	}
 
 	public void setUuid(String uuid) {
+		if (_originalUuid == null) {
+			_originalUuid = _uuid;
+		}
+
 		_uuid = uuid;
+	}
+
+	public String getOriginalUuid() {
+		return GetterUtil.getString(_originalUuid);
 	}
 
 	public long getWsrpConsumerId() {
@@ -139,7 +151,19 @@ public class WSRPConsumerModelImpl extends BaseModelImpl<WSRPConsumer>
 	}
 
 	public void setCompanyId(long companyId) {
+		_columnBitmask |= COMPANYID_COLUMN_BITMASK;
+
+		if (!_setOriginalCompanyId) {
+			_setOriginalCompanyId = true;
+
+			_originalCompanyId = _companyId;
+		}
+
 		_companyId = companyId;
+	}
+
+	public long getOriginalCompanyId() {
+		return _originalCompanyId;
 	}
 
 	public Date getCreateDate() {
@@ -237,14 +261,23 @@ public class WSRPConsumerModelImpl extends BaseModelImpl<WSRPConsumer>
 		_forwardCookies = forwardCookies;
 	}
 
+	public long getColumnBitmask() {
+		return _columnBitmask;
+	}
+
 	@Override
 	public WSRPConsumer toEscapedModel() {
 		if (isEscapedModel()) {
 			return (WSRPConsumer)this;
 		}
 		else {
-			return (WSRPConsumer)Proxy.newProxyInstance(_classLoader,
-				_escapedModelProxyInterfaces, new AutoEscapeBeanHandler(this));
+			if (_escapedModelProxy == null) {
+				_escapedModelProxy = (WSRPConsumer)ProxyUtil.newProxyInstance(_classLoader,
+						_escapedModelProxyInterfaces,
+						new AutoEscapeBeanHandler(this));
+			}
+
+			return _escapedModelProxy;
 		}
 	}
 
@@ -328,6 +361,102 @@ public class WSRPConsumerModelImpl extends BaseModelImpl<WSRPConsumer>
 
 	@Override
 	public void resetOriginalValues() {
+		WSRPConsumerModelImpl wsrpConsumerModelImpl = this;
+
+		wsrpConsumerModelImpl._originalUuid = wsrpConsumerModelImpl._uuid;
+
+		wsrpConsumerModelImpl._originalCompanyId = wsrpConsumerModelImpl._companyId;
+
+		wsrpConsumerModelImpl._setOriginalCompanyId = false;
+
+		wsrpConsumerModelImpl._columnBitmask = 0;
+	}
+
+	@Override
+	public CacheModel<WSRPConsumer> toCacheModel() {
+		WSRPConsumerCacheModel wsrpConsumerCacheModel = new WSRPConsumerCacheModel();
+
+		wsrpConsumerCacheModel.uuid = getUuid();
+
+		String uuid = wsrpConsumerCacheModel.uuid;
+
+		if ((uuid != null) && (uuid.length() == 0)) {
+			wsrpConsumerCacheModel.uuid = null;
+		}
+
+		wsrpConsumerCacheModel.wsrpConsumerId = getWsrpConsumerId();
+
+		wsrpConsumerCacheModel.companyId = getCompanyId();
+
+		Date createDate = getCreateDate();
+
+		if (createDate != null) {
+			wsrpConsumerCacheModel.createDate = createDate.getTime();
+		}
+		else {
+			wsrpConsumerCacheModel.createDate = Long.MIN_VALUE;
+		}
+
+		Date modifiedDate = getModifiedDate();
+
+		if (modifiedDate != null) {
+			wsrpConsumerCacheModel.modifiedDate = modifiedDate.getTime();
+		}
+		else {
+			wsrpConsumerCacheModel.modifiedDate = Long.MIN_VALUE;
+		}
+
+		wsrpConsumerCacheModel.name = getName();
+
+		String name = wsrpConsumerCacheModel.name;
+
+		if ((name != null) && (name.length() == 0)) {
+			wsrpConsumerCacheModel.name = null;
+		}
+
+		wsrpConsumerCacheModel.url = getUrl();
+
+		String url = wsrpConsumerCacheModel.url;
+
+		if ((url != null) && (url.length() == 0)) {
+			wsrpConsumerCacheModel.url = null;
+		}
+
+		wsrpConsumerCacheModel.wsdl = getWsdl();
+
+		String wsdl = wsrpConsumerCacheModel.wsdl;
+
+		if ((wsdl != null) && (wsdl.length() == 0)) {
+			wsrpConsumerCacheModel.wsdl = null;
+		}
+
+		wsrpConsumerCacheModel.registrationContextString = getRegistrationContextString();
+
+		String registrationContextString = wsrpConsumerCacheModel.registrationContextString;
+
+		if ((registrationContextString != null) &&
+				(registrationContextString.length() == 0)) {
+			wsrpConsumerCacheModel.registrationContextString = null;
+		}
+
+		wsrpConsumerCacheModel.registrationPropertiesString = getRegistrationPropertiesString();
+
+		String registrationPropertiesString = wsrpConsumerCacheModel.registrationPropertiesString;
+
+		if ((registrationPropertiesString != null) &&
+				(registrationPropertiesString.length() == 0)) {
+			wsrpConsumerCacheModel.registrationPropertiesString = null;
+		}
+
+		wsrpConsumerCacheModel.forwardCookies = getForwardCookies();
+
+		String forwardCookies = wsrpConsumerCacheModel.forwardCookies;
+
+		if ((forwardCookies != null) && (forwardCookies.length() == 0)) {
+			wsrpConsumerCacheModel.forwardCookies = null;
+		}
+
+		return wsrpConsumerCacheModel;
 	}
 
 	@Override
@@ -423,8 +552,11 @@ public class WSRPConsumerModelImpl extends BaseModelImpl<WSRPConsumer>
 			WSRPConsumer.class
 		};
 	private String _uuid;
+	private String _originalUuid;
 	private long _wsrpConsumerId;
 	private long _companyId;
+	private long _originalCompanyId;
+	private boolean _setOriginalCompanyId;
 	private Date _createDate;
 	private Date _modifiedDate;
 	private String _name;
@@ -434,4 +566,6 @@ public class WSRPConsumerModelImpl extends BaseModelImpl<WSRPConsumer>
 	private String _registrationPropertiesString;
 	private String _forwardCookies;
 	private transient ExpandoBridge _expandoBridge;
+	private long _columnBitmask;
+	private WSRPConsumer _escapedModelProxy;
 }

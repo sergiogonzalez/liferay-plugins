@@ -14,14 +14,9 @@
 
 package com.liferay.knowledgebase.service.impl;
 
-import com.liferay.documentlibrary.DuplicateDirectoryException;
-import com.liferay.documentlibrary.DuplicateFileException;
-import com.liferay.documentlibrary.NoSuchDirectoryException;
 import com.liferay.knowledgebase.KBArticleContentException;
 import com.liferay.knowledgebase.KBArticlePriorityException;
-import com.liferay.knowledgebase.KBArticleSectionException;
 import com.liferay.knowledgebase.KBArticleTitleException;
-import com.liferay.knowledgebase.NoSuchArticleException;
 import com.liferay.knowledgebase.admin.social.AdminActivityKeys;
 import com.liferay.knowledgebase.admin.util.AdminSubscriptionSender;
 import com.liferay.knowledgebase.admin.util.AdminUtil;
@@ -30,6 +25,7 @@ import com.liferay.knowledgebase.model.KBArticleConstants;
 import com.liferay.knowledgebase.service.base.KBArticleLocalServiceBaseImpl;
 import com.liferay.knowledgebase.util.KnowledgeBaseUtil;
 import com.liferay.knowledgebase.util.PortletKeys;
+import com.liferay.knowledgebase.util.PortletPropsValues;
 import com.liferay.knowledgebase.util.comparator.KBArticlePriorityComparator;
 import com.liferay.knowledgebase.util.comparator.KBArticleVersionComparator;
 import com.liferay.portal.kernel.bean.BeanPropertiesUtil;
@@ -55,6 +51,7 @@ import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
+import com.liferay.portal.kernel.util.StreamUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.UnmodifiableList;
@@ -63,7 +60,6 @@ import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.kernel.workflow.WorkflowHandlerRegistryUtil;
 import com.liferay.portal.model.CompanyConstants;
 import com.liferay.portal.model.Group;
-import com.liferay.portal.model.GroupConstants;
 import com.liferay.portal.model.ResourceConstants;
 import com.liferay.portal.model.Subscription;
 import com.liferay.portal.model.User;
@@ -72,6 +68,12 @@ import com.liferay.portal.service.ServiceContextUtil;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.SubscriptionSender;
 import com.liferay.portlet.asset.model.AssetEntry;
+import com.liferay.portlet.documentlibrary.DuplicateDirectoryException;
+import com.liferay.portlet.documentlibrary.DuplicateFileException;
+import com.liferay.portlet.documentlibrary.NoSuchDirectoryException;
+import com.liferay.portlet.documentlibrary.store.DLStoreUtil;
+
+import java.io.InputStream;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -89,21 +91,19 @@ import javax.portlet.PortletPreferences;
 public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 
 	public void addAttachment(
-			String dirName, String shortFileName, byte[] bytes,
+			String dirName, String shortFileName, InputStream inputStream,
 			ServiceContext serviceContext)
 		throws PortalException, SystemException {
 
-		dlLocalService.addFile(
-			serviceContext.getCompanyId(), CompanyConstants.SYSTEM_STRING,
-			GroupConstants.DEFAULT_PARENT_GROUP_ID, CompanyConstants.SYSTEM,
-			dirName + StringPool.SLASH + shortFileName, 0, StringPool.BLANK,
-			serviceContext.getModifiedDate(null), serviceContext, bytes);
+		DLStoreUtil.addFile(
+			serviceContext.getCompanyId(), CompanyConstants.SYSTEM,
+			dirName + StringPool.SLASH + shortFileName, inputStream);
 	}
 
 	public KBArticle addKBArticle(
 			long userId, long parentResourcePrimKey, String title,
-			String content, String description, long kbTemplateId,
-			String[] sections, String dirName, ServiceContext serviceContext)
+			String content, String description, String[] sections,
+			String dirName, ServiceContext serviceContext)
 		throws PortalException, SystemException {
 
 		// KB article
@@ -113,7 +113,7 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 		double priority = getPriority(groupId, parentResourcePrimKey);
 		Date now = new Date();
 
-		validate(title, content, sections);
+		validate(title, content);
 
 		long kbArticleId = counterLocalService.increment();
 
@@ -138,7 +138,6 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 		kbArticle.setTitle(title);
 		kbArticle.setContent(content);
 		kbArticle.setDescription(description);
-		kbArticle.setKbTemplateId(kbTemplateId);
 		kbArticle.setPriority(priority);
 		kbArticle.setSections(
 			StringUtil.merge(AdminUtil.escapeSections(sections)));
@@ -151,18 +150,7 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 
 		// Resources
 
-		if (serviceContext.getAddGroupPermissions() ||
-			serviceContext.getAddGuestPermissions()) {
-
-			addKBArticleResources(
-				kbArticle, serviceContext.getAddGroupPermissions(),
-				serviceContext.getAddGuestPermissions());
-		}
-		else {
-			addKBArticleResources(
-				kbArticle, serviceContext.getGroupPermissions(),
-				serviceContext.getGuestPermissions());
-		}
+		resourceLocalService.addModelResources(kbArticle, serviceContext);
 
 		// Asset
 
@@ -183,30 +171,6 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 		return kbArticle;
 	}
 
-	public void addKBArticleResources(
-			KBArticle kbArticle, boolean addCommunityPermissions,
-			boolean addGuestPermissions)
-		throws PortalException, SystemException {
-
-		resourceLocalService.addResources(
-			kbArticle.getCompanyId(), kbArticle.getGroupId(),
-			kbArticle.getUserId(), KBArticle.class.getName(),
-			kbArticle.getResourcePrimKey(), false, addCommunityPermissions,
-			addGuestPermissions);
-	}
-
-	public void addKBArticleResources(
-			KBArticle kbArticle, String[] communityPermissions,
-			String[] guestPermissions)
-		throws PortalException, SystemException {
-
-		resourceLocalService.addModelResources(
-			kbArticle.getCompanyId(), kbArticle.getGroupId(),
-			kbArticle.getUserId(), KBArticle.class.getName(),
-			kbArticle.getResourcePrimKey(), communityPermissions,
-			guestPermissions);
-	}
-
 	public void checkAttachments() throws PortalException, SystemException {
 		for (long companyId : PortalUtil.getCompanyIds()) {
 			checkAttachments(companyId);
@@ -216,9 +180,7 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 	public void deleteAttachment(long companyId, String fileName)
 		throws PortalException, SystemException {
 
-		dlLocalService.deleteFile(
-			companyId, CompanyConstants.SYSTEM_STRING, CompanyConstants.SYSTEM,
-			fileName);
+		DLStoreUtil.deleteFile(companyId, CompanyConstants.SYSTEM, fileName);
 	}
 
 	public void deleteGroupKBArticles(long groupId)
@@ -509,21 +471,6 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 		return kbArticlePersistence.countByR_S(resourcePrimKey, status);
 	}
 
-	public List<KBArticle> getKBTemplateKBArticles(
-			long kbTemplateId, int start, int end,
-			OrderByComparator orderByComparator)
-		throws SystemException {
-
-		return kbTemplatePersistence.getKBArticles(
-			kbTemplateId, start, end, orderByComparator);
-	}
-
-	public int getKBTemplateKBArticlesCount(long kbTemplateId)
-		throws SystemException {
-
-		return kbTemplatePersistence.getKBArticlesSize(kbTemplateId);
-	}
-
 	public KBArticle getLatestKBArticle(long resourcePrimKey, int status)
 		throws PortalException, SystemException {
 
@@ -714,7 +661,7 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 		dirName =
 			"knowledgebase/temp/attachments/" + counterLocalService.increment();
 
-		dlLocalService.addDirectory(
+		DLStoreUtil.addDirectory(
 			serviceContext.getCompanyId(), CompanyConstants.SYSTEM, dirName);
 
 		if (resourcePrimKey <= 0) {
@@ -727,10 +674,19 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 		for (String fileName : kbArticle.getAttachmentsFileNames()) {
 			String shortFileName = FileUtil.getShortFileName(fileName);
 
-			byte[] bytes = dlLocalService.getFile(
-				kbArticle.getCompanyId(), CompanyConstants.SYSTEM, fileName);
+			InputStream inputStream = null;
 
-			addAttachment(dirName, shortFileName, bytes, serviceContext);
+			try {
+				inputStream = DLStoreUtil.getFileAsStream(
+					kbArticle.getCompanyId(), CompanyConstants.SYSTEM,
+					fileName);
+
+				addAttachment(
+					dirName, shortFileName, inputStream, serviceContext);
+			}
+			finally {
+				StreamUtil.cleanUp(inputStream);
+			}
 		}
 
 		return dirName;
@@ -738,8 +694,8 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 
 	public KBArticle updateKBArticle(
 			long userId, long resourcePrimKey, String title, String content,
-			String description, long kbTemplateId, String[] sections,
-			String dirName, ServiceContext serviceContext)
+			String description, String[] sections, String dirName,
+			ServiceContext serviceContext)
 		throws PortalException, SystemException {
 
 		// KB article
@@ -748,7 +704,7 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 		int version = KBArticleConstants.DEFAULT_VERSION;
 		int status = WorkflowConstants.STATUS_DRAFT;
 
-		validate(title, content, sections);
+		validate(title, content);
 
 		KBArticle oldKBArticle = getLatestKBArticle(
 			resourcePrimKey, WorkflowConstants.STATUS_ANY);
@@ -793,7 +749,6 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 		kbArticle.setTitle(title);
 		kbArticle.setContent(content);
 		kbArticle.setDescription(description);
-		kbArticle.setKbTemplateId(kbTemplateId);
 		kbArticle.setPriority(oldPriority);
 		kbArticle.setSections(
 			StringUtil.merge(AdminUtil.escapeSections(sections)));
@@ -845,44 +800,26 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 			long userId, KBArticle kbArticle, long[] assetCategoryIds,
 			String[] assetTagNames)
 		throws PortalException, SystemException {
+		//TBD
+		long classTypeId = 0;
 
 		assetEntryLocalService.updateEntry(
 			userId, kbArticle.getGroupId(), KBArticle.class.getName(),
-			kbArticle.getClassPK(), kbArticle.getUuid(), assetCategoryIds,
-			assetTagNames, false, null, null, null, null,
+			kbArticle.getClassPK(), kbArticle.getUuid(), classTypeId,
+			assetCategoryIds, assetTagNames, false, null, null, null, null,
 			ContentTypes.TEXT_HTML, kbArticle.getTitle(),
 			kbArticle.getDescription(), null, null, null, 0, 0, null, false);
 	}
 
 	public void updateKBArticleResources(
-			KBArticle kbArticle, String[] communityPermissions,
+			KBArticle kbArticle, String[] groupPermissions,
 			String[] guestPermissions)
 		throws PortalException, SystemException {
 
 		resourceLocalService.updateResources(
 			kbArticle.getCompanyId(), kbArticle.getGroupId(),
 			KBArticle.class.getName(), kbArticle.getResourcePrimKey(),
-			communityPermissions, guestPermissions);
-	}
-
-	public void updateKBArticlesKBTemplates(long[] kbArticleIds)
-		throws SystemException {
-
-		for (long kbArticleId : kbArticleIds) {
-			KBArticle kbArticle = null;
-
-			try {
-				kbArticle = kbArticlePersistence.findByPrimaryKey(kbArticleId);
-			}
-			catch (NoSuchArticleException nsae) {
-				continue;
-			}
-
-			kbArticle.setKbTemplateId(
-				KBArticleConstants.DEFAULT_KB_TEMPLATE_ID);
-
-			kbArticlePersistence.update(kbArticle, false);
-		}
+			groupPermissions, guestPermissions);
 	}
 
 	public void updateKBArticlesPriorities(
@@ -1039,7 +976,7 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 		throws PortalException, SystemException {
 
 		try {
-			dlLocalService.addDirectory(
+			DLStoreUtil.addDirectory(
 				serviceContext.getCompanyId(), CompanyConstants.SYSTEM,
 				kbArticle.getAttachmentsDirName());
 		}
@@ -1051,21 +988,27 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 			return;
 		}
 
-		String[] fileNames = dlLocalService.getFileNames(
+		String[] fileNames = DLStoreUtil.getFileNames(
 			serviceContext.getCompanyId(), CompanyConstants.SYSTEM, dirName);
 
 		for (String fileName : fileNames) {
-			byte[] bytes = dlLocalService.getFile(
-				serviceContext.getCompanyId(), CompanyConstants.SYSTEM,
-				fileName);
+			InputStream inputStream = null;
 
 			try {
+				inputStream = DLStoreUtil.getFileAsStream(
+					serviceContext.getCompanyId(), CompanyConstants.SYSTEM,
+					fileName);
+
 				addAttachment(
 					kbArticle.getAttachmentsDirName(),
-					FileUtil.getShortFileName(fileName), bytes, serviceContext);
+					FileUtil.getShortFileName(fileName), inputStream,
+					serviceContext);
 			}
 			catch (DuplicateFileException dfe) {
 				_log.error("File already exists for " + dfe.getMessage());
+			}
+			finally {
+				StreamUtil.cleanUp(inputStream);
 			}
 		}
 	}
@@ -1163,24 +1106,21 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 		String dirName =
 			"knowledgebase/temp/attachments/" + counterLocalService.increment();
 
-		dlLocalService.addDirectory(
-			companyId, CompanyConstants.SYSTEM, dirName);
+		DLStoreUtil.addDirectory(companyId, CompanyConstants.SYSTEM, dirName);
 
-		String[] fileNames = dlLocalService.getFileNames(
+		String[] fileNames = DLStoreUtil.getFileNames(
 			companyId, CompanyConstants.SYSTEM,
 			"knowledgebase/temp/attachments");
 
 		Arrays.sort(fileNames);
 
 		for (int i = 0; i < fileNames.length - 50; i++) {
-			dlLocalService.deleteDirectory(
-				companyId, CompanyConstants.SYSTEM_STRING,
-				CompanyConstants.SYSTEM, fileNames[i]);
+			DLStoreUtil.deleteDirectory(
+				companyId, CompanyConstants.SYSTEM, fileNames[i]);
 		}
 
-		dlLocalService.deleteDirectory(
-			companyId, CompanyConstants.SYSTEM_STRING, CompanyConstants.SYSTEM,
-			dirName);
+		DLStoreUtil.deleteDirectory(
+			companyId, CompanyConstants.SYSTEM, dirName);
 	}
 
 	protected void deleteAssets(KBArticle kbArticle)
@@ -1211,9 +1151,8 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 		throws PortalException, SystemException {
 
 		try {
-			dlLocalService.deleteDirectory(
-				kbArticle.getCompanyId(), CompanyConstants.SYSTEM_STRING,
-				CompanyConstants.SYSTEM,
+			DLStoreUtil.deleteDirectory(
+				kbArticle.getCompanyId(), CompanyConstants.SYSTEM,
 				KBArticleConstants.DIR_NAME_PREFIX + folderId);
 		}
 		catch (NoSuchDirectoryException nsde) {
@@ -1258,6 +1197,10 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 
 	protected double getPriority(long groupId, long parentResourcePrimKey)
 		throws SystemException {
+
+		if (!PortletPropsValues.ADMIN_KB_ARTICLE_INCREMENT_PRIORITY_ENABLED) {
+			return KBArticleConstants.DEFAULT_VERSION;
+		}
 
 		List<KBArticle> kbArticles = getSiblingKBArticles(
 			groupId, parentResourcePrimKey, WorkflowConstants.STATUS_ANY, 0, 1,
@@ -1378,10 +1321,11 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 			kbArticleDiffs.get("title"));
 		subscriptionSender.setContextUserPrefix("ARTICLE");
 		subscriptionSender.setFrom(fromAddress, fromName);
-		subscriptionSender.setGroupId(kbArticle.getGroupId());
 		subscriptionSender.setHtmlFormat(true);
 		subscriptionSender.setMailId("kb_article", kbArticle.getKbArticleId());
+		subscriptionSender.setPortletId(serviceContext.getPortletId());
 		subscriptionSender.setReplyToAddress(fromAddress);
+		subscriptionSender.setScopeGroupId(kbArticle.getGroupId());
 		subscriptionSender.setSubject(subject);
 		subscriptionSender.setUserId(kbArticle.getUserId());
 
@@ -1475,7 +1419,7 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 		}
 	}
 
-	protected void validate(String title, String content, String[] sections)
+	protected void validate(String title, String content)
 		throws PortalException {
 
 		if (Validator.isNull(title)) {
@@ -1484,10 +1428,6 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 
 		if (Validator.isNull(content)) {
 			throw new KBArticleContentException();
-		}
-
-		if (Validator.isNull(sections)) {
-			throw new KBArticleSectionException();
 		}
 	}
 

@@ -14,34 +14,22 @@
 
 package com.liferay.knowledgebase.article.portlet;
 
-import com.liferay.documentlibrary.DuplicateFileException;
-import com.liferay.documentlibrary.FileNameException;
-import com.liferay.documentlibrary.FileSizeException;
-import com.liferay.documentlibrary.NoSuchFileException;
-import com.liferay.documentlibrary.service.DLLocalServiceUtil;
 import com.liferay.knowledgebase.KBArticleContentException;
 import com.liferay.knowledgebase.KBArticlePriorityException;
-import com.liferay.knowledgebase.KBArticleSectionException;
 import com.liferay.knowledgebase.KBArticleTitleException;
 import com.liferay.knowledgebase.KBCommentContentException;
-import com.liferay.knowledgebase.KBTemplateContentException;
-import com.liferay.knowledgebase.KBTemplateTitleException;
 import com.liferay.knowledgebase.NoSuchArticleException;
 import com.liferay.knowledgebase.NoSuchCommentException;
-import com.liferay.knowledgebase.NoSuchTemplateException;
-import com.liferay.knowledgebase.admin.util.AdminUtil;
 import com.liferay.knowledgebase.model.KBArticle;
 import com.liferay.knowledgebase.model.KBComment;
-import com.liferay.knowledgebase.model.KBTemplate;
-import com.liferay.knowledgebase.model.KBTemplateParser;
 import com.liferay.knowledgebase.service.KBArticleServiceUtil;
 import com.liferay.knowledgebase.service.KBCommentLocalServiceUtil;
-import com.liferay.knowledgebase.service.KBTemplateServiceUtil;
 import com.liferay.knowledgebase.service.permission.KBArticlePermission;
 import com.liferay.knowledgebase.util.ActionKeys;
 import com.liferay.knowledgebase.util.PortletKeys;
 import com.liferay.knowledgebase.util.WebKeys;
 import com.liferay.portal.NoSuchSubscriptionException;
+import com.liferay.portal.kernel.portlet.PortletResponseUtil;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.upload.UploadPortletRequest;
 import com.liferay.portal.kernel.util.Constants;
@@ -51,8 +39,9 @@ import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.MimeTypesUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.StringBundler;
+import com.liferay.portal.kernel.util.StreamUtil;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.model.CompanyConstants;
 import com.liferay.portal.security.auth.PrincipalException;
@@ -61,10 +50,13 @@ import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.ServiceContextFactory;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
+import com.liferay.portlet.documentlibrary.DuplicateFileException;
+import com.liferay.portlet.documentlibrary.FileNameException;
+import com.liferay.portlet.documentlibrary.FileSizeException;
+import com.liferay.portlet.documentlibrary.NoSuchFileException;
+import com.liferay.portlet.documentlibrary.store.DLStoreUtil;
 import com.liferay.util.bridges.mvc.MVCPortlet;
-import com.liferay.util.servlet.PortletResponseUtil;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -77,8 +69,6 @@ import javax.portlet.RenderResponse;
 import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
 
-import javax.servlet.http.HttpServletRequest;
-
 /**
  * @author Peter Shin
  * @author Brian Wing Shun Chan
@@ -89,24 +79,32 @@ public class ArticlePortlet extends MVCPortlet {
 			ActionRequest actionRequest, ActionResponse actionResponse)
 		throws Exception {
 
-		UploadPortletRequest uploadRequest = PortalUtil.getUploadPortletRequest(
-			actionRequest);
+		UploadPortletRequest uploadPortletRequest =
+			PortalUtil.getUploadPortletRequest(actionRequest);
 
 		String portletId = PortalUtil.getPortletId(actionRequest);
 
 		long resourcePrimKey = ParamUtil.getLong(
-			uploadRequest, "resourcePrimKey");
+			uploadPortletRequest, "resourcePrimKey");
 
-		String dirName = ParamUtil.getString(uploadRequest, "dirName");
-		File file = uploadRequest.getFile("file");
-		String fileName = uploadRequest.getFileName("file");
+		String dirName = ParamUtil.getString(uploadPortletRequest, "dirName");
+		String fileName = uploadPortletRequest.getFileName("file");
 
-		ServiceContext serviceContext = ServiceContextFactory.getInstance(
-			KBArticle.class.getName(), actionRequest);
+		InputStream inputStream = null;
 
-		KBArticleServiceUtil.addAttachment(
-			portletId, resourcePrimKey, dirName, fileName,
-			FileUtil.getBytes(file), serviceContext);
+		try {
+			inputStream = uploadPortletRequest.getFileAsStream("file");
+
+			ServiceContext serviceContext = ServiceContextFactory.getInstance(
+				KBArticle.class.getName(), actionRequest);
+
+			KBArticleServiceUtil.addAttachment(
+				portletId, resourcePrimKey, dirName, fileName, inputStream,
+				serviceContext);
+		}
+		finally {
+			StreamUtil.cleanUp(inputStream);
+		}
 	}
 
 	public void deleteAttachment(
@@ -190,22 +188,9 @@ public class ArticlePortlet extends MVCPortlet {
 
 			renderRequest.setAttribute(
 				WebKeys.KNOWLEDGE_BASE_KB_ARTICLE, kbArticle);
-
-			KBTemplate kbTemplate = null;
-
-			long kbTemplateId = ParamUtil.getLong(
-				renderRequest, "kbTemplateId");
-
-			if (kbTemplateId > 0) {
-				kbTemplate = KBTemplateServiceUtil.getKBTemplate(kbTemplateId);
-			}
-
-			renderRequest.setAttribute(
-				WebKeys.KNOWLEDGE_BASE_KB_TEMPLATE, kbTemplate);
 		}
 		catch (Exception e) {
 			if (e instanceof NoSuchArticleException ||
-				e instanceof NoSuchTemplateException ||
 				e instanceof PrincipalException) {
 
 				SessionErrors.add(renderRequest, e.getClass().getName());
@@ -226,7 +211,7 @@ public class ArticlePortlet extends MVCPortlet {
 		String fileName = ParamUtil.getString(resourceRequest, "fileName");
 
 		String shortFileName = FileUtil.getShortFileName(fileName);
-		InputStream is = DLLocalServiceUtil.getFileAsStream(
+		InputStream is = DLStoreUtil.getFileAsStream(
 			companyId, CompanyConstants.SYSTEM, fileName);
 		String contentType = MimeTypesUtil.getContentType(fileName);
 
@@ -352,7 +337,6 @@ public class ArticlePortlet extends MVCPortlet {
 		String title = ParamUtil.getString(actionRequest, "title");
 		String content = ParamUtil.getString(actionRequest, "content");
 		String description = ParamUtil.getString(actionRequest, "description");
-		long kbTemplateId = ParamUtil.getLong(actionRequest, "kbTemplateId");
 		String[] sections = actionRequest.getParameterValues("sections");
 		String dirName = ParamUtil.getString(actionRequest, "dirName");
 		int workflowAction = ParamUtil.getInteger(
@@ -366,12 +350,12 @@ public class ArticlePortlet extends MVCPortlet {
 		if (cmd.equals(Constants.ADD)) {
 			kbArticle = KBArticleServiceUtil.addKBArticle(
 				portletId, parentResourcePrimKey, title, content, description,
-				kbTemplateId, sections, dirName, serviceContext);
+				sections, dirName, serviceContext);
 		}
 		else if (cmd.equals(Constants.UPDATE)) {
 			kbArticle = KBArticleServiceUtil.updateKBArticle(
-				resourcePrimKey, title, content, description, kbTemplateId,
-				sections, dirName, serviceContext);
+				resourcePrimKey, title, content, description, sections, dirName,
+				serviceContext);
 		}
 
 		if (!cmd.equals(Constants.ADD) && !cmd.equals(Constants.UPDATE)) {
@@ -435,38 +419,6 @@ public class ArticlePortlet extends MVCPortlet {
 		}
 	}
 
-	public void updateKBTemplate(
-			ActionRequest actionRequest, ActionResponse actionResponse)
-		throws Exception {
-
-		String portletId = PortalUtil.getPortletId(actionRequest);
-
-		String cmd = ParamUtil.getString(actionRequest, Constants.CMD);
-
-		long kbTemplateId = ParamUtil.getLong(actionRequest, "kbTemplateId");
-
-		String title = ParamUtil.getString(actionRequest, "title");
-		String content = ParamUtil.getString(actionRequest, "content");
-		int engineType = ParamUtil.getInteger(actionRequest, "engineType");
-		boolean cacheable = ParamUtil.getBoolean(actionRequest, "cacheable");
-
-		transform(kbTemplateId, content, engineType, actionRequest);
-
-		ServiceContext serviceContext = ServiceContextFactory.getInstance(
-			KBTemplate.class.getName(), actionRequest);
-
-		if (cmd.equals(Constants.ADD)) {
-			KBTemplateServiceUtil.addKBTemplate(
-				portletId, title, content, engineType, cacheable,
-				serviceContext);
-		}
-		else if (cmd.equals(Constants.UPDATE)) {
-			KBTemplateServiceUtil.updateKBTemplate(
-				kbTemplateId, title, content, engineType, cacheable,
-				serviceContext);
-		}
-	}
-
 	@Override
 	protected void addSuccessMessage(
 		ActionRequest actionRequest, ActionResponse actionResponse) {
@@ -493,8 +445,6 @@ public class ArticlePortlet extends MVCPortlet {
 			SessionErrors.contains(
 				renderRequest, NoSuchSubscriptionException.class.getName()) ||
 			SessionErrors.contains(
-				renderRequest, NoSuchTemplateException.class.getName()) ||
-			SessionErrors.contains(
 				renderRequest, PrincipalException.class.getName())) {
 
 			include(jspPath + "error.jsp", renderRequest, renderResponse);
@@ -504,14 +454,40 @@ public class ArticlePortlet extends MVCPortlet {
 		}
 	}
 
-	protected long getResourcePrimKey(RenderRequest renderRequest) {
+	protected long getResourcePrimKey(RenderRequest renderRequest)
+		throws Exception {
+
+		ThemeDisplay themeDisplay = (ThemeDisplay)renderRequest.getAttribute(
+			WebKeys.THEME_DISPLAY);
+
 		PortletPreferences preferences = renderRequest.getPreferences();
 
 		long defaultValue = GetterUtil.getLong(
 			preferences.getValue("resourcePrimKey", null));
 
-		return ParamUtil.getLong(
+		String jspPage = renderRequest.getParameter("jspPage");
+
+		if ((defaultValue == 0) && Validator.equals(viewJSP, jspPage)) {
+			return 0;
+		}
+
+		long resourcePrimKey = ParamUtil.getLong(
 			renderRequest, "resourcePrimKey", defaultValue);
+
+		if ((resourcePrimKey == 0) || (resourcePrimKey != defaultValue)) {
+			return resourcePrimKey;
+		}
+
+		PermissionChecker permissionChecker =
+			themeDisplay.getPermissionChecker();
+
+		if (!KBArticlePermission.contains(
+				permissionChecker, defaultValue, ActionKeys.VIEW)) {
+
+			return 0;
+		}
+
+		return defaultValue;
 	}
 
 	protected int getStatus(RenderRequest renderRequest) throws Exception {
@@ -555,53 +531,17 @@ public class ArticlePortlet extends MVCPortlet {
 			cause instanceof FileSizeException ||
 			cause instanceof KBArticleContentException ||
 			cause instanceof KBArticlePriorityException ||
-			cause instanceof KBArticleSectionException ||
 			cause instanceof KBArticleTitleException ||
 			cause instanceof KBCommentContentException ||
-			cause instanceof KBTemplateContentException ||
-			cause instanceof KBTemplateTitleException ||
 			cause instanceof NoSuchArticleException ||
 			cause instanceof NoSuchCommentException ||
 			cause instanceof NoSuchFileException ||
-			cause instanceof NoSuchTemplateException ||
 			cause instanceof PrincipalException) {
 
 			return true;
 		}
 
 		return false;
-	}
-
-	protected void transform(
-			long kbTemplateId, String content, int engineType,
-			ActionRequest actionRequest)
-		throws Exception {
-
-		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
-			WebKeys.THEME_DISPLAY);
-
-		HttpServletRequest request = PortalUtil.getHttpServletRequest(
-			actionRequest);
-
-		StringBundler sb = new StringBundler(7);
-
-		sb.append(themeDisplay.getUserId());
-		sb.append(StringPool.PERIOD);
-		sb.append(themeDisplay.getScopeGroupId());
-		sb.append(StringPool.PERIOD);
-		sb.append(kbTemplateId);
-		sb.append(StringPool.PERIOD);
-		sb.append(System.currentTimeMillis());
-
-		KBTemplateParser kbTemplateParser = AdminUtil.getKBTemplateParser(
-			engineType);
-
-		try {
-			kbTemplateParser.transform(sb.toString(), content, null, request);
-		}
-		catch (Exception e) {
-			throw new KBTemplateContentException(e.getMessage());
-		}
 	}
 
 }

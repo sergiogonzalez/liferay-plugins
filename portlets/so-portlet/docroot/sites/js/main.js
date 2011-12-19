@@ -56,14 +56,26 @@ AUI().use(
 			createDataSource: function(url) {
 				return new A.DataSource.IO(
 					{
+						ioConfig: {
+							method: "post"
+						},
 						on: {
 							request: function(event) {
+								var sitesTabsContainer = A.one('.so-portlet-sites .sites-tabs');
+
+								var tabs1 = 'all-sites';
+
+								if (sitesTabsContainer) {
+									tabs1 = sitesTabsContainer.one('select').get('value');
+								}
+
 								var data = event.request;
 
 								event.cfg.data = {
 									directory: data.directory || false,
 									end: data.end || 0,
 									keywords: data.keywords || '',
+									searchTab: data.searchTab || tabs1,
 									start: data.start || 0,
 									userGroups: data.userGroups || false
 								}
@@ -71,7 +83,7 @@ AUI().use(
 						},
 						source: url
 					}
-				);
+				)
 			},
 
 			disableButton: function(button) {
@@ -112,6 +124,7 @@ AUI().use(
 				if (!instance._popup) {
 					instance._popup = new A.Dialog(
 						{
+							constrain2view: true,
 							cssClass: 'so-portlet-sites-dialog',
 							resizable: false,
 							width: 526
@@ -125,10 +138,22 @@ AUI().use(
 				return instance._popup;
 			},
 
+			createDirectoryList: function(directoryList) {
+				var instance = this;
+
+				instance._directoryList = directoryList;
+			},
+
 			updateSites: function() {
 				var instance = this;
 
-				instance._siteList.sendRequest();
+				if (instance._directoryList) {
+					instance._directoryList.sendRequest();
+				}
+
+				if (instance._siteList) {
+					instance._siteList.sendRequest();
+				}
 			},
 
 			_assignEvents: function() {
@@ -205,7 +230,7 @@ AUI().use(
 				else {
 					var siteTemplate =
 						'<li class="{classNames}">' +
-							'{joinHtml}' +
+							'{starHtml}' +
 							'<span class="name">{siteName}</span>' +
 						'</li>';
 
@@ -214,7 +239,6 @@ AUI().use(
 							results,
 							function(result) {
 								var classNames = [];
-								var joinHtml = '';
 
 								if (result.socialOfficeEnabled) {
 									classNames.push('social-office-enabled');
@@ -234,7 +258,7 @@ AUI().use(
 									siteTemplate,
 									{
 										classNames: classNames.join(' '),
-										joinHtml: (result.joinUrl ? '<span class="join"><a href="' + result.joinUrl + '">' + Liferay.Language.get('join') + '</a></span>' : ''),
+										starHtml: (result.starURL ? '<span class="action star"><a href="' + result.starURL + '">' + Liferay.Language.get('star') + '</a></span>' : '<span class="action unstar"><a href="' + result.unstarURL + '">' + Liferay.Language.get('unstar') + '</a></span>'),
 										siteName: name
 									}
 								);

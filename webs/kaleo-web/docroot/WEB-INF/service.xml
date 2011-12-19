@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!DOCTYPE service-builder PUBLIC "-//Liferay//DTD Service Builder 6.0.0//EN" "http://www.liferay.com/dtd/liferay-service-builder_6_0_0.dtd">
+<!DOCTYPE service-builder PUBLIC "-//Liferay//DTD Service Builder 6.1.0//EN" "http://www.liferay.com/dtd/liferay-service-builder_6_1_0.dtd">
 
 <service-builder package-path="com.liferay.portal.workflow.kaleo" auto-namespace-tables="false">
 	<namespace>Kaleo</namespace>
@@ -23,8 +23,9 @@
 
 		<!-- Other fields -->
 
+		<column name="kaleoClassName" type="String" />
+		<column name="kaleoClassPK" type="long" />
 		<column name="kaleoDefinitionId" type="long" />
-		<column name="kaleoNodeId" type="long" />
 		<column name="kaleoNodeName" type="String" />
 		<column name="name" type="String" />
 		<column name="description" type="String" />
@@ -47,8 +48,9 @@
 		<finder name="KaleoDefinitionId" return-type="Collection">
 			<finder-column name="kaleoDefinitionId" />
 		</finder>
-		<finder name="KNI_ET" return-type="Collection">
-			<finder-column name="kaleoNodeId" />
+		<finder name="KCN_KCPK_ET" return-type="Collection">
+			<finder-column name="kaleoClassName" />
+			<finder-column name="kaleoClassPK" />
 			<finder-column name="executionType" />
 		</finder>
 	</entity>
@@ -118,6 +120,7 @@
 		<column name="name" type="String" />
 		<column name="title" type="String" localized="true" />
 		<column name="description" type="String" />
+		<column name="content" type="String" />
 		<column name="version" type="int" />
 		<column name="active" type="boolean" />
 		<column name="startKaleoNodeId" type="long" />
@@ -288,11 +291,12 @@
 
 		<!-- Other fields -->
 
+		<column name="kaleoClassName" type="String" />
+		<column name="kaleoClassPK" type="long" />
 		<column name="kaleoDefinitionId" type="long" />
 		<column name="kaleoInstanceId" type="long" />
 		<column name="kaleoInstanceTokenId" type="long" />
 		<column name="kaleoTaskInstanceTokenId" type="long" />
-		<column name="kaleoNodeId" type="long" />
 		<column name="kaleoNodeName" type="String" />
 		<column name="terminalKaleoNode" type="boolean" />
 		<column name="kaleoActionId" type="long" />
@@ -335,9 +339,10 @@
 			<finder-column name="kaleoInstanceTokenId" />
 			<finder-column name="type" />
 		</finder>
-		<finder name="KITI_KNI_T" return-type="Collection">
+		<finder name="KCN_KCPK_KITI_T" return-type="Collection">
+			<finder-column name="kaleoClassName" />
+			<finder-column name="kaleoClassPK" />
 			<finder-column name="kaleoInstanceTokenId" />
-			<finder-column name="kaleoNodeId" />
 			<finder-column name="type" />
 		</finder>
 	</entity>
@@ -363,6 +368,7 @@
 
 		<column name="kaleoDefinitionId" type="long" />
 		<column name="name" type="String" />
+		<column name="metadata" type="String" />
 		<column name="description" type="String" />
 		<column name="type" type="String" />
 		<column name="initial" type="boolean" />
@@ -412,8 +418,9 @@
 
 		<!-- Other fields -->
 
+		<column name="kaleoClassName" type="String" />
+		<column name="kaleoClassPK" type="long" />
 		<column name="kaleoDefinitionId" type="long" />
-		<column name="kaleoNodeId" type="long" />
 		<column name="kaleoNodeName" type="String" />
 		<column name="name" type="String" />
 		<column name="description" type="String" />
@@ -440,8 +447,9 @@
 		<finder name="KaleoDefinitionId" return-type="Collection">
 			<finder-column name="kaleoDefinitionId" />
 		</finder>
-		<finder name="KNI_ET" return-type="Collection">
-			<finder-column name="kaleoNodeId" />
+		<finder name="KCN_KCPK_ET" return-type="Collection">
+			<finder-column name="kaleoClassName" />
+			<finder-column name="kaleoClassPK" />
 			<finder-column name="executionType" />
 		</finder>
 	</entity>
@@ -519,10 +527,6 @@
 		<column name="name" type="String" />
 		<column name="description" type="String" />
 
-		<!-- Relationships -->
-
-		<column name="kaleoAssignments" type="Collection" entity="KaleoTaskAssignment" mapping-key="kaleoTaskId" />
-
 		<!-- Order -->
 
 		<order by="asc">
@@ -561,9 +565,10 @@
 
 		<!-- Other fields -->
 
+		<column name="kaleoClassName" type="String" />
+		<column name="kaleoClassPK" type="long" />
 		<column name="kaleoDefinitionId" type="long" />
 		<column name="kaleoNodeId" type="long" />
-		<column name="kaleoTaskId" type="long" />
 		<column name="assigneeClassName" type="String" />
 		<column name="assigneeClassPK" type="long" />
 		<column name="assigneeActionId" type="String" />
@@ -584,15 +589,13 @@
 		<finder name="KaleoDefinitionId" return-type="Collection">
 			<finder-column name="kaleoDefinitionId" />
 		</finder>
-		<finder name="KaleoTaskId" return-type="Collection">
-			<finder-column name="kaleoTaskId" />
+		<finder name="KCN_KCPK" return-type="Collection">
+			<finder-column name="kaleoClassName" />
+			<finder-column name="kaleoClassPK" />
 		</finder>
-		<finder name="KNI_KTI" return-type="Collection">
-			<finder-column name="kaleoNodeId" />
-			<finder-column name="kaleoTaskId" />
-		</finder>
-		<finder name="KTI_ACN" return-type="Collection">
-			<finder-column name="kaleoTaskId" />
+		<finder name="KCN_KCPK_ACN" return-type="Collection">
+			<finder-column name="kaleoClassName" />
+			<finder-column name="kaleoClassPK" />
 			<finder-column name="assigneeClassName" />
 		</finder>
 
@@ -650,6 +653,49 @@
 		</finder>
 		<finder name="kaleoTaskInstanceTokenId" return-type="Collection">
 			<finder-column name="kaleoTaskInstanceTokenId" />
+		</finder>
+	</entity>
+	<entity name="KaleoTaskForm" local-service="true" remote-service="false">
+
+		<!-- PK fields -->
+
+		<column name="kaleoTaskFormId" type="long" primary="true" />
+
+		<!-- Group instance -->
+
+		<column name="groupId" type="long" />
+
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
+		<column name="userId" type="long" />
+		<column name="userName" type="String" />
+		<column name="createDate" type="Date" />
+		<column name="modifiedDate" type="Date" />
+
+		<!-- Other fields -->
+
+		<column name="kaleoDefinitionId" type="long" />
+		<column name="kaleoTaskId" type="long" />
+		<column name="description" type="String" />
+		<column name="formTemplateId" type="long" />
+
+		<!-- Order -->
+
+		<order by="asc">
+			<order-column name="kaleoTaskFormId" />
+		</order>
+
+		<!-- Finder methods -->
+
+		<finder name="CompanyId" return-type="Collection">
+			<finder-column name="companyId" />
+		</finder>
+		<finder name="KaleoDefinitionId" return-type="Collection">
+			<finder-column name="kaleoDefinitionId" />
+		</finder>
+		<finder name="KaleoTaskId" return-type="Collection">
+			<finder-column name="kaleoTaskId" />
 		</finder>
 	</entity>
 	<entity name="KaleoTaskInstanceToken" local-service="true" remote-service="false">
@@ -731,29 +777,33 @@
 
 		<!-- Other fields -->
 
+		<column name="kaleoClassName" type="String" />
+		<column name="kaleoClassPK" type="long" />
 		<column name="kaleoDefinitionId" type="long" />
-		<column name="kaleoNodeId" type="long" />
-		<column name="parentKaleoNodeId" type="long" />
 		<column name="name" type="String" />
-		<column name="defaultTimer" type="boolean" />
+		<column name="blocking" type="boolean" />
 		<column name="description" type="String" />
 		<column name="duration" type="double" />
 		<column name="scale" type="String" />
+		<column name="recurrenceDuration" type="double" />
+		<column name="recurrenceScale" type="String" />
 
 		<!-- Order -->
 
 		<order by="asc">
 			<order-column name="kaleoTimerId" />
 		</order>
-		
+
 		<!-- Finder methods -->
 
-		<finder name="parentKaleoNodeId" return-type="Collection">
-			<finder-column name="parentKaleoNodeId" />
+		<finder name="KCN_KCPK" return-type="Collection">
+			<finder-column name="kaleoClassName" />
+			<finder-column name="kaleoClassPK" />
 		</finder>
-		<finder name="PKNI_DT" return-type="Collection">
-			<finder-column name="parentKaleoNodeId" />
-			<finder-column name="defaultTimer" />
+		<finder name="KCN_KCPK_Blocking" return-type="Collection">
+			<finder-column name="kaleoClassName" />
+			<finder-column name="kaleoClassPK" />
+			<finder-column name="blocking" />
 		</finder>
 	</entity>
 	<entity name="KaleoTimerInstanceToken" local-service="true" remote-service="false">
@@ -776,11 +826,15 @@
 
 		<!-- Other fields -->
 
+		<column name="kaleoClassName" type="String" />
+		<column name="kaleoClassPK" type="long" />
 		<column name="kaleoDefinitionId" type="long" />
 		<column name="kaleoInstanceId" type="long" />
 		<column name="kaleoInstanceTokenId" type="long" />
+		<column name="kaleoTaskInstanceTokenId" type="long" />
 		<column name="kaleoTimerId" type="long" />
 		<column name="kaleoTimerName" type="String" />
+		<column name="blocking" type="boolean" />
 		<column name="completionUserId" type="long" />
 		<column name="completed" type="boolean" />
 		<column name="completionDate" type="Date" />
@@ -797,9 +851,18 @@
 		<finder name="KaleoInstanceId" return-type="Collection">
 			<finder-column name="kaleoInstanceId" />
 		</finder>
-		<finder name="KII_KTI" return-type="KaleoTimerInstanceToken">
-			<finder-column name="kaleoInstanceId" />
+		<finder name="KITI_KTI" return-type="KaleoTimerInstanceToken">
+			<finder-column name="kaleoInstanceTokenId" />
 			<finder-column name="kaleoTimerId" />
+		</finder>
+		<finder name="KITI_C" return-type="Collection">
+			<finder-column name="kaleoInstanceTokenId" />
+			<finder-column name="completed" />
+		</finder>
+		<finder name="KITI_C_B" return-type="Collection">
+			<finder-column name="kaleoInstanceTokenId" />
+			<finder-column name="completed" />
+			<finder-column name="blocking" />
 		</finder>
 	</entity>
 	<entity name="KaleoTransition" local-service="true" remote-service="false">

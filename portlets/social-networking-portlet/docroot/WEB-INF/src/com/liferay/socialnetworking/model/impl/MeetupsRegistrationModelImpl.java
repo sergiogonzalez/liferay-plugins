@@ -18,8 +18,10 @@ import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.util.DateUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.impl.BaseModelImpl;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.util.PortalUtil;
@@ -31,8 +33,6 @@ import com.liferay.socialnetworking.model.MeetupsRegistration;
 import com.liferay.socialnetworking.model.MeetupsRegistrationModel;
 
 import java.io.Serializable;
-
-import java.lang.reflect.Proxy;
 
 import java.sql.Types;
 
@@ -83,15 +83,12 @@ public class MeetupsRegistrationModelImpl extends BaseModelImpl<MeetupsRegistrat
 	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
 				"value.object.finder.cache.enabled.com.liferay.socialnetworking.model.MeetupsRegistration"),
 			true);
-
-	public Class<?> getModelClass() {
-		return MeetupsRegistration.class;
-	}
-
-	public String getModelClassName() {
-		return MeetupsRegistration.class.getName();
-	}
-
+	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
+				"value.object.column.bitmask.enabled.com.liferay.socialnetworking.model.MeetupsRegistration"),
+			true);
+	public static long MEETUPSENTRYID_COLUMN_BITMASK = 1L;
+	public static long STATUS_COLUMN_BITMASK = 2L;
+	public static long USERID_COLUMN_BITMASK = 4L;
 	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(com.liferay.util.service.ServiceProps.get(
 				"lock.expiration.time.com.liferay.socialnetworking.model.MeetupsRegistration"));
 
@@ -112,6 +109,14 @@ public class MeetupsRegistrationModelImpl extends BaseModelImpl<MeetupsRegistrat
 
 	public void setPrimaryKeyObj(Serializable primaryKeyObj) {
 		setPrimaryKey(((Long)primaryKeyObj).longValue());
+	}
+
+	public Class<?> getModelClass() {
+		return MeetupsRegistration.class;
+	}
+
+	public String getModelClassName() {
+		return MeetupsRegistration.class.getName();
 	}
 
 	public long getMeetupsRegistrationId() {
@@ -135,6 +140,8 @@ public class MeetupsRegistrationModelImpl extends BaseModelImpl<MeetupsRegistrat
 	}
 
 	public void setUserId(long userId) {
+		_columnBitmask |= USERID_COLUMN_BITMASK;
+
 		if (!_setOriginalUserId) {
 			_setOriginalUserId = true;
 
@@ -190,6 +197,8 @@ public class MeetupsRegistrationModelImpl extends BaseModelImpl<MeetupsRegistrat
 	}
 
 	public void setMeetupsEntryId(long meetupsEntryId) {
+		_columnBitmask |= MEETUPSENTRYID_COLUMN_BITMASK;
+
 		if (!_setOriginalMeetupsEntryId) {
 			_setOriginalMeetupsEntryId = true;
 
@@ -208,7 +217,19 @@ public class MeetupsRegistrationModelImpl extends BaseModelImpl<MeetupsRegistrat
 	}
 
 	public void setStatus(int status) {
+		_columnBitmask |= STATUS_COLUMN_BITMASK;
+
+		if (!_setOriginalStatus) {
+			_setOriginalStatus = true;
+
+			_originalStatus = _status;
+		}
+
 		_status = status;
+	}
+
+	public int getOriginalStatus() {
+		return _originalStatus;
 	}
 
 	public String getComments() {
@@ -224,14 +245,23 @@ public class MeetupsRegistrationModelImpl extends BaseModelImpl<MeetupsRegistrat
 		_comments = comments;
 	}
 
+	public long getColumnBitmask() {
+		return _columnBitmask;
+	}
+
 	@Override
 	public MeetupsRegistration toEscapedModel() {
 		if (isEscapedModel()) {
 			return (MeetupsRegistration)this;
 		}
 		else {
-			return (MeetupsRegistration)Proxy.newProxyInstance(_classLoader,
-				_escapedModelProxyInterfaces, new AutoEscapeBeanHandler(this));
+			if (_escapedModelProxy == null) {
+				_escapedModelProxy = (MeetupsRegistration)ProxyUtil.newProxyInstance(_classLoader,
+						_escapedModelProxyInterfaces,
+						new AutoEscapeBeanHandler(this));
+			}
+
+			return _escapedModelProxy;
 		}
 	}
 
@@ -325,6 +355,63 @@ public class MeetupsRegistrationModelImpl extends BaseModelImpl<MeetupsRegistrat
 		meetupsRegistrationModelImpl._originalMeetupsEntryId = meetupsRegistrationModelImpl._meetupsEntryId;
 
 		meetupsRegistrationModelImpl._setOriginalMeetupsEntryId = false;
+
+		meetupsRegistrationModelImpl._originalStatus = meetupsRegistrationModelImpl._status;
+
+		meetupsRegistrationModelImpl._setOriginalStatus = false;
+
+		meetupsRegistrationModelImpl._columnBitmask = 0;
+	}
+
+	@Override
+	public CacheModel<MeetupsRegistration> toCacheModel() {
+		MeetupsRegistrationCacheModel meetupsRegistrationCacheModel = new MeetupsRegistrationCacheModel();
+
+		meetupsRegistrationCacheModel.meetupsRegistrationId = getMeetupsRegistrationId();
+
+		meetupsRegistrationCacheModel.companyId = getCompanyId();
+
+		meetupsRegistrationCacheModel.userId = getUserId();
+
+		meetupsRegistrationCacheModel.userName = getUserName();
+
+		String userName = meetupsRegistrationCacheModel.userName;
+
+		if ((userName != null) && (userName.length() == 0)) {
+			meetupsRegistrationCacheModel.userName = null;
+		}
+
+		Date createDate = getCreateDate();
+
+		if (createDate != null) {
+			meetupsRegistrationCacheModel.createDate = createDate.getTime();
+		}
+		else {
+			meetupsRegistrationCacheModel.createDate = Long.MIN_VALUE;
+		}
+
+		Date modifiedDate = getModifiedDate();
+
+		if (modifiedDate != null) {
+			meetupsRegistrationCacheModel.modifiedDate = modifiedDate.getTime();
+		}
+		else {
+			meetupsRegistrationCacheModel.modifiedDate = Long.MIN_VALUE;
+		}
+
+		meetupsRegistrationCacheModel.meetupsEntryId = getMeetupsEntryId();
+
+		meetupsRegistrationCacheModel.status = getStatus();
+
+		meetupsRegistrationCacheModel.comments = getComments();
+
+		String comments = meetupsRegistrationCacheModel.comments;
+
+		if ((comments != null) && (comments.length() == 0)) {
+			meetupsRegistrationCacheModel.comments = null;
+		}
+
+		return meetupsRegistrationCacheModel;
 	}
 
 	@Override
@@ -420,6 +507,10 @@ public class MeetupsRegistrationModelImpl extends BaseModelImpl<MeetupsRegistrat
 	private long _originalMeetupsEntryId;
 	private boolean _setOriginalMeetupsEntryId;
 	private int _status;
+	private int _originalStatus;
+	private boolean _setOriginalStatus;
 	private String _comments;
 	private transient ExpandoBridge _expandoBridge;
+	private long _columnBitmask;
+	private MeetupsRegistration _escapedModelProxy;
 }

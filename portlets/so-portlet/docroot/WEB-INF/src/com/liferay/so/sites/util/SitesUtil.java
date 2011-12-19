@@ -8,7 +8,7 @@
  *
  * Liferay Social Office is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
  * for more details.
  *
  * You should have received a copy of the GNU General Public License along with
@@ -19,28 +19,118 @@ package com.liferay.so.sites.util;
 
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.Group;
 import com.liferay.portal.model.GroupConstants;
+import com.liferay.portal.model.User;
 import com.liferay.portal.service.GroupLocalServiceUtil;
+import com.liferay.portal.service.GroupServiceUtil;
+import com.liferay.portal.service.PortletPreferencesLocalServiceUtil;
+import com.liferay.portal.service.UserLocalServiceUtil;
+import com.liferay.portal.util.PortletKeys;
 import com.liferay.portal.util.comparator.GroupNameComparator;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import javax.portlet.PortletPreferences;
+
 /**
  * @author Ryan Park
+ * @author Jonathan Lee
  */
 public class SitesUtil {
 
-	public static final int MAX_RESULT_SIZE = 10;
-
-	public static List<Group> getVisibleSites(
-		long companyId, long userId, String keywords) {
+	public static String getStarredGroupIds(long userId) {
+		String starredGroupIds = StringPool.BLANK;
 
 		try {
-			return doGetVisibleSites(companyId, userId, keywords);
+			User user = UserLocalServiceUtil.getUser(userId);
+
+			Group group = user.getGroup();
+
+			PortletPreferences portletPreferences =
+				PortletPreferencesLocalServiceUtil.getPreferences(
+					user.getCompanyId(), group.getGroupId(),
+					PortletKeys.PREFS_OWNER_TYPE_GROUP, 0, "5_WAR_soportlet");
+
+			if (portletPreferences != null) {
+				starredGroupIds = portletPreferences.getValue(
+					"starredGroupIds", StringPool.BLANK);
+			}
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+		}
+
+		return starredGroupIds;
+	}
+
+	public static List<Group> getStarredSites(long userId, String name)
+		throws Exception {
+
+		String starredGroupIds = StringPool.BLANK;
+
+		User user = UserLocalServiceUtil.getUser(userId);
+
+		Group group = user.getGroup();
+
+		PortletPreferences portletPreferences =
+			PortletPreferencesLocalServiceUtil.getPreferences(
+				user.getCompanyId(), group.getGroupId(),
+				PortletKeys.PREFS_OWNER_TYPE_GROUP, 0, "5_WAR_soportlet");
+
+		if (portletPreferences != null) {
+			starredGroupIds = portletPreferences.getValue(
+				"starredGroupIds", StringPool.BLANK);
+		}
+
+		long[] groupIds = StringUtil.split(starredGroupIds, 0L);
+
+		List<Group> groups = new ArrayList<Group>(groupIds.length);
+
+		for (long groupId : groupIds) {
+			try {
+				Group curGroup = GroupServiceUtil.getGroup(groupId);
+
+				if (Validator.isNull(name)) {
+					groups.add(curGroup);
+				}
+				else {
+					String groupDescriptiveName = curGroup.getDescriptiveName();
+
+					groupDescriptiveName = groupDescriptiveName.toLowerCase();
+
+					if (groupDescriptiveName.contains(name.toLowerCase())) {
+						groups.add(curGroup);
+					}
+				}
+			}
+			catch (Exception e) {
+				StringUtil.remove(starredGroupIds, String.valueOf(groupId));
+
+				portletPreferences.setValue("starredGroupIds", starredGroupIds);
+
+				portletPreferences.store();
+			}
+		}
+
+		Collections.sort(groups, new GroupNameComparator(true));
+
+		return groups;
+	}
+
+	public static List<Group> getVisibleSites(
+		long companyId, long userId, String keywords, boolean usersSites,
+		int maxResultSize) {
+
+		try {
+			return doGetVisibleSites(
+				companyId, userId, keywords, usersSites, maxResultSize);
 		}
 		catch (Exception e) {
 			_log.error(e, e);
@@ -50,10 +140,11 @@ public class SitesUtil {
 	}
 
 	public static int getVisibleSitesCount(
-		long companyId, long userId, String keywords) {
+		long companyId, long userId, String keywords, boolean usersSites) {
 
 		try {
-			return doGetVisibleSitesCount(companyId, userId, keywords);
+			return doGetVisibleSitesCount(
+				companyId, userId, keywords, usersSites);
 		}
 		catch (Exception e) {
 			_log.error(e, e);
@@ -63,10 +154,11 @@ public class SitesUtil {
 	}
 
 	protected static List<Group> doGetVisibleSites(
-			long companyId, long userId, String keywords)
+			long companyId, long userId, String keywords, boolean usersSites,
+			int maxResultSize)
 		throws Exception {
 
-		List<Group> groups = new ArrayList<Group>(MAX_RESULT_SIZE);
+		List<Group> groups = new ArrayList<Group>(maxResultSize);
 
 		LinkedHashMap<String, Object> params =
 			new LinkedHashMap<String, Object>();
@@ -74,12 +166,12 @@ public class SitesUtil {
 		params.put("usersGroups", userId);
 
 		List<Group> usersGroups = GroupLocalServiceUtil.search(
-			companyId, keywords, null, params, 0, MAX_RESULT_SIZE,
+			companyId, keywords, null, params, 0, maxResultSize,
 			new GroupNameComparator(true));
 
 		groups.addAll(usersGroups);
 
-		if (Validator.isNull(keywords) || (groups.size() >= MAX_RESULT_SIZE)) {
+		if (usersSites || (groups.size() >= maxResultSize)) {
 			return groups;
 		}
 
@@ -93,15 +185,15 @@ public class SitesUtil {
 		params.put("types", types);
 
 		List<Group> visibleGroup = GroupLocalServiceUtil.search(
-			companyId, keywords, null, params, 0, MAX_RESULT_SIZE,
-			new GroupNameComparator());
+			companyId, keywords, null, params, 0, maxResultSize,
+			new GroupNameComparator(true));
 
 		for (Group group : visibleGroup) {
 			if (!usersGroups.contains(group)) {
 				groups.add(group);
 			}
 
-			if (groups.size() > MAX_RESULT_SIZE) {
+			if (groups.size() > maxResultSize) {
 				break;
 			}
 		}
@@ -110,10 +202,10 @@ public class SitesUtil {
 	}
 
 	protected static int doGetVisibleSitesCount(
-			long comapnyId, long userId, String keywords)
+			long comapnyId, long userId, String keywords, boolean usersSites)
 		throws Exception {
 
-		if (Validator.isNull(keywords)) {
+		if (usersSites) {
 			LinkedHashMap<String, Object> params =
 				new LinkedHashMap<String, Object>();
 
@@ -133,7 +225,7 @@ public class SitesUtil {
 
 			params.put("types", types);
 
-			int count = GroupLocalServiceUtil.searchCount(
+			int groupsCount = GroupLocalServiceUtil.searchCount(
 				comapnyId, keywords, null, params);
 
 			params.clear();
@@ -146,11 +238,8 @@ public class SitesUtil {
 
 			params.put("types", types);
 
-			count +=
-				GroupLocalServiceUtil.searchCount(
-					comapnyId, keywords, null, params);
-
-			return count;
+			return groupsCount + GroupLocalServiceUtil.searchCount(
+				comapnyId, keywords, null, params);
 		}
 	}
 

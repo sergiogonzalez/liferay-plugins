@@ -23,8 +23,10 @@ import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.json.JSON;
 import com.liferay.portal.kernel.util.DateUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.impl.BaseModelImpl;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.util.PortalUtil;
@@ -33,8 +35,6 @@ import com.liferay.portlet.expando.model.ExpandoBridge;
 import com.liferay.portlet.expando.util.ExpandoBridgeFactoryUtil;
 
 import java.io.Serializable;
-
-import java.lang.reflect.Proxy;
 
 import java.sql.Types;
 
@@ -90,6 +90,14 @@ public class MicroblogsEntryModelImpl extends BaseModelImpl<MicroblogsEntry>
 	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
 				"value.object.finder.cache.enabled.com.liferay.microblogs.model.MicroblogsEntry"),
 			true);
+	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
+				"value.object.column.bitmask.enabled.com.liferay.microblogs.model.MicroblogsEntry"),
+			true);
+	public static long COMPANYID_COLUMN_BITMASK = 1L;
+	public static long RECEIVERMICROBLOGSENTRYID_COLUMN_BITMASK = 2L;
+	public static long RECEIVERUSERID_COLUMN_BITMASK = 4L;
+	public static long TYPE_COLUMN_BITMASK = 8L;
+	public static long USERID_COLUMN_BITMASK = 16L;
 
 	/**
 	 * Converts the soap model instance into a normal model instance.
@@ -132,14 +140,6 @@ public class MicroblogsEntryModelImpl extends BaseModelImpl<MicroblogsEntry>
 		return models;
 	}
 
-	public Class<?> getModelClass() {
-		return MicroblogsEntry.class;
-	}
-
-	public String getModelClassName() {
-		return MicroblogsEntry.class.getName();
-	}
-
 	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(com.liferay.util.service.ServiceProps.get(
 				"lock.expiration.time.com.liferay.microblogs.model.MicroblogsEntry"));
 
@@ -162,6 +162,14 @@ public class MicroblogsEntryModelImpl extends BaseModelImpl<MicroblogsEntry>
 		setPrimaryKey(((Long)primaryKeyObj).longValue());
 	}
 
+	public Class<?> getModelClass() {
+		return MicroblogsEntry.class;
+	}
+
+	public String getModelClassName() {
+		return MicroblogsEntry.class.getName();
+	}
+
 	@JSON
 	public long getMicroblogsEntryId() {
 		return _microblogsEntryId;
@@ -177,7 +185,19 @@ public class MicroblogsEntryModelImpl extends BaseModelImpl<MicroblogsEntry>
 	}
 
 	public void setCompanyId(long companyId) {
+		_columnBitmask |= COMPANYID_COLUMN_BITMASK;
+
+		if (!_setOriginalCompanyId) {
+			_setOriginalCompanyId = true;
+
+			_originalCompanyId = _companyId;
+		}
+
 		_companyId = companyId;
+	}
+
+	public long getOriginalCompanyId() {
+		return _originalCompanyId;
 	}
 
 	@JSON
@@ -186,6 +206,14 @@ public class MicroblogsEntryModelImpl extends BaseModelImpl<MicroblogsEntry>
 	}
 
 	public void setUserId(long userId) {
+		_columnBitmask |= USERID_COLUMN_BITMASK;
+
+		if (!_setOriginalUserId) {
+			_setOriginalUserId = true;
+
+			_originalUserId = _userId;
+		}
+
 		_userId = userId;
 	}
 
@@ -195,6 +223,10 @@ public class MicroblogsEntryModelImpl extends BaseModelImpl<MicroblogsEntry>
 
 	public void setUserUuid(String userUuid) {
 		_userUuid = userUuid;
+	}
+
+	public long getOriginalUserId() {
+		return _originalUserId;
 	}
 
 	@JSON
@@ -249,7 +281,19 @@ public class MicroblogsEntryModelImpl extends BaseModelImpl<MicroblogsEntry>
 	}
 
 	public void setType(int type) {
+		_columnBitmask |= TYPE_COLUMN_BITMASK;
+
+		if (!_setOriginalType) {
+			_setOriginalType = true;
+
+			_originalType = _type;
+		}
+
 		_type = type;
+	}
+
+	public int getOriginalType() {
+		return _originalType;
 	}
 
 	@JSON
@@ -258,6 +302,14 @@ public class MicroblogsEntryModelImpl extends BaseModelImpl<MicroblogsEntry>
 	}
 
 	public void setReceiverUserId(long receiverUserId) {
+		_columnBitmask |= RECEIVERUSERID_COLUMN_BITMASK;
+
+		if (!_setOriginalReceiverUserId) {
+			_setOriginalReceiverUserId = true;
+
+			_originalReceiverUserId = _receiverUserId;
+		}
+
 		_receiverUserId = receiverUserId;
 	}
 
@@ -270,13 +322,29 @@ public class MicroblogsEntryModelImpl extends BaseModelImpl<MicroblogsEntry>
 		_receiverUserUuid = receiverUserUuid;
 	}
 
+	public long getOriginalReceiverUserId() {
+		return _originalReceiverUserId;
+	}
+
 	@JSON
 	public long getReceiverMicroblogsEntryId() {
 		return _receiverMicroblogsEntryId;
 	}
 
 	public void setReceiverMicroblogsEntryId(long receiverMicroblogsEntryId) {
+		_columnBitmask |= RECEIVERMICROBLOGSENTRYID_COLUMN_BITMASK;
+
+		if (!_setOriginalReceiverMicroblogsEntryId) {
+			_setOriginalReceiverMicroblogsEntryId = true;
+
+			_originalReceiverMicroblogsEntryId = _receiverMicroblogsEntryId;
+		}
+
 		_receiverMicroblogsEntryId = receiverMicroblogsEntryId;
+	}
+
+	public long getOriginalReceiverMicroblogsEntryId() {
+		return _originalReceiverMicroblogsEntryId;
 	}
 
 	@JSON
@@ -288,14 +356,23 @@ public class MicroblogsEntryModelImpl extends BaseModelImpl<MicroblogsEntry>
 		_socialRelationType = socialRelationType;
 	}
 
+	public long getColumnBitmask() {
+		return _columnBitmask;
+	}
+
 	@Override
 	public MicroblogsEntry toEscapedModel() {
 		if (isEscapedModel()) {
 			return (MicroblogsEntry)this;
 		}
 		else {
-			return (MicroblogsEntry)Proxy.newProxyInstance(_classLoader,
-				_escapedModelProxyInterfaces, new AutoEscapeBeanHandler(this));
+			if (_escapedModelProxy == null) {
+				_escapedModelProxy = (MicroblogsEntry)ProxyUtil.newProxyInstance(_classLoader,
+						_escapedModelProxyInterfaces,
+						new AutoEscapeBeanHandler(this));
+			}
+
+			return _escapedModelProxy;
 		}
 	}
 
@@ -382,6 +459,84 @@ public class MicroblogsEntryModelImpl extends BaseModelImpl<MicroblogsEntry>
 
 	@Override
 	public void resetOriginalValues() {
+		MicroblogsEntryModelImpl microblogsEntryModelImpl = this;
+
+		microblogsEntryModelImpl._originalCompanyId = microblogsEntryModelImpl._companyId;
+
+		microblogsEntryModelImpl._setOriginalCompanyId = false;
+
+		microblogsEntryModelImpl._originalUserId = microblogsEntryModelImpl._userId;
+
+		microblogsEntryModelImpl._setOriginalUserId = false;
+
+		microblogsEntryModelImpl._originalType = microblogsEntryModelImpl._type;
+
+		microblogsEntryModelImpl._setOriginalType = false;
+
+		microblogsEntryModelImpl._originalReceiverUserId = microblogsEntryModelImpl._receiverUserId;
+
+		microblogsEntryModelImpl._setOriginalReceiverUserId = false;
+
+		microblogsEntryModelImpl._originalReceiverMicroblogsEntryId = microblogsEntryModelImpl._receiverMicroblogsEntryId;
+
+		microblogsEntryModelImpl._setOriginalReceiverMicroblogsEntryId = false;
+
+		microblogsEntryModelImpl._columnBitmask = 0;
+	}
+
+	@Override
+	public CacheModel<MicroblogsEntry> toCacheModel() {
+		MicroblogsEntryCacheModel microblogsEntryCacheModel = new MicroblogsEntryCacheModel();
+
+		microblogsEntryCacheModel.microblogsEntryId = getMicroblogsEntryId();
+
+		microblogsEntryCacheModel.companyId = getCompanyId();
+
+		microblogsEntryCacheModel.userId = getUserId();
+
+		microblogsEntryCacheModel.userName = getUserName();
+
+		String userName = microblogsEntryCacheModel.userName;
+
+		if ((userName != null) && (userName.length() == 0)) {
+			microblogsEntryCacheModel.userName = null;
+		}
+
+		Date createDate = getCreateDate();
+
+		if (createDate != null) {
+			microblogsEntryCacheModel.createDate = createDate.getTime();
+		}
+		else {
+			microblogsEntryCacheModel.createDate = Long.MIN_VALUE;
+		}
+
+		Date modifiedDate = getModifiedDate();
+
+		if (modifiedDate != null) {
+			microblogsEntryCacheModel.modifiedDate = modifiedDate.getTime();
+		}
+		else {
+			microblogsEntryCacheModel.modifiedDate = Long.MIN_VALUE;
+		}
+
+		microblogsEntryCacheModel.content = getContent();
+
+		String content = microblogsEntryCacheModel.content;
+
+		if ((content != null) && (content.length() == 0)) {
+			microblogsEntryCacheModel.content = null;
+		}
+
+		microblogsEntryCacheModel.type = getType();
+
+		microblogsEntryCacheModel.receiverUserId = getReceiverUserId();
+
+		microblogsEntryCacheModel.receiverMicroblogsEntryId = getReceiverMicroblogsEntryId();
+
+		microblogsEntryCacheModel.socialRelationType = getSocialRelationType();
+
+		return microblogsEntryCacheModel;
 	}
 
 	@Override
@@ -478,16 +633,28 @@ public class MicroblogsEntryModelImpl extends BaseModelImpl<MicroblogsEntry>
 		};
 	private long _microblogsEntryId;
 	private long _companyId;
+	private long _originalCompanyId;
+	private boolean _setOriginalCompanyId;
 	private long _userId;
 	private String _userUuid;
+	private long _originalUserId;
+	private boolean _setOriginalUserId;
 	private String _userName;
 	private Date _createDate;
 	private Date _modifiedDate;
 	private String _content;
 	private int _type;
+	private int _originalType;
+	private boolean _setOriginalType;
 	private long _receiverUserId;
 	private String _receiverUserUuid;
+	private long _originalReceiverUserId;
+	private boolean _setOriginalReceiverUserId;
 	private long _receiverMicroblogsEntryId;
+	private long _originalReceiverMicroblogsEntryId;
+	private boolean _setOriginalReceiverMicroblogsEntryId;
 	private int _socialRelationType;
 	private transient ExpandoBridge _expandoBridge;
+	private long _columnBitmask;
+	private MicroblogsEntry _escapedModelProxy;
 }

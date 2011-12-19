@@ -18,7 +18,9 @@ import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.util.DateUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.impl.BaseModelImpl;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.util.PortalUtil;
@@ -30,8 +32,6 @@ import com.liferay.privatemessaging.model.UserThread;
 import com.liferay.privatemessaging.model.UserThreadModel;
 
 import java.io.Serializable;
-
-import java.lang.reflect.Proxy;
 
 import java.sql.Types;
 
@@ -82,15 +82,13 @@ public class UserThreadModelImpl extends BaseModelImpl<UserThread>
 	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
 				"value.object.finder.cache.enabled.com.liferay.privatemessaging.model.UserThread"),
 			true);
-
-	public Class<?> getModelClass() {
-		return UserThread.class;
-	}
-
-	public String getModelClassName() {
-		return UserThread.class.getName();
-	}
-
+	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
+				"value.object.column.bitmask.enabled.com.liferay.privatemessaging.model.UserThread"),
+			true);
+	public static long DELETED_COLUMN_BITMASK = 1L;
+	public static long MBTHREADID_COLUMN_BITMASK = 2L;
+	public static long READ_COLUMN_BITMASK = 4L;
+	public static long USERID_COLUMN_BITMASK = 8L;
 	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(com.liferay.util.service.ServiceProps.get(
 				"lock.expiration.time.com.liferay.privatemessaging.model.UserThread"));
 
@@ -111,6 +109,14 @@ public class UserThreadModelImpl extends BaseModelImpl<UserThread>
 
 	public void setPrimaryKeyObj(Serializable primaryKeyObj) {
 		setPrimaryKey(((Long)primaryKeyObj).longValue());
+	}
+
+	public Class<?> getModelClass() {
+		return UserThread.class;
+	}
+
+	public String getModelClassName() {
+		return UserThread.class.getName();
 	}
 
 	public long getUserThreadId() {
@@ -134,6 +140,8 @@ public class UserThreadModelImpl extends BaseModelImpl<UserThread>
 	}
 
 	public void setUserId(long userId) {
+		_columnBitmask |= USERID_COLUMN_BITMASK;
+
 		if (!_setOriginalUserId) {
 			_setOriginalUserId = true;
 
@@ -176,6 +184,8 @@ public class UserThreadModelImpl extends BaseModelImpl<UserThread>
 	}
 
 	public void setMbThreadId(long mbThreadId) {
+		_columnBitmask |= MBTHREADID_COLUMN_BITMASK;
+
 		if (!_setOriginalMbThreadId) {
 			_setOriginalMbThreadId = true;
 
@@ -206,7 +216,19 @@ public class UserThreadModelImpl extends BaseModelImpl<UserThread>
 	}
 
 	public void setRead(boolean read) {
+		_columnBitmask |= READ_COLUMN_BITMASK;
+
+		if (!_setOriginalRead) {
+			_setOriginalRead = true;
+
+			_originalRead = _read;
+		}
+
 		_read = read;
+	}
+
+	public boolean getOriginalRead() {
+		return _originalRead;
 	}
 
 	public boolean getDeleted() {
@@ -218,7 +240,23 @@ public class UserThreadModelImpl extends BaseModelImpl<UserThread>
 	}
 
 	public void setDeleted(boolean deleted) {
+		_columnBitmask |= DELETED_COLUMN_BITMASK;
+
+		if (!_setOriginalDeleted) {
+			_setOriginalDeleted = true;
+
+			_originalDeleted = _deleted;
+		}
+
 		_deleted = deleted;
+	}
+
+	public boolean getOriginalDeleted() {
+		return _originalDeleted;
+	}
+
+	public long getColumnBitmask() {
+		return _columnBitmask;
 	}
 
 	@Override
@@ -227,8 +265,13 @@ public class UserThreadModelImpl extends BaseModelImpl<UserThread>
 			return (UserThread)this;
 		}
 		else {
-			return (UserThread)Proxy.newProxyInstance(_classLoader,
-				_escapedModelProxyInterfaces, new AutoEscapeBeanHandler(this));
+			if (_escapedModelProxy == null) {
+				_escapedModelProxy = (UserThread)ProxyUtil.newProxyInstance(_classLoader,
+						_escapedModelProxyInterfaces,
+						new AutoEscapeBeanHandler(this));
+			}
+
+			return _escapedModelProxy;
 		}
 	}
 
@@ -322,6 +365,55 @@ public class UserThreadModelImpl extends BaseModelImpl<UserThread>
 		userThreadModelImpl._originalMbThreadId = userThreadModelImpl._mbThreadId;
 
 		userThreadModelImpl._setOriginalMbThreadId = false;
+
+		userThreadModelImpl._originalRead = userThreadModelImpl._read;
+
+		userThreadModelImpl._setOriginalRead = false;
+
+		userThreadModelImpl._originalDeleted = userThreadModelImpl._deleted;
+
+		userThreadModelImpl._setOriginalDeleted = false;
+
+		userThreadModelImpl._columnBitmask = 0;
+	}
+
+	@Override
+	public CacheModel<UserThread> toCacheModel() {
+		UserThreadCacheModel userThreadCacheModel = new UserThreadCacheModel();
+
+		userThreadCacheModel.userThreadId = getUserThreadId();
+
+		userThreadCacheModel.companyId = getCompanyId();
+
+		userThreadCacheModel.userId = getUserId();
+
+		Date createDate = getCreateDate();
+
+		if (createDate != null) {
+			userThreadCacheModel.createDate = createDate.getTime();
+		}
+		else {
+			userThreadCacheModel.createDate = Long.MIN_VALUE;
+		}
+
+		Date modifiedDate = getModifiedDate();
+
+		if (modifiedDate != null) {
+			userThreadCacheModel.modifiedDate = modifiedDate.getTime();
+		}
+		else {
+			userThreadCacheModel.modifiedDate = Long.MIN_VALUE;
+		}
+
+		userThreadCacheModel.mbThreadId = getMbThreadId();
+
+		userThreadCacheModel.topMBMessageId = getTopMBMessageId();
+
+		userThreadCacheModel.read = getRead();
+
+		userThreadCacheModel.deleted = getDeleted();
+
+		return userThreadCacheModel;
 	}
 
 	@Override
@@ -417,6 +509,12 @@ public class UserThreadModelImpl extends BaseModelImpl<UserThread>
 	private boolean _setOriginalMbThreadId;
 	private long _topMBMessageId;
 	private boolean _read;
+	private boolean _originalRead;
+	private boolean _setOriginalRead;
 	private boolean _deleted;
+	private boolean _originalDeleted;
+	private boolean _setOriginalDeleted;
 	private transient ExpandoBridge _expandoBridge;
+	private long _columnBitmask;
+	private UserThread _escapedModelProxy;
 }

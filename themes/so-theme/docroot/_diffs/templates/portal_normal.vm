@@ -13,7 +13,7 @@
 #if ($page_group.isUser())
 	#set($css_class = $css_class + " user-group")
 #end
-	
+
 <body class="$css_class">
 
 $theme.include($body_top_include)
@@ -28,7 +28,7 @@ $theme.include($body_top_include)
 	<header id="banner" role="banner">
 		<hgroup id="heading">
 			<h1 class="company-title">
-				<a class="logo" href="$company_url" title="#language("go-to") $company_name">
+				<a class="$logo_css_class" href="$company_url" title="#language("go-to") $company_name">
 					<span>$company_name</span>
 				</a>
 			</h1>
@@ -46,12 +46,6 @@ $theme.include($body_top_include)
 
 		#if (!$is_signed_in)
 			<a href="$sign_in_url" id="sign-in" rel="nofollow">$sign_in_text</a>
-		#end
-
-		#if ($update_available_url)
-			<div class="popup-alert-notice">
-				<a class="update-available" href="$update_available_url">#language("updates-are-available-for-liferay")</a>
-			</div>
 		#end
 
 		#if ($is_signed_in)

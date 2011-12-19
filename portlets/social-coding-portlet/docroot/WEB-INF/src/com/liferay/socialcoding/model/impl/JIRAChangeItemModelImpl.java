@@ -16,8 +16,10 @@ package com.liferay.socialcoding.model.impl;
 
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.impl.BaseModelImpl;
 import com.liferay.portal.service.ServiceContext;
 
@@ -28,8 +30,6 @@ import com.liferay.socialcoding.model.JIRAChangeItem;
 import com.liferay.socialcoding.model.JIRAChangeItemModel;
 
 import java.io.Serializable;
-
-import java.lang.reflect.Proxy;
 
 import java.sql.Types;
 
@@ -74,15 +74,10 @@ public class JIRAChangeItemModelImpl extends BaseModelImpl<JIRAChangeItem>
 	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
 				"value.object.finder.cache.enabled.com.liferay.socialcoding.model.JIRAChangeItem"),
 			true);
-
-	public Class<?> getModelClass() {
-		return JIRAChangeItem.class;
-	}
-
-	public String getModelClassName() {
-		return JIRAChangeItem.class.getName();
-	}
-
+	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
+				"value.object.column.bitmask.enabled.com.liferay.socialcoding.model.JIRAChangeItem"),
+			true);
+	public static long JIRACHANGEGROUPID_COLUMN_BITMASK = 1L;
 	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(com.liferay.util.service.ServiceProps.get(
 				"lock.expiration.time.com.liferay.socialcoding.model.JIRAChangeItem"));
 
@@ -105,6 +100,14 @@ public class JIRAChangeItemModelImpl extends BaseModelImpl<JIRAChangeItem>
 		setPrimaryKey(((Long)primaryKeyObj).longValue());
 	}
 
+	public Class<?> getModelClass() {
+		return JIRAChangeItem.class;
+	}
+
+	public String getModelClassName() {
+		return JIRAChangeItem.class.getName();
+	}
+
 	public long getJiraChangeItemId() {
 		return _jiraChangeItemId;
 	}
@@ -118,7 +121,19 @@ public class JIRAChangeItemModelImpl extends BaseModelImpl<JIRAChangeItem>
 	}
 
 	public void setJiraChangeGroupId(long jiraChangeGroupId) {
+		_columnBitmask |= JIRACHANGEGROUPID_COLUMN_BITMASK;
+
+		if (!_setOriginalJiraChangeGroupId) {
+			_setOriginalJiraChangeGroupId = true;
+
+			_originalJiraChangeGroupId = _jiraChangeGroupId;
+		}
+
 		_jiraChangeGroupId = jiraChangeGroupId;
+	}
+
+	public long getOriginalJiraChangeGroupId() {
+		return _originalJiraChangeGroupId;
 	}
 
 	public String getField() {
@@ -186,14 +201,23 @@ public class JIRAChangeItemModelImpl extends BaseModelImpl<JIRAChangeItem>
 		_newString = newString;
 	}
 
+	public long getColumnBitmask() {
+		return _columnBitmask;
+	}
+
 	@Override
 	public JIRAChangeItem toEscapedModel() {
 		if (isEscapedModel()) {
 			return (JIRAChangeItem)this;
 		}
 		else {
-			return (JIRAChangeItem)Proxy.newProxyInstance(_classLoader,
-				_escapedModelProxyInterfaces, new AutoEscapeBeanHandler(this));
+			if (_escapedModelProxy == null) {
+				_escapedModelProxy = (JIRAChangeItem)ProxyUtil.newProxyInstance(_classLoader,
+						_escapedModelProxyInterfaces,
+						new AutoEscapeBeanHandler(this));
+			}
+
+			return _escapedModelProxy;
 		}
 	}
 
@@ -275,6 +299,64 @@ public class JIRAChangeItemModelImpl extends BaseModelImpl<JIRAChangeItem>
 
 	@Override
 	public void resetOriginalValues() {
+		JIRAChangeItemModelImpl jiraChangeItemModelImpl = this;
+
+		jiraChangeItemModelImpl._originalJiraChangeGroupId = jiraChangeItemModelImpl._jiraChangeGroupId;
+
+		jiraChangeItemModelImpl._setOriginalJiraChangeGroupId = false;
+
+		jiraChangeItemModelImpl._columnBitmask = 0;
+	}
+
+	@Override
+	public CacheModel<JIRAChangeItem> toCacheModel() {
+		JIRAChangeItemCacheModel jiraChangeItemCacheModel = new JIRAChangeItemCacheModel();
+
+		jiraChangeItemCacheModel.jiraChangeItemId = getJiraChangeItemId();
+
+		jiraChangeItemCacheModel.jiraChangeGroupId = getJiraChangeGroupId();
+
+		jiraChangeItemCacheModel.field = getField();
+
+		String field = jiraChangeItemCacheModel.field;
+
+		if ((field != null) && (field.length() == 0)) {
+			jiraChangeItemCacheModel.field = null;
+		}
+
+		jiraChangeItemCacheModel.oldValue = getOldValue();
+
+		String oldValue = jiraChangeItemCacheModel.oldValue;
+
+		if ((oldValue != null) && (oldValue.length() == 0)) {
+			jiraChangeItemCacheModel.oldValue = null;
+		}
+
+		jiraChangeItemCacheModel.oldString = getOldString();
+
+		String oldString = jiraChangeItemCacheModel.oldString;
+
+		if ((oldString != null) && (oldString.length() == 0)) {
+			jiraChangeItemCacheModel.oldString = null;
+		}
+
+		jiraChangeItemCacheModel.newValue = getNewValue();
+
+		String newValue = jiraChangeItemCacheModel.newValue;
+
+		if ((newValue != null) && (newValue.length() == 0)) {
+			jiraChangeItemCacheModel.newValue = null;
+		}
+
+		jiraChangeItemCacheModel.newString = getNewString();
+
+		String newString = jiraChangeItemCacheModel.newString;
+
+		if ((newString != null) && (newString.length() == 0)) {
+			jiraChangeItemCacheModel.newString = null;
+		}
+
+		return jiraChangeItemCacheModel;
 	}
 
 	@Override
@@ -347,10 +429,14 @@ public class JIRAChangeItemModelImpl extends BaseModelImpl<JIRAChangeItem>
 		};
 	private long _jiraChangeItemId;
 	private long _jiraChangeGroupId;
+	private long _originalJiraChangeGroupId;
+	private boolean _setOriginalJiraChangeGroupId;
 	private String _field;
 	private String _oldValue;
 	private String _oldString;
 	private String _newValue;
 	private String _newString;
 	private transient ExpandoBridge _expandoBridge;
+	private long _columnBitmask;
+	private JIRAChangeItem _escapedModelProxy;
 }

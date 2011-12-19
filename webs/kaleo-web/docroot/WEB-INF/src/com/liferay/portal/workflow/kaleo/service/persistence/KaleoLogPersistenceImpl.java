@@ -35,6 +35,7 @@ import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.ModelListener;
 import com.liferay.portal.service.persistence.BatchSessionUtil;
 import com.liferay.portal.service.persistence.ResourcePersistence;
@@ -71,46 +72,74 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 	 * Never modify or reference this class directly. Always use {@link KaleoLogUtil} to access the kaleo log persistence. Modify <code>service.xml</code> and rerun ServiceBuilder to regenerate this class.
 	 */
 	public static final String FINDER_CLASS_NAME_ENTITY = KaleoLogImpl.class.getName();
-	public static final String FINDER_CLASS_NAME_LIST = FINDER_CLASS_NAME_ENTITY +
-		".List";
-	public static final FinderPath FINDER_PATH_FIND_BY_COMPANYID = new FinderPath(KaleoLogModelImpl.ENTITY_CACHE_ENABLED,
-			KaleoLogModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"findByCompanyId",
+	public static final String FINDER_CLASS_NAME_LIST_WITH_PAGINATION = FINDER_CLASS_NAME_ENTITY +
+		".List1";
+	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION = FINDER_CLASS_NAME_ENTITY +
+		".List2";
+	public static final FinderPath FINDER_PATH_WITH_PAGINATION_FIND_BY_COMPANYID =
+		new FinderPath(KaleoLogModelImpl.ENTITY_CACHE_ENABLED,
+			KaleoLogModelImpl.FINDER_CACHE_ENABLED, KaleoLogImpl.class,
+			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByCompanyId",
 			new String[] {
 				Long.class.getName(),
 				
 			"java.lang.Integer", "java.lang.Integer",
 				"com.liferay.portal.kernel.util.OrderByComparator"
 			});
+	public static final FinderPath FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_COMPANYID =
+		new FinderPath(KaleoLogModelImpl.ENTITY_CACHE_ENABLED,
+			KaleoLogModelImpl.FINDER_CACHE_ENABLED, KaleoLogImpl.class,
+			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByCompanyId",
+			new String[] { Long.class.getName() },
+			KaleoLogModelImpl.COMPANYID_COLUMN_BITMASK);
 	public static final FinderPath FINDER_PATH_COUNT_BY_COMPANYID = new FinderPath(KaleoLogModelImpl.ENTITY_CACHE_ENABLED,
-			KaleoLogModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"countByCompanyId", new String[] { Long.class.getName() });
-	public static final FinderPath FINDER_PATH_FIND_BY_KALEODEFINITIONID = new FinderPath(KaleoLogModelImpl.ENTITY_CACHE_ENABLED,
-			KaleoLogModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"findByKaleoDefinitionId",
+			KaleoLogModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByCompanyId",
+			new String[] { Long.class.getName() });
+	public static final FinderPath FINDER_PATH_WITH_PAGINATION_FIND_BY_KALEODEFINITIONID =
+		new FinderPath(KaleoLogModelImpl.ENTITY_CACHE_ENABLED,
+			KaleoLogModelImpl.FINDER_CACHE_ENABLED, KaleoLogImpl.class,
+			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByKaleoDefinitionId",
 			new String[] {
 				Long.class.getName(),
 				
 			"java.lang.Integer", "java.lang.Integer",
 				"com.liferay.portal.kernel.util.OrderByComparator"
 			});
+	public static final FinderPath FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_KALEODEFINITIONID =
+		new FinderPath(KaleoLogModelImpl.ENTITY_CACHE_ENABLED,
+			KaleoLogModelImpl.FINDER_CACHE_ENABLED, KaleoLogImpl.class,
+			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
+			"findByKaleoDefinitionId", new String[] { Long.class.getName() },
+			KaleoLogModelImpl.KALEODEFINITIONID_COLUMN_BITMASK);
 	public static final FinderPath FINDER_PATH_COUNT_BY_KALEODEFINITIONID = new FinderPath(KaleoLogModelImpl.ENTITY_CACHE_ENABLED,
-			KaleoLogModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
+			KaleoLogModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
 			"countByKaleoDefinitionId", new String[] { Long.class.getName() });
-	public static final FinderPath FINDER_PATH_FIND_BY_KALEOINSTANCEID = new FinderPath(KaleoLogModelImpl.ENTITY_CACHE_ENABLED,
-			KaleoLogModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"findByKaleoInstanceId",
+	public static final FinderPath FINDER_PATH_WITH_PAGINATION_FIND_BY_KALEOINSTANCEID =
+		new FinderPath(KaleoLogModelImpl.ENTITY_CACHE_ENABLED,
+			KaleoLogModelImpl.FINDER_CACHE_ENABLED, KaleoLogImpl.class,
+			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByKaleoInstanceId",
 			new String[] {
 				Long.class.getName(),
 				
 			"java.lang.Integer", "java.lang.Integer",
 				"com.liferay.portal.kernel.util.OrderByComparator"
 			});
+	public static final FinderPath FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_KALEOINSTANCEID =
+		new FinderPath(KaleoLogModelImpl.ENTITY_CACHE_ENABLED,
+			KaleoLogModelImpl.FINDER_CACHE_ENABLED, KaleoLogImpl.class,
+			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByKaleoInstanceId",
+			new String[] { Long.class.getName() },
+			KaleoLogModelImpl.KALEOINSTANCEID_COLUMN_BITMASK);
 	public static final FinderPath FINDER_PATH_COUNT_BY_KALEOINSTANCEID = new FinderPath(KaleoLogModelImpl.ENTITY_CACHE_ENABLED,
-			KaleoLogModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
+			KaleoLogModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
 			"countByKaleoInstanceId", new String[] { Long.class.getName() });
-	public static final FinderPath FINDER_PATH_FIND_BY_KALEOTASKINSTANCETOKENID = new FinderPath(KaleoLogModelImpl.ENTITY_CACHE_ENABLED,
-			KaleoLogModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
+	public static final FinderPath FINDER_PATH_WITH_PAGINATION_FIND_BY_KALEOTASKINSTANCETOKENID =
+		new FinderPath(KaleoLogModelImpl.ENTITY_CACHE_ENABLED,
+			KaleoLogModelImpl.FINDER_CACHE_ENABLED, KaleoLogImpl.class,
+			FINDER_CLASS_NAME_LIST_WITH_PAGINATION,
 			"findByKaleoTaskInstanceTokenId",
 			new String[] {
 				Long.class.getName(),
@@ -118,47 +147,79 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 			"java.lang.Integer", "java.lang.Integer",
 				"com.liferay.portal.kernel.util.OrderByComparator"
 			});
+	public static final FinderPath FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_KALEOTASKINSTANCETOKENID =
+		new FinderPath(KaleoLogModelImpl.ENTITY_CACHE_ENABLED,
+			KaleoLogModelImpl.FINDER_CACHE_ENABLED, KaleoLogImpl.class,
+			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
+			"findByKaleoTaskInstanceTokenId",
+			new String[] { Long.class.getName() },
+			KaleoLogModelImpl.KALEOTASKINSTANCETOKENID_COLUMN_BITMASK);
 	public static final FinderPath FINDER_PATH_COUNT_BY_KALEOTASKINSTANCETOKENID =
 		new FinderPath(KaleoLogModelImpl.ENTITY_CACHE_ENABLED,
-			KaleoLogModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
+			KaleoLogModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
 			"countByKaleoTaskInstanceTokenId",
 			new String[] { Long.class.getName() });
-	public static final FinderPath FINDER_PATH_FIND_BY_KITI_T = new FinderPath(KaleoLogModelImpl.ENTITY_CACHE_ENABLED,
-			KaleoLogModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"findByKITI_T",
+	public static final FinderPath FINDER_PATH_WITH_PAGINATION_FIND_BY_KITI_T = new FinderPath(KaleoLogModelImpl.ENTITY_CACHE_ENABLED,
+			KaleoLogModelImpl.FINDER_CACHE_ENABLED, KaleoLogImpl.class,
+			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByKITI_T",
 			new String[] {
 				Long.class.getName(), String.class.getName(),
 				
 			"java.lang.Integer", "java.lang.Integer",
 				"com.liferay.portal.kernel.util.OrderByComparator"
 			});
+	public static final FinderPath FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_KITI_T =
+		new FinderPath(KaleoLogModelImpl.ENTITY_CACHE_ENABLED,
+			KaleoLogModelImpl.FINDER_CACHE_ENABLED, KaleoLogImpl.class,
+			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByKITI_T",
+			new String[] { Long.class.getName(), String.class.getName() },
+			KaleoLogModelImpl.KALEOINSTANCETOKENID_COLUMN_BITMASK |
+			KaleoLogModelImpl.TYPE_COLUMN_BITMASK);
 	public static final FinderPath FINDER_PATH_COUNT_BY_KITI_T = new FinderPath(KaleoLogModelImpl.ENTITY_CACHE_ENABLED,
-			KaleoLogModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"countByKITI_T",
+			KaleoLogModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByKITI_T",
 			new String[] { Long.class.getName(), String.class.getName() });
-	public static final FinderPath FINDER_PATH_FIND_BY_KITI_KNI_T = new FinderPath(KaleoLogModelImpl.ENTITY_CACHE_ENABLED,
-			KaleoLogModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"findByKITI_KNI_T",
+	public static final FinderPath FINDER_PATH_WITH_PAGINATION_FIND_BY_KCN_KCPK_KITI_T =
+		new FinderPath(KaleoLogModelImpl.ENTITY_CACHE_ENABLED,
+			KaleoLogModelImpl.FINDER_CACHE_ENABLED, KaleoLogImpl.class,
+			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByKCN_KCPK_KITI_T",
 			new String[] {
-				Long.class.getName(), Long.class.getName(),
-				String.class.getName(),
+				String.class.getName(), Long.class.getName(),
+				Long.class.getName(), String.class.getName(),
 				
 			"java.lang.Integer", "java.lang.Integer",
 				"com.liferay.portal.kernel.util.OrderByComparator"
 			});
-	public static final FinderPath FINDER_PATH_COUNT_BY_KITI_KNI_T = new FinderPath(KaleoLogModelImpl.ENTITY_CACHE_ENABLED,
-			KaleoLogModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"countByKITI_KNI_T",
+	public static final FinderPath FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_KCN_KCPK_KITI_T =
+		new FinderPath(KaleoLogModelImpl.ENTITY_CACHE_ENABLED,
+			KaleoLogModelImpl.FINDER_CACHE_ENABLED, KaleoLogImpl.class,
+			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByKCN_KCPK_KITI_T",
 			new String[] {
-				Long.class.getName(), Long.class.getName(),
-				String.class.getName()
+				String.class.getName(), Long.class.getName(),
+				Long.class.getName(), String.class.getName()
+			},
+			KaleoLogModelImpl.KALEOCLASSNAME_COLUMN_BITMASK |
+			KaleoLogModelImpl.KALEOCLASSPK_COLUMN_BITMASK |
+			KaleoLogModelImpl.KALEOINSTANCETOKENID_COLUMN_BITMASK |
+			KaleoLogModelImpl.TYPE_COLUMN_BITMASK);
+	public static final FinderPath FINDER_PATH_COUNT_BY_KCN_KCPK_KITI_T = new FinderPath(KaleoLogModelImpl.ENTITY_CACHE_ENABLED,
+			KaleoLogModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION,
+			"countByKCN_KCPK_KITI_T",
+			new String[] {
+				String.class.getName(), Long.class.getName(),
+				Long.class.getName(), String.class.getName()
 			});
-	public static final FinderPath FINDER_PATH_FIND_ALL = new FinderPath(KaleoLogModelImpl.ENTITY_CACHE_ENABLED,
-			KaleoLogModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"findAll", new String[0]);
+	public static final FinderPath FINDER_PATH_WITH_PAGINATION_FIND_ALL = new FinderPath(KaleoLogModelImpl.ENTITY_CACHE_ENABLED,
+			KaleoLogModelImpl.FINDER_CACHE_ENABLED, KaleoLogImpl.class,
+			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll", new String[0]);
+	public static final FinderPath FINDER_PATH_WITHOUT_PAGINATION_FIND_ALL = new FinderPath(KaleoLogModelImpl.ENTITY_CACHE_ENABLED,
+			KaleoLogModelImpl.FINDER_CACHE_ENABLED, KaleoLogImpl.class,
+			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0]);
 	public static final FinderPath FINDER_PATH_COUNT_ALL = new FinderPath(KaleoLogModelImpl.ENTITY_CACHE_ENABLED,
-			KaleoLogModelImpl.FINDER_CACHE_ENABLED, FINDER_CLASS_NAME_LIST,
-			"countAll", new String[0]);
+			KaleoLogModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll", new String[0]);
 
 	/**
 	 * Caches the kaleo log in the entity cache if it is enabled.
@@ -181,7 +242,7 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 		for (KaleoLog kaleoLog : kaleoLogs) {
 			if (EntityCacheUtil.getResult(
 						KaleoLogModelImpl.ENTITY_CACHE_ENABLED,
-						KaleoLogImpl.class, kaleoLog.getPrimaryKey(), this) == null) {
+						KaleoLogImpl.class, kaleoLog.getPrimaryKey()) == null) {
 				cacheResult(kaleoLog);
 			}
 		}
@@ -201,8 +262,10 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 		}
 
 		EntityCacheUtil.clearCache(KaleoLogImpl.class.getName());
+
 		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_ENTITY);
-		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST);
+		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
+		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 	}
 
 	/**
@@ -216,6 +279,9 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 	public void clearCache(KaleoLog kaleoLog) {
 		EntityCacheUtil.removeResult(KaleoLogModelImpl.ENTITY_CACHE_ENABLED,
 			KaleoLogImpl.class, kaleoLog.getPrimaryKey());
+
+		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
+		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 	}
 
 	/**
@@ -317,7 +383,8 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 			closeSession(session);
 		}
 
-		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST);
+		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
+		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 
 		EntityCacheUtil.removeResult(KaleoLogModelImpl.ENTITY_CACHE_ENABLED,
 			KaleoLogImpl.class, kaleoLog.getPrimaryKey());
@@ -330,6 +397,10 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 		com.liferay.portal.workflow.kaleo.model.KaleoLog kaleoLog, boolean merge)
 		throws SystemException {
 		kaleoLog = toUnwrappedModel(kaleoLog);
+
+		boolean isNew = kaleoLog.isNew();
+
+		KaleoLogModelImpl kaleoLogModelImpl = (KaleoLogModelImpl)kaleoLog;
 
 		Session session = null;
 
@@ -347,7 +418,90 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 			closeSession(session);
 		}
 
-		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST);
+		FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
+
+		if (isNew || !KaleoLogModelImpl.COLUMN_BITMASK_ENABLED) {
+			FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
+		}
+
+		else {
+			if ((kaleoLogModelImpl.getColumnBitmask() &
+					FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_COMPANYID.getColumnBitmask()) != 0) {
+				Object[] args = new Object[] {
+						Long.valueOf(kaleoLogModelImpl.getOriginalCompanyId())
+					};
+
+				FinderCacheUtil.removeResult(FINDER_PATH_COUNT_BY_COMPANYID,
+					args);
+				FinderCacheUtil.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_COMPANYID,
+					args);
+			}
+
+			if ((kaleoLogModelImpl.getColumnBitmask() &
+					FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_KALEODEFINITIONID.getColumnBitmask()) != 0) {
+				Object[] args = new Object[] {
+						Long.valueOf(kaleoLogModelImpl.getOriginalKaleoDefinitionId())
+					};
+
+				FinderCacheUtil.removeResult(FINDER_PATH_COUNT_BY_KALEODEFINITIONID,
+					args);
+				FinderCacheUtil.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_KALEODEFINITIONID,
+					args);
+			}
+
+			if ((kaleoLogModelImpl.getColumnBitmask() &
+					FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_KALEOINSTANCEID.getColumnBitmask()) != 0) {
+				Object[] args = new Object[] {
+						Long.valueOf(kaleoLogModelImpl.getOriginalKaleoInstanceId())
+					};
+
+				FinderCacheUtil.removeResult(FINDER_PATH_COUNT_BY_KALEOINSTANCEID,
+					args);
+				FinderCacheUtil.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_KALEOINSTANCEID,
+					args);
+			}
+
+			if ((kaleoLogModelImpl.getColumnBitmask() &
+					FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_KALEOTASKINSTANCETOKENID.getColumnBitmask()) != 0) {
+				Object[] args = new Object[] {
+						Long.valueOf(kaleoLogModelImpl.getOriginalKaleoTaskInstanceTokenId())
+					};
+
+				FinderCacheUtil.removeResult(FINDER_PATH_COUNT_BY_KALEOTASKINSTANCETOKENID,
+					args);
+				FinderCacheUtil.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_KALEOTASKINSTANCETOKENID,
+					args);
+			}
+
+			if ((kaleoLogModelImpl.getColumnBitmask() &
+					FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_KITI_T.getColumnBitmask()) != 0) {
+				Object[] args = new Object[] {
+						Long.valueOf(kaleoLogModelImpl.getOriginalKaleoInstanceTokenId()),
+						
+						kaleoLogModelImpl.getOriginalType()
+					};
+
+				FinderCacheUtil.removeResult(FINDER_PATH_COUNT_BY_KITI_T, args);
+				FinderCacheUtil.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_KITI_T,
+					args);
+			}
+
+			if ((kaleoLogModelImpl.getColumnBitmask() &
+					FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_KCN_KCPK_KITI_T.getColumnBitmask()) != 0) {
+				Object[] args = new Object[] {
+						kaleoLogModelImpl.getOriginalKaleoClassName(),
+						Long.valueOf(kaleoLogModelImpl.getOriginalKaleoClassPK()),
+						Long.valueOf(kaleoLogModelImpl.getOriginalKaleoInstanceTokenId()),
+						
+						kaleoLogModelImpl.getOriginalType()
+					};
+
+				FinderCacheUtil.removeResult(FINDER_PATH_COUNT_BY_KCN_KCPK_KITI_T,
+					args);
+				FinderCacheUtil.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_KCN_KCPK_KITI_T,
+					args);
+			}
+		}
 
 		EntityCacheUtil.putResult(KaleoLogModelImpl.ENTITY_CACHE_ENABLED,
 			KaleoLogImpl.class, kaleoLog.getPrimaryKey(), kaleoLog);
@@ -372,11 +526,12 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 		kaleoLogImpl.setUserName(kaleoLog.getUserName());
 		kaleoLogImpl.setCreateDate(kaleoLog.getCreateDate());
 		kaleoLogImpl.setModifiedDate(kaleoLog.getModifiedDate());
+		kaleoLogImpl.setKaleoClassName(kaleoLog.getKaleoClassName());
+		kaleoLogImpl.setKaleoClassPK(kaleoLog.getKaleoClassPK());
 		kaleoLogImpl.setKaleoDefinitionId(kaleoLog.getKaleoDefinitionId());
 		kaleoLogImpl.setKaleoInstanceId(kaleoLog.getKaleoInstanceId());
 		kaleoLogImpl.setKaleoInstanceTokenId(kaleoLog.getKaleoInstanceTokenId());
 		kaleoLogImpl.setKaleoTaskInstanceTokenId(kaleoLog.getKaleoTaskInstanceTokenId());
-		kaleoLogImpl.setKaleoNodeId(kaleoLog.getKaleoNodeId());
 		kaleoLogImpl.setKaleoNodeName(kaleoLog.getKaleoNodeName());
 		kaleoLogImpl.setTerminalKaleoNode(kaleoLog.isTerminalKaleoNode());
 		kaleoLogImpl.setKaleoActionId(kaleoLog.getKaleoActionId());
@@ -459,10 +614,16 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 	public KaleoLog fetchByPrimaryKey(long kaleoLogId)
 		throws SystemException {
 		KaleoLog kaleoLog = (KaleoLog)EntityCacheUtil.getResult(KaleoLogModelImpl.ENTITY_CACHE_ENABLED,
-				KaleoLogImpl.class, kaleoLogId, this);
+				KaleoLogImpl.class, kaleoLogId);
+
+		if (kaleoLog == _nullKaleoLog) {
+			return null;
+		}
 
 		if (kaleoLog == null) {
 			Session session = null;
+
+			boolean hasException = false;
 
 			try {
 				session = openSession();
@@ -471,11 +632,17 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 						Long.valueOf(kaleoLogId));
 			}
 			catch (Exception e) {
+				hasException = true;
+
 				throw processException(e);
 			}
 			finally {
 				if (kaleoLog != null) {
 					cacheResult(kaleoLog);
+				}
+				else if (!hasException) {
+					EntityCacheUtil.putResult(KaleoLogModelImpl.ENTITY_CACHE_ENABLED,
+						KaleoLogImpl.class, kaleoLogId, _nullKaleoLog);
 				}
 
 				closeSession(session);
@@ -532,14 +699,20 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 	 */
 	public List<KaleoLog> findByCompanyId(long companyId, int start, int end,
 		OrderByComparator orderByComparator) throws SystemException {
-		Object[] finderArgs = new Object[] {
-				companyId,
-				
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
-			};
+		FinderPath finderPath = null;
+		Object[] finderArgs = null;
 
-		List<KaleoLog> list = (List<KaleoLog>)FinderCacheUtil.getResult(FINDER_PATH_FIND_BY_COMPANYID,
+		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
+				(orderByComparator == null)) {
+			finderPath = FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_COMPANYID;
+			finderArgs = new Object[] { companyId };
+		}
+		else {
+			finderPath = FINDER_PATH_WITH_PAGINATION_FIND_BY_COMPANYID;
+			finderArgs = new Object[] { companyId, start, end, orderByComparator };
+		}
+
+		List<KaleoLog> list = (List<KaleoLog>)FinderCacheUtil.getResult(finderPath,
 				finderArgs, this);
 
 		if (list == null) {
@@ -587,14 +760,12 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 			}
 			finally {
 				if (list == null) {
-					FinderCacheUtil.removeResult(FINDER_PATH_FIND_BY_COMPANYID,
-						finderArgs);
+					FinderCacheUtil.removeResult(finderPath, finderArgs);
 				}
 				else {
 					cacheResult(list);
 
-					FinderCacheUtil.putResult(FINDER_PATH_FIND_BY_COMPANYID,
-						finderArgs, list);
+					FinderCacheUtil.putResult(finderPath, finderArgs, list);
 				}
 
 				closeSession(session);
@@ -739,17 +910,17 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 		query.append(_FINDER_COLUMN_COMPANYID_COMPANYID_2);
 
 		if (orderByComparator != null) {
-			String[] orderByFields = orderByComparator.getOrderByFields();
+			String[] orderByConditionFields = orderByComparator.getOrderByConditionFields();
 
-			if (orderByFields.length > 0) {
+			if (orderByConditionFields.length > 0) {
 				query.append(WHERE_AND);
 			}
 
-			for (int i = 0; i < orderByFields.length; i++) {
+			for (int i = 0; i < orderByConditionFields.length; i++) {
 				query.append(_ORDER_BY_ENTITY_ALIAS);
-				query.append(orderByFields[i]);
+				query.append(orderByConditionFields[i]);
 
-				if ((i + 1) < orderByFields.length) {
+				if ((i + 1) < orderByConditionFields.length) {
 					if (orderByComparator.isAscending() ^ previous) {
 						query.append(WHERE_GREATER_THAN_HAS_NEXT);
 					}
@@ -768,6 +939,8 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 			}
 
 			query.append(ORDER_BY_CLAUSE);
+
+			String[] orderByFields = orderByComparator.getOrderByFields();
 
 			for (int i = 0; i < orderByFields.length; i++) {
 				query.append(_ORDER_BY_ENTITY_ALIAS);
@@ -808,7 +981,7 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 		qPos.add(companyId);
 
 		if (orderByComparator != null) {
-			Object[] values = orderByComparator.getOrderByValues(kaleoLog);
+			Object[] values = orderByComparator.getOrderByConditionValues(kaleoLog);
 
 			for (Object value : values) {
 				qPos.add(value);
@@ -873,14 +1046,24 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 	public List<KaleoLog> findByKaleoDefinitionId(long kaleoDefinitionId,
 		int start, int end, OrderByComparator orderByComparator)
 		throws SystemException {
-		Object[] finderArgs = new Object[] {
-				kaleoDefinitionId,
-				
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
-			};
+		FinderPath finderPath = null;
+		Object[] finderArgs = null;
 
-		List<KaleoLog> list = (List<KaleoLog>)FinderCacheUtil.getResult(FINDER_PATH_FIND_BY_KALEODEFINITIONID,
+		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
+				(orderByComparator == null)) {
+			finderPath = FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_KALEODEFINITIONID;
+			finderArgs = new Object[] { kaleoDefinitionId };
+		}
+		else {
+			finderPath = FINDER_PATH_WITH_PAGINATION_FIND_BY_KALEODEFINITIONID;
+			finderArgs = new Object[] {
+					kaleoDefinitionId,
+					
+					start, end, orderByComparator
+				};
+		}
+
+		List<KaleoLog> list = (List<KaleoLog>)FinderCacheUtil.getResult(finderPath,
 				finderArgs, this);
 
 		if (list == null) {
@@ -928,14 +1111,12 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 			}
 			finally {
 				if (list == null) {
-					FinderCacheUtil.removeResult(FINDER_PATH_FIND_BY_KALEODEFINITIONID,
-						finderArgs);
+					FinderCacheUtil.removeResult(finderPath, finderArgs);
 				}
 				else {
 					cacheResult(list);
 
-					FinderCacheUtil.putResult(FINDER_PATH_FIND_BY_KALEODEFINITIONID,
-						finderArgs, list);
+					FinderCacheUtil.putResult(finderPath, finderArgs, list);
 				}
 
 				closeSession(session);
@@ -1081,17 +1262,17 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 		query.append(_FINDER_COLUMN_KALEODEFINITIONID_KALEODEFINITIONID_2);
 
 		if (orderByComparator != null) {
-			String[] orderByFields = orderByComparator.getOrderByFields();
+			String[] orderByConditionFields = orderByComparator.getOrderByConditionFields();
 
-			if (orderByFields.length > 0) {
+			if (orderByConditionFields.length > 0) {
 				query.append(WHERE_AND);
 			}
 
-			for (int i = 0; i < orderByFields.length; i++) {
+			for (int i = 0; i < orderByConditionFields.length; i++) {
 				query.append(_ORDER_BY_ENTITY_ALIAS);
-				query.append(orderByFields[i]);
+				query.append(orderByConditionFields[i]);
 
-				if ((i + 1) < orderByFields.length) {
+				if ((i + 1) < orderByConditionFields.length) {
 					if (orderByComparator.isAscending() ^ previous) {
 						query.append(WHERE_GREATER_THAN_HAS_NEXT);
 					}
@@ -1110,6 +1291,8 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 			}
 
 			query.append(ORDER_BY_CLAUSE);
+
+			String[] orderByFields = orderByComparator.getOrderByFields();
 
 			for (int i = 0; i < orderByFields.length; i++) {
 				query.append(_ORDER_BY_ENTITY_ALIAS);
@@ -1150,7 +1333,7 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 		qPos.add(kaleoDefinitionId);
 
 		if (orderByComparator != null) {
-			Object[] values = orderByComparator.getOrderByValues(kaleoLog);
+			Object[] values = orderByComparator.getOrderByConditionValues(kaleoLog);
 
 			for (Object value : values) {
 				qPos.add(value);
@@ -1215,14 +1398,24 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 	public List<KaleoLog> findByKaleoInstanceId(long kaleoInstanceId,
 		int start, int end, OrderByComparator orderByComparator)
 		throws SystemException {
-		Object[] finderArgs = new Object[] {
-				kaleoInstanceId,
-				
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
-			};
+		FinderPath finderPath = null;
+		Object[] finderArgs = null;
 
-		List<KaleoLog> list = (List<KaleoLog>)FinderCacheUtil.getResult(FINDER_PATH_FIND_BY_KALEOINSTANCEID,
+		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
+				(orderByComparator == null)) {
+			finderPath = FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_KALEOINSTANCEID;
+			finderArgs = new Object[] { kaleoInstanceId };
+		}
+		else {
+			finderPath = FINDER_PATH_WITH_PAGINATION_FIND_BY_KALEOINSTANCEID;
+			finderArgs = new Object[] {
+					kaleoInstanceId,
+					
+					start, end, orderByComparator
+				};
+		}
+
+		List<KaleoLog> list = (List<KaleoLog>)FinderCacheUtil.getResult(finderPath,
 				finderArgs, this);
 
 		if (list == null) {
@@ -1270,14 +1463,12 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 			}
 			finally {
 				if (list == null) {
-					FinderCacheUtil.removeResult(FINDER_PATH_FIND_BY_KALEOINSTANCEID,
-						finderArgs);
+					FinderCacheUtil.removeResult(finderPath, finderArgs);
 				}
 				else {
 					cacheResult(list);
 
-					FinderCacheUtil.putResult(FINDER_PATH_FIND_BY_KALEOINSTANCEID,
-						finderArgs, list);
+					FinderCacheUtil.putResult(finderPath, finderArgs, list);
 				}
 
 				closeSession(session);
@@ -1423,17 +1614,17 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 		query.append(_FINDER_COLUMN_KALEOINSTANCEID_KALEOINSTANCEID_2);
 
 		if (orderByComparator != null) {
-			String[] orderByFields = orderByComparator.getOrderByFields();
+			String[] orderByConditionFields = orderByComparator.getOrderByConditionFields();
 
-			if (orderByFields.length > 0) {
+			if (orderByConditionFields.length > 0) {
 				query.append(WHERE_AND);
 			}
 
-			for (int i = 0; i < orderByFields.length; i++) {
+			for (int i = 0; i < orderByConditionFields.length; i++) {
 				query.append(_ORDER_BY_ENTITY_ALIAS);
-				query.append(orderByFields[i]);
+				query.append(orderByConditionFields[i]);
 
-				if ((i + 1) < orderByFields.length) {
+				if ((i + 1) < orderByConditionFields.length) {
 					if (orderByComparator.isAscending() ^ previous) {
 						query.append(WHERE_GREATER_THAN_HAS_NEXT);
 					}
@@ -1452,6 +1643,8 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 			}
 
 			query.append(ORDER_BY_CLAUSE);
+
+			String[] orderByFields = orderByComparator.getOrderByFields();
 
 			for (int i = 0; i < orderByFields.length; i++) {
 				query.append(_ORDER_BY_ENTITY_ALIAS);
@@ -1492,7 +1685,7 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 		qPos.add(kaleoInstanceId);
 
 		if (orderByComparator != null) {
-			Object[] values = orderByComparator.getOrderByValues(kaleoLog);
+			Object[] values = orderByComparator.getOrderByConditionValues(kaleoLog);
 
 			for (Object value : values) {
 				qPos.add(value);
@@ -1559,14 +1752,24 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 	public List<KaleoLog> findByKaleoTaskInstanceTokenId(
 		long kaleoTaskInstanceTokenId, int start, int end,
 		OrderByComparator orderByComparator) throws SystemException {
-		Object[] finderArgs = new Object[] {
-				kaleoTaskInstanceTokenId,
-				
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
-			};
+		FinderPath finderPath = null;
+		Object[] finderArgs = null;
 
-		List<KaleoLog> list = (List<KaleoLog>)FinderCacheUtil.getResult(FINDER_PATH_FIND_BY_KALEOTASKINSTANCETOKENID,
+		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
+				(orderByComparator == null)) {
+			finderPath = FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_KALEOTASKINSTANCETOKENID;
+			finderArgs = new Object[] { kaleoTaskInstanceTokenId };
+		}
+		else {
+			finderPath = FINDER_PATH_WITH_PAGINATION_FIND_BY_KALEOTASKINSTANCETOKENID;
+			finderArgs = new Object[] {
+					kaleoTaskInstanceTokenId,
+					
+					start, end, orderByComparator
+				};
+		}
+
+		List<KaleoLog> list = (List<KaleoLog>)FinderCacheUtil.getResult(finderPath,
 				finderArgs, this);
 
 		if (list == null) {
@@ -1614,14 +1817,12 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 			}
 			finally {
 				if (list == null) {
-					FinderCacheUtil.removeResult(FINDER_PATH_FIND_BY_KALEOTASKINSTANCETOKENID,
-						finderArgs);
+					FinderCacheUtil.removeResult(finderPath, finderArgs);
 				}
 				else {
 					cacheResult(list);
 
-					FinderCacheUtil.putResult(FINDER_PATH_FIND_BY_KALEOTASKINSTANCETOKENID,
-						finderArgs, list);
+					FinderCacheUtil.putResult(finderPath, finderArgs, list);
 				}
 
 				closeSession(session);
@@ -1768,17 +1969,17 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 		query.append(_FINDER_COLUMN_KALEOTASKINSTANCETOKENID_KALEOTASKINSTANCETOKENID_2);
 
 		if (orderByComparator != null) {
-			String[] orderByFields = orderByComparator.getOrderByFields();
+			String[] orderByConditionFields = orderByComparator.getOrderByConditionFields();
 
-			if (orderByFields.length > 0) {
+			if (orderByConditionFields.length > 0) {
 				query.append(WHERE_AND);
 			}
 
-			for (int i = 0; i < orderByFields.length; i++) {
+			for (int i = 0; i < orderByConditionFields.length; i++) {
 				query.append(_ORDER_BY_ENTITY_ALIAS);
-				query.append(orderByFields[i]);
+				query.append(orderByConditionFields[i]);
 
-				if ((i + 1) < orderByFields.length) {
+				if ((i + 1) < orderByConditionFields.length) {
 					if (orderByComparator.isAscending() ^ previous) {
 						query.append(WHERE_GREATER_THAN_HAS_NEXT);
 					}
@@ -1797,6 +1998,8 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 			}
 
 			query.append(ORDER_BY_CLAUSE);
+
+			String[] orderByFields = orderByComparator.getOrderByFields();
 
 			for (int i = 0; i < orderByFields.length; i++) {
 				query.append(_ORDER_BY_ENTITY_ALIAS);
@@ -1837,7 +2040,7 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 		qPos.add(kaleoTaskInstanceTokenId);
 
 		if (orderByComparator != null) {
-			Object[] values = orderByComparator.getOrderByValues(kaleoLog);
+			Object[] values = orderByComparator.getOrderByConditionValues(kaleoLog);
 
 			for (Object value : values) {
 				qPos.add(value);
@@ -1905,14 +2108,24 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 	public List<KaleoLog> findByKITI_T(long kaleoInstanceTokenId, String type,
 		int start, int end, OrderByComparator orderByComparator)
 		throws SystemException {
-		Object[] finderArgs = new Object[] {
-				kaleoInstanceTokenId, type,
-				
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
-			};
+		FinderPath finderPath = null;
+		Object[] finderArgs = null;
 
-		List<KaleoLog> list = (List<KaleoLog>)FinderCacheUtil.getResult(FINDER_PATH_FIND_BY_KITI_T,
+		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
+				(orderByComparator == null)) {
+			finderPath = FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_KITI_T;
+			finderArgs = new Object[] { kaleoInstanceTokenId, type };
+		}
+		else {
+			finderPath = FINDER_PATH_WITH_PAGINATION_FIND_BY_KITI_T;
+			finderArgs = new Object[] {
+					kaleoInstanceTokenId, type,
+					
+					start, end, orderByComparator
+				};
+		}
+
+		List<KaleoLog> list = (List<KaleoLog>)FinderCacheUtil.getResult(finderPath,
 				finderArgs, this);
 
 		if (list == null) {
@@ -1976,14 +2189,12 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 			}
 			finally {
 				if (list == null) {
-					FinderCacheUtil.removeResult(FINDER_PATH_FIND_BY_KITI_T,
-						finderArgs);
+					FinderCacheUtil.removeResult(finderPath, finderArgs);
 				}
 				else {
 					cacheResult(list);
 
-					FinderCacheUtil.putResult(FINDER_PATH_FIND_BY_KITI_T,
-						finderArgs, list);
+					FinderCacheUtil.putResult(finderPath, finderArgs, list);
 				}
 
 				closeSession(session);
@@ -2151,17 +2362,17 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 		}
 
 		if (orderByComparator != null) {
-			String[] orderByFields = orderByComparator.getOrderByFields();
+			String[] orderByConditionFields = orderByComparator.getOrderByConditionFields();
 
-			if (orderByFields.length > 0) {
+			if (orderByConditionFields.length > 0) {
 				query.append(WHERE_AND);
 			}
 
-			for (int i = 0; i < orderByFields.length; i++) {
+			for (int i = 0; i < orderByConditionFields.length; i++) {
 				query.append(_ORDER_BY_ENTITY_ALIAS);
-				query.append(orderByFields[i]);
+				query.append(orderByConditionFields[i]);
 
-				if ((i + 1) < orderByFields.length) {
+				if ((i + 1) < orderByConditionFields.length) {
 					if (orderByComparator.isAscending() ^ previous) {
 						query.append(WHERE_GREATER_THAN_HAS_NEXT);
 					}
@@ -2180,6 +2391,8 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 			}
 
 			query.append(ORDER_BY_CLAUSE);
+
+			String[] orderByFields = orderByComparator.getOrderByFields();
 
 			for (int i = 0; i < orderByFields.length; i++) {
 				query.append(_ORDER_BY_ENTITY_ALIAS);
@@ -2224,7 +2437,7 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 		}
 
 		if (orderByComparator != null) {
-			Object[] values = orderByComparator.getOrderByValues(kaleoLog);
+			Object[] values = orderByComparator.getOrderByConditionValues(kaleoLog);
 
 			for (Object value : values) {
 				qPos.add(value);
@@ -2242,51 +2455,56 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 	}
 
 	/**
-	 * Returns all the kaleo logs where kaleoInstanceTokenId = &#63; and kaleoNodeId = &#63; and type = &#63;.
+	 * Returns all the kaleo logs where kaleoClassName = &#63; and kaleoClassPK = &#63; and kaleoInstanceTokenId = &#63; and type = &#63;.
 	 *
+	 * @param kaleoClassName the kaleo class name
+	 * @param kaleoClassPK the kaleo class p k
 	 * @param kaleoInstanceTokenId the kaleo instance token ID
-	 * @param kaleoNodeId the kaleo node ID
 	 * @param type the type
 	 * @return the matching kaleo logs
 	 * @throws SystemException if a system exception occurred
 	 */
-	public List<KaleoLog> findByKITI_KNI_T(long kaleoInstanceTokenId,
-		long kaleoNodeId, String type) throws SystemException {
-		return findByKITI_KNI_T(kaleoInstanceTokenId, kaleoNodeId, type,
-			QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
+	public List<KaleoLog> findByKCN_KCPK_KITI_T(String kaleoClassName,
+		long kaleoClassPK, long kaleoInstanceTokenId, String type)
+		throws SystemException {
+		return findByKCN_KCPK_KITI_T(kaleoClassName, kaleoClassPK,
+			kaleoInstanceTokenId, type, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
+			null);
 	}
 
 	/**
-	 * Returns a range of all the kaleo logs where kaleoInstanceTokenId = &#63; and kaleoNodeId = &#63; and type = &#63;.
+	 * Returns a range of all the kaleo logs where kaleoClassName = &#63; and kaleoClassPK = &#63; and kaleoInstanceTokenId = &#63; and type = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set.
 	 * </p>
 	 *
+	 * @param kaleoClassName the kaleo class name
+	 * @param kaleoClassPK the kaleo class p k
 	 * @param kaleoInstanceTokenId the kaleo instance token ID
-	 * @param kaleoNodeId the kaleo node ID
 	 * @param type the type
 	 * @param start the lower bound of the range of kaleo logs
 	 * @param end the upper bound of the range of kaleo logs (not inclusive)
 	 * @return the range of matching kaleo logs
 	 * @throws SystemException if a system exception occurred
 	 */
-	public List<KaleoLog> findByKITI_KNI_T(long kaleoInstanceTokenId,
-		long kaleoNodeId, String type, int start, int end)
-		throws SystemException {
-		return findByKITI_KNI_T(kaleoInstanceTokenId, kaleoNodeId, type, start,
-			end, null);
+	public List<KaleoLog> findByKCN_KCPK_KITI_T(String kaleoClassName,
+		long kaleoClassPK, long kaleoInstanceTokenId, String type, int start,
+		int end) throws SystemException {
+		return findByKCN_KCPK_KITI_T(kaleoClassName, kaleoClassPK,
+			kaleoInstanceTokenId, type, start, end, null);
 	}
 
 	/**
-	 * Returns an ordered range of all the kaleo logs where kaleoInstanceTokenId = &#63; and kaleoNodeId = &#63; and type = &#63;.
+	 * Returns an ordered range of all the kaleo logs where kaleoClassName = &#63; and kaleoClassPK = &#63; and kaleoInstanceTokenId = &#63; and type = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set.
 	 * </p>
 	 *
+	 * @param kaleoClassName the kaleo class name
+	 * @param kaleoClassPK the kaleo class p k
 	 * @param kaleoInstanceTokenId the kaleo instance token ID
-	 * @param kaleoNodeId the kaleo node ID
 	 * @param type the type
 	 * @param start the lower bound of the range of kaleo logs
 	 * @param end the upper bound of the range of kaleo logs (not inclusive)
@@ -2294,45 +2512,69 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 	 * @return the ordered range of matching kaleo logs
 	 * @throws SystemException if a system exception occurred
 	 */
-	public List<KaleoLog> findByKITI_KNI_T(long kaleoInstanceTokenId,
-		long kaleoNodeId, String type, int start, int end,
-		OrderByComparator orderByComparator) throws SystemException {
-		Object[] finderArgs = new Object[] {
-				kaleoInstanceTokenId, kaleoNodeId, type,
-				
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
-			};
+	public List<KaleoLog> findByKCN_KCPK_KITI_T(String kaleoClassName,
+		long kaleoClassPK, long kaleoInstanceTokenId, String type, int start,
+		int end, OrderByComparator orderByComparator) throws SystemException {
+		FinderPath finderPath = null;
+		Object[] finderArgs = null;
 
-		List<KaleoLog> list = (List<KaleoLog>)FinderCacheUtil.getResult(FINDER_PATH_FIND_BY_KITI_KNI_T,
+		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
+				(orderByComparator == null)) {
+			finderPath = FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_KCN_KCPK_KITI_T;
+			finderArgs = new Object[] {
+					kaleoClassName, kaleoClassPK, kaleoInstanceTokenId, type
+				};
+		}
+		else {
+			finderPath = FINDER_PATH_WITH_PAGINATION_FIND_BY_KCN_KCPK_KITI_T;
+			finderArgs = new Object[] {
+					kaleoClassName, kaleoClassPK, kaleoInstanceTokenId, type,
+					
+					start, end, orderByComparator
+				};
+		}
+
+		List<KaleoLog> list = (List<KaleoLog>)FinderCacheUtil.getResult(finderPath,
 				finderArgs, this);
 
 		if (list == null) {
 			StringBundler query = null;
 
 			if (orderByComparator != null) {
-				query = new StringBundler(5 +
+				query = new StringBundler(6 +
 						(orderByComparator.getOrderByFields().length * 3));
 			}
 			else {
-				query = new StringBundler(5);
+				query = new StringBundler(6);
 			}
 
 			query.append(_SQL_SELECT_KALEOLOG_WHERE);
 
-			query.append(_FINDER_COLUMN_KITI_KNI_T_KALEOINSTANCETOKENID_2);
+			if (kaleoClassName == null) {
+				query.append(_FINDER_COLUMN_KCN_KCPK_KITI_T_KALEOCLASSNAME_1);
+			}
+			else {
+				if (kaleoClassName.equals(StringPool.BLANK)) {
+					query.append(_FINDER_COLUMN_KCN_KCPK_KITI_T_KALEOCLASSNAME_3);
+				}
+				else {
+					query.append(_FINDER_COLUMN_KCN_KCPK_KITI_T_KALEOCLASSNAME_2);
+				}
+			}
 
-			query.append(_FINDER_COLUMN_KITI_KNI_T_KALEONODEID_2);
+			query.append(_FINDER_COLUMN_KCN_KCPK_KITI_T_KALEOCLASSPK_2);
+
+			query.append(_FINDER_COLUMN_KCN_KCPK_KITI_T_KALEOINSTANCETOKENID_2);
 
 			if (type == null) {
-				query.append(_FINDER_COLUMN_KITI_KNI_T_TYPE_1);
+				query.append(_FINDER_COLUMN_KCN_KCPK_KITI_T_TYPE_1);
 			}
 			else {
 				if (type.equals(StringPool.BLANK)) {
-					query.append(_FINDER_COLUMN_KITI_KNI_T_TYPE_3);
+					query.append(_FINDER_COLUMN_KCN_KCPK_KITI_T_TYPE_3);
 				}
 				else {
-					query.append(_FINDER_COLUMN_KITI_KNI_T_TYPE_2);
+					query.append(_FINDER_COLUMN_KCN_KCPK_KITI_T_TYPE_2);
 				}
 			}
 
@@ -2356,9 +2598,13 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 
 				QueryPos qPos = QueryPos.getInstance(q);
 
-				qPos.add(kaleoInstanceTokenId);
+				if (kaleoClassName != null) {
+					qPos.add(kaleoClassName);
+				}
 
-				qPos.add(kaleoNodeId);
+				qPos.add(kaleoClassPK);
+
+				qPos.add(kaleoInstanceTokenId);
 
 				if (type != null) {
 					qPos.add(type);
@@ -2372,14 +2618,12 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 			}
 			finally {
 				if (list == null) {
-					FinderCacheUtil.removeResult(FINDER_PATH_FIND_BY_KITI_KNI_T,
-						finderArgs);
+					FinderCacheUtil.removeResult(finderPath, finderArgs);
 				}
 				else {
 					cacheResult(list);
 
-					FinderCacheUtil.putResult(FINDER_PATH_FIND_BY_KITI_KNI_T,
-						finderArgs, list);
+					FinderCacheUtil.putResult(finderPath, finderArgs, list);
 				}
 
 				closeSession(session);
@@ -2390,36 +2634,42 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 	}
 
 	/**
-	 * Returns the first kaleo log in the ordered set where kaleoInstanceTokenId = &#63; and kaleoNodeId = &#63; and type = &#63;.
+	 * Returns the first kaleo log in the ordered set where kaleoClassName = &#63; and kaleoClassPK = &#63; and kaleoInstanceTokenId = &#63; and type = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set.
 	 * </p>
 	 *
+	 * @param kaleoClassName the kaleo class name
+	 * @param kaleoClassPK the kaleo class p k
 	 * @param kaleoInstanceTokenId the kaleo instance token ID
-	 * @param kaleoNodeId the kaleo node ID
 	 * @param type the type
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the first matching kaleo log
 	 * @throws com.liferay.portal.workflow.kaleo.NoSuchLogException if a matching kaleo log could not be found
 	 * @throws SystemException if a system exception occurred
 	 */
-	public KaleoLog findByKITI_KNI_T_First(long kaleoInstanceTokenId,
-		long kaleoNodeId, String type, OrderByComparator orderByComparator)
+	public KaleoLog findByKCN_KCPK_KITI_T_First(String kaleoClassName,
+		long kaleoClassPK, long kaleoInstanceTokenId, String type,
+		OrderByComparator orderByComparator)
 		throws NoSuchLogException, SystemException {
-		List<KaleoLog> list = findByKITI_KNI_T(kaleoInstanceTokenId,
-				kaleoNodeId, type, 0, 1, orderByComparator);
+		List<KaleoLog> list = findByKCN_KCPK_KITI_T(kaleoClassName,
+				kaleoClassPK, kaleoInstanceTokenId, type, 0, 1,
+				orderByComparator);
 
 		if (list.isEmpty()) {
-			StringBundler msg = new StringBundler(8);
+			StringBundler msg = new StringBundler(10);
 
 			msg.append(_NO_SUCH_ENTITY_WITH_KEY);
 
-			msg.append("kaleoInstanceTokenId=");
-			msg.append(kaleoInstanceTokenId);
+			msg.append("kaleoClassName=");
+			msg.append(kaleoClassName);
 
-			msg.append(", kaleoNodeId=");
-			msg.append(kaleoNodeId);
+			msg.append(", kaleoClassPK=");
+			msg.append(kaleoClassPK);
+
+			msg.append(", kaleoInstanceTokenId=");
+			msg.append(kaleoInstanceTokenId);
 
 			msg.append(", type=");
 			msg.append(type);
@@ -2434,38 +2684,45 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 	}
 
 	/**
-	 * Returns the last kaleo log in the ordered set where kaleoInstanceTokenId = &#63; and kaleoNodeId = &#63; and type = &#63;.
+	 * Returns the last kaleo log in the ordered set where kaleoClassName = &#63; and kaleoClassPK = &#63; and kaleoInstanceTokenId = &#63; and type = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set.
 	 * </p>
 	 *
+	 * @param kaleoClassName the kaleo class name
+	 * @param kaleoClassPK the kaleo class p k
 	 * @param kaleoInstanceTokenId the kaleo instance token ID
-	 * @param kaleoNodeId the kaleo node ID
 	 * @param type the type
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the last matching kaleo log
 	 * @throws com.liferay.portal.workflow.kaleo.NoSuchLogException if a matching kaleo log could not be found
 	 * @throws SystemException if a system exception occurred
 	 */
-	public KaleoLog findByKITI_KNI_T_Last(long kaleoInstanceTokenId,
-		long kaleoNodeId, String type, OrderByComparator orderByComparator)
+	public KaleoLog findByKCN_KCPK_KITI_T_Last(String kaleoClassName,
+		long kaleoClassPK, long kaleoInstanceTokenId, String type,
+		OrderByComparator orderByComparator)
 		throws NoSuchLogException, SystemException {
-		int count = countByKITI_KNI_T(kaleoInstanceTokenId, kaleoNodeId, type);
+		int count = countByKCN_KCPK_KITI_T(kaleoClassName, kaleoClassPK,
+				kaleoInstanceTokenId, type);
 
-		List<KaleoLog> list = findByKITI_KNI_T(kaleoInstanceTokenId,
-				kaleoNodeId, type, count - 1, count, orderByComparator);
+		List<KaleoLog> list = findByKCN_KCPK_KITI_T(kaleoClassName,
+				kaleoClassPK, kaleoInstanceTokenId, type, count - 1, count,
+				orderByComparator);
 
 		if (list.isEmpty()) {
-			StringBundler msg = new StringBundler(8);
+			StringBundler msg = new StringBundler(10);
 
 			msg.append(_NO_SUCH_ENTITY_WITH_KEY);
 
-			msg.append("kaleoInstanceTokenId=");
-			msg.append(kaleoInstanceTokenId);
+			msg.append("kaleoClassName=");
+			msg.append(kaleoClassName);
 
-			msg.append(", kaleoNodeId=");
-			msg.append(kaleoNodeId);
+			msg.append(", kaleoClassPK=");
+			msg.append(kaleoClassPK);
+
+			msg.append(", kaleoInstanceTokenId=");
+			msg.append(kaleoInstanceTokenId);
 
 			msg.append(", type=");
 			msg.append(type);
@@ -2480,24 +2737,25 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 	}
 
 	/**
-	 * Returns the kaleo logs before and after the current kaleo log in the ordered set where kaleoInstanceTokenId = &#63; and kaleoNodeId = &#63; and type = &#63;.
+	 * Returns the kaleo logs before and after the current kaleo log in the ordered set where kaleoClassName = &#63; and kaleoClassPK = &#63; and kaleoInstanceTokenId = &#63; and type = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set.
 	 * </p>
 	 *
 	 * @param kaleoLogId the primary key of the current kaleo log
+	 * @param kaleoClassName the kaleo class name
+	 * @param kaleoClassPK the kaleo class p k
 	 * @param kaleoInstanceTokenId the kaleo instance token ID
-	 * @param kaleoNodeId the kaleo node ID
 	 * @param type the type
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the previous, current, and next kaleo log
 	 * @throws com.liferay.portal.workflow.kaleo.NoSuchLogException if a kaleo log with the primary key could not be found
 	 * @throws SystemException if a system exception occurred
 	 */
-	public KaleoLog[] findByKITI_KNI_T_PrevAndNext(long kaleoLogId,
-		long kaleoInstanceTokenId, long kaleoNodeId, String type,
-		OrderByComparator orderByComparator)
+	public KaleoLog[] findByKCN_KCPK_KITI_T_PrevAndNext(long kaleoLogId,
+		String kaleoClassName, long kaleoClassPK, long kaleoInstanceTokenId,
+		String type, OrderByComparator orderByComparator)
 		throws NoSuchLogException, SystemException {
 		KaleoLog kaleoLog = findByPrimaryKey(kaleoLogId);
 
@@ -2508,15 +2766,15 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 
 			KaleoLog[] array = new KaleoLogImpl[3];
 
-			array[0] = getByKITI_KNI_T_PrevAndNext(session, kaleoLog,
-					kaleoInstanceTokenId, kaleoNodeId, type, orderByComparator,
-					true);
+			array[0] = getByKCN_KCPK_KITI_T_PrevAndNext(session, kaleoLog,
+					kaleoClassName, kaleoClassPK, kaleoInstanceTokenId, type,
+					orderByComparator, true);
 
 			array[1] = kaleoLog;
 
-			array[2] = getByKITI_KNI_T_PrevAndNext(session, kaleoLog,
-					kaleoInstanceTokenId, kaleoNodeId, type, orderByComparator,
-					false);
+			array[2] = getByKCN_KCPK_KITI_T_PrevAndNext(session, kaleoLog,
+					kaleoClassName, kaleoClassPK, kaleoInstanceTokenId, type,
+					orderByComparator, false);
 
 			return array;
 		}
@@ -2528,9 +2786,10 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 		}
 	}
 
-	protected KaleoLog getByKITI_KNI_T_PrevAndNext(Session session,
-		KaleoLog kaleoLog, long kaleoInstanceTokenId, long kaleoNodeId,
-		String type, OrderByComparator orderByComparator, boolean previous) {
+	protected KaleoLog getByKCN_KCPK_KITI_T_PrevAndNext(Session session,
+		KaleoLog kaleoLog, String kaleoClassName, long kaleoClassPK,
+		long kaleoInstanceTokenId, String type,
+		OrderByComparator orderByComparator, boolean previous) {
 		StringBundler query = null;
 
 		if (orderByComparator != null) {
@@ -2543,34 +2802,46 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 
 		query.append(_SQL_SELECT_KALEOLOG_WHERE);
 
-		query.append(_FINDER_COLUMN_KITI_KNI_T_KALEOINSTANCETOKENID_2);
+		if (kaleoClassName == null) {
+			query.append(_FINDER_COLUMN_KCN_KCPK_KITI_T_KALEOCLASSNAME_1);
+		}
+		else {
+			if (kaleoClassName.equals(StringPool.BLANK)) {
+				query.append(_FINDER_COLUMN_KCN_KCPK_KITI_T_KALEOCLASSNAME_3);
+			}
+			else {
+				query.append(_FINDER_COLUMN_KCN_KCPK_KITI_T_KALEOCLASSNAME_2);
+			}
+		}
 
-		query.append(_FINDER_COLUMN_KITI_KNI_T_KALEONODEID_2);
+		query.append(_FINDER_COLUMN_KCN_KCPK_KITI_T_KALEOCLASSPK_2);
+
+		query.append(_FINDER_COLUMN_KCN_KCPK_KITI_T_KALEOINSTANCETOKENID_2);
 
 		if (type == null) {
-			query.append(_FINDER_COLUMN_KITI_KNI_T_TYPE_1);
+			query.append(_FINDER_COLUMN_KCN_KCPK_KITI_T_TYPE_1);
 		}
 		else {
 			if (type.equals(StringPool.BLANK)) {
-				query.append(_FINDER_COLUMN_KITI_KNI_T_TYPE_3);
+				query.append(_FINDER_COLUMN_KCN_KCPK_KITI_T_TYPE_3);
 			}
 			else {
-				query.append(_FINDER_COLUMN_KITI_KNI_T_TYPE_2);
+				query.append(_FINDER_COLUMN_KCN_KCPK_KITI_T_TYPE_2);
 			}
 		}
 
 		if (orderByComparator != null) {
-			String[] orderByFields = orderByComparator.getOrderByFields();
+			String[] orderByConditionFields = orderByComparator.getOrderByConditionFields();
 
-			if (orderByFields.length > 0) {
+			if (orderByConditionFields.length > 0) {
 				query.append(WHERE_AND);
 			}
 
-			for (int i = 0; i < orderByFields.length; i++) {
+			for (int i = 0; i < orderByConditionFields.length; i++) {
 				query.append(_ORDER_BY_ENTITY_ALIAS);
-				query.append(orderByFields[i]);
+				query.append(orderByConditionFields[i]);
 
-				if ((i + 1) < orderByFields.length) {
+				if ((i + 1) < orderByConditionFields.length) {
 					if (orderByComparator.isAscending() ^ previous) {
 						query.append(WHERE_GREATER_THAN_HAS_NEXT);
 					}
@@ -2589,6 +2860,8 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 			}
 
 			query.append(ORDER_BY_CLAUSE);
+
+			String[] orderByFields = orderByComparator.getOrderByFields();
 
 			for (int i = 0; i < orderByFields.length; i++) {
 				query.append(_ORDER_BY_ENTITY_ALIAS);
@@ -2626,16 +2899,20 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 
 		QueryPos qPos = QueryPos.getInstance(q);
 
-		qPos.add(kaleoInstanceTokenId);
+		if (kaleoClassName != null) {
+			qPos.add(kaleoClassName);
+		}
 
-		qPos.add(kaleoNodeId);
+		qPos.add(kaleoClassPK);
+
+		qPos.add(kaleoInstanceTokenId);
 
 		if (type != null) {
 			qPos.add(type);
 		}
 
 		if (orderByComparator != null) {
-			Object[] values = orderByComparator.getOrderByValues(kaleoLog);
+			Object[] values = orderByComparator.getOrderByConditionValues(kaleoLog);
 
 			for (Object value : values) {
 				qPos.add(value);
@@ -2693,12 +2970,20 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 	 */
 	public List<KaleoLog> findAll(int start, int end,
 		OrderByComparator orderByComparator) throws SystemException {
-		Object[] finderArgs = new Object[] {
-				String.valueOf(start), String.valueOf(end),
-				String.valueOf(orderByComparator)
-			};
+		FinderPath finderPath = null;
+		Object[] finderArgs = new Object[] { start, end, orderByComparator };
 
-		List<KaleoLog> list = (List<KaleoLog>)FinderCacheUtil.getResult(FINDER_PATH_FIND_ALL,
+		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
+				(orderByComparator == null)) {
+			finderPath = FINDER_PATH_WITH_PAGINATION_FIND_ALL;
+			finderArgs = FINDER_ARGS_EMPTY;
+		}
+		else {
+			finderPath = FINDER_PATH_WITHOUT_PAGINATION_FIND_ALL;
+			finderArgs = new Object[] { start, end, orderByComparator };
+		}
+
+		List<KaleoLog> list = (List<KaleoLog>)FinderCacheUtil.getResult(finderPath,
 				finderArgs, this);
 
 		if (list == null) {
@@ -2743,14 +3028,12 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 			}
 			finally {
 				if (list == null) {
-					FinderCacheUtil.removeResult(FINDER_PATH_FIND_ALL,
-						finderArgs);
+					FinderCacheUtil.removeResult(finderPath, finderArgs);
 				}
 				else {
 					cacheResult(list);
 
-					FinderCacheUtil.putResult(FINDER_PATH_FIND_ALL, finderArgs,
-						list);
+					FinderCacheUtil.putResult(finderPath, finderArgs, list);
 				}
 
 				closeSession(session);
@@ -2827,17 +3110,19 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 	}
 
 	/**
-	 * Removes all the kaleo logs where kaleoInstanceTokenId = &#63; and kaleoNodeId = &#63; and type = &#63; from the database.
+	 * Removes all the kaleo logs where kaleoClassName = &#63; and kaleoClassPK = &#63; and kaleoInstanceTokenId = &#63; and type = &#63; from the database.
 	 *
+	 * @param kaleoClassName the kaleo class name
+	 * @param kaleoClassPK the kaleo class p k
 	 * @param kaleoInstanceTokenId the kaleo instance token ID
-	 * @param kaleoNodeId the kaleo node ID
 	 * @param type the type
 	 * @throws SystemException if a system exception occurred
 	 */
-	public void removeByKITI_KNI_T(long kaleoInstanceTokenId, long kaleoNodeId,
-		String type) throws SystemException {
-		for (KaleoLog kaleoLog : findByKITI_KNI_T(kaleoInstanceTokenId,
-				kaleoNodeId, type)) {
+	public void removeByKCN_KCPK_KITI_T(String kaleoClassName,
+		long kaleoClassPK, long kaleoInstanceTokenId, String type)
+		throws SystemException {
+		for (KaleoLog kaleoLog : findByKCN_KCPK_KITI_T(kaleoClassName,
+				kaleoClassPK, kaleoInstanceTokenId, type)) {
 			kaleoLogPersistence.remove(kaleoLog);
 		}
 	}
@@ -3140,41 +3425,54 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 	}
 
 	/**
-	 * Returns the number of kaleo logs where kaleoInstanceTokenId = &#63; and kaleoNodeId = &#63; and type = &#63;.
+	 * Returns the number of kaleo logs where kaleoClassName = &#63; and kaleoClassPK = &#63; and kaleoInstanceTokenId = &#63; and type = &#63;.
 	 *
+	 * @param kaleoClassName the kaleo class name
+	 * @param kaleoClassPK the kaleo class p k
 	 * @param kaleoInstanceTokenId the kaleo instance token ID
-	 * @param kaleoNodeId the kaleo node ID
 	 * @param type the type
 	 * @return the number of matching kaleo logs
 	 * @throws SystemException if a system exception occurred
 	 */
-	public int countByKITI_KNI_T(long kaleoInstanceTokenId, long kaleoNodeId,
-		String type) throws SystemException {
+	public int countByKCN_KCPK_KITI_T(String kaleoClassName, long kaleoClassPK,
+		long kaleoInstanceTokenId, String type) throws SystemException {
 		Object[] finderArgs = new Object[] {
-				kaleoInstanceTokenId, kaleoNodeId, type
+				kaleoClassName, kaleoClassPK, kaleoInstanceTokenId, type
 			};
 
-		Long count = (Long)FinderCacheUtil.getResult(FINDER_PATH_COUNT_BY_KITI_KNI_T,
+		Long count = (Long)FinderCacheUtil.getResult(FINDER_PATH_COUNT_BY_KCN_KCPK_KITI_T,
 				finderArgs, this);
 
 		if (count == null) {
-			StringBundler query = new StringBundler(4);
+			StringBundler query = new StringBundler(5);
 
 			query.append(_SQL_COUNT_KALEOLOG_WHERE);
 
-			query.append(_FINDER_COLUMN_KITI_KNI_T_KALEOINSTANCETOKENID_2);
+			if (kaleoClassName == null) {
+				query.append(_FINDER_COLUMN_KCN_KCPK_KITI_T_KALEOCLASSNAME_1);
+			}
+			else {
+				if (kaleoClassName.equals(StringPool.BLANK)) {
+					query.append(_FINDER_COLUMN_KCN_KCPK_KITI_T_KALEOCLASSNAME_3);
+				}
+				else {
+					query.append(_FINDER_COLUMN_KCN_KCPK_KITI_T_KALEOCLASSNAME_2);
+				}
+			}
 
-			query.append(_FINDER_COLUMN_KITI_KNI_T_KALEONODEID_2);
+			query.append(_FINDER_COLUMN_KCN_KCPK_KITI_T_KALEOCLASSPK_2);
+
+			query.append(_FINDER_COLUMN_KCN_KCPK_KITI_T_KALEOINSTANCETOKENID_2);
 
 			if (type == null) {
-				query.append(_FINDER_COLUMN_KITI_KNI_T_TYPE_1);
+				query.append(_FINDER_COLUMN_KCN_KCPK_KITI_T_TYPE_1);
 			}
 			else {
 				if (type.equals(StringPool.BLANK)) {
-					query.append(_FINDER_COLUMN_KITI_KNI_T_TYPE_3);
+					query.append(_FINDER_COLUMN_KCN_KCPK_KITI_T_TYPE_3);
 				}
 				else {
-					query.append(_FINDER_COLUMN_KITI_KNI_T_TYPE_2);
+					query.append(_FINDER_COLUMN_KCN_KCPK_KITI_T_TYPE_2);
 				}
 			}
 
@@ -3189,9 +3487,13 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 
 				QueryPos qPos = QueryPos.getInstance(q);
 
-				qPos.add(kaleoInstanceTokenId);
+				if (kaleoClassName != null) {
+					qPos.add(kaleoClassName);
+				}
 
-				qPos.add(kaleoNodeId);
+				qPos.add(kaleoClassPK);
+
+				qPos.add(kaleoInstanceTokenId);
 
 				if (type != null) {
 					qPos.add(type);
@@ -3207,7 +3509,7 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 					count = Long.valueOf(0);
 				}
 
-				FinderCacheUtil.putResult(FINDER_PATH_COUNT_BY_KITI_KNI_T,
+				FinderCacheUtil.putResult(FINDER_PATH_COUNT_BY_KCN_KCPK_KITI_T,
 					finderArgs, count);
 
 				closeSession(session);
@@ -3224,10 +3526,8 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 	 * @throws SystemException if a system exception occurred
 	 */
 	public int countAll() throws SystemException {
-		Object[] finderArgs = new Object[0];
-
 		Long count = (Long)FinderCacheUtil.getResult(FINDER_PATH_COUNT_ALL,
-				finderArgs, this);
+				FINDER_ARGS_EMPTY, this);
 
 		if (count == null) {
 			Session session = null;
@@ -3247,8 +3547,8 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 					count = Long.valueOf(0);
 				}
 
-				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL, finderArgs,
-					count);
+				FinderCacheUtil.putResult(FINDER_PATH_COUNT_ALL,
+					FINDER_ARGS_EMPTY, count);
 
 				closeSession(session);
 			}
@@ -3285,7 +3585,7 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 	public void destroy() {
 		EntityCacheUtil.removeCache(KaleoLogImpl.class.getName());
 		FinderCacheUtil.removeCache(FINDER_CLASS_NAME_ENTITY);
-		FinderCacheUtil.removeCache(FINDER_CLASS_NAME_LIST);
+		FinderCacheUtil.removeCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 	}
 
 	@BeanReference(type = KaleoActionPersistence.class)
@@ -3312,6 +3612,8 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 	protected KaleoTaskAssignmentPersistence kaleoTaskAssignmentPersistence;
 	@BeanReference(type = KaleoTaskAssignmentInstancePersistence.class)
 	protected KaleoTaskAssignmentInstancePersistence kaleoTaskAssignmentInstancePersistence;
+	@BeanReference(type = KaleoTaskFormPersistence.class)
+	protected KaleoTaskFormPersistence kaleoTaskFormPersistence;
 	@BeanReference(type = KaleoTaskInstanceTokenPersistence.class)
 	protected KaleoTaskInstanceTokenPersistence kaleoTaskInstanceTokenPersistence;
 	@BeanReference(type = KaleoTimerPersistence.class)
@@ -3339,16 +3641,36 @@ public class KaleoLogPersistenceImpl extends BasePersistenceImpl<KaleoLog>
 	private static final String _FINDER_COLUMN_KITI_T_TYPE_1 = "kaleoLog.type IS NULL";
 	private static final String _FINDER_COLUMN_KITI_T_TYPE_2 = "kaleoLog.type = ?";
 	private static final String _FINDER_COLUMN_KITI_T_TYPE_3 = "(kaleoLog.type IS NULL OR kaleoLog.type = ?)";
-	private static final String _FINDER_COLUMN_KITI_KNI_T_KALEOINSTANCETOKENID_2 =
+	private static final String _FINDER_COLUMN_KCN_KCPK_KITI_T_KALEOCLASSNAME_1 = "kaleoLog.kaleoClassName IS NULL AND ";
+	private static final String _FINDER_COLUMN_KCN_KCPK_KITI_T_KALEOCLASSNAME_2 = "kaleoLog.kaleoClassName = ? AND ";
+	private static final String _FINDER_COLUMN_KCN_KCPK_KITI_T_KALEOCLASSNAME_3 = "(kaleoLog.kaleoClassName IS NULL OR kaleoLog.kaleoClassName = ?) AND ";
+	private static final String _FINDER_COLUMN_KCN_KCPK_KITI_T_KALEOCLASSPK_2 = "kaleoLog.kaleoClassPK = ? AND ";
+	private static final String _FINDER_COLUMN_KCN_KCPK_KITI_T_KALEOINSTANCETOKENID_2 =
 		"kaleoLog.kaleoInstanceTokenId = ? AND ";
-	private static final String _FINDER_COLUMN_KITI_KNI_T_KALEONODEID_2 = "kaleoLog.kaleoNodeId = ? AND ";
-	private static final String _FINDER_COLUMN_KITI_KNI_T_TYPE_1 = "kaleoLog.type IS NULL";
-	private static final String _FINDER_COLUMN_KITI_KNI_T_TYPE_2 = "kaleoLog.type = ?";
-	private static final String _FINDER_COLUMN_KITI_KNI_T_TYPE_3 = "(kaleoLog.type IS NULL OR kaleoLog.type = ?)";
+	private static final String _FINDER_COLUMN_KCN_KCPK_KITI_T_TYPE_1 = "kaleoLog.type IS NULL";
+	private static final String _FINDER_COLUMN_KCN_KCPK_KITI_T_TYPE_2 = "kaleoLog.type = ?";
+	private static final String _FINDER_COLUMN_KCN_KCPK_KITI_T_TYPE_3 = "(kaleoLog.type IS NULL OR kaleoLog.type = ?)";
 	private static final String _ORDER_BY_ENTITY_ALIAS = "kaleoLog.";
 	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY = "No KaleoLog exists with the primary key ";
 	private static final String _NO_SUCH_ENTITY_WITH_KEY = "No KaleoLog exists with the key {";
 	private static final boolean _HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE = GetterUtil.getBoolean(PropsUtil.get(
 				PropsKeys.HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE));
 	private static Log _log = LogFactoryUtil.getLog(KaleoLogPersistenceImpl.class);
+	private static KaleoLog _nullKaleoLog = new KaleoLogImpl() {
+			@Override
+			public Object clone() {
+				return this;
+			}
+
+			@Override
+			public CacheModel<KaleoLog> toCacheModel() {
+				return _nullKaleoLogCacheModel;
+			}
+		};
+
+	private static CacheModel<KaleoLog> _nullKaleoLogCacheModel = new CacheModel<KaleoLog>() {
+			public KaleoLog toEntityModel() {
+				return _nullKaleoLog;
+			}
+		};
 }

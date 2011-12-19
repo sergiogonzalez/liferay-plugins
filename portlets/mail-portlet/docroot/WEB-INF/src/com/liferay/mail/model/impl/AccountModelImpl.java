@@ -20,8 +20,10 @@ import com.liferay.mail.model.AccountModel;
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.model.CacheModel;
 import com.liferay.portal.model.impl.BaseModelImpl;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.util.PortalUtil;
@@ -30,8 +32,6 @@ import com.liferay.portlet.expando.model.ExpandoBridge;
 import com.liferay.portlet.expando.util.ExpandoBridgeFactoryUtil;
 
 import java.io.Serializable;
-
-import java.lang.reflect.Proxy;
 
 import java.sql.Types;
 
@@ -99,15 +99,11 @@ public class AccountModelImpl extends BaseModelImpl<Account>
 	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
 				"value.object.finder.cache.enabled.com.liferay.mail.model.Account"),
 			true);
-
-	public Class<?> getModelClass() {
-		return Account.class;
-	}
-
-	public String getModelClassName() {
-		return Account.class.getName();
-	}
-
+	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
+				"value.object.column.bitmask.enabled.com.liferay.mail.model.Account"),
+			true);
+	public static long ADDRESS_COLUMN_BITMASK = 1L;
+	public static long USERID_COLUMN_BITMASK = 2L;
 	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(com.liferay.util.service.ServiceProps.get(
 				"lock.expiration.time.com.liferay.mail.model.Account"));
 
@@ -128,6 +124,14 @@ public class AccountModelImpl extends BaseModelImpl<Account>
 
 	public void setPrimaryKeyObj(Serializable primaryKeyObj) {
 		setPrimaryKey(((Long)primaryKeyObj).longValue());
+	}
+
+	public Class<?> getModelClass() {
+		return Account.class;
+	}
+
+	public String getModelClassName() {
+		return Account.class.getName();
 	}
 
 	public long getAccountId() {
@@ -151,6 +155,8 @@ public class AccountModelImpl extends BaseModelImpl<Account>
 	}
 
 	public void setUserId(long userId) {
+		_columnBitmask |= USERID_COLUMN_BITMASK;
+
 		if (!_setOriginalUserId) {
 			_setOriginalUserId = true;
 
@@ -211,6 +217,8 @@ public class AccountModelImpl extends BaseModelImpl<Account>
 	}
 
 	public void setAddress(String address) {
+		_columnBitmask |= ADDRESS_COLUMN_BITMASK;
+
 		if (_originalAddress == null) {
 			_originalAddress = _address;
 		}
@@ -434,14 +442,23 @@ public class AccountModelImpl extends BaseModelImpl<Account>
 		_defaultSender = defaultSender;
 	}
 
+	public long getColumnBitmask() {
+		return _columnBitmask;
+	}
+
 	@Override
 	public Account toEscapedModel() {
 		if (isEscapedModel()) {
 			return (Account)this;
 		}
 		else {
-			return (Account)Proxy.newProxyInstance(_classLoader,
-				_escapedModelProxyInterfaces, new AutoEscapeBeanHandler(this));
+			if (_escapedModelProxy == null) {
+				_escapedModelProxy = (Account)ProxyUtil.newProxyInstance(_classLoader,
+						_escapedModelProxyInterfaces,
+						new AutoEscapeBeanHandler(this));
+			}
+
+			return _escapedModelProxy;
 		}
 	}
 
@@ -547,6 +564,141 @@ public class AccountModelImpl extends BaseModelImpl<Account>
 		accountModelImpl._setOriginalUserId = false;
 
 		accountModelImpl._originalAddress = accountModelImpl._address;
+
+		accountModelImpl._columnBitmask = 0;
+	}
+
+	@Override
+	public CacheModel<Account> toCacheModel() {
+		AccountCacheModel accountCacheModel = new AccountCacheModel();
+
+		accountCacheModel.accountId = getAccountId();
+
+		accountCacheModel.companyId = getCompanyId();
+
+		accountCacheModel.userId = getUserId();
+
+		accountCacheModel.userName = getUserName();
+
+		String userName = accountCacheModel.userName;
+
+		if ((userName != null) && (userName.length() == 0)) {
+			accountCacheModel.userName = null;
+		}
+
+		Date createDate = getCreateDate();
+
+		if (createDate != null) {
+			accountCacheModel.createDate = createDate.getTime();
+		}
+		else {
+			accountCacheModel.createDate = Long.MIN_VALUE;
+		}
+
+		Date modifiedDate = getModifiedDate();
+
+		if (modifiedDate != null) {
+			accountCacheModel.modifiedDate = modifiedDate.getTime();
+		}
+		else {
+			accountCacheModel.modifiedDate = Long.MIN_VALUE;
+		}
+
+		accountCacheModel.address = getAddress();
+
+		String address = accountCacheModel.address;
+
+		if ((address != null) && (address.length() == 0)) {
+			accountCacheModel.address = null;
+		}
+
+		accountCacheModel.personalName = getPersonalName();
+
+		String personalName = accountCacheModel.personalName;
+
+		if ((personalName != null) && (personalName.length() == 0)) {
+			accountCacheModel.personalName = null;
+		}
+
+		accountCacheModel.protocol = getProtocol();
+
+		String protocol = accountCacheModel.protocol;
+
+		if ((protocol != null) && (protocol.length() == 0)) {
+			accountCacheModel.protocol = null;
+		}
+
+		accountCacheModel.incomingHostName = getIncomingHostName();
+
+		String incomingHostName = accountCacheModel.incomingHostName;
+
+		if ((incomingHostName != null) && (incomingHostName.length() == 0)) {
+			accountCacheModel.incomingHostName = null;
+		}
+
+		accountCacheModel.incomingPort = getIncomingPort();
+
+		accountCacheModel.incomingSecure = getIncomingSecure();
+
+		accountCacheModel.outgoingHostName = getOutgoingHostName();
+
+		String outgoingHostName = accountCacheModel.outgoingHostName;
+
+		if ((outgoingHostName != null) && (outgoingHostName.length() == 0)) {
+			accountCacheModel.outgoingHostName = null;
+		}
+
+		accountCacheModel.outgoingPort = getOutgoingPort();
+
+		accountCacheModel.outgoingSecure = getOutgoingSecure();
+
+		accountCacheModel.login = getLogin();
+
+		String login = accountCacheModel.login;
+
+		if ((login != null) && (login.length() == 0)) {
+			accountCacheModel.login = null;
+		}
+
+		accountCacheModel.password = getPassword();
+
+		String password = accountCacheModel.password;
+
+		if ((password != null) && (password.length() == 0)) {
+			accountCacheModel.password = null;
+		}
+
+		accountCacheModel.savePassword = getSavePassword();
+
+		accountCacheModel.signature = getSignature();
+
+		String signature = accountCacheModel.signature;
+
+		if ((signature != null) && (signature.length() == 0)) {
+			accountCacheModel.signature = null;
+		}
+
+		accountCacheModel.useSignature = getUseSignature();
+
+		accountCacheModel.folderPrefix = getFolderPrefix();
+
+		String folderPrefix = accountCacheModel.folderPrefix;
+
+		if ((folderPrefix != null) && (folderPrefix.length() == 0)) {
+			accountCacheModel.folderPrefix = null;
+		}
+
+		accountCacheModel.inboxFolderId = getInboxFolderId();
+
+		accountCacheModel.draftFolderId = getDraftFolderId();
+
+		accountCacheModel.sentFolderId = getSentFolderId();
+
+		accountCacheModel.trashFolderId = getTrashFolderId();
+
+		accountCacheModel.defaultSender = getDefaultSender();
+
+		return accountCacheModel;
 	}
 
 	@Override
@@ -762,4 +914,6 @@ public class AccountModelImpl extends BaseModelImpl<Account>
 	private long _trashFolderId;
 	private boolean _defaultSender;
 	private transient ExpandoBridge _expandoBridge;
+	private long _columnBitmask;
+	private Account _escapedModelProxy;
 }

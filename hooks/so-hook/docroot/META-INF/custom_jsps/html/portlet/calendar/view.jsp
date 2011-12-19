@@ -9,7 +9,7 @@
  *
  * Liferay Social Office is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
  * for more details.
  *
  * You should have received a copy of the GNU General Public License along with
@@ -30,6 +30,11 @@ portletURL.setWindowState(WindowState.MAXIMIZED);
 
 portletURL.setParameter("struts_action", "/calendar/view");
 portletURL.setParameter("tabs1", tabs1);
+
+String[] urlArray = PortalUtil.stripURLAnchor(portletURL.toString(), "&#");
+
+String urlWithoutAnchor = urlArray[0];
+String urlAnchor = urlArray[1];
 %>
 
 <form method="post" name="<portlet:namespace />fm">
@@ -44,7 +49,7 @@ for (int i = 1; i <= selCal.getActualMaximum(Calendar.DATE); i++) {
 	tempCal.set(Calendar.DATE, i);
 	tempCal.set(Calendar.YEAR, selYear);
 
-	boolean hasEvents = CalEventLocalServiceUtil.hasEvents(scopeGroupId, tempCal, eventType);
+	boolean hasEvents = CalEventServiceUtil.hasEvents(scopeGroupId, tempCal, eventType);
 
 	if (hasEvents) {
 		data.add(new Integer(i));
