@@ -27,18 +27,21 @@ else if (group.isRegularSite()) {
 	activities = SocialActivityLocalServiceUtil.getGroupUsersActivities(group.getGroupId(), start, end);
 }
 
-PortletURL rssURL = renderResponse.createRenderURL();
-
-rssURL.setParameter("rss", "1");
-
-String taglibFeedTitle = LanguageUtil.format(pageContext, "subscribe-to-x's-activities", group.getDescriptiveName(locale));
+String taglibFeedTitle = LanguageUtil.get(pageContext, "rss-feed-title");
 String taglibFeedLinkMessage = LanguageUtil.format(pageContext, "subscribe-to-x's-activities", group.getDescriptiveName(locale));
 %>
+
+<portlet:resourceURL var="rssURL">
+	<portlet:param name="<%= Constants.CMD %>" value="rss" />
+	<portlet:param name="feedTitle" value="<%= taglibFeedTitle %>" />
+	<portlet:param name="start" value="<%= String.valueOf(start) %>" />
+	<portlet:param name="end" value="<%= String.valueOf(end) %>" />
+</portlet:resourceURL>
 
 <liferay-ui:social-activities
 	activities="<%= activities %>"
 	feedEnabled="<%= true %>"
 	feedTitle="<%= taglibFeedTitle %>"
-	feedLink="<%= rssURL.toString() %>"
+	feedLink="<%= rssURL %>"
 	feedLinkMessage="<%= taglibFeedLinkMessage %>"
 />

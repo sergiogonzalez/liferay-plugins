@@ -379,7 +379,8 @@ public class ArticlePortlet extends MVCPortlet {
 			editURL = HttpUtil.setParameter(
 				editURL, "p_p_id", PortletKeys.KNOWLEDGE_BASE_ARTICLE);
 			editURL = HttpUtil.setParameter(
-				editURL, namespace + "jspPage", jspPath + "edit_article.jsp");
+				editURL, namespace + "mvcPath",
+				templatePath + "edit_article.jsp");
 			editURL = HttpUtil.setParameter(
 				editURL, namespace + "redirect", redirect);
 			editURL = HttpUtil.setParameter(
@@ -457,7 +458,7 @@ public class ArticlePortlet extends MVCPortlet {
 			SessionErrors.contains(
 				renderRequest, PrincipalException.class.getName())) {
 
-			include(jspPath + "error.jsp", renderRequest, renderResponse);
+			include(templatePath + "error.jsp", renderRequest, renderResponse);
 		}
 		else {
 			super.doDispatch(renderRequest, renderResponse);
@@ -475,10 +476,10 @@ public class ArticlePortlet extends MVCPortlet {
 		long defaultValue = GetterUtil.getLong(
 			preferences.getValue("resourcePrimKey", null));
 
-		String jspPage = ParamUtil.getString(renderRequest, "jspPage");
+		String mvcPath = ParamUtil.getString(renderRequest, "mvcPath");
 
-		if (((defaultValue == 0) && jspPage.equals(viewJSP)) ||
-			jspPage.equals("/article/select_configuration_article.jsp")) {
+		if (((defaultValue == 0) && mvcPath.equals(viewTemplate)) ||
+			mvcPath.equals("/article/select_configuration_article.jsp")) {
 
 			return 0;
 		}

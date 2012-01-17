@@ -20,5 +20,6 @@
 	<classpathentry kind="lib" path="/portal-trunk/util-java/util-java.jar" />
 	<classpathentry kind="lib" path="/portal-trunk/util-taglib/util-taglib.jar" />
 	<classpathentry kind="lib" path="docroot/WEB-INF/lib/ip-geocoder-client.jar" />
+	<classpathentry kind="lib" path="/portal-trunk/lib/portal/rome.jar"/>
 	<classpathentry kind="output" path="bin" />
 </classpath>

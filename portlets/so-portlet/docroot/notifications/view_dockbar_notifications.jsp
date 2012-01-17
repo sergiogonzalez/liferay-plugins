@@ -33,7 +33,7 @@ int notificationEventsCount = notificationEvents.size();
 		<%
 		if (!notificationEvents.isEmpty()) {
 			for (NotificationEvent notificationEvent : notificationEvents) {
-				if (notificationEvent.getType().equals(PortletKey.SO_NOTIFICATION)) {
+				if (notificationEvent.getType().equals(PortletKeys.SO_NOTIFICATION)) {
 					userNotificationEventUuids = StringUtil.add(userNotificationEventUuids, notificationEvent.getUuid());
 				}
 				else {
@@ -62,7 +62,7 @@ int notificationEventsCount = notificationEvents.size();
 			%>
 
 				<c:choose>
-					<c:when test='<%= portletId.equals("<%= PortletKeys.SO_INVITE_MEMBERS %>") %>'>
+					<c:when test='<%= portletId.equals(PortletKeys.SO_INVITE_MEMBERS) %>'>
 						<%@ include file="/notifications/view_member_request.jspf" %>
 					</c:when>
 					<c:when test='<%= portletId.equals("1_WAR_contactsportlet") %>'>
@@ -93,7 +93,7 @@ int notificationEventsCount = notificationEvents.size();
 
 			<span class="view-all">
 				<liferay-portlet:renderURL portletName="<%= PortletKeys.SO_NOTIFICATION %>" var="viewAllNotifications" windowState="<%= LiferayWindowState.MAXIMIZED.toString() %>">
-					<portlet:param name="jspPage" value="/notifications/view.jsp" />
+					<portlet:param name="mvcPath" value="/notifications/view.jsp" />
 					<portlet:param name="redirect" value="<%= currentURL %>" />
 				</liferay-portlet:renderURL>
 
