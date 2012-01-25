@@ -80,21 +80,28 @@ portletURL.setWindowState(WindowState.NORMAL);
 						String lastNameAnchor = StringPool.SPACE;
 
 						for (User user2 : users) {
+							String lastName = user2.getLastName();
+
+							String curLastNameAnchor = LanguageUtil.get(pageContext, "no-last-name");
+
+							if (Validator.isNotNull(lastName)) {
+								curLastNameAnchor = StringUtil.upperCase(lastName.substring(0, 1));
+							}
 						%>
 
-							<c:if test="<%= !StringUtil.startsWith(user2.getLastName(), lastNameAnchor) %>">
+							<c:if test="<%= !curLastNameAnchor.equals(lastNameAnchor) %>">
 
 								<%
-								lastNameAnchor = user2.getLastName().substring(0, 1);
+								lastNameAnchor = curLastNameAnchor;
 								%>
 
 								<div class="lastNameAnchor">
-									<a><%= StringUtil.upperCase(lastNameAnchor) %></a>
+									<a><liferay-ui:message key="<%= lastNameAnchor %>" /></a>
 								</div>
 							</c:if>
 
 							<liferay-portlet:renderURL windowState="<%= LiferayWindowState.EXCLUSIVE.toString() %>" var="viewSummaryURL">
-								<portlet:param name="jspPage" value="/contacts_center/view_user.jsp" />
+								<portlet:param name="mvcPath" value="/contacts_center/view_user.jsp" />
 								<portlet:param name="userId" value="<%= String.valueOf(user2.getUserId()) %>" />
 							</liferay-portlet:renderURL>
 
@@ -105,7 +112,13 @@ portletURL.setWindowState(WindowState.NORMAL);
 
 								<div class="lfr-contact-info">
 									<div class="lfr-contact-name">
-										<a><%= HtmlUtil.escape(user2.getLastName()) %>, <%= HtmlUtil.escape(user2.getFirstName()) %></a>
+										<a>
+											<c:if test="<%= Validator.isNotNull(user2.getLastName()) %>">
+												<%= HtmlUtil.escape(user2.getLastName()) %>,
+											</c:if>
+
+											<%= HtmlUtil.escape(user2.getFirstName()) %>
+										</a>
 									</div>
 
 									<div class="lfr-contact-extra">

@@ -3,13 +3,16 @@
 <workflow-definition
 	xmlns="urn:liferay.com:liferay-workflow_6.1.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="urn:liferay.com:liferay-workflow_6.1.0 http://www.liferay.com/dtd/liferay-workflow-definition_6_1_0.xsd"
+	xsi:schemaLocation="urn:liferay.com:liferay-workflow_6.1.0 http://www.liferay.com/dtd/liferay-workflow-definition_6_2_0.xsd"
 >
 	<name>Legal and Marketing Approval</name>
 	<description>Workflow assets must be approved first by Marketing and then by Legal.</description>
 	<version>1</version>
 	<state>
 		<name>created</name>
+		<metadata>
+			<![CDATA[{"xy":[62,51]}]]>
+		</metadata>
 		<initial>true</initial>
 		<transitions>
 			<transition>
@@ -21,6 +24,9 @@
 	</state>
 	<task>
 		<name>update</name>
+		<metadata>
+			<![CDATA[{"xy":[522,211]}]]>
+		</metadata>
 		<actions>
 			<notification>
 				<name>Creator Modification Notification</name>
@@ -43,6 +49,9 @@
 	</task>
 	<task>
 		<name>marketing-review</name>
+		<metadata>
+			<![CDATA[{"xy":[291,39]}]]>
+		</metadata>
 		<actions>
 			<notification>
 				<name>Market Content Review Notification</name>
@@ -103,6 +112,9 @@
 	</task>
 	<task>
 		<name>legal-review</name>
+		<metadata>
+			<![CDATA[{"xy":[121,209]}]]>
+		</metadata>
 		<actions>
 			<notification>
 				<name>Legal Content Review Notification</name>
@@ -163,6 +175,9 @@
 	</task>
 	<state>
 		<name>approve</name>
+		<metadata>
+			<![CDATA[{"xy":[138,377]}]]>
+		</metadata>
 		<actions>
 			<action>
 				<name>Approve Asset</name>
