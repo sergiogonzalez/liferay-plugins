@@ -3,6 +3,7 @@
 <web-app xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.4" xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
 
 	<!-- Registers JSONW Web Service servlet -->
+
 	<servlet>
         <servlet-name>JSON Web Service Servlet</servlet-name>
         <servlet-class>com.liferay.portal.kernel.servlet.PortalClassLoaderServlet</servlet-class>
@@ -20,5 +21,4 @@
         <servlet-name>JSON Web Service Servlet</servlet-name>
         <url-pattern>/api/secure/jsonws/*</url-pattern>
     </servlet-mapping>
-
 </web-app>
