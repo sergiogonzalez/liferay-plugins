@@ -26,7 +26,6 @@ import com.liferay.portal.model.Account;
 import com.liferay.portal.model.Company;
 import com.liferay.portal.model.GroupConstants;
 import com.liferay.portal.model.User;
-import com.liferay.portal.service.CompanyLocalServiceUtil;
 import com.liferay.so.model.FavoriteSite;
 import com.liferay.so.service.base.FavoriteSiteLocalServiceBaseImpl;
 
@@ -40,6 +39,8 @@ public class FavoriteSiteLocalServiceImpl
 
 	 public FavoriteSite addFavoriteSite(long userId, long groupId)
 		throws PortalException, SystemException {
+
+		validate(groupId);
 
 		User user = userLocalService.getUserById(userId);
 
@@ -57,10 +58,10 @@ public class FavoriteSiteLocalServiceImpl
 		return favoriteSite;
 	}
 
-	public void deleteFavoriteSite(long favoriteSiteId)
+	public FavoriteSite deleteFavoriteSite(long favoriteSiteId)
 		throws PortalException, SystemException {
 
-		favoriteSitePersistence.remove(favoriteSiteId);
+		return favoriteSitePersistence.remove(favoriteSiteId);
 	}
 
 	public void deleteFavoriteSite(long userId, long groupId)
@@ -138,7 +139,7 @@ public class FavoriteSiteLocalServiceImpl
 		String groupRealName = name;
 
 		try {
-			Company company = CompanyLocalServiceUtil.getCompany(companyId);
+			Company company = companyPersistence.findByPrimaryKey(companyId);
 
 			Account account = company.getAccount();
 
@@ -156,6 +157,12 @@ public class FavoriteSiteLocalServiceImpl
 		}
 
 		return groupRealName;
+	}
+
+	protected void validate(long groupId)
+		throws PortalException, SystemException {
+
+		groupPersistence.findByPrimaryKey(groupId);
 	}
 
 }

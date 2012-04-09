@@ -23,11 +23,8 @@ import com.liferay.portal.kernel.dao.jdbc.SqlUpdateFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.search.Indexer;
-import com.liferay.portal.kernel.search.IndexerRegistryUtil;
-import com.liferay.portal.kernel.search.SearchException;
+import com.liferay.portal.kernel.search.Indexable;
+import com.liferay.portal.kernel.search.IndexableType;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.model.PersistedModel;
 import com.liferay.portal.service.PersistedModelLocalServiceRegistryUtil;
@@ -41,6 +38,7 @@ import com.liferay.portal.workflow.kaleo.model.KaleoTaskAssignmentInstance;
 import com.liferay.portal.workflow.kaleo.service.KaleoActionLocalService;
 import com.liferay.portal.workflow.kaleo.service.KaleoConditionLocalService;
 import com.liferay.portal.workflow.kaleo.service.KaleoDefinitionLocalService;
+import com.liferay.portal.workflow.kaleo.service.KaleoDefinitionService;
 import com.liferay.portal.workflow.kaleo.service.KaleoInstanceLocalService;
 import com.liferay.portal.workflow.kaleo.service.KaleoInstanceTokenLocalService;
 import com.liferay.portal.workflow.kaleo.service.KaleoLogLocalService;
@@ -105,28 +103,14 @@ public abstract class KaleoTaskAssignmentInstanceLocalServiceBaseImpl
 	 * @return the kaleo task assignment instance that was added
 	 * @throws SystemException if a system exception occurred
 	 */
+	@Indexable(type = IndexableType.REINDEX)
 	public KaleoTaskAssignmentInstance addKaleoTaskAssignmentInstance(
 		KaleoTaskAssignmentInstance kaleoTaskAssignmentInstance)
 		throws SystemException {
 		kaleoTaskAssignmentInstance.setNew(true);
 
-		kaleoTaskAssignmentInstance = kaleoTaskAssignmentInstancePersistence.update(kaleoTaskAssignmentInstance,
-				false);
-
-		Indexer indexer = IndexerRegistryUtil.getIndexer(getModelClassName());
-
-		if (indexer != null) {
-			try {
-				indexer.reindex(kaleoTaskAssignmentInstance);
-			}
-			catch (SearchException se) {
-				if (_log.isWarnEnabled()) {
-					_log.warn(se, se);
-				}
-			}
-		}
-
-		return kaleoTaskAssignmentInstance;
+		return kaleoTaskAssignmentInstancePersistence.update(kaleoTaskAssignmentInstance,
+			false);
 	}
 
 	/**
@@ -144,51 +128,29 @@ public abstract class KaleoTaskAssignmentInstanceLocalServiceBaseImpl
 	 * Deletes the kaleo task assignment instance with the primary key from the database. Also notifies the appropriate model listeners.
 	 *
 	 * @param kaleoTaskAssignmentInstanceId the primary key of the kaleo task assignment instance
+	 * @return the kaleo task assignment instance that was removed
 	 * @throws PortalException if a kaleo task assignment instance with the primary key could not be found
 	 * @throws SystemException if a system exception occurred
 	 */
-	public void deleteKaleoTaskAssignmentInstance(
+	@Indexable(type = IndexableType.DELETE)
+	public KaleoTaskAssignmentInstance deleteKaleoTaskAssignmentInstance(
 		long kaleoTaskAssignmentInstanceId)
 		throws PortalException, SystemException {
-		KaleoTaskAssignmentInstance kaleoTaskAssignmentInstance = kaleoTaskAssignmentInstancePersistence.remove(kaleoTaskAssignmentInstanceId);
-
-		Indexer indexer = IndexerRegistryUtil.getIndexer(getModelClassName());
-
-		if (indexer != null) {
-			try {
-				indexer.delete(kaleoTaskAssignmentInstance);
-			}
-			catch (SearchException se) {
-				if (_log.isWarnEnabled()) {
-					_log.warn(se, se);
-				}
-			}
-		}
+		return kaleoTaskAssignmentInstancePersistence.remove(kaleoTaskAssignmentInstanceId);
 	}
 
 	/**
 	 * Deletes the kaleo task assignment instance from the database. Also notifies the appropriate model listeners.
 	 *
 	 * @param kaleoTaskAssignmentInstance the kaleo task assignment instance
+	 * @return the kaleo task assignment instance that was removed
 	 * @throws SystemException if a system exception occurred
 	 */
-	public void deleteKaleoTaskAssignmentInstance(
+	@Indexable(type = IndexableType.DELETE)
+	public KaleoTaskAssignmentInstance deleteKaleoTaskAssignmentInstance(
 		KaleoTaskAssignmentInstance kaleoTaskAssignmentInstance)
 		throws SystemException {
-		kaleoTaskAssignmentInstancePersistence.remove(kaleoTaskAssignmentInstance);
-
-		Indexer indexer = IndexerRegistryUtil.getIndexer(getModelClassName());
-
-		if (indexer != null) {
-			try {
-				indexer.delete(kaleoTaskAssignmentInstance);
-			}
-			catch (SearchException se) {
-				if (_log.isWarnEnabled()) {
-					_log.warn(se, se);
-				}
-			}
-		}
+		return kaleoTaskAssignmentInstancePersistence.remove(kaleoTaskAssignmentInstance);
 	}
 
 	/**
@@ -315,6 +277,7 @@ public abstract class KaleoTaskAssignmentInstanceLocalServiceBaseImpl
 	 * @return the kaleo task assignment instance that was updated
 	 * @throws SystemException if a system exception occurred
 	 */
+	@Indexable(type = IndexableType.REINDEX)
 	public KaleoTaskAssignmentInstance updateKaleoTaskAssignmentInstance(
 		KaleoTaskAssignmentInstance kaleoTaskAssignmentInstance)
 		throws SystemException {
@@ -330,28 +293,14 @@ public abstract class KaleoTaskAssignmentInstanceLocalServiceBaseImpl
 	 * @return the kaleo task assignment instance that was updated
 	 * @throws SystemException if a system exception occurred
 	 */
+	@Indexable(type = IndexableType.REINDEX)
 	public KaleoTaskAssignmentInstance updateKaleoTaskAssignmentInstance(
 		KaleoTaskAssignmentInstance kaleoTaskAssignmentInstance, boolean merge)
 		throws SystemException {
 		kaleoTaskAssignmentInstance.setNew(false);
 
-		kaleoTaskAssignmentInstance = kaleoTaskAssignmentInstancePersistence.update(kaleoTaskAssignmentInstance,
-				merge);
-
-		Indexer indexer = IndexerRegistryUtil.getIndexer(getModelClassName());
-
-		if (indexer != null) {
-			try {
-				indexer.reindex(kaleoTaskAssignmentInstance);
-			}
-			catch (SearchException se) {
-				if (_log.isWarnEnabled()) {
-					_log.warn(se, se);
-				}
-			}
-		}
-
-		return kaleoTaskAssignmentInstance;
+		return kaleoTaskAssignmentInstancePersistence.update(kaleoTaskAssignmentInstance,
+			merge);
 	}
 
 	/**
@@ -447,6 +396,25 @@ public abstract class KaleoTaskAssignmentInstanceLocalServiceBaseImpl
 	public void setKaleoDefinitionLocalService(
 		KaleoDefinitionLocalService kaleoDefinitionLocalService) {
 		this.kaleoDefinitionLocalService = kaleoDefinitionLocalService;
+	}
+
+	/**
+	 * Returns the kaleo definition remote service.
+	 *
+	 * @return the kaleo definition remote service
+	 */
+	public KaleoDefinitionService getKaleoDefinitionService() {
+		return kaleoDefinitionService;
+	}
+
+	/**
+	 * Sets the kaleo definition remote service.
+	 *
+	 * @param kaleoDefinitionService the kaleo definition remote service
+	 */
+	public void setKaleoDefinitionService(
+		KaleoDefinitionService kaleoDefinitionService) {
+		this.kaleoDefinitionService = kaleoDefinitionService;
 	}
 
 	/**
@@ -1178,6 +1146,8 @@ public abstract class KaleoTaskAssignmentInstanceLocalServiceBaseImpl
 	protected KaleoConditionPersistence kaleoConditionPersistence;
 	@BeanReference(type = KaleoDefinitionLocalService.class)
 	protected KaleoDefinitionLocalService kaleoDefinitionLocalService;
+	@BeanReference(type = KaleoDefinitionService.class)
+	protected KaleoDefinitionService kaleoDefinitionService;
 	@BeanReference(type = KaleoDefinitionPersistence.class)
 	protected KaleoDefinitionPersistence kaleoDefinitionPersistence;
 	@BeanReference(type = KaleoInstanceLocalService.class)
@@ -1248,6 +1218,5 @@ public abstract class KaleoTaskAssignmentInstanceLocalServiceBaseImpl
 	protected UserService userService;
 	@BeanReference(type = UserPersistence.class)
 	protected UserPersistence userPersistence;
-	private static Log _log = LogFactoryUtil.getLog(KaleoTaskAssignmentInstanceLocalServiceBaseImpl.class);
 	private String _beanIdentifier;
 }

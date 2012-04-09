@@ -40,15 +40,17 @@ long appId = ParamUtil.getLong(request, "appId");
 
 String portletId = portletDisplay.getId();
 
-String iFrameURL = StringPool.BLANK;
+String iFrameURL = MarketplaceConstants.MARKETPLACE_URL_LOGOUT;
+
+String referer = StringPool.BLANK;
 
 if (portletId.equals(PortletKeys.MY_MARKETPLACE)) {
-	iFrameURL = HttpUtil.setParameter(MarketplaceConstants.MARKETPLACE_URL_LOGOUT, "referer", MarketplaceConstants.MARKETPLACE_PATH_PURCHASED);
+	referer = MarketplaceConstants.getPathPurchased();
 }
 else if (portletId.equals(PortletKeys.STORE) && (appId > 0)) {
-	iFrameURL = HttpUtil.setParameter(MarketplaceConstants.MARKETPLACE_URL_LOGOUT, "referer", MarketplaceConstants.MARKETPLACE_PATH_STORE + "/application/" + appId);
+	referer = MarketplaceConstants.getPathStore() + "/application/" + appId;
 }
 else {
-	iFrameURL = HttpUtil.setParameter(MarketplaceConstants.MARKETPLACE_URL_LOGOUT, "referer", MarketplaceConstants.MARKETPLACE_PATH_STORE);
+	referer = MarketplaceConstants.getPathStore();
 }
 %>

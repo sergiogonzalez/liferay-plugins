@@ -32,7 +32,7 @@ if (user2 != null) {
 %>
 
 <c:if test="<%= (projectsEntries != null) && !projectsEntries.isEmpty() %>">
-	<div class="field-group" data-extension="true" data-sectionId="projects" data-title="projects">
+	<div class="field-group" data-extension="true" data-sectionId="projects" data-title="<%= LanguageUtil.get(pageContext, "projects") %>">
 
 		<%
 		for (ProjectsEntry projectsEntry : projectsEntries) {
@@ -49,14 +49,14 @@ if (user2 != null) {
 		%>
 
 			<div class="projects section">
-				<h3><%= projectsEntry.getTitle() %>:</h3>
+				<h3><%= HtmlUtil.escape(projectsEntry.getTitle()) %>:</h3>
 
 				<div class="project-date property-list">
 					<span class="property"><%= startDate %> - <%= endDate %></span>
 				</div>
 
 				<div class="project-description property-list">
-					<div class="property"><%= projectsEntry.getDescription() %></div>
+					<div class="property"><%= HtmlUtil.escape(projectsEntry.getDescription()) %></div>
 				</div>
 			</div>
 
@@ -73,7 +73,7 @@ if (user2 != null) {
 
 		<div class="field-actions-toolbar">
 			<ul class="settings-actions">
-				<li class="action-field aui-component aui-settings-field lfr-token" data-extension="true" data-sectionId="projects" data-title="projects">
+				<li class="action-field aui-component aui-settings-field lfr-token" data-extension="true" data-sectionId="projects" data-title="<%= LanguageUtil.get(pageContext, "projects") %>">
 					<div class="aui-settings-field-content">
 						<span class="settings-label"><liferay-ui:message key="add" /></span>
 					</div>

@@ -29,12 +29,13 @@
 
 	<liferay-ui:search-container-row
 		className="com.liferay.wsrp.model.WSRPConsumer"
+		escapedModel="<%= true %>"
 		keyProperty="wsrpConsumerId"
 		modelVar="consumer"
 	>
 
 		<%
-		if (!WSRPConsumerManagerFactory.testWSRPConsumerManager(consumer, userToken)) {
+		if (!WSRPConsumerManagerFactory.testWSRPConsumerManager(consumer)) {
 			row.setRestricted(true);
 		}
 		%>

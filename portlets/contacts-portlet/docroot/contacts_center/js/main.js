@@ -7,6 +7,8 @@ AUI.add(
 
 		var ParseContent = A.Plugin.ParseContent;
 
+		var STR_UNDEFINED = 'undefined';
+
 		var TPL_BLOCK_IMG =
 			'<span>' +
 				'<img class="icon" alt="" src="' + themeDisplay.getPathThemeImages() + '/social/block.png">' +
@@ -157,6 +159,26 @@ AUI.add(
 						}
 					},
 
+					renderSelectContact: function(responseData, lastNameAnchor) {
+						var instance = this;
+
+						var data = A.JSON.parse(responseData);
+
+						var contacts = data.contacts;
+
+						var user = contacts[0].user;
+
+						instance._updateUserToolBar(user);
+
+						var contactList = data.contactList;
+
+						var contactUserHTML = instance._renderResult(contactList, true, lastNameAnchor);
+
+						var contactResultContent = A.one('.contacts-portlet .contacts-result-content');
+
+						contactResultContent.html(contactUserHTML.join(''));
+					},
+
 					renderContent: function(data, clear) {
 						var instance = this;
 
@@ -187,6 +209,33 @@ AUI.add(
 
 							instance._userToolbar.setContent(userToolbar);
 						}
+					},
+
+					renderMultiSelectContacts: function(responseData, lastNameAnchor) {
+						var instance = this;
+
+						var data = A.JSON.parse(responseData);
+
+						var contacts = data.contacts;
+
+						if (contacts && (contacts.length > 0)) {
+							instance._clearContactResult();
+
+							A.Array.map(
+								contacts,
+								function(contact) {
+									instance.addContactResult(contact);
+								}
+							);
+						}
+
+						var contactList = data.contactList;
+
+						var contactUserHTML = instance._renderResult(contactList, true, lastNameAnchor);
+
+						var contactResultContent = A.one('.contacts-portlet .contacts-result-content');
+
+						contactResultContent.html(contactUserHTML.join(''));
 					},
 
 					showMoreResult: function(responseData, lastNameAnchor) {
@@ -276,15 +325,26 @@ AUI.add(
 
 						var contactsResult = new ContactsResult(
 							{
+								inputNode: contactsSearchInput,
+								listNode: contactsResult,
+								minQueryLength: 0,
 								requestTemplate: function(query) {
 									return {
 										keywords: query
 									}
 								},
+								resultTextLocator: function(response) {
+									var result = '';
 
-								inputNode: contactsSearchInput,
-								listNode: contactsResult,
-								minQueryLength: 0,
+									if (typeof response.toString != STR_UNDEFINED) {
+										result = response.toString();
+									}
+									else if (typeof response.responseText != STR_UNDEFINED) {
+										result = response.responseText;
+									}
+
+									return result;
+								},
 								source: instance._createDataSource(contactsResultURL)
 							}
 						);
@@ -566,6 +626,73 @@ AUI.add(
 
 							if (instance._exportButton && (instance._buttonExportUserIds.length <= 0)) {
 								instance._exportButton.hide();
+							}
+						}
+					},
+
+					_updateUserToolBar: function(user) {
+						var instance = this;
+
+						var addConnectionButton = instance.byId('addConnectionButton');
+						var blockButton = instance.byId('blockButton');
+						var followButton = instance.byId('followButton');
+						var removeConnectionButton = instance.byId('removeConnectionButton');
+						var unblockButton = instance.byId('unblockButton');
+						var unfollowButton = instance.byId('unfollowButton');
+
+						var blockIcon = A.one('.contacts-action .block');
+						var disabledIcon = A.one('.contacts-action .disabled');
+						var connectedIcon = A.one('.contacts-action .connected');
+						var followingIcon = A.one('.contacts-action .following');
+
+						if (user.block) {
+							blockIcon.show();
+							connectedIcon.hide();
+							disabledIcon.hide();
+							followingIcon.hide();
+
+							blockButton.hide();
+							unblockButton.show();
+						}
+						else {
+							blockIcon.hide();
+
+							blockButton.show();
+							unblockButton.hide();
+
+							if (user.connectionRequested) {
+								connectedIcon.hide();
+								disabledIcon.show();
+
+								addConnectionButton.hide();
+								removeConnectionButton.hide();
+							}
+							else if (user.connected) {
+								connectedIcon.show();
+								disabledIcon.hide();
+
+								addConnectionButton.hide();
+								removeConnectionButton.show();
+							}
+							else {
+								connectedIcon.hide();
+								disabledIcon.hide();
+
+								addConnectionButton.show();
+								removeConnectionButton.hide();
+							}
+
+							if (user.following) {
+								followingIcon.show();
+
+								followButton.hide();
+								unfollowButton.show();
+							}
+							else {
+								followingIcon.hide();
+
+								followButton.show();
+								unfollowButton.hide();
 							}
 						}
 					}

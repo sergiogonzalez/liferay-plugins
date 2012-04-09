@@ -33,6 +33,8 @@ AUI().use(
 	'json-parse',
 	'liferay-so-site-list',
 	function(A) {
+		var STR_UNDEFINED = 'undefined';
+
 		Liferay.namespace('SO');
 
 		Liferay.SO.Sites = {
@@ -76,8 +78,7 @@ AUI().use(
 									end: data.end || 0,
 									keywords: data.keywords || '',
 									searchTab: data.searchTab || tabs1,
-									start: data.start || 0,
-									userGroups: data.userGroups || false
+									start: data.start || 0
 								}
 							}
 						},
@@ -126,6 +127,7 @@ AUI().use(
 						{
 							constrain2view: true,
 							cssClass: 'so-portlet-sites-dialog',
+							modal: true,
 							resizable: false,
 							width: 526
 						}
@@ -144,7 +146,7 @@ AUI().use(
 				instance._directoryList = directoryList;
 			},
 
-			updateSites: function() {
+			updateSites: function(showSuccessMessage) {
 				var instance = this;
 
 				if (instance._directoryList) {
@@ -153,6 +155,10 @@ AUI().use(
 
 				if (instance._siteList) {
 					instance._siteList.sendRequest();
+				}
+
+				if (showSuccessMessage && instance._messages) {
+					instance._messages.html('<span class="portlet-msg-success">' + Liferay.Language.get('your-request-completed-successfully') + '</span>');
 				}
 			},
 
@@ -194,15 +200,26 @@ AUI().use(
 
 				var siteList = new Liferay.SO.SiteList(
 					{
+						inputNode: siteSearchInput,
+						listNode: siteList,
+						minQueryLength: 0,
 						requestTemplate: function(query) {
 							return {
 								keywords: query
 							}
 						},
+						resultTextLocator: function(response) {
+							var result = '';
 
-						inputNode: siteSearchInput,
-						listNode: siteList,
-						minQueryLength: 0,
+							if (typeof response.toString != STR_UNDEFINED) {
+								result = response.toString();
+							}
+							else if (typeof response.responseText != STR_UNDEFINED) {
+								result = response.responseText;
+							}
+
+							return result;
+						},
 						source: instance.createDataSource(siteListURL)
 					}
 				);
@@ -210,6 +227,8 @@ AUI().use(
 				siteList.on('results', instance._updateSiteList);
 
 				instance._siteList = siteList;
+
+				instance._messages = A.one(config.messages);
 			},
 
 			_updateSiteList: function(event) {

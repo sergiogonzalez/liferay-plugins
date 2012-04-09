@@ -19,12 +19,8 @@
 
 <%@ include file="/html/portlet/dockbar/init.jsp" %>
 
-<%
-Role role = RoleLocalServiceUtil.fetchRole(themeDisplay.getCompanyId(), "Social Office User");
-%>
-
 <c:choose>
-	<c:when test="<%= (role == null) || !UserLocalServiceUtil.hasRoleUser(role.getRoleId(), themeDisplay.getUserId()) %>">
+	<c:when test='<%= !UserLocalServiceUtil.hasRoleUser(themeDisplay.getCompanyId(), "Social Office User", themeDisplay.getUserId(), true) %>'>
 		<liferay-util:include page="/html/portlet/dockbar/view.portal.jsp" />
 	</c:when>
 	<c:otherwise>
@@ -44,7 +40,7 @@ Role role = RoleLocalServiceUtil.fetchRole(themeDisplay.getCompanyId(), "Social 
 				<%
 				Group mySite = user.getGroup();
 
-				PortletURL portletURL = new PortletURLImpl(request, PortletKeys.MY_SITES, plid, PortletRequest.ACTION_PHASE);
+				PortletURL portletURL = new PortletURLImpl(request, PortletKeys.SITE_REDIRECTOR, plid, PortletRequest.ACTION_PHASE);
 
 				portletURL.setWindowState(WindowState.NORMAL);
 				portletURL.setPortletMode(PortletMode.VIEW);

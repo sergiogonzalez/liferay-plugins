@@ -81,44 +81,49 @@ request.setAttribute("view_user.jsp-user", user2);
 							else if (SocialRelationLocalServiceUtil.hasRelation(themeDisplay.getUserId(), user2.getUserId(), SocialRelationConstants.TYPE_UNI_ENEMY)) {
 								blocked = true;
 							}
+
+							boolean showConnectedRequestedIcon = !blocked && SocialRequestLocalServiceUtil.hasRequest(themeDisplay.getUserId(), User.class.getName(), themeDisplay.getUserId(), SocialRelationConstants.TYPE_BI_CONNECTION, user2.getUserId(), SocialRequestConstants.STATUS_PENDING);
 							%>
 
-							<c:choose>
-								<c:when test="<%= !blocked && SocialRequestLocalServiceUtil.hasRequest(themeDisplay.getUserId(), User.class.getName(), themeDisplay.getUserId(), SocialRelationConstants.TYPE_BI_CONNECTION, user2.getUserId(), SocialRequestConstants.STATUS_PENDING) %>">
-									<liferay-ui:icon
-										cssClass="disabled"
-										image="../social/coworker"
-										label="<%= true %>"
-										message="connection-requested"
-									/>
-								</c:when>
-								<c:when test="<%= !blocked && SocialRelationLocalServiceUtil.hasRelation(themeDisplay.getUserId(), user2.getUserId(), SocialRelationConstants.TYPE_BI_CONNECTION) %>">
-									<liferay-ui:icon
-										cssClass="connected"
-										image="../social/coworker"
-										label="<%= true %>"
-										message="connected"
-									/>
-								</c:when>
-							</c:choose>
+							<liferay-ui:icon
+								cssClass='<%= (showConnectedRequestedIcon) ? "disabled" : "disabled aui-helper-hidden" %>'
+								image="../social/coworker"
+								label="<%= true %>"
+								message="connection-requested"
+							/>
 
-							<c:if test="<%= !blocked && SocialRelationLocalServiceUtil.hasRelation(themeDisplay.getUserId(), user2.getUserId(), SocialRelationConstants.TYPE_UNI_FOLLOWER) %>">
-								<liferay-ui:icon
-									cssClass="following"
-									image="../social/following"
-									label="<%= true %>"
-									message="following"
-								/>
-							</c:if>
+							<%
+							boolean showConnectedIcon = !blocked && SocialRelationLocalServiceUtil.hasRelation(themeDisplay.getUserId(), user2.getUserId(), SocialRelationConstants.TYPE_BI_CONNECTION);
+							%>
 
-							<c:if test="<%= SocialRelationLocalServiceUtil.hasRelation(themeDisplay.getUserId(), user2.getUserId(), SocialRelationConstants.TYPE_UNI_ENEMY) %>">
-								<liferay-ui:icon
-									cssClass="block"
-									image="../social/block"
-									label="<%= true %>"
-									message="block"
-								/>
-							</c:if>
+							<liferay-ui:icon
+								cssClass='<%= (showConnectedIcon) ? "connected" : "connected aui-helper-hidden" %>'
+								image="../social/coworker"
+								label="<%= true %>"
+								message="connected"
+							/>
+
+							<%
+							boolean showFollowingIcon = !blocked && SocialRelationLocalServiceUtil.hasRelation(themeDisplay.getUserId(), user2.getUserId(), SocialRelationConstants.TYPE_UNI_FOLLOWER);
+							%>
+
+							<liferay-ui:icon
+								cssClass='<%= (showFollowingIcon) ? "following" : "following aui-helper-hidden" %>'
+								image="../social/following"
+								label="<%= true %>"
+								message="following"
+							/>
+
+							<%
+							boolean showBlockIcon = SocialRelationLocalServiceUtil.hasRelation(themeDisplay.getUserId(), user2.getUserId(), SocialRelationConstants.TYPE_UNI_ENEMY);
+							%>
+
+							<liferay-ui:icon
+								cssClass='<%= (showBlockIcon) ? "block" : "block aui-helper-hidden" %>'
+								image="../social/block"
+								label="<%= true %>"
+								message="block"
+							/>
 						</c:when>
 						<c:otherwise>
 							<liferay-util:include page="/contacts_center/user_toolbar.jsp" servletContext="<%= application %>" />
@@ -238,18 +243,16 @@ request.setAttribute("view_user.jsp-user", user2);
 										<c:when test="<%= !results.isEmpty() %>">
 
 											<%
-											for (Group currGroup : results) {
-												PortletURL groupURL = renderResponse.createActionURL();
-
-												groupURL.setWindowState(WindowState.NORMAL);
-
-												groupURL.setParameter("struts_action", "/sites_admin/page");
-												groupURL.setParameter("redirect", currentURL);
-												groupURL.setParameter("groupId", String.valueOf(group.getGroupId()));
-												groupURL.setParameter("privateLayout", Boolean.FALSE.toString());
+											for (Group curGroup : results) {
 											%>
 
-											<li class="user-information-sites"><a href="<%= groupURL %>"><%= currGroup.getDescriptiveName(locale) %></a></li>
+												<liferay-portlet:actionURL portletName="<%= PortletKeys.SITE_REDIRECTOR %>" var="siteURL" windowState="<%= LiferayWindowState.NORMAL.toString() %>">
+													<portlet:param name="struts_action" value="/my_sites/view" />
+													<portlet:param name="groupId" value="<%= String.valueOf(curGroup.getGroupId()) %>" />
+													<portlet:param name="privateLayout" value="<%= Boolean.FALSE.toString() %>" />
+												</liferay-portlet:actionURL>
+
+												<li class="user-information-sites"><a href="<%= siteURL %>"><%= curGroup.getDescriptiveName(locale) %></a></li>
 
 											<%
 											}
@@ -276,7 +279,7 @@ request.setAttribute("view_user.jsp-user", user2);
 
 								<c:choose>
 									<c:when test="<%= !assetTags.isEmpty() %>">
-										<div class="field-group" data-sectionId="categorization" data-title="tags">
+										<div class="field-group" data-sectionId="categorization" data-title="<%= LanguageUtil.get(pageContext, "tags") %>" >
 											<ul class="user-tags">
 
 												<%
@@ -365,7 +368,7 @@ request.setAttribute("view_user.jsp-user", user2);
 						destroyOnClose: true,
 						modal: true,
 						resizable: false,
-						title: Liferay.Language.get(node.getAttribute('data-title')),
+						title: node.getAttribute('data-title'),
 						width: 500
 					}
 				).plug(

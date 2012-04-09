@@ -29,8 +29,8 @@ List<Group> groups = null;
 int groupsCount = 0;
 
 if (tabs1.equals("my-sites")) {
-	groups = SitesUtil.getFavoriteSitesGroups(themeDisplay.getUserId(), searchName, maxResultSize);
-	groupsCount = SitesUtil.getFavoriteSitesGroupsCount(themeDisplay.getUserId(), searchName);
+	groups = SitesUtil.getVisibleSites(themeDisplay.getCompanyId(), themeDisplay.getUserId(), searchName, true, maxResultSize);
+	groupsCount = SitesUtil.getVisibleSitesCount(themeDisplay.getCompanyId(), themeDisplay.getUserId(), searchName, true);
 
 	if (groupsCount == 0) {
 		tabs1 = "all-sites";
@@ -38,6 +38,10 @@ if (tabs1.equals("my-sites")) {
 		groups = SitesUtil.getVisibleSites(themeDisplay.getCompanyId(), themeDisplay.getUserId(), searchName, false, maxResultSize);
 		groupsCount = SitesUtil.getVisibleSitesCount(themeDisplay.getCompanyId(), themeDisplay.getUserId(), searchName, false);
 	}
+}
+else if (tabs1.equals("my-favorites")) {
+	groups = SitesUtil.getFavoriteSitesGroups(themeDisplay.getUserId(), searchName, 0, maxResultSize);
+	groupsCount = SitesUtil.getFavoriteSitesGroupsCount(themeDisplay.getUserId(), searchName);
 }
 else {
 	groups = SitesUtil.getVisibleSites(themeDisplay.getCompanyId(), themeDisplay.getUserId(), searchName, false, maxResultSize);
@@ -51,6 +55,8 @@ portletURL.setWindowState(WindowState.NORMAL);
 pageContext.setAttribute("portletURL", portletURL);
 %>
 
+<div id="<portlet:namespace/>messages"><!-- --></div>
+
 <form action="<%= portletURL.toString() %>" method="get" name="<portlet:namespace />fm">
 <liferay-portlet:renderURLParams varImpl="portletURL" />
 
@@ -58,6 +64,7 @@ pageContext.setAttribute("portletURL", portletURL);
 	<aui:select label="" name="tabs1">
 		<aui:option label="all-sites" selected='<%= tabs1.equals("all-sites") %>' value="all-sites" />
 		<aui:option label="my-sites" selected='<%= tabs1.equals("my-sites") %>' value="my-sites" />
+		<aui:option label="my-favorites" selected='<%= tabs1.equals("my-favorites") %>' value="my-favorites" />
 	</aui:select>
 </div>
 
@@ -75,7 +82,7 @@ pageContext.setAttribute("portletURL", portletURL);
 
 	<c:if test="<%= !hideNotice %>">
 		<div class="portlet-msg-info favorite-msg-info <%= hideNotice %>">
-			<liferay-ui:message key="favorite-some-sites-to-customize-your-sites-list" />
+			<liferay-ui:message key="favorite-some-sites-to-customize-this-list" />
 
 			<span class="hide-notice">
 				<liferay-portlet:actionURL name="hideNotice" var="hideNoticeURL">
@@ -99,7 +106,7 @@ pageContext.setAttribute("portletURL", portletURL);
 
 					ExpandoBridge expandoBridge = group.getExpandoBridge();
 
-					boolean socialOfficeEnabled = GetterUtil.getBoolean(expandoBridge.getAttribute("socialOfficeEnabled"));
+					boolean socialOfficeEnabled = SocialOfficeServiceUtil.isSocialOfficeSite(group.getGroupId());
 
 					if (socialOfficeEnabled) {
 						className += "social-office-enabled ";
@@ -151,10 +158,10 @@ pageContext.setAttribute("portletURL", portletURL);
 										<portlet:param name="privateLayout" value="<%= String.valueOf(!group.hasPublicLayouts()) %>" />
 									</liferay-portlet:actionURL>
 
-									<a href="<%= siteURL %>"><%= group.getDescriptiveName(locale) %></a>
+									<a href="<%= siteURL %>"><%= HtmlUtil.escape(group.getDescriptiveName(locale)) %></a>
 								</c:when>
 								<c:otherwise>
-									<%= group.getDescriptiveName(locale) %>
+									<%= HtmlUtil.escape(group.getDescriptiveName(locale)) %>
 								</c:otherwise>
 							</c:choose>
 						</span>
@@ -198,6 +205,7 @@ pageContext.setAttribute("portletURL", portletURL);
 <aui:script use="aui-base,aui-io,aui-toolbar">
 	Liferay.SO.Sites.init(
 		{
+			messages: '#<portlet:namespace />messages',
 			siteList: '.so-portlet-sites .site-list',
 			siteListContainer: '.so-portlet-sites .site-list-container',
 			siteListURL: '<portlet:resourceURL id="getSites"><portlet:param name="portletResource" value="<%= portletResource %>" /></portlet:resourceURL>',
@@ -256,6 +264,7 @@ pageContext.setAttribute("portletURL", portletURL);
 
 			Liferay.SO.Sites.init(
 				{
+					messages: '#<portlet:namespace />messages',
 					siteList: '.so-portlet-sites .site-list',
 					siteListContainer: '.so-portlet-sites .site-list-container',
 					siteListURL: '<portlet:resourceURL id="getSites"><portlet:param name="portletResource" value="<%= portletResource %>" /></portlet:resourceURL>',
@@ -274,7 +283,7 @@ pageContext.setAttribute("portletURL", portletURL);
 
 			var data = {
 				keywords: keywords,
-				userSites: <%= tabs1.equals("my-sites") %>
+				tabs1: sitesTabsSelect.get('value')
 			};
 
 			<liferay-portlet:renderURL var="viewSitesURL" windowState="<%= LiferayWindowState.EXCLUSIVE.toString() %>">

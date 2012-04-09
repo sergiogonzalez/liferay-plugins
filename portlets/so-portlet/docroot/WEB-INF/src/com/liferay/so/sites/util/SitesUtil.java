@@ -17,13 +17,11 @@
 
 package com.liferay.so.sites.util;
 
-import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.model.Group;
 import com.liferay.portal.model.GroupConstants;
 import com.liferay.portal.service.GroupLocalServiceUtil;
-import com.liferay.portal.service.GroupServiceUtil;
 import com.liferay.portal.util.comparator.GroupNameComparator;
 import com.liferay.so.service.FavoriteSiteLocalServiceUtil;
 
@@ -38,18 +36,12 @@ import java.util.List;
 public class SitesUtil {
 
 	public static List<Group> getFavoriteSitesGroups(
-			long userId, String name, int maxResultSize)
+			long userId, String name, int start, int end)
 		throws Exception {
-
-		int start = 0;
-
-		if (maxResultSize == QueryUtil.ALL_POS) {
-			start = QueryUtil.ALL_POS;
-		}
 
 		List<Object[]> favoriteSites =
 			FavoriteSiteLocalServiceUtil.getFavoriteSites(
-				userId, name, start, maxResultSize);
+				userId, name, start, end);
 
 		List<Group> groups = new ArrayList<Group>(favoriteSites.size());
 
@@ -58,7 +50,7 @@ public class SitesUtil {
 			long groupId = (Long)favoriteSite[1];
 
 			try {
-				groups.add(GroupServiceUtil.getGroup(groupId));
+				groups.add(GroupLocalServiceUtil.getGroup(groupId));
 			}
 			catch (Exception e) {
 				FavoriteSiteLocalServiceUtil.deleteFavoriteSite(
@@ -165,7 +157,7 @@ public class SitesUtil {
 			return GroupLocalServiceUtil.searchCount(
 				comapnyId, keywords, null, params);
 		}
-		else{
+		else {
 			LinkedHashMap<String, Object> params =
 				new LinkedHashMap<String, Object>();
 

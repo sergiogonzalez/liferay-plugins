@@ -23,11 +23,8 @@ import com.liferay.portal.kernel.dao.jdbc.SqlUpdateFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.search.Indexer;
-import com.liferay.portal.kernel.search.IndexerRegistryUtil;
-import com.liferay.portal.kernel.search.SearchException;
+import com.liferay.portal.kernel.search.Indexable;
+import com.liferay.portal.kernel.search.IndexableType;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.model.PersistedModel;
 import com.liferay.portal.service.PersistedModelLocalServiceRegistryUtil;
@@ -41,6 +38,7 @@ import com.liferay.portal.workflow.kaleo.model.KaleoNotification;
 import com.liferay.portal.workflow.kaleo.service.KaleoActionLocalService;
 import com.liferay.portal.workflow.kaleo.service.KaleoConditionLocalService;
 import com.liferay.portal.workflow.kaleo.service.KaleoDefinitionLocalService;
+import com.liferay.portal.workflow.kaleo.service.KaleoDefinitionService;
 import com.liferay.portal.workflow.kaleo.service.KaleoInstanceLocalService;
 import com.liferay.portal.workflow.kaleo.service.KaleoInstanceTokenLocalService;
 import com.liferay.portal.workflow.kaleo.service.KaleoLogLocalService;
@@ -105,27 +103,12 @@ public abstract class KaleoNotificationLocalServiceBaseImpl
 	 * @return the kaleo notification that was added
 	 * @throws SystemException if a system exception occurred
 	 */
+	@Indexable(type = IndexableType.REINDEX)
 	public KaleoNotification addKaleoNotification(
 		KaleoNotification kaleoNotification) throws SystemException {
 		kaleoNotification.setNew(true);
 
-		kaleoNotification = kaleoNotificationPersistence.update(kaleoNotification,
-				false);
-
-		Indexer indexer = IndexerRegistryUtil.getIndexer(getModelClassName());
-
-		if (indexer != null) {
-			try {
-				indexer.reindex(kaleoNotification);
-			}
-			catch (SearchException se) {
-				if (_log.isWarnEnabled()) {
-					_log.warn(se, se);
-				}
-			}
-		}
-
-		return kaleoNotification;
+		return kaleoNotificationPersistence.update(kaleoNotification, false);
 	}
 
 	/**
@@ -142,49 +125,27 @@ public abstract class KaleoNotificationLocalServiceBaseImpl
 	 * Deletes the kaleo notification with the primary key from the database. Also notifies the appropriate model listeners.
 	 *
 	 * @param kaleoNotificationId the primary key of the kaleo notification
+	 * @return the kaleo notification that was removed
 	 * @throws PortalException if a kaleo notification with the primary key could not be found
 	 * @throws SystemException if a system exception occurred
 	 */
-	public void deleteKaleoNotification(long kaleoNotificationId)
+	@Indexable(type = IndexableType.DELETE)
+	public KaleoNotification deleteKaleoNotification(long kaleoNotificationId)
 		throws PortalException, SystemException {
-		KaleoNotification kaleoNotification = kaleoNotificationPersistence.remove(kaleoNotificationId);
-
-		Indexer indexer = IndexerRegistryUtil.getIndexer(getModelClassName());
-
-		if (indexer != null) {
-			try {
-				indexer.delete(kaleoNotification);
-			}
-			catch (SearchException se) {
-				if (_log.isWarnEnabled()) {
-					_log.warn(se, se);
-				}
-			}
-		}
+		return kaleoNotificationPersistence.remove(kaleoNotificationId);
 	}
 
 	/**
 	 * Deletes the kaleo notification from the database. Also notifies the appropriate model listeners.
 	 *
 	 * @param kaleoNotification the kaleo notification
+	 * @return the kaleo notification that was removed
 	 * @throws SystemException if a system exception occurred
 	 */
-	public void deleteKaleoNotification(KaleoNotification kaleoNotification)
-		throws SystemException {
-		kaleoNotificationPersistence.remove(kaleoNotification);
-
-		Indexer indexer = IndexerRegistryUtil.getIndexer(getModelClassName());
-
-		if (indexer != null) {
-			try {
-				indexer.delete(kaleoNotification);
-			}
-			catch (SearchException se) {
-				if (_log.isWarnEnabled()) {
-					_log.warn(se, se);
-				}
-			}
-		}
+	@Indexable(type = IndexableType.DELETE)
+	public KaleoNotification deleteKaleoNotification(
+		KaleoNotification kaleoNotification) throws SystemException {
+		return kaleoNotificationPersistence.remove(kaleoNotification);
 	}
 
 	/**
@@ -310,6 +271,7 @@ public abstract class KaleoNotificationLocalServiceBaseImpl
 	 * @return the kaleo notification that was updated
 	 * @throws SystemException if a system exception occurred
 	 */
+	@Indexable(type = IndexableType.REINDEX)
 	public KaleoNotification updateKaleoNotification(
 		KaleoNotification kaleoNotification) throws SystemException {
 		return updateKaleoNotification(kaleoNotification, true);
@@ -323,28 +285,13 @@ public abstract class KaleoNotificationLocalServiceBaseImpl
 	 * @return the kaleo notification that was updated
 	 * @throws SystemException if a system exception occurred
 	 */
+	@Indexable(type = IndexableType.REINDEX)
 	public KaleoNotification updateKaleoNotification(
 		KaleoNotification kaleoNotification, boolean merge)
 		throws SystemException {
 		kaleoNotification.setNew(false);
 
-		kaleoNotification = kaleoNotificationPersistence.update(kaleoNotification,
-				merge);
-
-		Indexer indexer = IndexerRegistryUtil.getIndexer(getModelClassName());
-
-		if (indexer != null) {
-			try {
-				indexer.reindex(kaleoNotification);
-			}
-			catch (SearchException se) {
-				if (_log.isWarnEnabled()) {
-					_log.warn(se, se);
-				}
-			}
-		}
-
-		return kaleoNotification;
+		return kaleoNotificationPersistence.update(kaleoNotification, merge);
 	}
 
 	/**
@@ -440,6 +387,25 @@ public abstract class KaleoNotificationLocalServiceBaseImpl
 	public void setKaleoDefinitionLocalService(
 		KaleoDefinitionLocalService kaleoDefinitionLocalService) {
 		this.kaleoDefinitionLocalService = kaleoDefinitionLocalService;
+	}
+
+	/**
+	 * Returns the kaleo definition remote service.
+	 *
+	 * @return the kaleo definition remote service
+	 */
+	public KaleoDefinitionService getKaleoDefinitionService() {
+		return kaleoDefinitionService;
+	}
+
+	/**
+	 * Sets the kaleo definition remote service.
+	 *
+	 * @param kaleoDefinitionService the kaleo definition remote service
+	 */
+	public void setKaleoDefinitionService(
+		KaleoDefinitionService kaleoDefinitionService) {
+		this.kaleoDefinitionService = kaleoDefinitionService;
 	}
 
 	/**
@@ -1171,6 +1137,8 @@ public abstract class KaleoNotificationLocalServiceBaseImpl
 	protected KaleoConditionPersistence kaleoConditionPersistence;
 	@BeanReference(type = KaleoDefinitionLocalService.class)
 	protected KaleoDefinitionLocalService kaleoDefinitionLocalService;
+	@BeanReference(type = KaleoDefinitionService.class)
+	protected KaleoDefinitionService kaleoDefinitionService;
 	@BeanReference(type = KaleoDefinitionPersistence.class)
 	protected KaleoDefinitionPersistence kaleoDefinitionPersistence;
 	@BeanReference(type = KaleoInstanceLocalService.class)
@@ -1241,6 +1209,5 @@ public abstract class KaleoNotificationLocalServiceBaseImpl
 	protected UserService userService;
 	@BeanReference(type = UserPersistence.class)
 	protected UserPersistence userPersistence;
-	private static Log _log = LogFactoryUtil.getLog(KaleoNotificationLocalServiceBaseImpl.class);
 	private String _beanIdentifier;
 }
