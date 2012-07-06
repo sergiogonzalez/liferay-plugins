@@ -28,6 +28,7 @@ import com.liferay.knowledgebase.model.KBComment;
 import com.liferay.knowledgebase.model.KBTemplate;
 import com.liferay.knowledgebase.service.KBArticleServiceUtil;
 import com.liferay.knowledgebase.service.KBCommentLocalServiceUtil;
+import com.liferay.knowledgebase.service.KBCommentServiceUtil;
 import com.liferay.knowledgebase.service.KBTemplateServiceUtil;
 import com.liferay.knowledgebase.util.PortletKeys;
 import com.liferay.knowledgebase.util.WebKeys;
@@ -167,7 +168,7 @@ public class AdminPortlet extends MVCPortlet {
 
 		long kbCommentId = ParamUtil.getLong(actionRequest, "kbCommentId");
 
-		KBCommentLocalServiceUtil.deleteKBComment(kbCommentId);
+		KBCommentServiceUtil.deleteKBComment(kbCommentId);
 	}
 
 	public void deleteKBTemplate(
@@ -262,12 +263,17 @@ public class AdminPortlet extends MVCPortlet {
 			ResourceRequest resourceRequest, ResourceResponse resourceResponse)
 		throws Exception {
 
-		long companyId = ParamUtil.getLong(resourceRequest, "companyId");
+		long resourcePrimKey = ParamUtil.getLong(
+			resourceRequest, "resourcePrimKey");
+
 		String fileName = ParamUtil.getString(resourceRequest, "fileName");
+
+		KBArticle kbArticle = KBArticleServiceUtil.getLatestKBArticle(
+			resourcePrimKey, WorkflowConstants.STATUS_ANY);
 
 		String shortFileName = FileUtil.getShortFileName(fileName);
 		InputStream is = DLStoreUtil.getFileAsStream(
-			companyId, CompanyConstants.SYSTEM, fileName);
+			kbArticle.getCompanyId(), CompanyConstants.SYSTEM, fileName);
 		String contentType = MimeTypesUtil.getContentType(fileName);
 
 		PortletResponseUtil.sendFile(
@@ -496,7 +502,7 @@ public class AdminPortlet extends MVCPortlet {
 				helpful, serviceContext);
 		}
 		else if (cmd.equals(Constants.UPDATE)) {
-			KBCommentLocalServiceUtil.updateKBComment(
+			KBCommentServiceUtil.updateKBComment(
 				kbCommentId, classNameId, classPK, content, helpful,
 				serviceContext);
 		}

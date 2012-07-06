@@ -63,6 +63,7 @@ public class MessageClp extends BaseModelImpl<Message> implements Message {
 		setPrimaryKey(((Long)primaryKeyObj).longValue());
 	}
 
+	@Override
 	public Map<String, Object> getModelAttributes() {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 
@@ -89,6 +90,7 @@ public class MessageClp extends BaseModelImpl<Message> implements Message {
 		return attributes;
 	}
 
+	@Override
 	public void setModelAttributes(Map<String, Object> attributes) {
 		Long messageId = (Long)attributes.get("messageId");
 
@@ -365,11 +367,11 @@ public class MessageClp extends BaseModelImpl<Message> implements Message {
 		_remoteMessageId = remoteMessageId;
 	}
 
-	public long getGroupId() {
+	public boolean hasFlag(int flag) {
 		throw new UnsupportedOperationException();
 	}
 
-	public boolean hasFlag(int flag) {
+	public long getGroupId() {
 		throw new UnsupportedOperationException();
 	}
 

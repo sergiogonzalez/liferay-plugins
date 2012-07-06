@@ -18,8 +18,9 @@
 package com.liferay.so.hook.upgrade;
 
 import com.liferay.portal.kernel.upgrade.UpgradeProcess;
+import com.liferay.so.hook.upgrade.v2_0_2.UpgradeCompany;
 import com.liferay.so.hook.upgrade.v2_0_2.UpgradeGroup;
-import com.liferay.so.hook.upgrade.v2_0_2.UpgradeLayoutSetPrototype;
+import com.liferay.so.hook.upgrade.v2_0_2.UpgradeUser;
 
 /**
  * @author Jonathan Lee
@@ -33,11 +34,8 @@ public class UpgradeProcess_2_0_2 extends UpgradeProcess {
 
 	@Override
 	protected void doUpgrade() throws Exception {
-		if (UpgradeUtil.isFirstRun()) {
-			return;
-		}
-
-		upgrade(UpgradeLayoutSetPrototype.class);
+		upgrade(UpgradeCompany.class);
+		upgrade(UpgradeUser.class);
 		upgrade(UpgradeGroup.class);
 	}
 

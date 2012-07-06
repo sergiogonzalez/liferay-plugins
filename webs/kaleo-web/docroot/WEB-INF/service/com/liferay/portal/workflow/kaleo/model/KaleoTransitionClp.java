@@ -62,6 +62,7 @@ public class KaleoTransitionClp extends BaseModelImpl<KaleoTransition>
 		setPrimaryKey(((Long)primaryKeyObj).longValue());
 	}
 
+	@Override
 	public Map<String, Object> getModelAttributes() {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 
@@ -85,6 +86,7 @@ public class KaleoTransitionClp extends BaseModelImpl<KaleoTransition>
 		return attributes;
 	}
 
+	@Override
 	public void setModelAttributes(Map<String, Object> attributes) {
 		Long kaleoTransitionId = (Long)attributes.get("kaleoTransitionId");
 
@@ -325,11 +327,11 @@ public class KaleoTransitionClp extends BaseModelImpl<KaleoTransition>
 		_defaultTransition = defaultTransition;
 	}
 
-	public com.liferay.portal.workflow.kaleo.model.KaleoNode getSourceKaleoNode() {
+	public com.liferay.portal.workflow.kaleo.model.KaleoNode getTargetKaleoNode() {
 		throw new UnsupportedOperationException();
 	}
 
-	public com.liferay.portal.workflow.kaleo.model.KaleoNode getTargetKaleoNode() {
+	public com.liferay.portal.workflow.kaleo.model.KaleoNode getSourceKaleoNode() {
 		throw new UnsupportedOperationException();
 	}
 

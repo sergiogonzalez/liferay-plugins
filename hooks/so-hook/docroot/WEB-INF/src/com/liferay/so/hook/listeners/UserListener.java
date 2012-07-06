@@ -26,6 +26,7 @@ import com.liferay.portal.model.User;
 import com.liferay.portal.service.UserLocalServiceUtil;
 import com.liferay.portlet.expando.model.ExpandoBridge;
 import com.liferay.so.util.LayoutSetPrototypeUtil;
+import com.liferay.so.util.SocialOfficeConstants;
 import com.liferay.so.util.SocialOfficeUtil;
 
 /**
@@ -47,6 +48,10 @@ public class UserListener extends BaseModelListener<User> {
 				user.getCompanyId(), "Social Office User", user.getUserId(),
 				true);
 
+			if (!hasRole) {
+				return;
+			}
+
 			Group group = user.getGroup();
 
 			ExpandoBridge expandoBridge = group.getExpandoBridge();
@@ -54,12 +59,18 @@ public class UserListener extends BaseModelListener<User> {
 			boolean socialOfficeEnabled = GetterUtil.getBoolean(
 				expandoBridge.getAttribute("socialOfficeEnabled"));
 
-			if (hasRole && !socialOfficeEnabled) {
-				LayoutSetPrototypeUtil.updateLayoutSetPrototype(group, false);
-				LayoutSetPrototypeUtil.updateLayoutSetPrototype(group, true);
-
-				SocialOfficeUtil.enableSocialOffice(group);
+			if (socialOfficeEnabled) {
+				return;
 			}
+
+			LayoutSetPrototypeUtil.updateLayoutSetPrototype(
+				group, false,
+				SocialOfficeConstants.LAYOUT_SET_PROTOTYPE_KEY_USER_PUBLIC);
+			LayoutSetPrototypeUtil.updateLayoutSetPrototype(
+				group, true,
+				SocialOfficeConstants.LAYOUT_SET_PROTOTYPE_KEY_USER_PRIVATE);
+
+			SocialOfficeUtil.enableSocialOffice(group);
 		}
 		catch (NoSuchGroupException nsge) {
 		}
@@ -81,6 +92,10 @@ public class UserListener extends BaseModelListener<User> {
 				user.getCompanyId(), "Social Office User", user.getUserId(),
 				true);
 
+			if (hasRole) {
+				return;
+			}
+
 			Group group = user.getGroup();
 
 			ExpandoBridge expandoBridge = group.getExpandoBridge();
@@ -88,12 +103,18 @@ public class UserListener extends BaseModelListener<User> {
 			boolean socialOfficeEnabled = GetterUtil.getBoolean(
 				expandoBridge.getAttribute("socialOfficeEnabled"));
 
-			if (!hasRole && socialOfficeEnabled) {
-				LayoutSetPrototypeUtil.removeLayoutSetPrototype(group, false);
-				LayoutSetPrototypeUtil.removeLayoutSetPrototype(group, true);
-
-				SocialOfficeUtil.disableSocialOffice(group);
+			if (!socialOfficeEnabled) {
+				return;
 			}
+
+			LayoutSetPrototypeUtil.removeLayoutSetPrototype(
+				group, false,
+				SocialOfficeConstants.LAYOUT_SET_PROTOTYPE_KEY_USER_PUBLIC);
+			LayoutSetPrototypeUtil.removeLayoutSetPrototype(
+				group, true,
+				SocialOfficeConstants.LAYOUT_SET_PROTOTYPE_KEY_USER_PRIVATE);
+
+			SocialOfficeUtil.disableSocialOffice(group);
 		}
 		catch (NoSuchGroupException nsge) {
 		}

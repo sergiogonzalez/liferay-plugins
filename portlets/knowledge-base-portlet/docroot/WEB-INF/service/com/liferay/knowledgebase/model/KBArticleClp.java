@@ -64,6 +64,7 @@ public class KBArticleClp extends BaseModelImpl<KBArticle> implements KBArticle 
 		setPrimaryKey(((Long)primaryKeyObj).longValue());
 	}
 
+	@Override
 	public Map<String, Object> getModelAttributes() {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 
@@ -95,6 +96,7 @@ public class KBArticleClp extends BaseModelImpl<KBArticle> implements KBArticle 
 		return attributes;
 	}
 
+	@Override
 	public void setModelAttributes(Map<String, Object> attributes) {
 		String uuid = (String)attributes.get("uuid");
 
@@ -467,11 +469,11 @@ public class KBArticleClp extends BaseModelImpl<KBArticle> implements KBArticle 
 		_statusDate = statusDate;
 	}
 
-	public java.lang.String getAttachmentsDirName() {
+	public boolean isFirstVersion() {
 		throw new UnsupportedOperationException();
 	}
 
-	public java.lang.String[] getAttachmentsFileNames() {
+	public java.lang.String getAttachmentsDirName() {
 		throw new UnsupportedOperationException();
 	}
 
@@ -479,11 +481,11 @@ public class KBArticleClp extends BaseModelImpl<KBArticle> implements KBArticle 
 		throw new UnsupportedOperationException();
 	}
 
-	public boolean isFirstVersion() {
+	public boolean isRoot() {
 		throw new UnsupportedOperationException();
 	}
 
-	public boolean isRoot() {
+	public java.lang.String[] getAttachmentsFileNames() {
 		throw new UnsupportedOperationException();
 	}
 
@@ -496,6 +498,15 @@ public class KBArticleClp extends BaseModelImpl<KBArticle> implements KBArticle 
 
 	public boolean isApproved() {
 		if (getStatus() == WorkflowConstants.STATUS_APPROVED) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	public boolean isDenied() {
+		if (getStatus() == WorkflowConstants.STATUS_DENIED) {
 			return true;
 		}
 		else {
@@ -521,8 +532,44 @@ public class KBArticleClp extends BaseModelImpl<KBArticle> implements KBArticle 
 		}
 	}
 
+	public boolean isInactive() {
+		if (getStatus() == WorkflowConstants.STATUS_INACTIVE) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	public boolean isIncomplete() {
+		if (getStatus() == WorkflowConstants.STATUS_INCOMPLETE) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	public boolean isInTrash() {
+		if (getStatus() == WorkflowConstants.STATUS_IN_TRASH) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
 	public boolean isPending() {
 		if (getStatus() == WorkflowConstants.STATUS_PENDING) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	public boolean isScheduled() {
+		if (getStatus() == WorkflowConstants.STATUS_SCHEDULED) {
 			return true;
 		}
 		else {

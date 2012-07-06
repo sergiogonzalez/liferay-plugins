@@ -64,6 +64,7 @@ public class TasksEntryClp extends BaseModelImpl<TasksEntry>
 		setPrimaryKey(((Long)primaryKeyObj).longValue());
 	}
 
+	@Override
 	public Map<String, Object> getModelAttributes() {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 
@@ -85,6 +86,7 @@ public class TasksEntryClp extends BaseModelImpl<TasksEntry>
 		return attributes;
 	}
 
+	@Override
 	public void setModelAttributes(Map<String, Object> attributes) {
 		Long tasksEntryId = (Long)attributes.get("tasksEntryId");
 
@@ -309,7 +311,7 @@ public class TasksEntryClp extends BaseModelImpl<TasksEntry>
 		_status = status;
 	}
 
-	public java.lang.String getAssigneeFullName() {
+	public java.lang.String getReporterFullName() {
 		throw new UnsupportedOperationException();
 	}
 
@@ -317,11 +319,11 @@ public class TasksEntryClp extends BaseModelImpl<TasksEntry>
 		throw new UnsupportedOperationException();
 	}
 
-	public java.lang.String getReporterFullName() {
+	public java.lang.String getStatusLabel() {
 		throw new UnsupportedOperationException();
 	}
 
-	public java.lang.String getStatusLabel() {
+	public java.lang.String getAssigneeFullName() {
 		throw new UnsupportedOperationException();
 	}
 

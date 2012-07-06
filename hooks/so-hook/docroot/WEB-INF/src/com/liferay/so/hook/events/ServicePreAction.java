@@ -20,24 +20,13 @@ package com.liferay.so.hook.events;
 import com.liferay.portal.kernel.events.Action;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.kernel.util.StringUtil;
-import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.model.Group;
-import com.liferay.portal.model.Layout;
-import com.liferay.portal.model.LayoutConstants;
 import com.liferay.portal.model.User;
-import com.liferay.portal.service.GroupLocalServiceUtil;
-import com.liferay.portal.service.LayoutLocalServiceUtil;
-import com.liferay.portal.service.UserLocalServiceUtil;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PortletKeys;
 import com.liferay.portlet.PortletURLFactoryUtil;
-
-import java.util.List;
 
 import javax.portlet.PortletMode;
 import javax.portlet.PortletRequest;
@@ -50,6 +39,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * @author Brett Swaim
  * @author Ryan Park
+ * @author Jonathan Lee
  */
 public class ServicePreAction extends Action {
 
@@ -69,134 +59,36 @@ public class ServicePreAction extends Action {
 			HttpServletRequest request, HttpServletResponse response)
 		throws Exception {
 
+		String currentURL = PortalUtil.getCurrentURL(request);
+
+		if (!currentURL.equals("/user")) {
+			return;
+		}
+
 		ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
-		String currentURL = PortalUtil.getCurrentURL(request);
-
-		if (Validator.isNotNull(themeDisplay.getI18nLanguageId())) {
-			int x = currentURL.indexOf(StringPool.SLASH, 1);
-
-			currentURL = currentURL.substring(x);
-		}
-
-		String redirect = null;
-
-		if (isMyPlacesView(themeDisplay, currentURL)) {
-			redirect = getRedirect(themeDisplay, request);
-		}
-		else if (isDirectoryView(request, currentURL)) {
-			redirect = getUserRedirect(
-				request, ParamUtil.getLong(request, "_11_p_u_i_d"),
-				themeDisplay.getPlid());
-		}
-
-		if (Validator.isNotNull(redirect)) {
-			response.sendRedirect(redirect);
-		}
-	}
-
-	protected String getGroupRedirect(ThemeDisplay themeDisplay, long groupId)
-		throws Exception {
-
-		List<Layout> layouts = LayoutLocalServiceUtil.getLayouts(
-			groupId, false, LayoutConstants.DEFAULT_PARENT_LAYOUT_ID, false, 0,
-			1);
-
-		if (layouts.size() > 0) {
-			Layout layout = layouts.get(0);
-
-			return PortalUtil.getLayoutURL(layout, themeDisplay);
-		}
-
-		return null;
-	}
-
-	protected String getRedirect(
-			ThemeDisplay themeDisplay, HttpServletRequest request)
-		throws Exception {
-
-		long groupId = ParamUtil.getLong(request, "groupId");
-
-		if (groupId > 0) {
-			Group group = GroupLocalServiceUtil.getGroup(groupId);
-
-			if (group.isUser()) {
-				return getUserRedirect(
-					request, group.getClassPK(), themeDisplay.getPlid());
-			}
-
-			return getGroupRedirect(themeDisplay, group.getGroupId());
-		}
-
-		return null;
-	}
-
-	protected String getUserRedirect(
-			HttpServletRequest request, long userId, long plid)
-		throws Exception {
-
-		User user = UserLocalServiceUtil.getUser(userId);
+		User user = themeDisplay.getUser();
 
 		if (!user.hasPrivateLayouts()) {
-			return null;
+			return;
 		}
 
 		PortletURL portletURL = PortletURLFactoryUtil.create(
-			request, PortletKeys.SITE_REDIRECTOR, plid,
+			request, PortletKeys.SITE_REDIRECTOR, themeDisplay.getPlid(),
 			PortletRequest.ACTION_PHASE);
 
 		portletURL.setParameter("struts_action", "/my_sites/view");
-		portletURL.setParameter(
-			"groupId", String.valueOf(user.getGroup().getGroupId()));
+
+		Group group = user.getGroup();
+
+		portletURL.setParameter("groupId", String.valueOf(group.getGroupId()));
+
 		portletURL.setParameter("privateLayout", Boolean.TRUE.toString());
 		portletURL.setPortletMode(PortletMode.VIEW);
 		portletURL.setWindowState(WindowState.NORMAL);
 
-		return portletURL.toString();
-	}
-
-	protected boolean isDirectoryView(
-			HttpServletRequest request, String currentURL)
-		throws Exception {
-
-		String action = ParamUtil.getString(request, "_11_struts_action");
-
-		if (!action.equals("/directory/view_user")) {
-			return false;
-		}
-
-		long userId = ParamUtil.getLong(request, "_11_p_u_i_d");
-
-		if (userId <= 0) {
-			return false;
-		}
-
-		return true;
-	}
-
-	protected boolean isMyPlacesView(
-		ThemeDisplay themeDisplay, String currentURL) {
-
-		String urlFragment1 =
-			themeDisplay.getPathMain() + "/my_sites/view?groupId=";
-
-		if (!StringUtil.startsWith(currentURL, urlFragment1)) {
-			return false;
-		}
-
-		String urlFragment2 = "&privateLayout=0";
-
-		if (!StringUtil.endsWith(currentURL, urlFragment2)) {
-			return false;
-		}
-
-		String s = currentURL;
-
-		s = StringUtil.remove(s, urlFragment1, StringPool.BLANK);
-		s = StringUtil.remove(s, urlFragment2, StringPool.BLANK);
-
-		return Validator.isNumber(s);
+		response.sendRedirect(portletURL.toString());
 	}
 
 	private static Log _log = LogFactoryUtil.getLog(ServicePreAction.class);

@@ -62,6 +62,7 @@ public class KaleoTimerInstanceTokenClp extends BaseModelImpl<KaleoTimerInstance
 		setPrimaryKey(((Long)primaryKeyObj).longValue());
 	}
 
+	@Override
 	public Map<String, Object> getModelAttributes() {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 
@@ -90,6 +91,7 @@ public class KaleoTimerInstanceTokenClp extends BaseModelImpl<KaleoTimerInstance
 		return attributes;
 	}
 
+	@Override
 	public void setModelAttributes(Map<String, Object> attributes) {
 		Long kaleoTimerInstanceTokenId = (Long)attributes.get(
 				"kaleoTimerInstanceTokenId");
@@ -403,11 +405,11 @@ public class KaleoTimerInstanceTokenClp extends BaseModelImpl<KaleoTimerInstance
 		throw new UnsupportedOperationException();
 	}
 
-	public com.liferay.portal.workflow.kaleo.model.KaleoTaskInstanceToken getKaleoTaskInstanceToken() {
+	public com.liferay.portal.workflow.kaleo.model.KaleoTimer getKaleoTimer() {
 		throw new UnsupportedOperationException();
 	}
 
-	public com.liferay.portal.workflow.kaleo.model.KaleoTimer getKaleoTimer() {
+	public com.liferay.portal.workflow.kaleo.model.KaleoTaskInstanceToken getKaleoTaskInstanceToken() {
 		throw new UnsupportedOperationException();
 	}
 

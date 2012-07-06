@@ -62,6 +62,7 @@ public class WSRPConsumerClp extends BaseModelImpl<WSRPConsumer>
 		setPrimaryKey(((Long)primaryKeyObj).longValue());
 	}
 
+	@Override
 	public Map<String, Object> getModelAttributes() {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 
@@ -82,6 +83,7 @@ public class WSRPConsumerClp extends BaseModelImpl<WSRPConsumer>
 		return attributes;
 	}
 
+	@Override
 	public void setModelAttributes(Map<String, Object> attributes) {
 		String uuid = (String)attributes.get("uuid");
 
@@ -241,7 +243,8 @@ public class WSRPConsumerClp extends BaseModelImpl<WSRPConsumer>
 		_forwardCookies = forwardCookies;
 	}
 
-	public oasis.names.tc.wsrp.v2.types.RegistrationContext getRegistrationContext() {
+	public void setRegistrationContext(
+		oasis.names.tc.wsrp.v2.types.RegistrationContext registrationContext) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -249,13 +252,12 @@ public class WSRPConsumerClp extends BaseModelImpl<WSRPConsumer>
 		throw new UnsupportedOperationException();
 	}
 
-	public void setRegistrationContext(
-		oasis.names.tc.wsrp.v2.types.RegistrationContext registrationContext) {
+	public void setRegistrationProperties(
+		com.liferay.portal.kernel.util.UnicodeProperties registrationProperties) {
 		throw new UnsupportedOperationException();
 	}
 
-	public void setRegistrationProperties(
-		com.liferay.portal.kernel.util.UnicodeProperties registrationProperties) {
+	public oasis.names.tc.wsrp.v2.types.RegistrationContext getRegistrationContext() {
 		throw new UnsupportedOperationException();
 	}
 

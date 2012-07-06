@@ -62,6 +62,7 @@ public class OAuthConsumerClp extends BaseModelImpl<OAuthConsumer>
 		setPrimaryKey(((Long)primaryKeyObj).longValue());
 	}
 
+	@Override
 	public Map<String, Object> getModelAttributes() {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 
@@ -78,6 +79,7 @@ public class OAuthConsumerClp extends BaseModelImpl<OAuthConsumer>
 		return attributes;
 	}
 
+	@Override
 	public void setModelAttributes(Map<String, Object> attributes) {
 		Long oAuthConsumerId = (Long)attributes.get("oAuthConsumerId");
 
@@ -206,11 +208,11 @@ public class OAuthConsumerClp extends BaseModelImpl<OAuthConsumer>
 		_keyType = keyType;
 	}
 
-	public java.lang.String getKeyName() {
+	public void setKeyName(java.lang.String keyName) {
 		throw new UnsupportedOperationException();
 	}
 
-	public void setKeyName(java.lang.String keyName) {
+	public java.lang.String getKeyName() {
 		throw new UnsupportedOperationException();
 	}
 

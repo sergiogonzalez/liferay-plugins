@@ -176,6 +176,10 @@ public class UserThreadLocalServiceClpInvoker {
 		_methodName51 = "markUserThreadAsUnread";
 
 		_methodParameterTypes51 = new String[] { "long", "long" };
+
+		_methodName52 = "updateUserName";
+
+		_methodParameterTypes52 = new String[] { "com.liferay.portal.model.User" };
 	}
 
 	public Object invokeMethod(String name, String[] parameterTypes,
@@ -373,6 +377,11 @@ public class UserThreadLocalServiceClpInvoker {
 				((Long)arguments[1]).longValue());
 		}
 
+		if (_methodName52.equals(name) &&
+				Arrays.deepEquals(_methodParameterTypes52, parameterTypes)) {
+			UserThreadLocalServiceUtil.updateUserName((com.liferay.portal.model.User)arguments[0]);
+		}
+
 		throw new UnsupportedOperationException();
 	}
 
@@ -440,4 +449,6 @@ public class UserThreadLocalServiceClpInvoker {
 	private String[] _methodParameterTypes50;
 	private String _methodName51;
 	private String[] _methodParameterTypes51;
+	private String _methodName52;
+	private String[] _methodParameterTypes52;
 }

@@ -20,6 +20,7 @@ import com.liferay.marketplace.model.App;
 import com.liferay.marketplace.model.Module;
 import com.liferay.marketplace.service.base.AppLocalServiceBaseImpl;
 import com.liferay.portal.kernel.deploy.DeployManagerUtil;
+import com.liferay.portal.kernel.deploy.auto.context.AutoDeploymentContext;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
@@ -41,6 +42,7 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
 /**
@@ -152,7 +154,14 @@ public class AppLocalServiceImpl extends AppLocalServiceBaseImpl {
 			while (enu.hasMoreElements()) {
 				ZipEntry zipEntry = enu.nextElement();
 
+				AutoDeploymentContext autoDeploymentContext =
+					new AutoDeploymentContext();
+
 				String fileName = zipEntry.getName();
+
+				String contextName = getContextName(fileName);
+
+				autoDeploymentContext.setContext(contextName);
 
 				if (_log.isInfoEnabled()) {
 					_log.info(
@@ -167,13 +176,21 @@ public class AppLocalServiceImpl extends AppLocalServiceBaseImpl {
 
 				FileUtil.write(pluginPackageFile, inputStream);
 
-				String contextName = getContextName(fileName);
+				autoDeploymentContext.setFile(pluginPackageFile);
 
-				DeployManagerUtil.deploy(pluginPackageFile, contextName);
+				DeployManagerUtil.deploy(autoDeploymentContext);
 
 				moduleLocalService.addModule(
 					app.getUserId(), app.getAppId(), contextName);
 			}
+		}
+		catch (ZipException ze) {
+			if (_log.isInfoEnabled()) {
+				_log.info(
+					"Deleting corrupt package from app " + app.getAppId(), ze);
+			}
+
+			deleteApp(app);
 		}
 		catch (Exception e) {
 			_log.error(e, e);

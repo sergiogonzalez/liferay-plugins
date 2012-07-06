@@ -67,6 +67,7 @@ public class KaleoDefinitionClp extends BaseModelImpl<KaleoDefinition>
 		setPrimaryKey(((Long)primaryKeyObj).longValue());
 	}
 
+	@Override
 	public Map<String, Object> getModelAttributes() {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 
@@ -88,6 +89,7 @@ public class KaleoDefinitionClp extends BaseModelImpl<KaleoDefinition>
 		return attributes;
 	}
 
+	@Override
 	public void setModelAttributes(Map<String, Object> attributes) {
 		Long kaleoDefinitionId = (Long)attributes.get("kaleoDefinitionId");
 
@@ -385,11 +387,11 @@ public class KaleoDefinitionClp extends BaseModelImpl<KaleoDefinition>
 		_startKaleoNodeId = startKaleoNodeId;
 	}
 
-	public com.liferay.portal.workflow.kaleo.model.KaleoNode getKaleoStartNode() {
+	public boolean hasIncompleteKaleoInstances() {
 		throw new UnsupportedOperationException();
 	}
 
-	public boolean hasIncompleteKaleoInstances() {
+	public com.liferay.portal.workflow.kaleo.model.KaleoNode getKaleoStartNode() {
 		throw new UnsupportedOperationException();
 	}
 

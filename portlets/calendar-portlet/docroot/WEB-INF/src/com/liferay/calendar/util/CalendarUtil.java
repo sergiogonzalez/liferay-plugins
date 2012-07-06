@@ -28,9 +28,9 @@ import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.util.UniqueList;
 import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.theme.ThemeDisplay;
-import com.liferay.util.UniqueList;
 
 import java.util.List;
 
@@ -131,6 +131,7 @@ public class CalendarUtil {
 			"permissions",
 			_getPermissionsJSONObject(
 				themeDisplay.getPermissionChecker(), calendar));
+		jsonObject.put("userId", calendar.getUserId());
 
 		return jsonObject;
 	}
@@ -164,6 +165,11 @@ public class CalendarUtil {
 			ActionKeys.MANAGE_BOOKINGS,
 			CalendarPermission.contains(
 				permissionChecker, calendar, ActionKeys.MANAGE_BOOKINGS));
+
+		jsonObject.put(
+			ActionKeys.UPDATE,
+			CalendarPermission.contains(
+				permissionChecker, calendar, ActionKeys.UPDATE));
 
 		jsonObject.put(
 			ActionKeys.VIEW,

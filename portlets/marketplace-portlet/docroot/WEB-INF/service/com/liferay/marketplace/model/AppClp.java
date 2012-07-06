@@ -62,6 +62,7 @@ public class AppClp extends BaseModelImpl<App> implements App {
 		setPrimaryKey(((Long)primaryKeyObj).longValue());
 	}
 
+	@Override
 	public Map<String, Object> getModelAttributes() {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 
@@ -78,6 +79,7 @@ public class AppClp extends BaseModelImpl<App> implements App {
 		return attributes;
 	}
 
+	@Override
 	public void setModelAttributes(Map<String, Object> attributes) {
 		String uuid = (String)attributes.get("uuid");
 
@@ -214,6 +216,10 @@ public class AppClp extends BaseModelImpl<App> implements App {
 		_version = version;
 	}
 
+	public boolean isDownloaded() {
+		throw new UnsupportedOperationException();
+	}
+
 	public java.lang.String getFileDir() {
 		throw new UnsupportedOperationException();
 	}
@@ -222,15 +228,11 @@ public class AppClp extends BaseModelImpl<App> implements App {
 		throw new UnsupportedOperationException();
 	}
 
-	public java.lang.String getFilePath() {
-		throw new UnsupportedOperationException();
-	}
-
-	public boolean isDownloaded() {
-		throw new UnsupportedOperationException();
-	}
-
 	public boolean isInstalled() {
+		throw new UnsupportedOperationException();
+	}
+
+	public java.lang.String getFilePath() {
 		throw new UnsupportedOperationException();
 	}
 

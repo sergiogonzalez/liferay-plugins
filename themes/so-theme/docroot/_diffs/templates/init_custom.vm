@@ -1,9 +1,17 @@
+#set ($membership_request_local_service = $serviceLocator.findService("com.liferay.portal.service.MembershipRequestLocalService"))
 #set ($user_local_service = $serviceLocator.findService("com.liferay.portal.service.UserLocalService"))
 
 #set ($logo = "logo")
 
-#set ($user_profile_url = $community_default_public_url)
 #set ($user_dashboard_portlet_url = $site_default_url)
+#set ($user_dashboard_url = $site_default_url)
+#set ($user_profile_url = $community_default_public_url)
+
+#set ($login_screen = false)
+
+#if ($theme_display.getColorSchemeId() == "login_screen")
+	#set ($login_screen = true)
+#end
 
 #if (($company.getLogoId() == 0) && !$layout.layoutSet.isLogo())
 	#set ($site_logo = $images_folder + "/custom/so_logo.png")
@@ -12,6 +20,14 @@
 #end
 
 #if ($is_signed_in)
+	#set ($liferay_toggle_controls = $sessionClicks.get($request, "liferay_toggle_controls", ""))
+
+	#if ($liferay_toggle_controls == "")
+		$sessionClicks.put($request, "liferay_toggle_controls", "hidden")
+		#set ($liferay_toggle_controls = "hidden")
+		#set ($css_class = $css_class.replaceAll("controls-visible", "controls-hidden"))
+	#end
+
 	#set ($user_group = $user.getGroup())
 
 	#set ($nav_css_class = "${nav_css_class} sort-pages modify-pages")

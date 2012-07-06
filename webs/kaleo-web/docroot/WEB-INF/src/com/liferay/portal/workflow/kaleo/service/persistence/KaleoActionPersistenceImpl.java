@@ -356,6 +356,7 @@ public class KaleoActionPersistenceImpl extends BasePersistenceImpl<KaleoAction>
 		if (isNew || !KaleoActionModelImpl.COLUMN_BITMASK_ENABLED) {
 			FinderCacheUtil.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 		}
+
 		else {
 			if ((kaleoActionModelImpl.getColumnBitmask() &
 					FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_COMPANYID.getColumnBitmask()) != 0) {
@@ -459,6 +460,7 @@ public class KaleoActionPersistenceImpl extends BasePersistenceImpl<KaleoAction>
 		kaleoActionImpl.setExecutionType(kaleoAction.getExecutionType());
 		kaleoActionImpl.setScript(kaleoAction.getScript());
 		kaleoActionImpl.setScriptLanguage(kaleoAction.getScriptLanguage());
+		kaleoActionImpl.setScriptRequiredContexts(kaleoAction.getScriptRequiredContexts());
 		kaleoActionImpl.setPriority(kaleoAction.getPriority());
 
 		return kaleoActionImpl;
