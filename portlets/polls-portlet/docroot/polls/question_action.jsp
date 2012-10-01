@@ -14,7 +14,7 @@
  */
 --%>
 
-<%@ include file="/polls/init.jsp" %>
+<%@ include file="/init.jsp" %>
 
 <%
 SearchContainer searchContainer = (SearchContainer)request.getAttribute("liferay-ui:search:searchContainer");

@@ -14,7 +14,7 @@
  */
 --%>
 
-<%@ include file="/polls/init.jsp" %>
+<%@ include file="/init.jsp" %>
 
 <%
 PortletURL portletURL = renderResponse.createRenderURL();

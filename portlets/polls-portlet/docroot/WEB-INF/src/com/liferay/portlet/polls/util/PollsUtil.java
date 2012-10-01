@@ -47,7 +47,7 @@ public class PollsUtil {
 	public static CategoryDataset getVotesDataset(long questionId)
 			throws SystemException {
 
-		DefaultCategoryDataset defaultCategoryDataset = new
+		DefaultCategoryDataset defaultCategoryDataset = new 
 			DefaultCategoryDataset();
 
 		String seriesName = StringPool.BLANK;

@@ -26,5 +26,7 @@ public class PollsWebKeys {
 	public static final String POLLS_QUESTION = "POLLS_QUESTION";
 
 	public static final String POLLS = "pollsportlet";
+	
+	public static final String POLLS_DISPLAY = "pollsdisplayportlet";
 
 }

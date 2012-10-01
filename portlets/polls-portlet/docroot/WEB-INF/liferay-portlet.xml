@@ -13,6 +13,18 @@
 		<css-class-wrapper>polls-portlet</css-class-wrapper>
 		<add-default-resource>true</add-default-resource>
 	</portlet>
+	<portlet>
+		<portlet-name>polls-display-portlet</portlet-name>
+		<icon>/polls_display.png</icon>
+		<configuration-action-class>com.liferay.portal.kernel.portlet.DefaultConfigurationAction</configuration-action-class>
+		<portlet-data-handler-class>com.liferay.portlet.polls.lar.PollsDisplayPortletDataHandlerImpl</portlet-data-handler-class>
+		<control-panel-entry-category>content</control-panel-entry-category>
+		<control-panel-entry-weight>18.0</control-panel-entry-weight>
+		<header-portlet-css>/css/main.css</header-portlet-css>
+		<footer-portlet-javascript>/js/main.js</footer-portlet-javascript>
+		<css-class-wrapper>polls-portlet</css-class-wrapper>
+		<add-default-resource>true</add-default-resource>
+	</portlet>
 	<role-mapper>
 		<role-name>administrator</role-name>
 		<role-link>Administrator</role-link>

@@ -14,9 +14,7 @@
  */
 --%>
 
-<%@ page import="com.liferay.portal.security.auth.PrincipalException" %>
-
-<%@ include file="/polls/init.jsp" %>
+<%@ include file="/init.jsp" %>
 
 <liferay-ui:header
 	backURL="javascript:history.go(-1);"

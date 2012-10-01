@@ -80,7 +80,7 @@ public class PollsPortlet extends MVCPortlet {
 	public void addAndStoreSelection(
 			PortletConfig portletConfig, PortletRequest portletRequest,
 			PollsQuestion question)
-		throws Exception {
+		throws Exception {		
 
 		String referringPortletResource = ParamUtil.getString(
 			portletRequest, "referringPortletResource");
@@ -88,10 +88,10 @@ public class PollsPortlet extends MVCPortlet {
 		if (Validator.isNull(referringPortletResource)) {
 			return;
 		}
-
+		
 		ThemeDisplay themeDisplay = (ThemeDisplay)portletRequest.getAttribute(
-			WebKeys.THEME_DISPLAY);
-
+			WebKeys.THEME_DISPLAY);		
+		
 		Layout layout = LayoutLocalServiceUtil.getLayout(
 			themeDisplay.getRefererPlid());
 
@@ -101,17 +101,8 @@ public class PollsPortlet extends MVCPortlet {
 
 		preferences.setValue(
 			"questionId", String.valueOf(question.getQuestionId()));
-
+		
 		preferences.store();
-
-		LiferayPortletConfig liferayPortletConfig =
-			(LiferayPortletConfig)portletConfig;
-
-		SessionMessages.add(
-			portletRequest,
-			liferayPortletConfig.getPortletId() +
-				SessionMessages.KEY_SUFFIX_REFRESH_PORTLET,
-			referringPortletResource);
 	}
 
 	public void deleteQuestion(
@@ -195,7 +186,7 @@ public class PollsPortlet extends MVCPortlet {
 			JavaConstants.JAVAX_PORTLET_CONFIG);
 
 		long questionId = ParamUtil.getLong(actionRequest, "questionId");
-
+		
 		Map<Locale, String> titleMap = LocalizationUtil.getLocalizationMap(
 			actionRequest, "title");
 		Map<Locale, String> descriptionMap =
@@ -273,7 +264,6 @@ public class PollsPortlet extends MVCPortlet {
 				expirationDateMinute, neverExpire, choices, serviceContext);
 
 			// Poll display
-
 			addAndStoreSelection(portletConfig, actionRequest, question);
 		}
 		else {

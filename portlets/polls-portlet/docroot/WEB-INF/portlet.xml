@@ -32,4 +32,39 @@
 			<role-name>user</role-name>
 		</security-role-ref>
 	</portlet>
+	<portlet>
+		<portlet-name>polls-display-portlet</portlet-name>
+		<display-name>Polls Display</display-name>
+		<portlet-class>com.liferay.portlet.polls.PollsPortlet</portlet-class>
+		<init-param>
+			<name>config-template</name>
+			<value>/polls_display/configuration.jsp</value>
+		</init-param>
+		<init-param>
+			<name>view-jsp</name>
+			<value>/polls_display/view.jsp</value>
+		</init-param>
+		<expiration-cache>0</expiration-cache>
+		<supports>
+			<mime-type>text/html</mime-type>
+			<portlet-mode>view</portlet-mode>
+		</supports>
+		<portlet-info>
+			<title>Polls Display</title>
+			<short-title>Polls Display</short-title>
+			<keywords>Polls Display</keywords>
+		</portlet-info>
+		<security-role-ref>
+			<role-name>administrator</role-name>
+		</security-role-ref>
+		<security-role-ref>
+			<role-name>guest</role-name>
+		</security-role-ref>
+		<security-role-ref>
+			<role-name>power-user</role-name>
+		</security-role-ref>
+		<security-role-ref>
+			<role-name>user</role-name>
+		</security-role-ref>
+	</portlet>
 </portlet-app>

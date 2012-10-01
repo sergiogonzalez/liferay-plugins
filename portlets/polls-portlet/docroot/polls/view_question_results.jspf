@@ -17,7 +17,6 @@
 <%
 NumberFormat numberFormat = NumberFormat.getNumberInstance(locale);
 NumberFormat percentFormat = NumberFormat.getPercentInstance(locale);
-System.out.println("portletName = " + portletName);
 %>
 
 <table border="0" cellpadding="4" cellspacing="0" width="100%">
