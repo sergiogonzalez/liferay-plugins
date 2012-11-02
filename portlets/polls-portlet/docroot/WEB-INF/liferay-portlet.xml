@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<!DOCTYPE liferay-portlet-app PUBLIC "-//Liferay//DTD Portlet Application 6.2.0//EN" "http://www.liferay.com/dtd/liferay-portlet-app_6_2_0.dtd">
+
+<liferay-portlet-app>
+	<portlet>
+		<portlet-name>polls-portlet</portlet-name>
+		<icon>/polls.png</icon>
+		<portlet-data-handler-class>com.liferay.portlet.polls.lar.PollsPortletDataHandlerImpl</portlet-data-handler-class>
+		<control-panel-entry-category>content</control-panel-entry-category>
+		<control-panel-entry-weight>18.0</control-panel-entry-weight>
+		<header-portlet-css>/css/main.css</header-portlet-css>
+		<footer-portlet-javascript>/js/main.js</footer-portlet-javascript>
+		<css-class-wrapper>polls-portlet</css-class-wrapper>
+		<add-default-resource>true</add-default-resource>
+	</portlet>
+	<portlet>
+		<portlet-name>polls-display-portlet</portlet-name>
+		<icon>/polls_display.png</icon>
+		<configuration-action-class>com.liferay.portal.kernel.portlet.DefaultConfigurationAction</configuration-action-class>
+		<portlet-data-handler-class>com.liferay.portlet.polls.lar.PollsDisplayPortletDataHandlerImpl</portlet-data-handler-class>
+		<instanceable>true</instanceable>
+		<header-portlet-css>/css/main.css</header-portlet-css>
+		<footer-portlet-javascript>/js/main.js</footer-portlet-javascript>
+		<css-class-wrapper>polls-portlet</css-class-wrapper>
+		<add-default-resource>true</add-default-resource>
+	</portlet>
+	<role-mapper>
+		<role-name>administrator</role-name>
+		<role-link>Administrator</role-link>
+	</role-mapper>
+	<role-mapper>
+		<role-name>guest</role-name>
+		<role-link>Guest</role-link>
+	</role-mapper>
+	<role-mapper>
+		<role-name>power-user</role-name>
+		<role-link>Power User</role-link>
+	</role-mapper>
+	<role-mapper>
+		<role-name>user</role-name>
+		<role-link>User</role-link>
+	</role-mapper>
+</liferay-portlet-app>
