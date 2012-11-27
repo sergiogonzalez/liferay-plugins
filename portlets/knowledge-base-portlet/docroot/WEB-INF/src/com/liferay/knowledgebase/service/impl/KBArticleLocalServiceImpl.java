@@ -775,7 +775,7 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 		KBArticle kbArticle = getLatestKBArticle(
 			resourcePrimKey, WorkflowConstants.STATUS_ANY);
 
-		List<FileEntry> fileEntries = kbArticle.getAttachmentsFiles();
+		List<FileEntry> fileEntries = kbArticle.getAttachmentsFileEntries();
 
 		for (FileEntry fileEntry : fileEntries) {
 			addAttachment(
@@ -1095,7 +1095,7 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 
 		long groupId = serviceContext.getScopeGroupId();
 
-		long folderId = KBArticleAttachmentsUtil.getKBArticleFolderId(
+		long folderId = KBArticleAttachmentsUtil.getFolderId(
 			groupId, userId, kbArticle.getResourcePrimKey());
 
 		String[] fileNames = DLStoreUtil.getFileNames(

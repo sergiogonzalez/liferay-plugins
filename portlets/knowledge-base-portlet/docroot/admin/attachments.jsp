@@ -21,28 +21,28 @@ KBArticle kbArticle = (KBArticle)request.getAttribute(WebKeys.KNOWLEDGE_BASE_KB_
 
 long resourcePrimKey = BeanParamUtil.getLong(kbArticle, request, "resourcePrimKey");
 
-List<FileEntry> attachments = new ArrayList<FileEntry>();
+List<FileEntry> fileEntries = new ArrayList<FileEntry>();
 
 if (kbArticle != null) {
-	attachments = kbArticle.getAttachmentsFiles();
+	fileEntries = kbArticle.getAttachmentsFileEntries();
 }
 %>
 
 <div class="kb-attachments">
 
 	<%
-	for (FileEntry attachment : attachments) {
+	for (FileEntry fileEntry : fileEntries) {
 	%>
 
 		<div>
 			<liferay-portlet:resourceURL id="attachment" var="clipURL">
-				<portlet:param name="fileEntryId" value="<%= String.valueOf(attachment.getFileEntryId()) %>" />
+				<portlet:param name="fileEntryId" value="<%= String.valueOf(fileEntry.getFileEntryId()) %>" />
 			</liferay-portlet:resourceURL>
 
 			<liferay-ui:icon
 				image="clip"
 				label="<%= true %>"
-				message='<%= attachment.getTitle() + " (" + TextFormatter.formatKB(attachment.getSize(), locale) + "k)" %>'
+				message='<%= fileEntry.getTitle() + " (" + TextFormatter.formatKB(fileEntry.getSize(), locale) + "k)" %>'
 				method="get"
 				url="<%= clipURL %>"
 			/>
@@ -68,6 +68,6 @@ if (kbArticle != null) {
 	%>
 
 	<div class="kb-edit-link">
-		<aui:a href="javascript:;" onClick="<%= taglibOnClick %>"><liferay-ui:message key='<%= (!attachments.isEmpty()) ? "attachments" : "add-attachments" %>' /> &raquo;</aui:a>
+		<aui:a href="javascript:;" onClick="<%= taglibOnClick %>"><liferay-ui:message key='<%= (!fileEntries.isEmpty()) ? "attachments" : "add-attachments" %>' /> &raquo;</aui:a>
 	</div>
 </div>

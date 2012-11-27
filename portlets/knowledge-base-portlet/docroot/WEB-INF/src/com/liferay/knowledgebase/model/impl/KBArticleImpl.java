@@ -57,10 +57,10 @@ public class KBArticleImpl extends KBArticleBaseImpl {
 		return new String[0];
 	}
 
-	public List<FileEntry> getAttachmentsFiles()
+	public List<FileEntry> getAttachmentsFileEntries()
 		throws PortalException, SystemException {
 
-		long folderId = KBArticleAttachmentsUtil.getKBArticleFolderId(
+		long folderId = KBArticleAttachmentsUtil.getFolderId(
 			getGroupId(), getUserId(), getResourcePrimKey());
 
 		return PortletFileRepositoryUtil.getPortletFileEntries(

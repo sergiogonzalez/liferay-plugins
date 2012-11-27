@@ -27,7 +27,7 @@ import com.liferay.portlet.documentlibrary.model.DLFolderConstants;
  */
 public class KBArticleAttachmentsUtil {
 
-	public static long getKBArticleFolderId(
+	public static long getFolderId(
 			long groupId, long userId, long resourcePrimKey)
 		throws PortalException, SystemException {
 

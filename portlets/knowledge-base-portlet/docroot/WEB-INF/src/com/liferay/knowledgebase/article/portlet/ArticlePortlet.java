@@ -217,11 +217,11 @@ public class ArticlePortlet extends MVCPortlet {
 
 		long fileEntryId = ParamUtil.getLong(resourceRequest, "fileEntryId");
 
-		FileEntry attachment = DLAppServiceUtil.getFileEntry(fileEntryId);
+		FileEntry fileEntry = DLAppServiceUtil.getFileEntry(fileEntryId);
 
 		PortletResponseUtil.sendFile(
-			resourceRequest, resourceResponse, attachment.getTitle(),
-			attachment.getContentStream(), attachment.getMimeType());
+			resourceRequest, resourceResponse, fileEntry.getTitle(),
+			fileEntry.getContentStream(), fileEntry.getMimeType());
 	}
 
 	public void serveKBArticleRSS(

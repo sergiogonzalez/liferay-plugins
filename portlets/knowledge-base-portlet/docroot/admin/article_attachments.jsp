@@ -21,10 +21,10 @@ KBArticle kbArticle = (KBArticle)request.getAttribute(WebKeys.KNOWLEDGE_BASE_KB_
 
 String[] fileNames = kbArticle.getAttachmentsFileNames();
 
-List<FileEntry> attachments = new ArrayList<FileEntry>();
+List<FileEntry> fileEntries = new ArrayList<FileEntry>();
 
 if (kbArticle != null) {
-	attachments = kbArticle.getAttachmentsFiles();
+	fileEntries = kbArticle.getAttachmentsFileEntries();
 }
 %>
 
@@ -32,18 +32,18 @@ if (kbArticle != null) {
 	<div class="kb-article-attachments">
 
 		<%
-		for (FileEntry attachment : attachments) {
+		for (FileEntry fileEntry : fileEntries) {
 		%>
 
 			<div>
 				<liferay-portlet:resourceURL id="attachment" var="clipURL">
-					<portlet:param name="fileEntryId" value="<%= String.valueOf(attachment.getFileEntryId()) %>" />
+					<portlet:param name="fileEntryId" value="<%= String.valueOf(fileEntry.getFileEntryId()) %>" />
 				</liferay-portlet:resourceURL>
 
 				<liferay-ui:icon
 					image="clip"
 					label="<%= true %>"
-					message='<%= attachment.getTitle() + " (" + TextFormatter.formatKB(attachment.getSize(), locale) + "k)" %>'
+					message='<%= fileEntry.getTitle() + " (" + TextFormatter.formatKB(fileEntry.getSize(), locale) + "k)" %>'
 					method="get"
 					url="<%= clipURL %>"
 				/>
