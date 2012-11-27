@@ -20,25 +20,30 @@
 KBArticle kbArticle = (KBArticle)request.getAttribute(WebKeys.KNOWLEDGE_BASE_KB_ARTICLE);
 
 String[] fileNames = kbArticle.getAttachmentsFileNames();
+
+List<FileEntry> attachments = new ArrayList<FileEntry>();
+
+if (kbArticle != null) {
+	attachments = kbArticle.getAttachmentsFiles();
+}
 %>
 
 <c:if test="<%= fileNames.length > 0 %>">
 	<div class="kb-article-attachments">
 
 		<%
-		for (String fileName : fileNames) {
+		for (FileEntry attachment : attachments) {
 		%>
 
 			<div>
 				<liferay-portlet:resourceURL id="attachment" var="clipURL">
 					<portlet:param name="resourcePrimKey" value="<%= String.valueOf(kbArticle.getResourcePrimKey()) %>" />
-					<portlet:param name="fileName" value="<%= fileName %>" />
 				</liferay-portlet:resourceURL>
 
 				<liferay-ui:icon
 					image="clip"
 					label="<%= true %>"
-					message='<%= FileUtil.getShortFileName(fileName) + " (" + TextFormatter.formatKB(DLStoreUtil.getFileSize(company.getCompanyId(), CompanyConstants.SYSTEM, fileName), locale) + "k)" %>'
+					message='<%= attachment.getTitle() + " (" + TextFormatter.formatKB(attachment.getSize(), locale) + "k)" %>'
 					method="get"
 					url="<%= clipURL %>"
 				/>

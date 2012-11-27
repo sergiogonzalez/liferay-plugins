@@ -14,14 +14,20 @@
 
 package com.liferay.knowledgebase.model.impl;
 
+import com.liferay.knowledgebase.article.util.KBArticleAttachmentsUtil;
 import com.liferay.knowledgebase.model.KBArticleConstants;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.repository.model.FileEntry;
+import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.model.CompanyConstants;
+import com.liferay.portal.portletfilerepository.PortletFileRepositoryUtil;
 import com.liferay.portlet.documentlibrary.NoSuchDirectoryException;
 import com.liferay.portlet.documentlibrary.store.DLStoreUtil;
+
+import java.util.List;
 
 /**
  * @author Peter Shin
@@ -49,6 +55,16 @@ public class KBArticleImpl extends KBArticleBaseImpl {
 		}
 
 		return new String[0];
+	}
+
+	public List<FileEntry> getAttachmentsFiles()
+		throws PortalException, SystemException {
+
+		long folderId = KBArticleAttachmentsUtil.getKBArticleFolderId(
+			getGroupId(), getUserId(), getResourcePrimKey());
+
+		return PortletFileRepositoryUtil.getPortletFileEntries(
+			getGroupId(), folderId, WorkflowConstants.STATUS_APPROVED);
 	}
 
 	public long getClassPK() {
