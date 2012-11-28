@@ -68,6 +68,6 @@ if (kbArticle != null) {
 	%>
 
 	<div class="kb-edit-link">
-		<aui:a href="javascript:;" onClick="<%= taglibOnClick %>"><liferay-ui:message key='<%= (!fileEntries.isEmpty()) ? "attachments" : "add-attachments" %>' /> &raquo;</aui:a>
+		<aui:a href="javascript:;" onClick="<%= taglibOnClick %>"><liferay-ui:message key='<%= (!attachmentsFileEntries.isEmpty()) ? "attachments" : "add-attachments" %>' /> &raquo;</aui:a>
 	</div>
 </div>
