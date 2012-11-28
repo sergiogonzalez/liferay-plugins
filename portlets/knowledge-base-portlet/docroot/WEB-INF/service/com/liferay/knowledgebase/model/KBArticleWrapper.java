@@ -897,6 +897,12 @@ public class KBArticleWrapper implements KBArticle, ModelWrapper<KBArticle> {
 		_kbArticle.persist();
 	}
 
+	public long getAttachmentsFolderId()
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _kbArticle.getAttachmentsFolderId();
+	}
+
 	public java.lang.String getAttachmentsDirName() {
 		return _kbArticle.getAttachmentsDirName();
 	}
@@ -905,6 +911,12 @@ public class KBArticleWrapper implements KBArticle, ModelWrapper<KBArticle> {
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		return _kbArticle.getAttachmentsFileNames();
+	}
+
+	public java.util.List<com.liferay.portal.kernel.repository.model.FileEntry> getAttachmentsFileEntries()
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _kbArticle.getAttachmentsFileEntries();
 	}
 
 	public long getClassPK() {

@@ -20,6 +20,7 @@ import com.liferay.knowledgebase.service.permission.KBArticlePermission;
 import com.liferay.knowledgebase.util.ActionKeys;
 import com.liferay.knowledgebase.util.KnowledgeBaseUtil;
 import com.liferay.portal.kernel.language.LanguageUtil;
+import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
@@ -35,6 +36,7 @@ import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.util.SubscriptionSender;
 import com.liferay.portlet.documentlibrary.store.DLStoreUtil;
 
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -72,22 +74,21 @@ public class AdminSubscriptionSender extends SubscriptionSender {
 	protected String getEmailKBArticleAttachments(Locale locale)
 		throws Exception {
 
-		String[] fileNames = _kbArticle.getAttachmentsFileNames();
+		List<FileEntry> attachmentsFileEntries =
+			_kbArticle.getAttachmentsFileEntries();
 
-		if (fileNames.length <= 0) {
+		if (attachmentsFileEntries.size() <= 0) {
 			return StringPool.BLANK;
 		}
 
-		StringBundler sb = new StringBundler(fileNames.length * 5);
+		StringBundler sb = new StringBundler(attachmentsFileEntries.size() * 5);
 
-		for (String fileName : fileNames) {
-			long kb = DLStoreUtil.getFileSize(
-				companyId, CompanyConstants.SYSTEM, fileName);
-
-			sb.append(FileUtil.getShortFileName(fileName));
+		for (FileEntry fileEntry : attachmentsFileEntries) {
+			sb.append(fileEntry.getTitle());
 			sb.append(" (");
-			sb.append(TextFormatter.formatStorageSize(kb, locale));
-			sb.append("k)");
+			sb.append(TextFormatter.formatStorageSize(
+				fileEntry.getSize(), locale));
+			sb.append(")");
 			sb.append("<br />");
 		}
 
