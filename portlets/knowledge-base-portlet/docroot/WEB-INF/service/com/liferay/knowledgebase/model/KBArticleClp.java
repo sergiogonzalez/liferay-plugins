@@ -468,6 +468,10 @@ public class KBArticleClp extends BaseModelImpl<KBArticle> implements KBArticle 
 		_statusDate = statusDate;
 	}
 
+	public long getAttachmentsFolderId() {
+		throw new UnsupportedOperationException();
+	}
+
 	public java.util.List<com.liferay.portal.kernel.repository.model.FileEntry> getAttachmentsFileEntries() {
 		throw new UnsupportedOperationException();
 	}
