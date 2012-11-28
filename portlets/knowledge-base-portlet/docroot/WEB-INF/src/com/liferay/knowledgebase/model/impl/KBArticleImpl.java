@@ -42,6 +42,14 @@ public class KBArticleImpl extends KBArticleBaseImpl {
 		return KBArticleConstants.DIR_NAME_PREFIX + getClassPK();
 	}
 
+	public List<FileEntry> getAttachmentsFileEntries()
+		throws PortalException, SystemException {
+
+		return PortletFileRepositoryUtil.getPortletFileEntries(
+			getGroupId(), getAttachmentsFolderId(),
+			WorkflowConstants.STATUS_APPROVED);
+	}
+
 	public String[] getAttachmentsFileNames()
 		throws PortalException, SystemException {
 
@@ -57,14 +65,17 @@ public class KBArticleImpl extends KBArticleBaseImpl {
 		return new String[0];
 	}
 
-	public List<FileEntry> getAttachmentsFileEntries()
+	public long getAttachmentsFolderId()
 		throws PortalException, SystemException {
 
-		long folderId = KBArticleAttachmentsUtil.getFolderId(
+		if (_attachmentsFolderId > 0) {
+			return _attachmentsFolderId;
+		}
+
+		_attachmentsFolderId = KBArticleAttachmentsUtil.getFolderId(
 			getGroupId(), getUserId(), getResourcePrimKey());
 
-		return PortletFileRepositoryUtil.getPortletFileEntries(
-			getGroupId(), folderId, WorkflowConstants.STATUS_APPROVED);
+		return _attachmentsFolderId;
 	}
 
 	public long getClassPK() {
@@ -99,5 +110,7 @@ public class KBArticleImpl extends KBArticleBaseImpl {
 	}
 
 	private static Log _log = LogFactoryUtil.getLog(KBArticleImpl.class);
+
+	private long _attachmentsFolderId;
 
 }

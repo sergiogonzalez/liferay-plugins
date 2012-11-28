@@ -21,17 +21,17 @@ KBArticle kbArticle = (KBArticle)request.getAttribute(WebKeys.KNOWLEDGE_BASE_KB_
 
 long resourcePrimKey = BeanParamUtil.getLong(kbArticle, request, "resourcePrimKey");
 
-List<FileEntry> fileEntries = new ArrayList<FileEntry>();
+List<FileEntry> attachmentsFileEntries = new ArrayList<FileEntry>();
 
 if (kbArticle != null) {
-	fileEntries = kbArticle.getAttachmentsFileEntries();
+	attachmentsFileEntries = kbArticle.getAttachmentsFileEntries();
 }
 %>
 
 <div class="kb-attachments">
 
 	<%
-	for (FileEntry fileEntry : fileEntries) {
+	for (FileEntry fileEntry : attachmentsFileEntries) {
 	%>
 
 		<div>

@@ -20,7 +20,6 @@ import com.liferay.knowledgebase.KBArticleTitleException;
 import com.liferay.knowledgebase.admin.social.AdminActivityKeys;
 import com.liferay.knowledgebase.admin.util.AdminSubscriptionSender;
 import com.liferay.knowledgebase.admin.util.AdminUtil;
-import com.liferay.knowledgebase.article.util.KBArticleAttachmentsUtil;
 import com.liferay.knowledgebase.model.KBArticle;
 import com.liferay.knowledgebase.model.KBArticleConstants;
 import com.liferay.knowledgebase.service.base.KBArticleLocalServiceBaseImpl;
@@ -775,9 +774,10 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 		KBArticle kbArticle = getLatestKBArticle(
 			resourcePrimKey, WorkflowConstants.STATUS_ANY);
 
-		List<FileEntry> fileEntries = kbArticle.getAttachmentsFileEntries();
+		List<FileEntry> attachmentsFileEntries =
+			kbArticle.getAttachmentsFileEntries();
 
-		for (FileEntry fileEntry : fileEntries) {
+		for (FileEntry fileEntry : attachmentsFileEntries) {
 			addAttachment(
 				dirName, fileEntry.getTitle(), fileEntry.getContentStream(),
 				serviceContext);
@@ -1095,15 +1095,12 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 
 		long groupId = serviceContext.getScopeGroupId();
 
-		long folderId = KBArticleAttachmentsUtil.getFolderId(
-			groupId, userId, kbArticle.getResourcePrimKey());
-
 		String[] fileNames = DLStoreUtil.getFileNames(
 			serviceContext.getCompanyId(), CompanyConstants.SYSTEM, dirName);
 
 		if (fileNames.length > 0) {
 			PortletFileRepositoryUtil.deletePortletFileEntries(
-				groupId, folderId);
+				groupId, kbArticle.getAttachmentsFolderId());
 		}
 
 		for (String fileName : fileNames) {
@@ -1118,7 +1115,8 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 
 				PortletFileRepositoryUtil.addPortletFileEntry(
 					groupId, userId, PortletKeys.KNOWLEDGE_BASE_ARTICLE,
-					folderId, inputStream, shortFileName);
+					kbArticle.getAttachmentsFolderId(), inputStream,
+					shortFileName);
 			}
 			finally {
 				StreamUtil.cleanUp(inputStream);
