@@ -20,6 +20,7 @@ import com.liferay.portal.kernel.upgrade.v6_2_0.BaseUpgradeAttachments;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.model.CompanyConstants;
 import com.liferay.portal.util.PortalUtil;
+import com.liferay.portlet.documentlibrary.NoSuchDirectoryException;
 import com.liferay.portlet.documentlibrary.model.DLFolderConstants;
 import com.liferay.portlet.documentlibrary.store.DLStoreUtil;
 
@@ -48,9 +49,13 @@ public class UpgradeAttachments extends BaseUpgradeAttachments {
 			while (rs.next()) {
 				long companyId = rs.getLong("companyId");
 
-				DLStoreUtil.deleteDirectory(
-					companyId, CompanyConstants.SYSTEM,
-					"knowledgebase/kbarticles");
+				try {
+					DLStoreUtil.deleteDirectory(
+						companyId, CompanyConstants.SYSTEM,
+						"knowledgebase/kbarticles");
+				}
+				catch (NoSuchDirectoryException nsde) {
+				}
 			}
 		}
 		finally {

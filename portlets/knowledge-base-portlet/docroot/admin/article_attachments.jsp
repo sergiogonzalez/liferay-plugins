@@ -19,8 +19,6 @@
 <%
 KBArticle kbArticle = (KBArticle)request.getAttribute(WebKeys.KNOWLEDGE_BASE_KB_ARTICLE);
 
-String[] fileNames = kbArticle.getAttachmentsFileNames();
-
 List<FileEntry> attachmentsFileEntries = new ArrayList<FileEntry>();
 
 if (kbArticle != null) {
@@ -28,7 +26,7 @@ if (kbArticle != null) {
 }
 %>
 
-<c:if test="<%= fileNames.length > 0 %>">
+<c:if test="<%= attachmentsFileEntries.size() > 0 %>">
 	<div class="kb-article-attachments">
 
 		<%
@@ -43,7 +41,7 @@ if (kbArticle != null) {
 				<liferay-ui:icon
 					image="clip"
 					label="<%= true %>"
-					message='<%= fileEntry.getTitle() + " (" + TextFormatter.formatKB(fileEntry.getSize(), locale) + "k)" %>'
+					message='<%= fileEntry.getTitle() + " (" + TextFormatter.formatStorageSize(fileEntry.getSize(), locale) + ")" %>'
 					method="get"
 					url="<%= clipURL %>"
 				/>
