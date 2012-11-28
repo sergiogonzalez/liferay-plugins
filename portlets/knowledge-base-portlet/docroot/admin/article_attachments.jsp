@@ -21,10 +21,10 @@ KBArticle kbArticle = (KBArticle)request.getAttribute(WebKeys.KNOWLEDGE_BASE_KB_
 
 String[] fileNames = kbArticle.getAttachmentsFileNames();
 
-List<FileEntry> fileEntries = new ArrayList<FileEntry>();
+List<FileEntry> attachmentsFileEntries = new ArrayList<FileEntry>();
 
 if (kbArticle != null) {
-	fileEntries = kbArticle.getAttachmentsFileEntries();
+	attachmentsFileEntries = kbArticle.getAttachmentsFileEntries();
 }
 %>
 
@@ -32,7 +32,7 @@ if (kbArticle != null) {
 	<div class="kb-article-attachments">
 
 		<%
-		for (FileEntry fileEntry : fileEntries) {
+		for (FileEntry fileEntry : attachmentsFileEntries) {
 		%>
 
 			<div>
