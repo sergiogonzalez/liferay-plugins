@@ -601,6 +601,16 @@ public class WSRPConsumerPortletLocalServiceImpl
 		String name = ExtensionHelperUtil.getNameAttribute(messageElement);
 		String value = messageElement.getValue();
 
+		if (Validator.isNull(name)) {
+			if (_log.isInfoEnabled()) {
+				_log.info(
+					"Message element " + messageElement.toString() +
+						" has a null name");
+			}
+
+			return;
+		}
+
 		if (name.equals("css-class-wrapper")) {
 			portlet.setCssClassWrapper(value);
 		}
