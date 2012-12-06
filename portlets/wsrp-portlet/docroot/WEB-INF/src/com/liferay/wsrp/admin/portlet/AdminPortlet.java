@@ -32,6 +32,7 @@ import com.liferay.wsrp.model.WSRPProducer;
 import com.liferay.wsrp.service.WSRPConsumerLocalServiceUtil;
 import com.liferay.wsrp.service.WSRPConsumerPortletLocalServiceUtil;
 import com.liferay.wsrp.service.WSRPProducerLocalServiceUtil;
+import com.liferay.wsrp.util.MarkupCharacterSetsUtil;
 import com.liferay.wsrp.util.WebKeys;
 
 import javax.portlet.ActionRequest;
@@ -215,6 +216,9 @@ public class AdminPortlet extends MVCPortlet {
 			actionRequest, "forwardCookies");
 		String forwardHeaders = ParamUtil.getString(
 			actionRequest, "forwardHeaders");
+		String markupCharacterSets =
+			MarkupCharacterSetsUtil.getSupportedMarkupCharacterSets(
+				ParamUtil.getString(actionRequest, "markupCharacterSets"));
 
 		if (wsrpConsumerId <= 0) {
 			ServiceContext serviceContext = ServiceContextFactory.getInstance(
@@ -222,12 +226,13 @@ public class AdminPortlet extends MVCPortlet {
 
 			WSRPConsumerLocalServiceUtil.addWSRPConsumer(
 				themeDisplay.getCompanyId(), adminPortletId, name, url,
-				forwardCookies, forwardHeaders, serviceContext);
+				forwardCookies, forwardHeaders, markupCharacterSets,
+				serviceContext);
 		}
 		else {
 			WSRPConsumerLocalServiceUtil.updateWSRPConsumer(
 				wsrpConsumerId, adminPortletId, name, url, forwardCookies,
-				forwardHeaders);
+				forwardHeaders, markupCharacterSets);
 		}
 	}
 
