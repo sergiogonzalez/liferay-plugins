@@ -376,8 +376,9 @@ public class AkismetMBMessageLocalServiceImpl
 		String userIP = serviceContext.getRemoteAddr();
 
 		return AkismetDataLocalServiceUtil.updateAkismetData(
-			message.getMessageId(), AkismetConstants.TYPE_COMMENT, permalink,
-			referrer, userAgent, userIP, StringPool.BLANK);
+			MBMessage.class.getName(), message.getMessageId(),
+			AkismetConstants.TYPE_COMMENT, permalink, referrer, userAgent,
+			userIP, StringPool.BLANK);
 	}
 
 }
