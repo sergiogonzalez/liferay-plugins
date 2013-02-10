@@ -38,6 +38,11 @@ $microblogs-border-color: #C7D0DA;
 
 		.aui-field-select {
 			display: inline-block;
+			float: left;
+
+			.aui-field-element {
+				position: static;
+			}
 		}
 
 		.button-holder-right {
@@ -201,12 +206,14 @@ $microblogs-border-color: #C7D0DA;
 
 	.highlighter-content {
 		color: transparent;
+
+		@include force-wrap();
+
 		left: 1px;
 		padding: 5px;
 		position: absolute;
 		top: 1px;
-		visibility: hidden;
-		word-wrap: break-word;
+		width: 100%;
 		z-index: 998;
 
 		&.textbox {
@@ -227,7 +234,9 @@ $microblogs-border-color: #C7D0DA;
 
 		div {
 			display: inline-block;
-			white-space: pre;
+			width: 100%;
+
+			@include force-wrap();
 		}
 	}
 
