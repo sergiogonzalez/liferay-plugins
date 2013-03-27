@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -18,18 +18,20 @@ import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.model.User;
+import com.liferay.portal.security.permission.PermissionChecker;
+import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.UserLocalServiceUtil;
-import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portlet.social.model.BaseSocialActivityInterpreter;
 import com.liferay.portlet.social.model.SocialActivity;
-import com.liferay.portlet.social.model.SocialActivityFeedEntry;
 import com.liferay.portlet.social.model.SocialRelationConstants;
 import com.liferay.portlet.social.service.SocialRelationLocalServiceUtil;
 import com.liferay.socialnetworking.model.WallEntry;
 import com.liferay.socialnetworking.service.WallEntryLocalServiceUtil;
+import com.liferay.socialnetworking.util.SocialNetworkingUtil;
 
 /**
  * @author Brian Wing Shun Chan
+ * @author Zsolt Berentey
  */
 public class WallActivityInterpreter extends BaseSocialActivityInterpreter {
 
@@ -38,71 +40,109 @@ public class WallActivityInterpreter extends BaseSocialActivityInterpreter {
 	}
 
 	@Override
-	protected SocialActivityFeedEntry doInterpret(
-			SocialActivity activity, ThemeDisplay themeDisplay)
+	protected String getBody(
+			SocialActivity activity, ServiceContext serviceContext)
 		throws Exception {
-
-		String creatorUserName = getUserName(
-			activity.getUserId(), themeDisplay);
-		String receiverUserName = getUserName(
-			activity.getReceiverUserId(), themeDisplay);
-
-		User receiverUser = UserLocalServiceUtil.getUserById(
-			activity.getReceiverUserId());
-
-		if (!SocialRelationLocalServiceUtil.hasRelation(
-				themeDisplay.getUserId(), activity.getReceiverUserId(),
-				SocialRelationConstants.TYPE_BI_FRIEND) &&
-			(themeDisplay.getUserId() != activity.getReceiverUserId())) {
-
-			return null;
-		}
-
-		int activityType = activity.getType();
-
-		// Link
 
 		WallEntry wallEntry = WallEntryLocalServiceUtil.getWallEntry(
 			activity.getClassPK());
 
-		String link =
-			themeDisplay.getPortalURL() +
-				themeDisplay.getPathFriendlyURLPublic() + StringPool.SLASH +
-					HtmlUtil.escapeURL(receiverUser.getScreenName()) +
-						"/profile/-/wall/" + activity.getClassPK();
-
-		// Title
-
-		String title = StringPool.BLANK;
-
-		if (activityType == WallActivityKeys.ADD_ENTRY) {
-			title = themeDisplay.translate(
-				"activity-social-networking-wall-add-entry",
-				new Object[] {creatorUserName, receiverUserName});
-		}
-
-		// Body
-
-		StringBundler sb = new StringBundler(5);
-
-		sb.append("<a href=\"");
-		sb.append(link);
-		sb.append("\">");
-
-		String entryComments = getValue(
+		String comments = getJSONValue(
 			activity.getExtraData(), "comments", wallEntry.getComments());
 
-		sb.append(entryComments);
+		String link = getLink(activity, serviceContext);
 
-		sb.append("</a>");
-
-		String body = sb.toString();
-
-		return new SocialActivityFeedEntry(link, title, body);
+		return wrapLink(link, comments);
 	}
 
-	private static final String[] _CLASS_NAMES = new String[] {
-		WallEntry.class.getName()
-	};
+	@Override
+	protected String getLink(
+			SocialActivity activity, ServiceContext serviceContext)
+		throws Exception {
+
+		User receiverUser = UserLocalServiceUtil.getUserById(
+			activity.getReceiverUserId());
+
+		String wallLayoutFriendlyURL =
+			SocialNetworkingUtil.getWallLayoutFriendlyURL(receiverUser);
+
+		if (wallLayoutFriendlyURL == null) {
+			return null;
+		}
+
+		StringBundler sb = new StringBundler(7);
+
+		sb.append(serviceContext.getPortalURL());
+		sb.append(serviceContext.getPathFriendlyURLPublic());
+		sb.append(StringPool.SLASH);
+		sb.append(HtmlUtil.escapeURL(receiverUser.getScreenName()));
+		sb.append(wallLayoutFriendlyURL);
+		sb.append("/-/wall/");
+		sb.append(activity.getClassPK());
+
+		return sb.toString();
+	}
+
+	@Override
+	protected Object[] getTitleArguments(
+			String groupName, SocialActivity activity, String link,
+			String title, ServiceContext serviceContext)
+		throws Exception {
+
+		int activityType = activity.getType();
+
+		if (activityType != WallActivityKeys.ADD_ENTRY) {
+			return new Object[0];
+		}
+
+		User creatorUser = UserLocalServiceUtil.getUserById(
+			activity.getUserId());
+
+		User receiverUser = UserLocalServiceUtil.getUserById(
+			activity.getReceiverUserId());
+
+		String creatorUserProfileURL = SocialNetworkingUtil.getUserProfileURL(
+			activity.getUserId(), serviceContext);
+
+		String receiverUserProfileURL = SocialNetworkingUtil.getUserProfileURL(
+			activity.getReceiverUserId(), serviceContext);
+
+		return new Object[] {
+			wrapLink(creatorUserProfileURL, creatorUser.getFullName()),
+			wrapLink(receiverUserProfileURL, receiverUser.getFullName())
+		};
+	}
+
+	@Override
+	protected String getTitlePattern(
+		String groupName, SocialActivity activity) {
+
+		int activityType = activity.getType();
+
+		if (activityType == WallActivityKeys.ADD_ENTRY) {
+			return "activity-social-networking-wall-add-entry";
+		}
+
+		return StringPool.BLANK;
+	}
+
+	@Override
+	protected boolean hasPermissions(
+			PermissionChecker permissionChecker, SocialActivity activity,
+			String actionId, ServiceContext serviceContext)
+		throws Exception {
+
+		if (!SocialRelationLocalServiceUtil.hasRelation(
+				serviceContext.getUserId(), activity.getReceiverUserId(),
+				SocialRelationConstants.TYPE_BI_FRIEND) &&
+			(serviceContext.getUserId() != activity.getReceiverUserId())) {
+
+			return false;
+		}
+
+		return true;
+	}
+
+	private static final String[] _CLASS_NAMES = {WallEntry.class.getName()};
 
 }
