@@ -14,24 +14,18 @@
 
 package com.liferay.socialnetworking.friends.social;
 
-import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
-import com.liferay.portal.kernel.util.HtmlUtil;
-import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.User;
 import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.UserLocalServiceUtil;
-import com.liferay.portal.util.PortalUtil;
 import com.liferay.portlet.social.model.BaseSocialActivityInterpreter;
 import com.liferay.portlet.social.model.SocialActivity;
-import com.liferay.socialnetworking.util.PortletPropsValues;
 import com.liferay.socialnetworking.util.SocialNetworkingUtil;
 
 /**
  * @author Brian Wing Shun Chan
+ * @author Zsolt Berentey
  */
 public class FriendsActivityInterpreter extends BaseSocialActivityInterpreter {
 
@@ -44,18 +38,8 @@ public class FriendsActivityInterpreter extends BaseSocialActivityInterpreter {
 			SocialActivity activity, ServiceContext serviceContext)
 		throws Exception {
 
-		StringBundler sb = new StringBundler(4);
-
-		sb.append(serviceContext.getPortalURL());
-		sb.append(serviceContext.getPathFriendlyURLPublic());
-		sb.append(StringPool.SLASH);
-
-		User creatorUser = UserLocalServiceUtil.getUserById(
-			activity.getUserId());
-
-		sb.append(HtmlUtil.escapeURL(creatorUser.getScreenName()));
-
-		return sb.toString();
+		return SocialNetworkingUtil.getUserProfileURL(
+			activity.getReceiverUserId(), serviceContext);
 	}
 
 	@Override
@@ -70,13 +54,19 @@ public class FriendsActivityInterpreter extends BaseSocialActivityInterpreter {
 			return new Object[0];
 		}
 
-		String creatorUserNameURL = getUserProfileURL(
+		User creatorUser = UserLocalServiceUtil.getUserById(
+			activity.getUserId());
+
+		User receiverUser = UserLocalServiceUtil.getUserById(
+			activity.getReceiverUserId());
+
+		String creatorUserProfileURL = SocialNetworkingUtil.getUserProfileURL(
 			activity.getUserId(), serviceContext);
 
-		String receiverUserNameURL = getUserProfileURL(
-			activity.getReceiverUserId(), serviceContext);
-
-		return new Object[] {creatorUserNameURL, receiverUserNameURL};
+		return new Object[] {
+			wrapLink(creatorUserProfileURL, creatorUser.getFullName()),
+			wrapLink(link, receiverUser.getFullName())
+		};
 	}
 
 	@Override
