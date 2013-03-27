@@ -100,26 +100,6 @@ public class FriendsActivityInterpreter extends BaseSocialActivityInterpreter {
 		return true;
 	}
 
-	private String getUserProfileURL(long userId, ServiceContext serviceContext)
-		throws PortalException, SystemException {
-
-		String urlPattern = PortletPropsValues.FRIENDS_USER_PROFILE_URL;
-
-		if (Validator.isNull(urlPattern)) {
-			return getUserName(userId, serviceContext);
-		}
-
-		User user = UserLocalServiceUtil.getUserById(userId);
-
-		StringBundler sb = new StringBundler(3);
-
-		sb.append(serviceContext.getPortalURL());
-		sb.append(PortalUtil.getPathContext());
-		sb.append(SocialNetworkingUtil.replaceVariables(urlPattern, user));
-
-		return wrapLink(sb.toString(), HtmlUtil.escape(user.getFullName()));
-	}
-
 	private static final String[] _CLASS_NAMES = {User.class.getName()};
 
 }
