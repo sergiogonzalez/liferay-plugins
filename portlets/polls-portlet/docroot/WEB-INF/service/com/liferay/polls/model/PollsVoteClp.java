@@ -14,6 +14,7 @@
 
 package com.liferay.polls.model;
 
+import com.liferay.polls.service.ClpSerializer;
 import com.liferay.polls.service.PollsVoteLocalServiceUtil;
 
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
@@ -26,6 +27,8 @@ import com.liferay.portal.util.PortalUtil;
 
 import java.io.Serializable;
 
+import java.lang.reflect.Method;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,26 +40,32 @@ public class PollsVoteClp extends BaseModelImpl<PollsVote> implements PollsVote 
 	public PollsVoteClp() {
 	}
 
+	@Override
 	public Class<?> getModelClass() {
 		return PollsVote.class;
 	}
 
+	@Override
 	public String getModelClassName() {
 		return PollsVote.class.getName();
 	}
 
+	@Override
 	public long getPrimaryKey() {
 		return _pollsVoteId;
 	}
 
+	@Override
 	public void setPrimaryKey(long primaryKey) {
 		setPollsVoteId(primaryKey);
 	}
 
+	@Override
 	public Serializable getPrimaryKeyObj() {
 		return _pollsVoteId;
 	}
 
+	@Override
 	public void setPrimaryKeyObj(Serializable primaryKeyObj) {
 		setPrimaryKey(((Long)primaryKeyObj).longValue());
 	}
@@ -135,88 +144,240 @@ public class PollsVoteClp extends BaseModelImpl<PollsVote> implements PollsVote 
 		}
 	}
 
+	@Override
 	public long getPollsVoteId() {
 		return _pollsVoteId;
 	}
 
+	@Override
 	public void setPollsVoteId(long pollsVoteId) {
 		_pollsVoteId = pollsVoteId;
+
+		if (_pollsVoteRemoteModel != null) {
+			try {
+				Class<?> clazz = _pollsVoteRemoteModel.getClass();
+
+				Method method = clazz.getMethod("setPollsVoteId", long.class);
+
+				method.invoke(_pollsVoteRemoteModel, pollsVoteId);
+			}
+			catch (Exception e) {
+				throw new UnsupportedOperationException(e);
+			}
+		}
 	}
 
+	@Override
 	public long getCompanyId() {
 		return _companyId;
 	}
 
+	@Override
 	public void setCompanyId(long companyId) {
 		_companyId = companyId;
+
+		if (_pollsVoteRemoteModel != null) {
+			try {
+				Class<?> clazz = _pollsVoteRemoteModel.getClass();
+
+				Method method = clazz.getMethod("setCompanyId", long.class);
+
+				method.invoke(_pollsVoteRemoteModel, companyId);
+			}
+			catch (Exception e) {
+				throw new UnsupportedOperationException(e);
+			}
+		}
 	}
 
+	@Override
 	public long getUserId() {
 		return _userId;
 	}
 
+	@Override
 	public void setUserId(long userId) {
 		_userId = userId;
+
+		if (_pollsVoteRemoteModel != null) {
+			try {
+				Class<?> clazz = _pollsVoteRemoteModel.getClass();
+
+				Method method = clazz.getMethod("setUserId", long.class);
+
+				method.invoke(_pollsVoteRemoteModel, userId);
+			}
+			catch (Exception e) {
+				throw new UnsupportedOperationException(e);
+			}
+		}
 	}
 
+	@Override
 	public String getUserUuid() throws SystemException {
 		return PortalUtil.getUserValue(getUserId(), "uuid", _userUuid);
 	}
 
+	@Override
 	public void setUserUuid(String userUuid) {
 		_userUuid = userUuid;
 	}
 
+	@Override
 	public String getUserName() {
 		return _userName;
 	}
 
+	@Override
 	public void setUserName(String userName) {
 		_userName = userName;
+
+		if (_pollsVoteRemoteModel != null) {
+			try {
+				Class<?> clazz = _pollsVoteRemoteModel.getClass();
+
+				Method method = clazz.getMethod("setUserName", String.class);
+
+				method.invoke(_pollsVoteRemoteModel, userName);
+			}
+			catch (Exception e) {
+				throw new UnsupportedOperationException(e);
+			}
+		}
 	}
 
+	@Override
 	public Date getCreateDate() {
 		return _createDate;
 	}
 
+	@Override
 	public void setCreateDate(Date createDate) {
 		_createDate = createDate;
+
+		if (_pollsVoteRemoteModel != null) {
+			try {
+				Class<?> clazz = _pollsVoteRemoteModel.getClass();
+
+				Method method = clazz.getMethod("setCreateDate", Date.class);
+
+				method.invoke(_pollsVoteRemoteModel, createDate);
+			}
+			catch (Exception e) {
+				throw new UnsupportedOperationException(e);
+			}
+		}
 	}
 
+	@Override
 	public Date getModifiedDate() {
 		return _modifiedDate;
 	}
 
+	@Override
 	public void setModifiedDate(Date modifiedDate) {
 		_modifiedDate = modifiedDate;
+
+		if (_pollsVoteRemoteModel != null) {
+			try {
+				Class<?> clazz = _pollsVoteRemoteModel.getClass();
+
+				Method method = clazz.getMethod("setModifiedDate", Date.class);
+
+				method.invoke(_pollsVoteRemoteModel, modifiedDate);
+			}
+			catch (Exception e) {
+				throw new UnsupportedOperationException(e);
+			}
+		}
 	}
 
+	@Override
 	public long getPollsQuestionId() {
 		return _pollsQuestionId;
 	}
 
+	@Override
 	public void setPollsQuestionId(long pollsQuestionId) {
 		_pollsQuestionId = pollsQuestionId;
+
+		if (_pollsVoteRemoteModel != null) {
+			try {
+				Class<?> clazz = _pollsVoteRemoteModel.getClass();
+
+				Method method = clazz.getMethod("setPollsQuestionId", long.class);
+
+				method.invoke(_pollsVoteRemoteModel, pollsQuestionId);
+			}
+			catch (Exception e) {
+				throw new UnsupportedOperationException(e);
+			}
+		}
 	}
 
+	@Override
 	public long getPollsChoiceId() {
 		return _pollsChoiceId;
 	}
 
+	@Override
 	public void setPollsChoiceId(long pollsChoiceId) {
 		_pollsChoiceId = pollsChoiceId;
+
+		if (_pollsVoteRemoteModel != null) {
+			try {
+				Class<?> clazz = _pollsVoteRemoteModel.getClass();
+
+				Method method = clazz.getMethod("setPollsChoiceId", long.class);
+
+				method.invoke(_pollsVoteRemoteModel, pollsChoiceId);
+			}
+			catch (Exception e) {
+				throw new UnsupportedOperationException(e);
+			}
+		}
 	}
 
+	@Override
 	public Date getVoteDate() {
 		return _voteDate;
 	}
 
+	@Override
 	public void setVoteDate(Date voteDate) {
 		_voteDate = voteDate;
+
+		if (_pollsVoteRemoteModel != null) {
+			try {
+				Class<?> clazz = _pollsVoteRemoteModel.getClass();
+
+				Method method = clazz.getMethod("setVoteDate", Date.class);
+
+				method.invoke(_pollsVoteRemoteModel, voteDate);
+			}
+			catch (Exception e) {
+				throw new UnsupportedOperationException(e);
+			}
+		}
 	}
 
+	@Override
 	public com.liferay.polls.model.PollsChoice getPollsChoice() {
-		throw new UnsupportedOperationException();
+		try {
+			String methodName = "getPollsChoice";
+
+			Class<?>[] parameterTypes = new Class<?>[] {  };
+
+			Object[] parameterValues = new Object[] {  };
+
+			com.liferay.polls.model.PollsChoice returnObj = (com.liferay.polls.model.PollsChoice)invokeOnRemoteModel(methodName,
+					parameterTypes, parameterValues);
+
+			return returnObj;
+		}
+		catch (Exception e) {
+			throw new UnsupportedOperationException(e);
+		}
 	}
 
 	public BaseModel<?> getPollsVoteRemoteModel() {
@@ -227,6 +388,48 @@ public class PollsVoteClp extends BaseModelImpl<PollsVote> implements PollsVote 
 		_pollsVoteRemoteModel = pollsVoteRemoteModel;
 	}
 
+	public Object invokeOnRemoteModel(String methodName,
+		Class<?>[] parameterTypes, Object[] parameterValues)
+		throws Exception {
+		Object[] remoteParameterValues = new Object[parameterValues.length];
+
+		for (int i = 0; i < parameterValues.length; i++) {
+			if (parameterValues[i] != null) {
+				remoteParameterValues[i] = ClpSerializer.translateInput(parameterValues[i]);
+			}
+		}
+
+		Class<?> remoteModelClass = _pollsVoteRemoteModel.getClass();
+
+		ClassLoader remoteModelClassLoader = remoteModelClass.getClassLoader();
+
+		Class<?>[] remoteParameterTypes = new Class[parameterTypes.length];
+
+		for (int i = 0; i < parameterTypes.length; i++) {
+			if (parameterTypes[i].isPrimitive()) {
+				remoteParameterTypes[i] = parameterTypes[i];
+			}
+			else {
+				String parameterTypeName = parameterTypes[i].getName();
+
+				remoteParameterTypes[i] = remoteModelClassLoader.loadClass(parameterTypeName);
+			}
+		}
+
+		Method method = remoteModelClass.getMethod(methodName,
+				remoteParameterTypes);
+
+		Object returnValue = method.invoke(_pollsVoteRemoteModel,
+				remoteParameterValues);
+
+		if (returnValue != null) {
+			returnValue = ClpSerializer.translateOutput(returnValue);
+		}
+
+		return returnValue;
+	}
+
+	@Override
 	public void persist() throws SystemException {
 		if (this.isNew()) {
 			PollsVoteLocalServiceUtil.addPollsVote(this);
@@ -259,6 +462,7 @@ public class PollsVoteClp extends BaseModelImpl<PollsVote> implements PollsVote 
 		return clone;
 	}
 
+	@Override
 	public int compareTo(PollsVote pollsVote) {
 		long primaryKey = pollsVote.getPrimaryKey();
 
@@ -275,18 +479,15 @@ public class PollsVoteClp extends BaseModelImpl<PollsVote> implements PollsVote 
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null) {
+		if (this == obj) {
+			return true;
+		}
+
+		if (!(obj instanceof PollsVoteClp)) {
 			return false;
 		}
 
-		PollsVoteClp pollsVote = null;
-
-		try {
-			pollsVote = (PollsVoteClp)obj;
-		}
-		catch (ClassCastException cce) {
-			return false;
-		}
+		PollsVoteClp pollsVote = (PollsVoteClp)obj;
 
 		long primaryKey = pollsVote.getPrimaryKey();
 
@@ -330,6 +531,7 @@ public class PollsVoteClp extends BaseModelImpl<PollsVote> implements PollsVote 
 		return sb.toString();
 	}
 
+	@Override
 	public String toXmlString() {
 		StringBundler sb = new StringBundler(31);
 

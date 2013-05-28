@@ -14,6 +14,7 @@
 
 package com.liferay.polls.model;
 
+import com.liferay.polls.service.ClpSerializer;
 import com.liferay.polls.service.PollsChoiceLocalServiceUtil;
 
 import com.liferay.portal.LocaleException;
@@ -30,6 +31,8 @@ import com.liferay.portal.model.impl.BaseModelImpl;
 
 import java.io.Serializable;
 
+import java.lang.reflect.Method;
+
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -42,26 +45,32 @@ public class PollsChoiceClp extends BaseModelImpl<PollsChoice>
 	public PollsChoiceClp() {
 	}
 
+	@Override
 	public Class<?> getModelClass() {
 		return PollsChoice.class;
 	}
 
+	@Override
 	public String getModelClassName() {
 		return PollsChoice.class.getName();
 	}
 
+	@Override
 	public long getPrimaryKey() {
 		return _pollsChoiceId;
 	}
 
+	@Override
 	public void setPrimaryKey(long primaryKey) {
 		setPollsChoiceId(primaryKey);
 	}
 
+	@Override
 	public Serializable getPrimaryKeyObj() {
 		return _pollsChoiceId;
 	}
 
+	@Override
 	public void setPrimaryKeyObj(Serializable primaryKeyObj) {
 		setPrimaryKey(((Long)primaryKeyObj).longValue());
 	}
@@ -112,85 +121,169 @@ public class PollsChoiceClp extends BaseModelImpl<PollsChoice>
 		}
 	}
 
+	@Override
 	public String getUuid() {
 		return _uuid;
 	}
 
+	@Override
 	public void setUuid(String uuid) {
 		_uuid = uuid;
+
+		if (_pollsChoiceRemoteModel != null) {
+			try {
+				Class<?> clazz = _pollsChoiceRemoteModel.getClass();
+
+				Method method = clazz.getMethod("setUuid", String.class);
+
+				method.invoke(_pollsChoiceRemoteModel, uuid);
+			}
+			catch (Exception e) {
+				throw new UnsupportedOperationException(e);
+			}
+		}
 	}
 
+	@Override
 	public long getPollsChoiceId() {
 		return _pollsChoiceId;
 	}
 
+	@Override
 	public void setPollsChoiceId(long pollsChoiceId) {
 		_pollsChoiceId = pollsChoiceId;
+
+		if (_pollsChoiceRemoteModel != null) {
+			try {
+				Class<?> clazz = _pollsChoiceRemoteModel.getClass();
+
+				Method method = clazz.getMethod("setPollsChoiceId", long.class);
+
+				method.invoke(_pollsChoiceRemoteModel, pollsChoiceId);
+			}
+			catch (Exception e) {
+				throw new UnsupportedOperationException(e);
+			}
+		}
 	}
 
+	@Override
 	public long getPollsQuestionId() {
 		return _pollsQuestionId;
 	}
 
+	@Override
 	public void setPollsQuestionId(long pollsQuestionId) {
 		_pollsQuestionId = pollsQuestionId;
+
+		if (_pollsChoiceRemoteModel != null) {
+			try {
+				Class<?> clazz = _pollsChoiceRemoteModel.getClass();
+
+				Method method = clazz.getMethod("setPollsQuestionId", long.class);
+
+				method.invoke(_pollsChoiceRemoteModel, pollsQuestionId);
+			}
+			catch (Exception e) {
+				throw new UnsupportedOperationException(e);
+			}
+		}
 	}
 
+	@Override
 	public String getName() {
 		return _name;
 	}
 
+	@Override
 	public void setName(String name) {
 		_name = name;
+
+		if (_pollsChoiceRemoteModel != null) {
+			try {
+				Class<?> clazz = _pollsChoiceRemoteModel.getClass();
+
+				Method method = clazz.getMethod("setName", String.class);
+
+				method.invoke(_pollsChoiceRemoteModel, name);
+			}
+			catch (Exception e) {
+				throw new UnsupportedOperationException(e);
+			}
+		}
 	}
 
+	@Override
 	public String getDescription() {
 		return _description;
 	}
 
+	@Override
 	public String getDescription(Locale locale) {
 		String languageId = LocaleUtil.toLanguageId(locale);
 
 		return getDescription(languageId);
 	}
 
+	@Override
 	public String getDescription(Locale locale, boolean useDefault) {
 		String languageId = LocaleUtil.toLanguageId(locale);
 
 		return getDescription(languageId, useDefault);
 	}
 
+	@Override
 	public String getDescription(String languageId) {
 		return LocalizationUtil.getLocalization(getDescription(), languageId);
 	}
 
+	@Override
 	public String getDescription(String languageId, boolean useDefault) {
 		return LocalizationUtil.getLocalization(getDescription(), languageId,
 			useDefault);
 	}
 
+	@Override
 	public String getDescriptionCurrentLanguageId() {
 		return _descriptionCurrentLanguageId;
 	}
 
+	@Override
 	public String getDescriptionCurrentValue() {
 		Locale locale = getLocale(_descriptionCurrentLanguageId);
 
 		return getDescription(locale);
 	}
 
+	@Override
 	public Map<Locale, String> getDescriptionMap() {
 		return LocalizationUtil.getLocalizationMap(getDescription());
 	}
 
+	@Override
 	public void setDescription(String description) {
 		_description = description;
+
+		if (_pollsChoiceRemoteModel != null) {
+			try {
+				Class<?> clazz = _pollsChoiceRemoteModel.getClass();
+
+				Method method = clazz.getMethod("setDescription", String.class);
+
+				method.invoke(_pollsChoiceRemoteModel, description);
+			}
+			catch (Exception e) {
+				throw new UnsupportedOperationException(e);
+			}
+		}
 	}
 
+	@Override
 	public void setDescription(String description, Locale locale) {
 		setDescription(description, locale, LocaleUtil.getDefault());
 	}
 
+	@Override
 	public void setDescription(String description, Locale locale,
 		Locale defaultLocale) {
 		String languageId = LocaleUtil.toLanguageId(locale);
@@ -207,14 +300,17 @@ public class PollsChoiceClp extends BaseModelImpl<PollsChoice>
 		}
 	}
 
+	@Override
 	public void setDescriptionCurrentLanguageId(String languageId) {
 		_descriptionCurrentLanguageId = languageId;
 	}
 
+	@Override
 	public void setDescriptionMap(Map<Locale, String> descriptionMap) {
 		setDescriptionMap(descriptionMap, LocaleUtil.getDefault());
 	}
 
+	@Override
 	public void setDescriptionMap(Map<Locale, String> descriptionMap,
 		Locale defaultLocale) {
 		if (descriptionMap == null) {
@@ -243,8 +339,23 @@ public class PollsChoiceClp extends BaseModelImpl<PollsChoice>
 		}
 	}
 
+	@Override
 	public int getPollsVotesCount() {
-		throw new UnsupportedOperationException();
+		try {
+			String methodName = "getPollsVotesCount";
+
+			Class<?>[] parameterTypes = new Class<?>[] {  };
+
+			Object[] parameterValues = new Object[] {  };
+
+			Integer returnObj = (Integer)invokeOnRemoteModel(methodName,
+					parameterTypes, parameterValues);
+
+			return returnObj;
+		}
+		catch (Exception e) {
+			throw new UnsupportedOperationException(e);
+		}
 	}
 
 	public BaseModel<?> getPollsChoiceRemoteModel() {
@@ -255,6 +366,48 @@ public class PollsChoiceClp extends BaseModelImpl<PollsChoice>
 		_pollsChoiceRemoteModel = pollsChoiceRemoteModel;
 	}
 
+	public Object invokeOnRemoteModel(String methodName,
+		Class<?>[] parameterTypes, Object[] parameterValues)
+		throws Exception {
+		Object[] remoteParameterValues = new Object[parameterValues.length];
+
+		for (int i = 0; i < parameterValues.length; i++) {
+			if (parameterValues[i] != null) {
+				remoteParameterValues[i] = ClpSerializer.translateInput(parameterValues[i]);
+			}
+		}
+
+		Class<?> remoteModelClass = _pollsChoiceRemoteModel.getClass();
+
+		ClassLoader remoteModelClassLoader = remoteModelClass.getClassLoader();
+
+		Class<?>[] remoteParameterTypes = new Class[parameterTypes.length];
+
+		for (int i = 0; i < parameterTypes.length; i++) {
+			if (parameterTypes[i].isPrimitive()) {
+				remoteParameterTypes[i] = parameterTypes[i];
+			}
+			else {
+				String parameterTypeName = parameterTypes[i].getName();
+
+				remoteParameterTypes[i] = remoteModelClassLoader.loadClass(parameterTypeName);
+			}
+		}
+
+		Method method = remoteModelClass.getMethod(methodName,
+				remoteParameterTypes);
+
+		Object returnValue = method.invoke(_pollsChoiceRemoteModel,
+				remoteParameterValues);
+
+		if (returnValue != null) {
+			returnValue = ClpSerializer.translateOutput(returnValue);
+		}
+
+		return returnValue;
+	}
+
+	@Override
 	public void persist() throws SystemException {
 		if (this.isNew()) {
 			PollsChoiceLocalServiceUtil.addPollsChoice(this);
@@ -264,6 +417,7 @@ public class PollsChoiceClp extends BaseModelImpl<PollsChoice>
 		}
 	}
 
+	@Override
 	@SuppressWarnings("unused")
 	public void prepareLocalizedFieldsForImport(Locale defaultImportLocale)
 		throws LocaleException {
@@ -290,6 +444,7 @@ public class PollsChoiceClp extends BaseModelImpl<PollsChoice>
 		return clone;
 	}
 
+	@Override
 	public int compareTo(PollsChoice pollsChoice) {
 		int value = 0;
 
@@ -318,18 +473,15 @@ public class PollsChoiceClp extends BaseModelImpl<PollsChoice>
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null) {
+		if (this == obj) {
+			return true;
+		}
+
+		if (!(obj instanceof PollsChoiceClp)) {
 			return false;
 		}
 
-		PollsChoiceClp pollsChoice = null;
-
-		try {
-			pollsChoice = (PollsChoiceClp)obj;
-		}
-		catch (ClassCastException cce) {
-			return false;
-		}
+		PollsChoiceClp pollsChoice = (PollsChoiceClp)obj;
 
 		long primaryKey = pollsChoice.getPrimaryKey();
 
@@ -365,6 +517,7 @@ public class PollsChoiceClp extends BaseModelImpl<PollsChoice>
 		return sb.toString();
 	}
 
+	@Override
 	public String toXmlString() {
 		StringBundler sb = new StringBundler(19);
 

@@ -25,6 +25,7 @@ import com.liferay.calendar.service.persistence.CalendarResourceUtil;
 import com.liferay.calendar.service.persistence.CalendarUtil;
 import com.liferay.calendar.util.PortletKeys;
 import com.liferay.portal.kernel.lar.BasePortletDataHandler;
+import com.liferay.portal.kernel.lar.DataLevel;
 import com.liferay.portal.kernel.lar.PortletDataContext;
 import com.liferay.portal.kernel.lar.PortletDataHandlerBoolean;
 import com.liferay.portal.kernel.lar.PortletDataHandlerControl;
@@ -46,7 +47,7 @@ public class CalendarPortletDataHandler extends BasePortletDataHandler {
 	public static final String NAMESPACE = "calendar";
 
 	public CalendarPortletDataHandler() {
-		setAlwaysExportable(true);
+		setDataLevel(DataLevel.SITE);
 		setDataLocalized(true);
 		setDataPortletPreferences(
 			"calendarNotificationBodyEmailInvite",
@@ -361,13 +362,16 @@ public class CalendarPortletDataHandler extends BasePortletDataHandler {
 					importedCalendar = CalendarLocalServiceUtil.addCalendar(
 						userId, groupId, calendarResourceId,
 						calendar.getNameMap(), calendar.getDescriptionMap(),
-						calendar.getColor(), calendar.getDefaultCalendar(),
+						calendar.getColor(), calendar.isDefaultCalendar(),
+						calendar.isEnableComments(), calendar.isEnableRatings(),
 						serviceContext);
 				}
 				else {
 					importedCalendar = CalendarLocalServiceUtil.updateCalendar(
 						existingCalendar.getCalendarId(), calendar.getNameMap(),
 						calendar.getDescriptionMap(), calendar.getColor(),
+						calendar.isDefaultCalendar(),
+						calendar.isEnableComments(), calendar.isEnableRatings(),
 						serviceContext);
 				}
 			}
@@ -375,7 +379,8 @@ public class CalendarPortletDataHandler extends BasePortletDataHandler {
 				importedCalendar = CalendarLocalServiceUtil.addCalendar(
 					userId, groupId, calendarResourceId, calendar.getNameMap(),
 					calendar.getDescriptionMap(), calendar.getColor(),
-					calendar.getDefaultCalendar(), serviceContext);
+					calendar.isDefaultCalendar(), calendar.isEnableComments(),
+					calendar.isEnableRatings(), serviceContext);
 			}
 		}
 

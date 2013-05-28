@@ -27,6 +27,7 @@ import com.liferay.portlet.asset.model.AssetRenderer;
 import com.liferay.portlet.asset.model.AssetRendererFactory;
 import com.liferay.portlet.social.model.BaseSocialActivityInterpreter;
 import com.liferay.portlet.social.model.SocialActivity;
+import com.liferay.portlet.social.model.SocialActivitySet;
 
 import java.text.Format;
 
@@ -84,14 +85,14 @@ public abstract class SOSocialActivityInterpreter
 		long millisAgo = System.currentTimeMillis() - milliseconds;
 
 		if (millisAgo <= Time.MINUTE) {
-			return "about-a-minute-ago";
+			return LanguageUtil.get(locale, "about-a-minute-ago");
 		}
 		else if (millisAgo < Time.HOUR) {
 			return LanguageUtil.format(
 				locale, "x-minutes-ago", (millisAgo / Time.MINUTE));
 		}
 		else if ((millisAgo / Time.HOUR) == 1) {
-			return "about-an-hour-ago";
+			return LanguageUtil.get(locale, "about-an-hour-ago");
 		}
 		else if ((millisAgo < Time.DAY) || (daysBetween == 0)) {
 			return LanguageUtil.format(
@@ -183,16 +184,30 @@ public abstract class SOSocialActivityInterpreter
 			activity.getClassPK(), ActionKeys.VIEW);
 	}
 
+	protected boolean isExpired(SocialActivitySet activitySet) {
+		long age = System.currentTimeMillis() - activitySet.getCreateDate();
+
+		if (age > (Time.HOUR * 8)) {
+			return true;
+		}
+
+		return false;
+	}
+
 	protected String wrapLink(String link, String iconPath, String text) {
 		StringBundler sb = new StringBundler(5);
 
+		sb.append("<a href=\"");
+		sb.append(link);
+		sb.append("\">");
 		sb.append("<span><img class=\"icon\" src=\"");
 		sb.append(iconPath);
 		sb.append("\"></span><span>");
 		sb.append(text);
 		sb.append("</span>");
+		sb.append("</a>");
 
-		return wrapLink(link, sb.toString());
+		return sb.toString();
 	}
 
 	private static final String _SELECTOR = "SO";

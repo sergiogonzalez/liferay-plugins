@@ -1064,6 +1064,11 @@ AUI.add(
 						},
 						value: {},
 						validator: isObject
+					},
+
+					resourceGroupId: {
+						setter: toInt,
+						value: 0
 					}
 				},
 
@@ -1370,6 +1375,11 @@ AUI.add(
 														}
 													);
 
+													var schedulerEventDuration = schedulerEvent.getSecondsDuration() * 1000;
+
+													var calendarEndTime = calendarBooking.startTime + schedulerEventDuration;
+													var calendarStartTime = calendarBooking.startTime;
+
 													var changedStartDate = changed.startDate;
 
 													if (changedStartDate) {
@@ -1381,18 +1391,16 @@ AUI.add(
 															offset = newVal.getTime() - prevVal.getTime();
 														}
 
-														var calendarStartTime = calendarBooking.startTime + offset;
-
-														var endDate = CalendarUtil.toLocalTime(calendarStartTime + (schedulerEvent.getSecondsDuration() * 1000));
-														var startDate = CalendarUtil.toLocalTime(calendarStartTime);
-
-														newSchedulerEvent.setAttrs(
-															{
-																endDate: endDate,
-																startDate: startDate
-															}
-														);
+														calendarStartTime = calendarStartTime + offset;
+														calendarEndTime = calendarStartTime + schedulerEventDuration;
 													}
+
+													newSchedulerEvent.setAttrs(
+														{
+															endDate: CalendarUtil.toLocalTime(calendarEndTime),
+															startDate: CalendarUtil.toLocalTime(calendarStartTime)
+														}
+													);
 
 													CalendarUtil.updateEvent(
 														newSchedulerEvent,
@@ -1511,6 +1519,12 @@ AUI.add(
 						value: STR_BLANK
 					},
 
+					permissionsCalendarBookingURL: {
+						setter: String,
+						validator: isValue,
+						value: STR_BLANK
+					},
+
 					portletNamespace: {
 						setter: String,
 						validator: isValue,
@@ -1526,6 +1540,12 @@ AUI.add(
 						value: {
 							children: []
 						}
+					},
+
+					viewCalendarBookingURL: {
+						setter: String,
+						validator: isValue,
+						value: STR_BLANK
 					}
 				},
 
@@ -1613,7 +1633,7 @@ AUI.add(
 						}
 					},
 
-					_handleEditDetailsEvent: function(event) {
+					_handleEditEvent: function(event) {
 						var instance = this;
 
 						var scheduler = instance.get('scheduler');
@@ -1655,8 +1675,82 @@ AUI.add(
 									width: 915
 								},
 								refreshWindow: window,
-								title: Liferay.Language.get('edit-details'),
+								title: Liferay.Language.get('edit'),
 								uri: Lang.sub(editCalendarBookingURL, data)
+							}
+						);
+
+						instance.hideOverlay();
+					},
+
+					_handlePermissionsEvent: function(event) {
+						var instance = this;
+
+						var scheduler = instance.get('scheduler');
+
+						var permissionsCalendarBookingURL = decodeURIComponent(instance.get('permissionsCalendarBookingURL'));
+
+						var data = instance.serializeForm();
+
+						var schedulerEvent = instance.get('event');
+
+						var calendarId = schedulerEvent.get('calendarId');
+
+						var calendar = CalendarUtil.visibleCalendars[calendarId];
+
+						data.modelResourceDescription = encodeURIComponent(data.content);
+						data.resourceGroupId = calendar.get('resourceGroupId')
+						data.resourcePrimKey = schedulerEvent.get('calendarBookingId');
+
+						Liferay.Util.openWindow(
+							{
+								dialog: {
+									after: {
+										destroy: function(event) {
+											scheduler.load();
+										}
+									},
+									destroyOnClose: true,
+									modal: true,
+									width: 915
+								},
+								refreshWindow: window,
+								title: Liferay.Language.get('permissions'),
+								uri: Lang.sub(permissionsCalendarBookingURL, data)
+							}
+						);
+
+						instance.hideOverlay();
+					},
+
+					_handleViewEvent: function(event) {
+						var instance = this;
+
+						var scheduler = instance.get('scheduler');
+
+						var viewCalendarBookingURL = decodeURIComponent(instance.get('viewCalendarBookingURL'));
+
+						var data = instance.serializeForm();
+
+						var schedulerEvent = instance.get('event');
+
+						data.calendarBookingId = schedulerEvent.get('calendarBookingId');
+
+						Liferay.Util.openWindow(
+							{
+								dialog: {
+									after: {
+										destroy: function(event) {
+											scheduler.load();
+										}
+									},
+									destroyOnClose: true,
+									modal: true,
+									width: 915
+								},
+								refreshWindow: window,
+								title: Liferay.Language.get('view'),
+								uri: Lang.sub(viewCalendarBookingURL, data)
 							}
 						);
 
@@ -1807,7 +1901,17 @@ AUI.add(
 							toolbar.removeAll();
 						}
 						else {
-							var schedulerEvent = instance.get('event') || instance;
+							var schedulerEvent = instance.get('event');
+
+							var schedulerEventCreated = false;
+
+							if (schedulerEvent) {
+								schedulerEventCreated = true;
+							}
+							else {
+								schedulerEvent = instance;
+							}
+
 							var status = schedulerEvent.get('status');
 							var calendar = CalendarUtil.availableCalendars[schedulerEvent.get('calendarId')];
 
@@ -1838,11 +1942,31 @@ AUI.add(
 
 							toolbar.add(
 								{
-									handler: A.bind(instance._handleEditDetailsEvent, instance),
-									id: 'editDetailsBtn',
-									label: Liferay.Language.get('edit-details')
+									handler: A.bind(instance._handleEditEvent, instance),
+									id: 'editBtn',
+									label: Liferay.Language.get('edit')
 								}
 							);
+
+							if ((schedulerEventCreated === true) && permissions.VIEW_BOOKING_DETAILS) {
+								toolbar.add(
+									{
+										handler: A.bind(instance._handleViewEvent, instance),
+										id: 'viewBtn',
+										label: Liferay.Language.get('view')
+									}
+								);
+							}
+
+							if ((schedulerEventCreated === true) && permissions.PERMISSIONS) {
+								toolbar.add(
+									{
+										handler: A.bind(instance._handlePermissionsEvent, instance),
+										id: 'permissionsBtn',
+										label: Liferay.Language.get('permissions')
+									}
+								);
+							}
 
 							if (schedulerEvent.isMasterBooking()) {
 								toolbar.add(
@@ -1892,7 +2016,7 @@ AUI.add(
 								toolbar.remove('acceptBtn');
 								toolbar.remove('declineBtn');
 								toolbar.remove('deleteBtn');
-								toolbar.remove('editDetailsBtn');
+								toolbar.remove('editBtn');
 								toolbar.remove('maybeBtn');
 								toolbar.remove('saveBtn');
 							}

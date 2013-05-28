@@ -24,6 +24,7 @@ import com.liferay.calendar.notification.NotificationType;
 import com.liferay.calendar.recurrence.Recurrence;
 import com.liferay.calendar.recurrence.RecurrenceSerializer;
 import com.liferay.calendar.service.base.CalendarBookingLocalServiceBaseImpl;
+import com.liferay.calendar.social.CalendarActivityKeys;
 import com.liferay.calendar.util.JCalendarUtil;
 import com.liferay.calendar.util.NotificationUtil;
 import com.liferay.calendar.util.PortletPropsValues;
@@ -38,6 +39,8 @@ import com.liferay.portal.kernel.dao.orm.PropertyFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.json.JSONFactoryUtil;
+import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.HtmlUtil;
@@ -47,6 +50,7 @@ import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.Group;
+import com.liferay.portal.model.ResourceConstants;
 import com.liferay.portal.model.User;
 import com.liferay.portal.service.GroupLocalServiceUtil;
 import com.liferay.portal.service.ServiceContext;
@@ -154,12 +158,24 @@ public class CalendarBookingLocalServiceImpl
 		addChildCalendarBookings(
 			calendarBooking, childCalendarIds, serviceContext);
 
+		// Resources
+
+		resourceLocalService.addModelResources(calendarBooking, serviceContext);
+
 		// Asset
 
 		updateAsset(
 			userId, calendarBooking, serviceContext.getAssetCategoryIds(),
 			serviceContext.getAssetTagNames(),
 			serviceContext.getAssetLinkEntryIds());
+
+		// Social
+
+		socialActivityLocalService.addActivity(
+			userId, calendar.getResourceGroupId(),
+			CalendarBooking.class.getName(), calendarBookingId,
+			CalendarActivityKeys.ADD_CALENDAR_BOOKING,
+			getExtraDataJSON(calendarBooking, serviceContext), 0);
 
 		// Workflow
 
@@ -217,9 +233,32 @@ public class CalendarBookingLocalServiceImpl
 			deleteCalendarBooking(childCalendarBooking);
 		}
 
+		// Resources
+
+		resourceLocalService.deleteResource(
+			calendarBooking, ResourceConstants.SCOPE_INDIVIDUAL);
+
+		// Subscriptions
+
+		subscriptionLocalService.deleteSubscriptions(
+			calendarBooking.getCompanyId(), CalendarBooking.class.getName(),
+			calendarBooking.getCalendarBookingId());
+
 		// Asset
 
 		assetEntryLocalService.deleteEntry(
+			CalendarBooking.class.getName(),
+			calendarBooking.getCalendarBookingId());
+
+		// Message boards
+
+		mbMessageLocalService.deleteDiscussionMessages(
+			CalendarBooking.class.getName(),
+			calendarBooking.getCalendarBookingId());
+
+		// Ratings
+
+		ratingsStatsLocalService.deleteStats(
 			CalendarBooking.class.getName(),
 			calendarBooking.getCalendarBookingId());
 
@@ -239,11 +278,9 @@ public class CalendarBookingLocalServiceImpl
 	}
 
 	public void deleteCalendarBookingInstance(
-			long calendarBookingId, long startTime, boolean allFollowing)
+			CalendarBooking calendarBooking, long startTime,
+			boolean allFollowing)
 		throws PortalException, SystemException {
-
-		CalendarBooking calendarBooking =
-			calendarBookingPersistence.findByPrimaryKey(calendarBookingId);
 
 		java.util.Calendar startTimeJCalendar = JCalendarUtil.getJCalendar(
 			startTime);
@@ -273,6 +310,16 @@ public class CalendarBookingLocalServiceImpl
 			RecurrenceSerializer.serialize(recurrenceObj));
 
 		calendarBookingPersistence.update(calendarBooking);
+	}
+
+	public void deleteCalendarBookingInstance(
+			long calendarBookingId, long startTime, boolean allFollowing)
+		throws PortalException, SystemException {
+
+		CalendarBooking calendarBooking =
+			calendarBookingPersistence.findByPrimaryKey(calendarBookingId);
+
+		deleteCalendarBookingInstance(calendarBooking, startTime, allFollowing);
 	}
 
 	public void deleteCalendarBookings(long calendarId)
@@ -505,6 +552,7 @@ public class CalendarBookingLocalServiceImpl
 		User user = userPersistence.findByPrimaryKey(userId);
 		CalendarBooking calendarBooking =
 			calendarBookingPersistence.findByPrimaryKey(calendarBookingId);
+		Calendar calendar = calendarPersistence.findByPrimaryKey(calendarId);
 
 		java.util.Calendar startTimeJCalendar = JCalendarUtil.getJCalendar(
 			startTime);
@@ -557,6 +605,14 @@ public class CalendarBookingLocalServiceImpl
 			serviceContext.getAssetTagNames(),
 			serviceContext.getAssetLinkEntryIds());
 
+		// Social
+
+		socialActivityLocalService.addActivity(
+			userId, calendar.getResourceGroupId(),
+			CalendarBooking.class.getName(), calendarBookingId,
+			CalendarActivityKeys.UPDATE_CALENDAR_BOOKING,
+			getExtraDataJSON(calendarBooking, serviceContext), 0);
+
 		// Workflow
 
 		calendarBookingApprovalWorkflow.invokeTransition(
@@ -595,10 +651,29 @@ public class CalendarBookingLocalServiceImpl
 			ServiceContext serviceContext)
 		throws PortalException, SystemException {
 
-		deleteCalendarBookingInstance(
-			calendarBookingId, startTime, allFollowing);
+		CalendarBooking calendarBooking =
+			calendarBookingPersistence.findByPrimaryKey(calendarBookingId);
 
-		if (!allFollowing) {
+		String oldRecurrence = calendarBooking.getRecurrence();
+
+		deleteCalendarBookingInstance(calendarBooking, startTime, allFollowing);
+
+		if (allFollowing) {
+			Recurrence recurrenceObj = RecurrenceSerializer.deserialize(
+				recurrence);
+
+			if (oldRecurrence.equals(recurrence) &&
+				(recurrenceObj.getCount() > 0)) {
+
+				int index = RecurrenceUtil.getIndexOfInstance(
+					recurrence, calendarBooking.getStartTime(), startTime);
+
+				recurrenceObj.setCount(recurrenceObj.getCount() - index);
+
+				recurrence = RecurrenceSerializer.serialize(recurrenceObj);
+			}
+		}
+		else {
 			recurrence = StringPool.BLANK;
 		}
 
@@ -736,6 +811,17 @@ public class CalendarBookingLocalServiceImpl
 		}
 
 		return childCalendarIds;
+	}
+
+	protected String getExtraDataJSON(
+		CalendarBooking calendarBooking, ServiceContext serviceContext) {
+
+		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
+
+		jsonObject.put(
+			"title", calendarBooking.getTitle(serviceContext.getLocale()));
+
+		return jsonObject.toString();
 	}
 
 	protected void validate(

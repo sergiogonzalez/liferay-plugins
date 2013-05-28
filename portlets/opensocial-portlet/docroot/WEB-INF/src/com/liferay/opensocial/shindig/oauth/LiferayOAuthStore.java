@@ -90,8 +90,7 @@ public class LiferayOAuthStore implements OAuthStore {
 
 		String keyName = oAuthConsumer.getKeyName();
 
-		String callbackURL = _callbackURL.replace(
-			"%host%", ShindigUtil.getHost());
+		String callbackURL = ShindigUtil.transformURL(_callbackURL);
 
 		return new ConsumerInfo(netOAuthConsumer, keyName, callbackURL);
 	}

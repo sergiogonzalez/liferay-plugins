@@ -45,7 +45,7 @@ public class LiferayJsonContainerConfig extends JsonContainerConfig {
 		String value = super.getString(container, property);
 
 		if (Validator.isNotNull(value)) {
-			value = value.replaceAll("%host%", ShindigUtil.getHost());
+			value = ShindigUtil.transformURL(value);
 		}
 
 		return value;

@@ -33,6 +33,7 @@ import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.kernel.uuid.PortalUUIDUtil;
@@ -335,6 +336,10 @@ public class ShindigUtil {
 		return PortalUtil.getPortletNamespace(portletId);
 	}
 
+	public static String getScheme() {
+		return _scheme.get();
+	}
+
 	public static String getTableOpenSocial() {
 		return _TABLE_OPEN_SOCIAL;
 	}
@@ -377,6 +382,16 @@ public class ShindigUtil {
 
 	public static void setHost(String host) {
 		_host.set(host);
+	}
+
+	public static void setScheme(String scheme) {
+		_scheme.set(scheme);
+	}
+
+	public static String transformURL(String url) {
+		return StringUtil.replace(
+			url, new String[] {"%host%", "%scheme%"},
+			new String[] {getHost(), getScheme()});
 	}
 
 	public static void updateOAuthConsumers(
@@ -451,5 +466,9 @@ public class ShindigUtil {
 
 	@Inject
 	private static Processor _processor;
+
+	private static AutoResetThreadLocal<String> _scheme =
+		new AutoResetThreadLocal<String>(
+			ShindigUtil.class + "._scheme", StringPool.BLANK);
 
 }
