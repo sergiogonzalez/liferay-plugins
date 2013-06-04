@@ -276,8 +276,8 @@ public class FileSystemImporter extends BaseImporter {
 
 		Layout layout = LayoutLocalServiceUtil.addLayout(
 			userId, groupId, privateLayout, parentLayoutId, nameMap, titleMap,
-			null, null, null, LayoutConstants.TYPE_PORTLET, hidden,
-			friendlyURLMap, serviceContext);
+			null, null, null, LayoutConstants.TYPE_PORTLET, StringPool.BLANK,
+			hidden, friendlyURLMap, serviceContext);
 
 		String typeSettings = layoutJSONObject.getString("typeSettings");
 
