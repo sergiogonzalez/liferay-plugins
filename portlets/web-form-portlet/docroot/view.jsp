@@ -17,10 +17,10 @@
 <%@ include file="/init.jsp" %>
 
 <%
-String title = LocalizationUtil.getPreferencesValue(preferences, "title", themeDisplay.getLanguageId());
-String description = LocalizationUtil.getPreferencesValue(preferences, "description", themeDisplay.getLanguageId());
-boolean requireCaptcha = GetterUtil.getBoolean(preferences.getValue("requireCaptcha", StringPool.BLANK));
-String successURL = preferences.getValue("successURL", StringPool.BLANK);
+String title = LocalizationUtil.getPreferencesValue(portletPreferences, "title", themeDisplay.getLanguageId());
+String description = LocalizationUtil.getPreferencesValue(portletPreferences, "description", themeDisplay.getLanguageId());
+boolean requireCaptcha = GetterUtil.getBoolean(portletPreferences.getValue("requireCaptcha", StringPool.BLANK));
+String successURL = portletPreferences.getValue("successURL", StringPool.BLANK);
 %>
 
 <portlet:actionURL var="saveDataURL">
@@ -33,7 +33,9 @@ String successURL = preferences.getValue("successURL", StringPool.BLANK);
 	</c:if>
 
 	<aui:fieldset label="<%= HtmlUtil.escape(title) %>">
-		<em class="description"><%= HtmlUtil.escape(description) %></em>
+		<c:if test="<%= Validator.isNotNull(description) %>">
+			<p class="description"><%= HtmlUtil.escape(description) %></p>
+		</c:if>
 
 		<liferay-ui:success key="success" message="the-form-information-was-sent-successfully" />
 
@@ -49,30 +51,30 @@ String successURL = preferences.getValue("successURL", StringPool.BLANK);
 		int i = 1;
 
 		String fieldName = "field" + i;
-		String fieldLabel = LocalizationUtil.getPreferencesValue(preferences, "fieldLabel" + i, themeDisplay.getLanguageId());
-		boolean fieldOptional = PrefsParamUtil.getBoolean(preferences, request, "fieldOptional" + i, false);
+		String fieldLabel = LocalizationUtil.getPreferencesValue(portletPreferences, "fieldLabel" + i, themeDisplay.getLanguageId());
+		boolean fieldOptional = PrefsParamUtil.getBoolean(portletPreferences, request, "fieldOptional" + i, false);
 		String fieldValue = ParamUtil.getString(request, fieldName);
 
 		while ((i == 1) || Validator.isNotNull(fieldLabel)) {
-			String fieldType = preferences.getValue("fieldType" + i, "text");
-			String fieldOptions = LocalizationUtil.getPreferencesValue(preferences, "fieldOptions" + i, themeDisplay.getLanguageId());
-			String fieldValidationScript = preferences.getValue("fieldValidationScript" + i, StringPool.BLANK);
-			String fieldValidationErrorMessage = preferences.getValue("fieldValidationErrorMessage" + i, StringPool.BLANK);
+			String fieldType = portletPreferences.getValue("fieldType" + i, "text");
+			String fieldOptions = LocalizationUtil.getPreferencesValue(portletPreferences, "fieldOptions" + i, themeDisplay.getLanguageId());
+			String fieldValidationScript = portletPreferences.getValue("fieldValidationScript" + i, StringPool.BLANK);
+			String fieldValidationErrorMessage = portletPreferences.getValue("fieldValidationErrorMessage" + i, StringPool.BLANK);
 		%>
 
 			<c:if test="<%= PortletPropsValues.VALIDATION_SCRIPT_ENABLED %>">
 				<liferay-ui:error key='<%= "error" + fieldLabel %>' message="<%= fieldValidationErrorMessage %>" />
 
 				<c:if test="<%= Validator.isNotNull(fieldValidationScript) %>">
-					<div class="aui-helper-hidden" id="<portlet:namespace/>validationError<%= fieldName %>">
-						<span class="portlet-msg-error"><%= fieldValidationErrorMessage %></span>
+					<div class="hide" id="<portlet:namespace/>validationError<%= fieldName %>">
+						<span class="alert alert-error"><%= fieldValidationErrorMessage %></span>
 					</div>
 				</c:if>
 			</c:if>
 
 			<c:if test="<%= !fieldOptional %>">
-				<div class="aui-helper-hidden" id="<portlet:namespace/>fieldOptionalError<%= fieldName %>">
-					<span class="portlet-msg-error"><liferay-ui:message key="this-field-is-mandatory" /></span>
+				<div class="hide" id="<portlet:namespace/>fieldOptionalError<%= fieldName %>">
+					<span class="alert alert-error"><liferay-ui:message key="this-field-is-mandatory" /></span>
 				</div>
 			</c:if>
 
@@ -105,11 +107,6 @@ String successURL = preferences.getValue("successURL", StringPool.BLANK);
 					</aui:field-wrapper>
 				</c:when>
 				<c:when test='<%= fieldType.equals("options") %>'>
-
-					<%
-					String[] options = WebFormUtil.split(fieldOptions);
-					%>
-
 					<aui:select cssClass='<%= fieldOptional ? "optional" : StringPool.BLANK %>' label="<%= HtmlUtil.escape(fieldLabel) %>" name="<%= fieldName %>">
 
 						<%
@@ -130,8 +127,8 @@ String successURL = preferences.getValue("successURL", StringPool.BLANK);
 			i++;
 
 			fieldName = "field" + i;
-			fieldLabel = LocalizationUtil.getPreferencesValue(preferences, "fieldLabel" + i, themeDisplay.getLanguageId());
-			fieldOptional = PrefsParamUtil.getBoolean(preferences, request, "fieldOptional" + i, false);
+			fieldLabel = LocalizationUtil.getPreferencesValue(portletPreferences, "fieldLabel" + i, themeDisplay.getLanguageId());
+			fieldOptional = PrefsParamUtil.getBoolean(portletPreferences, request, "fieldOptional" + i, false);
 			fieldValue = ParamUtil.getString(request, fieldName);
 		}
 		%>
@@ -167,13 +164,13 @@ String successURL = preferences.getValue("successURL", StringPool.BLANK);
 				int i = 1;
 
 				String fieldName = "field" + i;
-				String fieldLabel = preferences.getValue("fieldLabel" + i, StringPool.BLANK);
+				String fieldLabel = portletPreferences.getValue("fieldLabel" + i, StringPool.BLANK);
 
 				while ((i == 1) || Validator.isNotNull(fieldLabel)) {
-					boolean fieldOptional = PrefsParamUtil.getBoolean(preferences, request, "fieldOptional" + i, false);
-					String fieldType = preferences.getValue("fieldType" + i, "text");
-					String fieldValidationScript = preferences.getValue("fieldValidationScript" + i, StringPool.BLANK);
-					String fieldValidationErrorMessage = preferences.getValue("fieldValidationErrorMessage" + i, StringPool.BLANK);
+					boolean fieldOptional = PrefsParamUtil.getBoolean(portletPreferences, request, "fieldOptional" + i, false);
+					String fieldType = portletPreferences.getValue("fieldType" + i, "text");
+					String fieldValidationScript = portletPreferences.getValue("fieldValidationScript" + i, StringPool.BLANK);
+					String fieldValidationErrorMessage = portletPreferences.getValue("fieldValidationErrorMessage" + i, StringPool.BLANK);
 				%>
 
 					var key = "<%= fieldName %>";
@@ -218,7 +215,7 @@ String successURL = preferences.getValue("successURL", StringPool.BLANK);
 					i++;
 
 					fieldName = "field" + i;
-					fieldLabel = preferences.getValue("fieldLabel" + i, "");
+					fieldLabel = portletPreferences.getValue("fieldLabel" + i, "");
 				}
 				%>
 
@@ -235,7 +232,7 @@ String successURL = preferences.getValue("successURL", StringPool.BLANK);
 					if (!fieldOptional[key] && currentFieldValue.match(/^\s*$/)) {
 						validationErrors = true;
 
-						A.all('.portlet-msg-success').hide();
+						A.all('.alert-success').hide();
 
 						if (optionalFieldError) {
 							optionalFieldError.show();
@@ -244,7 +241,7 @@ String successURL = preferences.getValue("successURL", StringPool.BLANK);
 					else if (!fieldValidationFunctions[key](currentFieldValue, fieldsMap)) {
 						validationErrors = true;
 
-						A.all('.portlet-msg-success').hide();
+						A.all('.alert-success').hide();
 
 						if (optionalFieldError) {
 							optionalFieldError.hide();

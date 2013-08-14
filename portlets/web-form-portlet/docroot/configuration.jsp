@@ -19,22 +19,22 @@
 <%
 String redirect = ParamUtil.getString(renderRequest, "redirect");
 
-String titleXml = LocalizationUtil.getLocalizationXmlFromPreferences(preferences, renderRequest, "title");
-String descriptionXml = LocalizationUtil.getLocalizationXmlFromPreferences(preferences, renderRequest, "description");
-boolean requireCaptcha = GetterUtil.getBoolean(preferences.getValue("requireCaptcha", StringPool.BLANK));
-String successURL = preferences.getValue("successURL", StringPool.BLANK);
+String titleXml = LocalizationUtil.getLocalizationXmlFromPreferences(portletPreferences, renderRequest, "title");
+String descriptionXml = LocalizationUtil.getLocalizationXmlFromPreferences(portletPreferences, renderRequest, "description");
+boolean requireCaptcha = GetterUtil.getBoolean(portletPreferences.getValue("requireCaptcha", StringPool.BLANK));
+String successURL = portletPreferences.getValue("successURL", StringPool.BLANK);
 
-boolean sendAsEmail = GetterUtil.getBoolean(preferences.getValue("sendAsEmail", StringPool.BLANK));
-String emailFromName = WebFormUtil.getEmailFromName(preferences, company.getCompanyId());
-String emailFromAddress = WebFormUtil.getEmailFromAddress(preferences, company.getCompanyId());
-String emailAddress = preferences.getValue("emailAddress", StringPool.BLANK);
-String subject = preferences.getValue("subject", StringPool.BLANK);
+boolean sendAsEmail = GetterUtil.getBoolean(portletPreferences.getValue("sendAsEmail", StringPool.BLANK));
+String emailFromName = WebFormUtil.getEmailFromName(portletPreferences, company.getCompanyId());
+String emailFromAddress = WebFormUtil.getEmailFromAddress(portletPreferences, company.getCompanyId());
+String emailAddress = portletPreferences.getValue("emailAddress", StringPool.BLANK);
+String subject = portletPreferences.getValue("subject", StringPool.BLANK);
 
-boolean saveToDatabase = GetterUtil.getBoolean(preferences.getValue("saveToDatabase", StringPool.BLANK));
-String databaseTableName = preferences.getValue("databaseTableName", StringPool.BLANK);
+boolean saveToDatabase = GetterUtil.getBoolean(portletPreferences.getValue("saveToDatabase", StringPool.BLANK));
+String databaseTableName = portletPreferences.getValue("databaseTableName", StringPool.BLANK);
 
-boolean saveToFile = GetterUtil.getBoolean(preferences.getValue("saveToFile", StringPool.BLANK));
-String fileName = preferences.getValue("fileName", StringPool.BLANK);
+boolean saveToFile = GetterUtil.getBoolean(portletPreferences.getValue("saveToFile", StringPool.BLANK));
+String fileName = portletPreferences.getValue("fileName", StringPool.BLANK);
 
 boolean fieldsEditingDisabled = false;
 
@@ -54,8 +54,6 @@ if (WebFormUtil.getTableRowsCount(company.getCompanyId(), databaseTableName) > 0
 	<liferay-ui:panel-container extended="<%= Boolean.TRUE %>" id="webFormConfiguration" persistState="<%= true %>">
 		<liferay-ui:panel collapsible="<%= true %>" extended="<%= true %>" id="webFormGeneral" persistState="<%= true %>" title="form-information">
 			<aui:fieldset>
-				<liferay-ui:error key="titleRequired" message="please-enter-a-title" />
-
 				<aui:field-wrapper cssClass="lfr-input-text-container" label="title">
 					<liferay-ui:input-localized name="title" xml="<%= titleXml %>" />
 				</aui:field-wrapper>
@@ -106,7 +104,7 @@ if (WebFormUtil.getTableRowsCount(company.getCompanyId(), databaseTableName) > 0
 		<liferay-ui:panel collapsible="<%= true %>" extended="<%= true %>" id="webFormFields" persistState="<%= true %>" title="form-fields">
 			<aui:fieldset cssClass="rows-container webFields">
 				<c:if test="<%= fieldsEditingDisabled %>">
-					<div class="portlet-msg-alert">
+					<div class="alert">
 						<liferay-ui:message key="there-is-existing-form-data-please-export-and-delete-it-before-making-changes-to-the-fields" />
 					</div>
 
@@ -150,7 +148,7 @@ if (WebFormUtil.getTableRowsCount(company.getCompanyId(), databaseTableName) > 0
 					formFieldsIndexes = new int[0];
 
 					for (int i = 1; true; i++) {
-						String fieldLabel = PrefsParamUtil.getString(preferences, request, "fieldLabel" + i);
+						String fieldLabel = PrefsParamUtil.getString(portletPreferences, request, "fieldLabel" + i);
 
 						if (Validator.isNull(fieldLabel)) {
 							break;
@@ -225,11 +223,11 @@ if (!fieldsEditingDisabled) {
 			optionsDiv.hide();
 		}
 
-		var optionalControl = formRow.one('.optional-control');
+		var optionalControl = formRow.one('.optional-control').ancestor();
 		var labelName = formRow.one('.label-name');
 
 		if (value == 'paragraph') {
-			var inputName = labelName.one('input');
+			var inputName = labelName.one('input.field');
 
 			var formFieldsIndex = select.attr('id').match(/\d+$/);
 

@@ -39,9 +39,197 @@ SearchContainer searchContainer = new SearchContainer(renderRequest, null, null,
 </c:choose>
 
 <aui:script use="aui-base">
-	var announcementEntries = A.one('#p_p_id<portlet:namespace />');
+	var activities = A.one('#p_p_id<portlet:namespace />');
 
-	announcementEntries.delegate(
+	activities.delegate(
+		'click',
+		function(event) {
+			var currentTarget = event.currentTarget;
+
+			var activityFooterToolbar = currentTarget.ancestor('.activity-footer-toolbar');
+
+			var commentsContainer = activityFooterToolbar.siblings('.comments-container');
+
+			var commentsList = commentsContainer.one('.comments-list');
+
+			var commentEntry = commentsList.one('.comment-entry');
+
+			if (commentEntry) {
+				commentsList.toggleClass('aui-helper-hidden');
+			}
+			else {
+				var uri = '<liferay-portlet:resourceURL id="getComments"></liferay-portlet:resourceURL>';
+
+				uri = Liferay.Util.addParams('activitySetId=' + currentTarget.getAttribute('data-activitySetId'), uri) || uri;
+
+				A.io.request(
+					uri,
+					{
+						after: {
+							success: function(event, id, obj) {
+								var responseData = this.get('responseData');
+
+								if (responseData) {
+									var comments = responseData.comments;
+
+									A.Array.map(
+										comments,
+										function(comment) {
+											Liferay.SO.Activities.addNewComment(commentsList, comment);
+										}
+									)
+								}
+							}
+						},
+						dataType: 'json',
+					}
+				);
+			}
+		},
+		'.view-comments a'
+	);
+
+	activities.delegate(
+		'click',
+		function(event) {
+			if (confirm('<%= UnicodeLanguageUtil.get(pageContext,"are-you-sure-you-want-to-delete-the-selected-entry") %>')) {
+				var currentTarget = event.currentTarget;
+
+				var activityFooter = currentTarget.ancestor('.activity-footer');
+				var commentEntry = currentTarget.ancestor('.comment-entry')
+				var commentsContainer = currentTarget.ancestor('.comments-container');
+
+				var form = commentsContainer.one('form');
+
+				var cmdInput = form.one('#<portlet:namespace /><%= Constants.CMD %>');
+
+				cmdInput.val('<%= Constants.DELETE %>');
+
+				var mbMessageIdOrMicroblogsEntryId = currentTarget.getAttribute('data-mbMessageIdOrMicroblogsEntryId');
+
+				var mbMessageIdOrMicroblogsEntryIdInput = form.one('#<portlet:namespace />mbMessageIdOrMicroblogsEntryId');
+
+				mbMessageIdOrMicroblogsEntryIdInput.val(mbMessageIdOrMicroblogsEntryId);
+
+				A.io.request(
+					form.attr('action'),
+					{
+						after: {
+							success: function(event, id, obj) {
+								var responseData = this.get('responseData');
+
+								if (responseData.success) {
+									commentEntry.remove();
+
+									var viewComments = activityFooter.one('.view-comments a');
+
+									var viewCommentsHtml = viewComments.get('innerHTML');
+
+									var messagesCount = parseInt(viewCommentsHtml) - 1;
+
+									viewComments.html(
+										(messagesCount > 0 ? messagesCount : '') +
+										(messagesCount > 1 ? ' <%= UnicodeLanguageUtil.get(pageContext, "comments") %>' : ' <%= UnicodeLanguageUtil.get(pageContext, "comment") %>')
+									);
+								}
+							}
+						},
+						dataType: 'json',
+						form: {
+							id: form
+						}
+					}
+				);
+			}
+		},
+		'.comment-entry .delete-comment a'
+	);
+
+	activities.delegate(
+		'click',
+		function(event) {
+			var currentTarget = event.currentTarget;
+
+			var mbMessageIdOrMicroblogsEntryId = currentTarget.getAttribute('data-mbMessageIdOrMicroblogsEntryId');
+
+			var editForm = A.one('#<portlet:namespace />fm1' + mbMessageIdOrMicroblogsEntryId);
+
+			var commentEntry = currentTarget.ancestor('.comment-entry');
+
+			var message = commentEntry.one('.comment-body .message');
+
+			message.toggleClass('aui-helper-hidden');
+
+			if (editForm) {
+				editForm.toggleClass('aui-helper-hidden');
+			}
+			else {
+				var commentsContainer = currentTarget.ancestor('.comments-container');
+
+				editForm = commentsContainer.one('form').cloneNode(true);
+
+				editForm.removeClass('aui-helper-hidden');
+
+				editForm.set('id','<portlet:namespace />fm1' + mbMessageIdOrMicroblogsEntryId);
+				editForm.set('name','<portlet:namespace />fm1' + mbMessageIdOrMicroblogsEntryId);
+
+				var cmdInput = editForm.one('#<portlet:namespace /><%= Constants.CMD %>');
+
+				cmdInput.val('<%= Constants.EDIT %>');
+
+				var mbMessageIdOrMicroblogsEntryIdInput = editForm.one('#<portlet:namespace />mbMessageIdOrMicroblogsEntryId');
+
+				mbMessageIdOrMicroblogsEntryIdInput.val(mbMessageIdOrMicroblogsEntryId);
+
+				var commentBody = commentEntry.one('.comment-body');
+
+				commentBody.append(editForm);
+
+				editForm.on(
+					'submit',
+					function(event) {
+						event.halt();
+
+						A.io.request(
+							editForm.attr('action'),
+							{
+								after: {
+									success: function(event, id, obj) {
+										var responseData = this.get('responseData');
+
+										if (responseData.success) {
+											message.html(responseData.body);
+
+											var postDate = commentEntry.one('.comment-info .post-date');
+
+											postDate.html(responseData.modifiedDate);
+
+											editForm.toggleClass('aui-helper-hidden');
+
+											message.toggleClass('aui-helper-hidden');
+										}
+									}
+								},
+								dataType: 'json',
+								form: {
+									id: editForm
+								}
+							}
+						);
+					}
+				);
+			}
+
+			var messageHtml = message.get('innerHTML');
+
+			var bodyInput = editForm.one('#<portlet:namespace />body');
+
+			bodyInput.val(messageHtml);
+		},
+		'.comment-entry .edit-comment a'
+	);
+
+	activities.delegate(
 		'click',
 		function(event) {
 			Liferay.SO.Activities.toggleEntry(event,'<portlet:namespace />');

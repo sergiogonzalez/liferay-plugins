@@ -54,7 +54,7 @@ public class StartupAction extends SimpleAction {
 
 		try {
 			ExpandoColumnLocalServiceUtil.addColumn(
-				table.getTableId(), "client-id", ExpandoColumnConstants.STRING);
+				table.getTableId(), "clientId", ExpandoColumnConstants.STRING);
 		}
 		catch (DuplicateColumnNameException dcne) {
 		}
