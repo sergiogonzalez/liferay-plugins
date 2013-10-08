@@ -16,6 +16,8 @@ package com.liferay.mail.imap;
 
 import com.liferay.mail.MailException;
 import com.liferay.mail.NoSuchMessageException;
+import com.liferay.mail.mailbox.Mailbox;
+import com.liferay.mail.mailbox.MailboxFactoryUtil;
 import com.liferay.mail.model.Account;
 import com.liferay.mail.model.MailFile;
 import com.liferay.mail.service.AttachmentLocalServiceUtil;
@@ -649,10 +651,16 @@ public class IMAPAccessor {
 						folderId, remoteMessageId);
 				}
 				catch (NoSuchMessageException nsme) {
-					MessageLocalServiceUtil.addMessage(
-						_user.getUserId(), folderId, sender, to, cc, bcc,
-						sentDate, subject, StringPool.BLANK, flags,
-						remoteMessageId);
+					com.liferay.mail.model.Message message =
+						MessageLocalServiceUtil.addMessage(
+							_user.getUserId(), folderId, sender, to, cc, bcc,
+							sentDate, subject, StringPool.BLANK, flags,
+							remoteMessageId);
+
+					Mailbox mailbox = MailboxFactoryUtil.getMailbox(
+						_user.getUserId(), _account.getAccountId(), _password);
+
+					mailbox.synchronizeMessage(message.getMessageId());
 				}
 			}
 
