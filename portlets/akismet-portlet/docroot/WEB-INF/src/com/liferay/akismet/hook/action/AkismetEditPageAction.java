@@ -185,6 +185,7 @@ public class AkismetEditPageAction extends BaseStrutsPortletAction {
 
 			wikiPage.setStatus(WorkflowConstants.STATUS_APPROVED);
 			wikiPage.setSummary(AkismetConstants.WIKI_PAGE_PENDING_APPROVAL);
+			wikiPage.setHead(false);
 
 			wikiPage = WikiPageLocalServiceUtil.updateWikiPage(wikiPage);
 
@@ -214,6 +215,7 @@ public class AkismetEditPageAction extends BaseStrutsPortletAction {
 
 			wikiPage.setStatus(WorkflowConstants.STATUS_APPROVED);
 			wikiPage.setSummary(StringPool.BLANK);
+			wikiPage.setHead(false);
 
 			wikiPage = WikiPageLocalServiceUtil.updateWikiPage(wikiPage);
 

@@ -202,6 +202,7 @@ public class ModerationPortlet extends MVCPortlet {
 
 			wikiPage.setStatus(WorkflowConstants.STATUS_APPROVED);
 			wikiPage.setSummary(StringPool.BLANK);
+			wikiPage.setHead(false);
 
 			wikiPage = WikiPageLocalServiceUtil.updateWikiPage(wikiPage);
 
