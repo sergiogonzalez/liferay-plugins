@@ -129,19 +129,14 @@ public class AkismetWikiPageLocalServiceImpl
 		if (workflowAction == WorkflowConstants.ACTION_SAVE_DRAFT) {
 			return super.updatePage(
 				userId, nodeId, title, version, content, summary, minorEdit,
-				format, parentTitle, redirectTitle, serviceContext);
+				format, parentTitle, redirectTitle, false, serviceContext);
 		}
 
 		boolean enabled = isWikiEnabled(userId, nodeId, serviceContext);
 
-		if (enabled) {
-			serviceContext.setWorkflowAction(
-				WorkflowConstants.ACTION_SAVE_DRAFT);
-		}
-
 		WikiPage page = super.updatePage(
 			userId, nodeId, title, version, content, summary, minorEdit, format,
-			parentTitle, redirectTitle, serviceContext);
+			parentTitle, redirectTitle, false, serviceContext);
 
 		AkismetData akismetData = updateAkismetData(page, serviceContext);
 
@@ -185,7 +180,7 @@ public class AkismetWikiPageLocalServiceImpl
 				return super.updatePage(
 					userId, nodeId, title, page.getVersion(), null,
 					StringPool.BLANK, true, format, parentTitle, redirectTitle,
-					newServiceContext);
+					false, newServiceContext);
 			}
 		}
 		finally {
