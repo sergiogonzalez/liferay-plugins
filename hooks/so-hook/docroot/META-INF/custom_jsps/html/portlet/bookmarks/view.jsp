@@ -69,6 +69,7 @@ request.setAttribute("view.jsp-viewFolder", Boolean.TRUE.toString());
 <liferay-ui:search-container
 	curParam="cur1"
 	iteratorURL="<%= portletURL %>"
+	total="<%= BookmarksEntryServiceUtil.getEntriesCount(scopeGroupId, folderId) %>"
 >
 
 	<%
@@ -77,7 +78,6 @@ request.setAttribute("view.jsp-viewFolder", Boolean.TRUE.toString());
 
 	<liferay-ui:search-container-results
 		results="<%= BookmarksEntryServiceUtil.getEntries(scopeGroupId, folderId, searchContainer.getStart(), searchContainer.getEnd(), orderByComparator) %>"
-		total="<%= BookmarksEntryServiceUtil.getEntriesCount(scopeGroupId, folderId) %>"
 	/>
 
 	<liferay-ui:search-container-row
