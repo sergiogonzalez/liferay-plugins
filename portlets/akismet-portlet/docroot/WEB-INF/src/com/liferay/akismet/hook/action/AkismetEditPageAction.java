@@ -205,7 +205,7 @@ public class AkismetEditPageAction extends BaseStrutsPortletAction {
 
 				WikiPageLocalServiceUtil.revertPage(
 					themeDisplay.getUserId(), wikiPage.getNodeId(),
-					wikiPage.getTitle(), wikiPage.getVersion(), serviceContext);
+					wikiPage.getTitle(), previousVersion, serviceContext);
 			}
 			else {
 				SessionMessages.add(actionRequest, "anotherUserHasMadeChanges");
