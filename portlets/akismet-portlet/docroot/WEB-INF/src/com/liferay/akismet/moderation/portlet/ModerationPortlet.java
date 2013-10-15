@@ -176,6 +176,19 @@ public class ModerationPortlet extends MVCPortlet {
 					themeDisplay.getUserId(), wikiPage.getNodeId(),
 					wikiPage.getTitle(), wikiPage.getVersion(), serviceContext);
 			}
+			else if (((latestVersionWikiPage == null) ||
+					  (latestContent == null)) &&
+					 ((previousVersionWikiPage != null) &&
+					  (previousContent != null))) {
+
+				ServiceContext serviceContext =
+					ServiceContextFactory.getInstance(actionRequest);
+
+				WikiPageLocalServiceUtil.revertPage(
+					themeDisplay.getUserId(), wikiPage.getNodeId(),
+					wikiPage.getTitle(), previousVersionWikiPage.getVersion(),
+					serviceContext);
+			}
 			else {
 				StringBundler sb = new StringBundler(5);
 
