@@ -68,7 +68,7 @@ pageContext.setAttribute("portletURL", portletURL);
 </div>
 
 <div class="search">
-	<input class="search-input" id="<portlet:namespace />name" name="<portlet:namespace />name" size="30" type="text" value="<%= HtmlUtil.escape(name) %>" />
+	<input class="search-input" id="<portlet:namespace />name" name="<portlet:namespace />name" placeholder="<liferay-ui:message key="go-to" />" size="30" type="text" value="<%= HtmlUtil.escape(name) %>" />
 
 	<input src="<%= themeDisplay.getPathThemeImages() %>/common/search.png" type="image" value='<liferay-ui:message key="search" />' />
 </div>
@@ -83,10 +83,11 @@ pageContext.setAttribute("portletURL", portletURL);
 
 </form>
 
-<aui:script use="aui-base,aui-io,aui-toolbar">
+<aui:script use="aui-base,aui-io-deprecated,aui-toolbar">
 	Liferay.SO.Sites.init(
 		{
 			messages: '#<portlet:namespace />messages',
+			namespace: '<portlet:namespace />',
 			siteList: '.so-portlet-sites .site-list',
 			siteListContainer: '.so-portlet-sites .site-list-container',
 			siteListURL: '<portlet:resourceURL id="getSites"><portlet:param name="portletResource" value="<%= portletResource %>" /></portlet:resourceURL>',
@@ -165,8 +166,8 @@ pageContext.setAttribute("portletURL", portletURL);
 			var keywords = searchInput.get('value');
 
 			var data = {
-				keywords: keywords,
-				tabs1: sitesTabsSelect.get('value')
+				<portlet:namespace />keywords: keywords,
+				<portlet:namespace />tabs1: sitesTabsSelect.get('value')
 			};
 
 			<liferay-portlet:renderURL var="viewSitesURL" windowState="<%= LiferayWindowState.EXCLUSIVE.toString() %>">

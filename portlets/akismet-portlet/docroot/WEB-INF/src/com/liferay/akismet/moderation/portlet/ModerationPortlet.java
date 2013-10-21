@@ -157,6 +157,13 @@ public class ModerationPortlet extends MVCPortlet {
 				previousContent = previousVersionWikiPage.getContent();
 			}
 
+			// Selected version
+
+			wikiPage.setStatus(WorkflowConstants.STATUS_APPROVED);
+			wikiPage.setSummary(StringPool.BLANK);
+
+			wikiPage = WikiPageLocalServiceUtil.updateWikiPage(wikiPage);
+
 			// Latest version
 
 			if ((latestContent != null) && ((previousContent == null) ||
@@ -168,6 +175,19 @@ public class ModerationPortlet extends MVCPortlet {
 				WikiPageLocalServiceUtil.revertPage(
 					themeDisplay.getUserId(), wikiPage.getNodeId(),
 					wikiPage.getTitle(), wikiPage.getVersion(), serviceContext);
+			}
+			else if (((latestVersionWikiPage == null) ||
+					  (latestContent == null)) &&
+					 ((previousVersionWikiPage != null) &&
+					  (previousContent != null))) {
+
+				ServiceContext serviceContext =
+					ServiceContextFactory.getInstance(actionRequest);
+
+				WikiPageLocalServiceUtil.revertPage(
+					themeDisplay.getUserId(), wikiPage.getNodeId(),
+					wikiPage.getTitle(), previousVersionWikiPage.getVersion(),
+					serviceContext);
 			}
 			else {
 				StringBundler sb = new StringBundler(5);
@@ -197,13 +217,6 @@ public class ModerationPortlet extends MVCPortlet {
 
 				wikiPageLinks.add(sb.toString());
 			}
-
-			// Selected version
-
-			wikiPage.setStatus(WorkflowConstants.STATUS_APPROVED);
-			wikiPage.setSummary(StringPool.BLANK);
-
-			wikiPage = WikiPageLocalServiceUtil.updateWikiPage(wikiPage);
 
 			// Akismet
 
