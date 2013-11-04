@@ -83,7 +83,7 @@ pageContext.setAttribute("portletURL", portletURL);
 
 </form>
 
-<aui:script use="aui-base,aui-io-deprecated,aui-toolbar">
+<aui:script use="aui-base,aui-io-deprecated,aui-toolbar,liferay-so-user-menu">
 	Liferay.SO.Sites.init(
 		{
 			messages: '#<portlet:namespace />messages',
@@ -146,16 +146,6 @@ pageContext.setAttribute("portletURL", portletURL);
 		function(event) {
 			searchInput.set('value', '');
 
-			Liferay.SO.Sites.init(
-				{
-					messages: '#<portlet:namespace />messages',
-					siteList: '.so-portlet-sites .site-list',
-					siteListContainer: '.so-portlet-sites .site-list-container',
-					siteListURL: '<portlet:resourceURL id="getSites"><portlet:param name="portletResource" value="<%= portletResource %>" /></portlet:resourceURL>',
-					siteSearchInput: '#<portlet:namespace />name'
-				}
-			);
-
 			Liferay.SO.Sites.updateSites();
 		}
 	);
@@ -197,4 +187,26 @@ pageContext.setAttribute("portletURL", portletURL);
 		},
 		'.action a'
 	);
+
+	var dockBar = A.one('.portlet-dockbar');
+
+	if (dockBar) {
+		var html = A.one('html');
+
+		html.on(
+			'click',
+			function(event) {
+				A.fire('close-menus');
+			}
+		);
+
+		new Liferay.SO.UserMenu(
+			{
+				node: '.portlet-dockbar .go-to',
+				showClass: 'search-focus',
+				showOn: 'focus',
+				trigger: '.portlet-dockbar .go-to .so-portlet-sites .search-input'
+			}
+		);
+	}
 </aui:script>

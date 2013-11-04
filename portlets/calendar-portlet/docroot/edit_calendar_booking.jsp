@@ -147,7 +147,7 @@ List<Calendar> manageableCalendars = CalendarServiceUtil.search(themeDisplay.get
 						}
 					%>
 
-						<aui:option selected="<%= curCalendar.getCalendarId() == calendarId %>" value="<%= curCalendar.getCalendarId() %>"><%= curCalendar.getName(locale) %></aui:option>
+						<aui:option selected="<%= curCalendar.getCalendarId() == calendarId %>" value="<%= curCalendar.getCalendarId() %>"><%= HtmlUtil.escape(curCalendar.getName(locale)) %></aui:option>
 
 					<%
 					}
@@ -284,6 +284,10 @@ List<Calendar> manageableCalendars = CalendarServiceUtil.search(themeDisplay.get
 		return <%= calendarBookingId %> !== calendarBooking.calendarBookingId;
 	}
 
+	function <portlet:namespace />getSuggestionsContent() {
+		return document.<portlet:namespace />fm.<portlet:namespace />title.value + ' ' + document.<portlet:namespace />fm.<portlet:namespace />description.value;
+	}
+
 	Liferay.provide(
 		window,
 		'<portlet:namespace />updateCalendarBooking',
@@ -333,7 +337,7 @@ List<Calendar> manageableCalendars = CalendarServiceUtil.search(themeDisplay.get
 							'<p class="calendar-portlet-confirmation-text">',
 							A.Lang.sub(
 								Liferay.Language.get('you-are-about-to-make-changes-that-will-only-effect-your-calendar-x'),
-								['<%= calendar.getName(locale) %>']
+								['<%= HtmlUtil.escapeJS(calendar.getName(locale)) %>']
 							),
 							'</p>'
 						].join('');
@@ -345,10 +349,10 @@ List<Calendar> manageableCalendars = CalendarServiceUtil.search(themeDisplay.get
 							function() {
 								submitForm(document.<portlet:namespace />fm);
 
-								this.close();
+								this.hide();
 							},
 							function() {
-								this.close();
+								this.hide();
 							}
 						);
 					</c:otherwise>
@@ -684,11 +688,11 @@ List<Calendar> manageableCalendars = CalendarServiceUtil.search(themeDisplay.get
 			values: [
 				{
 					interval: <%= firstReminder %>,
-					type: '<%= HtmlUtil.escape(firstReminderType) %>'
+					type: '<%= HtmlUtil.escapeJS(firstReminderType) %>'
 				},
 				{
 					interval: <%= secondReminder %>,
-					type: '<%= HtmlUtil.escape(secondReminderType) %>'
+					type: '<%= HtmlUtil.escapeJS(secondReminderType) %>'
 				}
 			]
 		}
