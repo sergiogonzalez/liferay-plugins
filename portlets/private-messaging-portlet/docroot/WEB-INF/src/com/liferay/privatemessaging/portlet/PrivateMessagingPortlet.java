@@ -28,7 +28,6 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portlet.PortletResponseUtil;
 import com.liferay.portal.kernel.repository.model.FileEntry;
-import com.liferay.portal.kernel.servlet.ServletResponseUtil;
 import com.liferay.portal.kernel.upload.UploadPortletRequest;
 import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.ContentTypes;
@@ -73,9 +72,6 @@ import javax.portlet.PortletRequest;
 import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 /**
  * @author Scott Lee
  * @author Eudaldo Alonso
@@ -99,40 +95,30 @@ public class PrivateMessagingPortlet extends MVCPortlet {
 	}
 
 	public void getMessageAttachment(
-			ActionRequest actionRequest, ActionResponse actionResponse)
+			ResourceRequest resourceRequest, ResourceResponse resourceResponse)
 		throws Exception {
 
-		try {
-			ThemeDisplay themeDisplay =
-				(ThemeDisplay)actionRequest.getAttribute(WebKeys.THEME_DISPLAY);
+		ThemeDisplay themeDisplay = (ThemeDisplay)resourceRequest.getAttribute(
+			WebKeys.THEME_DISPLAY);
 
-			long messageId = ParamUtil.getLong(actionRequest, "messageId");
-			String fileName = ParamUtil.getString(actionRequest, "attachment");
+		long messageId = ParamUtil.getLong(resourceRequest, "messageId");
+		String fileName = ParamUtil.getString(resourceRequest, "attachment");
 
-			MBMessage message = MBMessageLocalServiceUtil.getMessage(messageId);
+		MBMessage message = MBMessageLocalServiceUtil.getMessage(messageId);
 
-			if (!PrivateMessagingUtil.isUserPartOfThread(
-					themeDisplay.getUserId(), message.getThreadId())) {
+		if (!PrivateMessagingUtil.isUserPartOfThread(
+				themeDisplay.getUserId(), message.getThreadId())) {
 
-				throw new PrincipalException();
-			}
-
-			HttpServletRequest request = PortalUtil.getHttpServletRequest(
-				actionRequest);
-			HttpServletResponse response = PortalUtil.getHttpServletResponse(
-				actionResponse);
-
-			FileEntry fileEntry = PortletFileRepositoryUtil.getPortletFileEntry(
-				message.getGroupId(), message.getAttachmentsFolderId(),
-				fileName);
-
-			ServletResponseUtil.sendFile(
-				request, response, fileName, fileEntry.getContentStream(),
-				fileEntry.getSize(), fileEntry.getMimeType());
+			throw new PrincipalException();
 		}
-		catch (Exception e) {
-			PortalUtil.sendError(e, actionRequest, actionResponse);
-		}
+
+		FileEntry fileEntry = PortletFileRepositoryUtil.getPortletFileEntry(
+			message.getGroupId(), message.getAttachmentsFolderId(), fileName);
+
+		PortletResponseUtil.sendFile(
+			resourceRequest, resourceResponse, fileName,
+			fileEntry.getContentStream(), (int)fileEntry.getSize(),
+			fileEntry.getMimeType());
 	}
 
 	public void markMessagesAsRead(
@@ -168,13 +154,13 @@ public class PrivateMessagingPortlet extends MVCPortlet {
 	}
 
 	public void sendMessage(
-			ActionRequest actionRequest, ActionResponse actionResponse)
+			ResourceRequest resourceRequest, ResourceResponse resourceResponse)
 		throws Exception {
 
 		UploadPortletRequest uploadPortletRequest =
-			PortalUtil.getUploadPortletRequest(actionRequest);
+			PortalUtil.getUploadPortletRequest(resourceRequest);
 
-		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
+		ThemeDisplay themeDisplay = (ThemeDisplay)resourceRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
 		long userId = ParamUtil.getLong(uploadPortletRequest, "userId");
@@ -209,7 +195,7 @@ public class PrivateMessagingPortlet extends MVCPortlet {
 				}
 				catch (Exception e) {
 					_log.error(
-						translate(actionRequest, "unable to attach file ") +
+						translate(resourceRequest, "unable to attach file ") +
 							fileName, e);
 				}
 			}
@@ -221,17 +207,8 @@ public class PrivateMessagingPortlet extends MVCPortlet {
 			jsonObject.put("success", Boolean.TRUE);
 		}
 		catch (Exception e) {
-			String message = "unable-to-send-message";
+			jsonObject.put("message", getMessage(resourceRequest, e));
 
-			if (e instanceof FileExtensionException ||
-				e instanceof FileNameException ||
-				e instanceof FileSizeException ||
-				e instanceof IOException) {
-
-				message = "unable-to-process-attachment";
-			}
-
-			jsonObject.put("message", translate(actionRequest, message));
 			jsonObject.put("success", Boolean.FALSE);
 		}
 		finally {
@@ -244,7 +221,7 @@ public class PrivateMessagingPortlet extends MVCPortlet {
 			}
 		}
 
-		writeJSON(actionRequest, actionResponse, jsonObject);
+		writeJSON(resourceRequest, resourceResponse, jsonObject);
 	}
 
 	@Override
@@ -256,8 +233,14 @@ public class PrivateMessagingPortlet extends MVCPortlet {
 			String resourceID = GetterUtil.getString(
 				resourceRequest.getResourceID());
 
-			if (resourceID.equals("getUsers")) {
+			if (resourceID.equals("getMessageAttachment")) {
+				getMessageAttachment(resourceRequest, resourceResponse);
+			}
+			else if (resourceID.equals("getUsers")) {
 				getUsers(resourceRequest, resourceResponse);
+			}
+			else if (resourceID.equals("sendMessage")) {
+				sendMessage(resourceRequest, resourceResponse);
 			}
 			else {
 				super.serveResource(resourceRequest, resourceResponse);
@@ -270,9 +253,6 @@ public class PrivateMessagingPortlet extends MVCPortlet {
 
 	protected String getMessage(PortletRequest portletRequest, Exception key)
 		throws Exception {
-
-		ThemeDisplay themeDisplay = (ThemeDisplay)portletRequest.getAttribute(
-			WebKeys.THEME_DISPLAY);
 
 		String message = null;
 
