@@ -1,3 +1,5 @@
+<%@ page import="com.liferay.akismet.util.AkismetUtil" %>
+<%@ page import="com.liferay.portlet.messageboards.model.MBMessage" %>
 <%--
 /**
  * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
@@ -16,45 +18,45 @@
 
 <%@ include file="/html/portlet/message_boards/init.jsp" %>
 
-<liferay-util:buffer var="html">
+<liferay-util:buffer var="messageRowHtml">
 	<liferay-util:include page="/html/portlet/message_boards/view_message_content.portal.jsp" />
 </liferay-util:buffer>
 
 <c:if test="<%= MBPermission.contains(permissionChecker, scopeGroupId, ActionKeys.BAN_USER) %>">
 
 	<%
-	int messagePos = 0;
+	int messageContainerPosition = 0;
 
-	while ((messagePos = html.indexOf("<div class=\"message-container", messagePos)) > -1) {
-		int x = html.indexOf("<ul class=\"edit-controls", messagePos);
-		int y = html.indexOf("</ul>", x);
+	while ((messageContainerPosition = messageRowHtml.indexOf("<div class=\"message-container", messageContainerPosition)) > -1) {
+		int ulTagPosition = messageRowHtml.indexOf("<ul class=\"edit-controls", messageContainerPosition);
+		int ulCloseTagPosition = messageRowHtml.indexOf("</ul>", ulTagPosition);
 
-		int messageIdPos = html.indexOf("_19_messageId=", x);
+		int messageRowMessageIdPosition = messageRowHtml.indexOf("_19_messageId=", ulTagPosition);
 
-		if ((x > 0) && (y > 0) && (messageIdPos > 0)) {
-			String messageId = html.substring(messageIdPos + 14, html.indexOf("\"", messageIdPos));
+		if ((ulTagPosition > 0) && (ulCloseTagPosition > 0) && (messageRowMessageIdPosition > 0)) {
+			String messageId = messageRowHtml.substring(messageRowMessageIdPosition + 14, messageRowHtml.indexOf("\"", messageRowMessageIdPosition));
 
-			MBMessage message = null;
+			MBMessage messageRowMessage = null;
 
 			try {
-				message = MBMessageLocalServiceUtil.getMessage(GetterUtil.getLong(messageId));
+				messageRowMessage = MBMessageLocalServiceUtil.getMessage(GetterUtil.getLong(messageId));
 			}
 			catch (Exception e) {
-				messagePos++;
+				messageContainerPosition++;
 
 				continue;
 			}
 
-			boolean spam = false;
+			boolean isSpam = false;
 
-			if (message.getStatus() == WorkflowConstants.STATUS_DENIED) {
-				spam = true;
+			if (messageRowMessage.getStatus() == WorkflowConstants.STATUS_DENIED) {
+				isSpam = true;
 			}
 	%>
 
-			<liferay-util:buffer var="customHTML">
+			<liferay-util:buffer var="spamLiTag">
 				<c:choose>
-					<c:when test="<%= spam %>">
+					<c:when test="<%= isSpam %>">
 						<li>
 							<portlet:actionURL var="notSpamURL">
 								<portlet:param name="struts_action" value="/message_boards/edit_message" />
@@ -96,28 +98,28 @@
 	<%
 			StringBundler sb = new StringBundler(5);
 
-			if (spam) {
-				sb.append(html.substring(0, messagePos + 4));
+			if (isSpam) {
+				sb.append(messageRowHtml.substring(0, messageContainerPosition + 4));
 				sb.append(" style=\"background-color: #FDD; border: 1px solid red;\"");
-				sb.append(html.substring(messagePos + 4, y));
+				sb.append(messageRowHtml.substring(messageContainerPosition + 4, ulCloseTagPosition));
 			}
 			else {
-				sb.append(html.substring(0, y));
+				sb.append(messageRowHtml.substring(0, ulCloseTagPosition));
 			}
 
-			sb.append(customHTML);
-			sb.append(html.substring(y));
+			sb.append(spamLiTag);
+			sb.append(messageRowHtml.substring(ulCloseTagPosition));
 
-			html = sb.toString();
+			messageRowHtml = sb.toString();
 
-			messagePos = y + customHTML.length();
+			messageContainerPosition = ulCloseTagPosition + spamLiTag.length();
 		}
 		else {
-			messagePos++;
+			messageContainerPosition++;
 		}
 	}
 	%>
 
 </c:if>
 
-<%= html %>
+<%= messageRowHtml %>
