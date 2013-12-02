@@ -47,11 +47,7 @@
 				continue;
 			}
 
-			boolean isSpam = false;
-
-			if (messageRowMessage.getStatus() == WorkflowConstants.STATUS_DENIED) {
-				isSpam = true;
-			}
+			boolean isSpam = messageRowMessage.getStatus() == WorkflowConstants.STATUS_DENIED;
 	%>
 
 			<liferay-util:buffer var="spamLiTag">
