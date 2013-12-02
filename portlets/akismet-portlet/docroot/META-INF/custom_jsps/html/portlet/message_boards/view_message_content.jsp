@@ -29,10 +29,12 @@
 		int ulTagPosition = messageRowHtml.indexOf("<ul class=\"edit-controls", messageContainerPosition);
 		int ulCloseTagPosition = messageRowHtml.indexOf("</ul>", ulTagPosition);
 
-		int messageRowMessageIdPosition = messageRowHtml.indexOf(renderResponse.getNamespace() + "messageId=", ulTagPosition);
+		String messageIdHtmlAttribute = renderResponse.getNamespace() + "messageId=";
+
+		int messageRowMessageIdPosition = messageRowHtml.indexOf(messageIdHtmlAttribute, ulTagPosition);
 
 		if ((ulTagPosition > 0) && (ulCloseTagPosition > 0) && (messageRowMessageIdPosition > 0)) {
-			String messageId = messageRowHtml.substring(messageRowMessageIdPosition + 14, messageRowHtml.indexOf("\"", messageRowMessageIdPosition));
+			String messageId = messageRowHtml.substring(messageRowMessageIdPosition + messageIdHtmlAttribute.length(), messageRowHtml.indexOf("\"", messageRowMessageIdPosition));
 
 			MBMessage messageRowMessage = null;
 
