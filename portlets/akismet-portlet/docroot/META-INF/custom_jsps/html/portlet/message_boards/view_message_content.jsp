@@ -1,5 +1,3 @@
-<%@ page import="com.liferay.akismet.util.AkismetUtil" %>
-<%@ page import="com.liferay.portlet.messageboards.model.MBMessage" %>
 <%--
 /**
  * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
@@ -31,7 +29,7 @@
 		int ulTagPosition = messageRowHtml.indexOf("<ul class=\"edit-controls", messageContainerPosition);
 		int ulCloseTagPosition = messageRowHtml.indexOf("</ul>", ulTagPosition);
 
-		int messageRowMessageIdPosition = messageRowHtml.indexOf("_19_messageId=", ulTagPosition);
+		int messageRowMessageIdPosition = messageRowHtml.indexOf(renderResponse.getNamespace() + "messageId=", ulTagPosition);
 
 		if ((ulTagPosition > 0) && (ulCloseTagPosition > 0) && (messageRowMessageIdPosition > 0)) {
 			String messageId = messageRowHtml.substring(messageRowMessageIdPosition + 14, messageRowHtml.indexOf("\"", messageRowMessageIdPosition));
