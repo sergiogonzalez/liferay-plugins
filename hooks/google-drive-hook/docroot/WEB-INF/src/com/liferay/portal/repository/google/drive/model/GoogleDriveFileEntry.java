@@ -37,6 +37,11 @@ import java.util.Map;
 public class GoogleDriveFileEntry implements FileEntry {
 
 	@Override
+	public Object clone() {
+		return this;
+	}
+
+	@Override
 	public boolean containsPermission(
 			PermissionChecker permissionChecker, String actionId)
 		throws PortalException, SystemException {

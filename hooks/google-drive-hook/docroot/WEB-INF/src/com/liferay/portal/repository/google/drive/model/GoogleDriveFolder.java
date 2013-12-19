@@ -33,6 +33,11 @@ import java.util.Map;
 public class GoogleDriveFolder implements Folder {
 
 	@Override
+	public Object clone() {
+		return this;
+	}
+
+	@Override
 	public boolean containsPermission(
 			PermissionChecker permissionChecker, String actionId)
 		throws PortalException, SystemException {

@@ -33,6 +33,11 @@ import java.util.Map;
 public class GoogleDriveFileVersion implements FileVersion {
 
 	@Override
+	public Object clone() {
+		return this;
+	}
+
+	@Override
 	public Map<String, Serializable> getAttributes() {
 		return null;
 	}
