@@ -21,6 +21,7 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.drive.Drive;
+import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.Revision;
 
 import com.liferay.portal.kernel.exception.PortalException;
@@ -35,16 +36,22 @@ import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.search.SearchException;
 import com.liferay.portal.kernel.servlet.PortalSessionThreadLocal;
 import com.liferay.portal.kernel.util.AutoResetThreadLocal;
+import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.TransientValue;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.Lock;
+import com.liferay.portal.model.RepositoryEntry;
 import com.liferay.portal.model.User;
+import com.liferay.portal.repository.google.drive.model.GoogleDriveFileVersion;
+import com.liferay.portal.repository.google.drive.model.GoogleDriveVersionLabel;
 import com.liferay.portal.security.auth.PrincipalException;
 import com.liferay.portal.security.auth.PrincipalThreadLocal;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.UserLocalServiceUtil;
+import com.liferay.portal.service.persistence.RepositoryEntryUtil;
+import com.liferay.portlet.documentlibrary.NoSuchFileEntryException;
 import com.liferay.util.portlet.PortletProps;
 
 import java.io.IOException;
@@ -132,6 +139,32 @@ public class GoogleDriveRepository extends BaseRepositoryImpl {
 	@Override
 	public void deleteFolder(long folderId)
 		throws PortalException, SystemException {
+	}
+
+	public InputStream getContentStream(long fileEntryId)
+		throws PortalException, SystemException {
+
+		Drive drive = getDrive();
+
+		File file = toFileObject(fileEntryId);
+
+		String downloadURL = file.getDownloadUrl();
+
+		if (Validator.isNull(downloadURL)) {
+			return null;
+		}
+
+		try {
+			HttpResponse response = drive.getRequestFactory().buildGetRequest(
+				new GenericUrl(downloadURL)).execute();
+
+			return response.getContent();
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+
+			return null;
+		}
 	}
 
 	public InputStream getContentStream(String fileId, String revisionId)
@@ -252,6 +285,35 @@ public class GoogleDriveRepository extends BaseRepositoryImpl {
 		throws PortalException, SystemException {
 
 		return null;
+	}
+
+	public FileVersion getFileVersion(
+			GoogleDriveVersionLabel googleDriveVersionLabel)
+		throws PortalException, SystemException {
+
+		FileEntry fileEntry = getFileEntry(
+			googleDriveVersionLabel.getVersionId());
+
+		String fileId = googleDriveVersionLabel.getFileId();
+		String revisionId = googleDriveVersionLabel.getRevisionId();
+
+		Drive drive = getDrive();
+
+		long size = 0;
+
+		try {
+			Revision revision =
+				drive.revisions().get(fileId, revisionId).execute();
+
+			size = GetterUtil.getLong(revision.getFileSize());
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return new GoogleDriveFileVersion(
+			this, fileEntry, googleDriveVersionLabel.getVersionLabel(), size,
+			fileId, revisionId);
 	}
 
 	@Override
@@ -533,6 +595,28 @@ public class GoogleDriveRepository extends BaseRepositoryImpl {
 		}
 		catch (Exception e) {
 			throw new PrincipalException(e);
+		}
+	}
+
+	protected File toFileObject(long entryId)
+		throws PortalException, SystemException {
+
+		RepositoryEntry repositoryEntry = RepositoryEntryUtil.fetchByPrimaryKey(
+			entryId);
+
+		if (repositoryEntry == null) {
+			throw new NoSuchFileEntryException();
+		}
+
+		Drive drive = getDrive();
+
+		try {
+			return drive.files().get(repositoryEntry.getMappedId()).execute();
+		}
+		catch (IOException ioe) {
+			ioe.printStackTrace();
+
+			throw new PortalException(ioe);
 		}
 	}
 
