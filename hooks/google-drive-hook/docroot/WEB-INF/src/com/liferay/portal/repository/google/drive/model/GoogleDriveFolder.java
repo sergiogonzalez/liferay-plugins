@@ -30,12 +30,7 @@ import java.util.Map;
 /**
  * @author Sergio González
  */
-public class GoogleDriveFolder implements Folder {
-
-	@Override
-	public Object clone() {
-		return this;
-	}
+public class GoogleDriveFolder extends GoogleDriveModel implements Folder {
 
 	@Override
 	public boolean containsPermission(
@@ -138,11 +133,6 @@ public class GoogleDriveFolder implements Folder {
 	}
 
 	@Override
-	public Serializable getPrimaryKeyObj() {
-		return null;
-	}
-
-	@Override
 	public long getRepositoryId() {
 		return 0;
 	}
@@ -235,42 +225,6 @@ public class GoogleDriveFolder implements Folder {
 	@Override
 	public boolean isSupportsSubscribing() {
 		return false;
-	}
-
-	@Override
-	public void setCompanyId(long companyId) {
-	}
-
-	@Override
-	public void setCreateDate(Date date) {
-	}
-
-	@Override
-	public void setGroupId(long groupId) {
-	}
-
-	@Override
-	public void setModifiedDate(Date date) {
-	}
-
-	@Override
-	public void setPrimaryKeyObj(Serializable primaryKeyObj) {
-	}
-
-	@Override
-	public void setUserId(long userId) {
-	}
-
-	@Override
-	public void setUserName(String userName) {
-	}
-
-	@Override
-	public void setUserUuid(String userUuid) {
-	}
-
-	@Override
-	public void setUuid(String uuid) {
 	}
 
 	@Override

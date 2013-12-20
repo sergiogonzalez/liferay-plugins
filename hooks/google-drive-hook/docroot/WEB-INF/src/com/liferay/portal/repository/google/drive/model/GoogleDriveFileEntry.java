@@ -22,7 +22,6 @@ import com.liferay.portal.kernel.repository.model.FileVersion;
 import com.liferay.portal.kernel.repository.model.Folder;
 import com.liferay.portal.model.Lock;
 import com.liferay.portal.security.permission.PermissionChecker;
-import com.liferay.portlet.expando.model.ExpandoBridge;
 
 import java.io.InputStream;
 import java.io.Serializable;
@@ -34,12 +33,8 @@ import java.util.Map;
 /**
  * @author Sergio González
  */
-public class GoogleDriveFileEntry implements FileEntry {
-
-	@Override
-	public Object clone() {
-		return this;
-	}
+public class GoogleDriveFileEntry
+	extends GoogleDriveModel implements FileEntry {
 
 	@Override
 	public boolean containsPermission(
@@ -80,11 +75,6 @@ public class GoogleDriveFileEntry implements FileEntry {
 
 	@Override
 	public String getDescription() {
-		return null;
-	}
-
-	@Override
-	public ExpandoBridge getExpandoBridge() {
 		return null;
 	}
 
@@ -179,11 +169,6 @@ public class GoogleDriveFileEntry implements FileEntry {
 	}
 
 	@Override
-	public String getModelClassName() {
-		return null;
-	}
-
-	@Override
 	public Date getModifiedDate() {
 		return null;
 	}
@@ -191,11 +176,6 @@ public class GoogleDriveFileEntry implements FileEntry {
 	@Override
 	public long getPrimaryKey() {
 		return 0;
-	}
-
-	@Override
-	public Serializable getPrimaryKeyObj() {
-		return null;
 	}
 
 	@Override
@@ -311,42 +291,6 @@ public class GoogleDriveFileEntry implements FileEntry {
 	@Override
 	public boolean isSupportsSocial() {
 		return false;
-	}
-
-	@Override
-	public void setCompanyId(long companyId) {
-	}
-
-	@Override
-	public void setCreateDate(Date date) {
-	}
-
-	@Override
-	public void setGroupId(long groupId) {
-	}
-
-	@Override
-	public void setModifiedDate(Date date) {
-	}
-
-	@Override
-	public void setPrimaryKeyObj(Serializable primaryKeyObj) {
-	}
-
-	@Override
-	public void setUserId(long userId) {
-	}
-
-	@Override
-	public void setUserName(String userName) {
-	}
-
-	@Override
-	public void setUserUuid(String userUuid) {
-	}
-
-	@Override
-	public void setUuid(String uuid) {
 	}
 
 	@Override

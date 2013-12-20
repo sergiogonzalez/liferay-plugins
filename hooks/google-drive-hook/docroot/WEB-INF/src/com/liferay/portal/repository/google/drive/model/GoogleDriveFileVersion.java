@@ -30,12 +30,8 @@ import java.util.Map;
 /**
  * @author Sergio González
  */
-public class GoogleDriveFileVersion implements FileVersion {
-
-	@Override
-	public Object clone() {
-		return this;
-	}
+public class GoogleDriveFileVersion
+	extends GoogleDriveModel implements FileVersion {
 
 	@Override
 	public Map<String, Serializable> getAttributes() {
@@ -140,11 +136,6 @@ public class GoogleDriveFileVersion implements FileVersion {
 	}
 
 	@Override
-	public Serializable getPrimaryKeyObj() {
-		return null;
-	}
-
-	@Override
 	public long getRepositoryId() {
 		return 0;
 	}
@@ -242,42 +233,6 @@ public class GoogleDriveFileVersion implements FileVersion {
 	@Override
 	public boolean isPending() {
 		return false;
-	}
-
-	@Override
-	public void setCompanyId(long companyId) {
-	}
-
-	@Override
-	public void setCreateDate(Date date) {
-	}
-
-	@Override
-	public void setGroupId(long groupId) {
-	}
-
-	@Override
-	public void setModifiedDate(Date date) {
-	}
-
-	@Override
-	public void setPrimaryKeyObj(Serializable primaryKeyObj) {
-	}
-
-	@Override
-	public void setUserId(long userId) {
-	}
-
-	@Override
-	public void setUserName(String userName) {
-	}
-
-	@Override
-	public void setUserUuid(String userUuid) {
-	}
-
-	@Override
-	public void setUuid(String uuid) {
 	}
 
 	@Override
