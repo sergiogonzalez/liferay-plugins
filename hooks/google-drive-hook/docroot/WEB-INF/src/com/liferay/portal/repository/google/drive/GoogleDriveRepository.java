@@ -14,6 +14,12 @@
 
 package com.liferay.portal.repository.google.drive;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.services.drive.Drive;
+
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.repository.BaseRepositoryImpl;
@@ -24,13 +30,24 @@ import com.liferay.portal.kernel.search.Hits;
 import com.liferay.portal.kernel.search.Query;
 import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.search.SearchException;
+import com.liferay.portal.kernel.servlet.PortalSessionThreadLocal;
+import com.liferay.portal.kernel.util.AutoResetThreadLocal;
 import com.liferay.portal.kernel.util.OrderByComparator;
+import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.kernel.util.TransientValue;
 import com.liferay.portal.model.Lock;
+import com.liferay.portal.model.User;
+import com.liferay.portal.security.auth.PrincipalException;
+import com.liferay.portal.security.auth.PrincipalThreadLocal;
 import com.liferay.portal.service.ServiceContext;
+import com.liferay.portal.service.UserLocalServiceUtil;
+import com.liferay.util.portlet.PortletProps;
 
 import java.io.InputStream;
 
 import java.util.List;
+
+import javax.servlet.http.HttpSession;
 
 /**
  * @author Sergio González
@@ -110,6 +127,30 @@ public class GoogleDriveRepository extends BaseRepositoryImpl {
 	@Override
 	public void deleteFolder(long folderId)
 		throws PortalException, SystemException {
+	}
+
+	public Drive getDrive() throws PortalException {
+		HttpSession httpSession = PortalSessionThreadLocal.getHttpSession();
+
+		Drive drive = null;
+
+		if (httpSession != null) {
+			TransientValue<Drive> transientValue =
+				(TransientValue<Drive>)httpSession.getAttribute(_SESSION_KEY);
+
+			if (transientValue != null) {
+				drive = transientValue.getValue();
+			}
+		}
+		else {
+			drive = _driveThreadLocal.get();
+		}
+
+		if (drive != null) {
+			return drive;
+		}
+
+		return createDrive();
 	}
 
 	@Override
@@ -412,5 +453,66 @@ public class GoogleDriveRepository extends BaseRepositoryImpl {
 
 		return false;
 	}
+
+	protected Drive createDrive() throws PortalException {
+		HttpTransport httpTransport = new NetHttpTransport();
+		JacksonFactory jsonFactory = new JacksonFactory();
+
+		long userId = PrincipalThreadLocal.getUserId();
+
+		try {
+			User user = UserLocalServiceUtil.getUser(userId);
+
+			if (!user.isDefaultUser()) {
+				GoogleCredential googleCredential =
+					new GoogleCredential.Builder().setTransport(httpTransport).
+						setJsonFactory(jsonFactory).
+						setClientSecrets(_CLIENT_ID, _CLIENT_SECRET).build();
+
+				// Need to get the accessToken and refreshToken from expando.
+				// This will be implemented in the upcoming commits.
+
+				String accessToken = StringPool.BLANK;
+				String refreshToken = StringPool.BLANK;
+
+				googleCredential.setAccessToken(accessToken);
+				googleCredential.setRefreshToken(refreshToken);
+
+				Drive drive = new Drive.Builder(
+					httpTransport, jsonFactory, googleCredential).build();
+
+				HttpSession httpSession =
+					PortalSessionThreadLocal.getHttpSession();
+
+				if (httpSession != null) {
+					httpSession.setAttribute(
+						_SESSION_KEY, new TransientValue<Drive>(drive));
+				}
+				else {
+					_driveThreadLocal.set(drive);
+				}
+
+				return drive;
+			}
+			else {
+				throw new PrincipalException();
+			}
+		}
+		catch (Exception e) {
+			throw new PrincipalException(e);
+		}
+	}
+
+	private static final String _CLIENT_ID = PortletProps.get(
+		"google.client.id");
+
+	private static final String _CLIENT_SECRET = PortletProps.get(
+		"google.client.secret");
+
+	private static final String _SESSION_KEY =
+		GoogleDriveRepository.class.getName() + ".drive";
+
+	private AutoResetThreadLocal<Drive> _driveThreadLocal =
+		new AutoResetThreadLocal<Drive>(Drive.class.getName());
 
 }
