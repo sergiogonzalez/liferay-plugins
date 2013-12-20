@@ -15,10 +15,13 @@
 package com.liferay.portal.repository.google.drive;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.client.http.GenericUrl;
+import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.drive.Drive;
+import com.google.api.services.drive.model.Revision;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
@@ -35,6 +38,7 @@ import com.liferay.portal.kernel.util.AutoResetThreadLocal;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.TransientValue;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.Lock;
 import com.liferay.portal.model.User;
 import com.liferay.portal.security.auth.PrincipalException;
@@ -43,6 +47,7 @@ import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.UserLocalServiceUtil;
 import com.liferay.util.portlet.PortletProps;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 import java.util.List;
@@ -127,6 +132,34 @@ public class GoogleDriveRepository extends BaseRepositoryImpl {
 	@Override
 	public void deleteFolder(long folderId)
 		throws PortalException, SystemException {
+	}
+
+	public InputStream getContentStream(String fileId, String revisionId)
+		throws PortalException, SystemException {
+
+		Drive drive = getDrive();
+
+		try {
+			Revision revision =
+				drive.revisions().get(fileId, revisionId).execute();
+
+			String downloadURL = revision.getDownloadUrl();
+
+			if (Validator.isNull(downloadURL)) {
+				return null;
+			}
+
+			HttpResponse response =
+				drive.getRequestFactory().buildGetRequest(
+					new GenericUrl(downloadURL)).execute();
+
+			return response.getContent();
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+
+			return null;
+		}
 	}
 
 	public Drive getDrive() throws PortalException {

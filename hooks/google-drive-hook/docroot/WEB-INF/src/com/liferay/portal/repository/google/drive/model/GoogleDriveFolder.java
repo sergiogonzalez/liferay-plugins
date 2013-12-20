@@ -14,15 +14,26 @@
 
 package com.liferay.portal.repository.google.drive.model;
 
+import com.google.api.client.util.DateTime;
+import com.google.api.services.drive.model.File;
+
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.lar.StagedModelType;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.repository.model.Folder;
+import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.repository.google.drive.GoogleDriveRepository;
 import com.liferay.portal.security.permission.PermissionChecker;
-import com.liferay.portlet.expando.model.ExpandoBridge;
+import com.liferay.portal.service.UserLocalServiceUtil;
+import com.liferay.portlet.documentlibrary.model.DLFileEntry;
+import com.liferay.portlet.documentlibrary.model.DLFolderConstants;
+import com.liferay.portlet.documentlibrary.service.DLAppLocalServiceUtil;
 
 import java.io.Serializable;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -32,24 +43,65 @@ import java.util.Map;
  */
 public class GoogleDriveFolder extends GoogleDriveModel implements Folder {
 
+	public GoogleDriveFolder(
+		GoogleDriveRepository googleDriveRepository, String uuid, long folderId,
+		File file) {
+
+		_googleDriveRepository = googleDriveRepository;
+		_uuid = uuid;
+		_folderId = folderId;
+
+		DateTime createDateTime = file.getCreatedDate();
+
+		_createDate = new Date(createDateTime.getValue());
+
+		DateTime modifiedDateTime = file.getModifiedDate();
+
+		_modifiedDate = new Date(modifiedDateTime.getValue());
+
+		_name = file.getTitle();
+
+		_description = file.getDescription();
+	}
+
 	@Override
 	public boolean containsPermission(
 			PermissionChecker permissionChecker, String actionId)
 		throws PortalException, SystemException {
 
-		return false;
+		return true;
 	}
 
 	@Override
 	public List<Long> getAncestorFolderIds()
 		throws PortalException, SystemException {
 
-		return null;
+		List<Long> folderIds = new ArrayList<Long>();
+
+		Folder folder = this;
+
+		while (!folder.isRoot()) {
+			folder = folder.getParentFolder();
+
+			folderIds.add(folder.getFolderId());
+		}
+
+		return folderIds;
 	}
 
 	@Override
 	public List<Folder> getAncestors() throws PortalException, SystemException {
-		return null;
+		List<Folder> folders = new ArrayList<Folder>();
+
+		Folder folder = this;
+
+		while (!folder.isRoot()) {
+			folder = folder.getParentFolder();
+
+			folders.add(folder);
+		}
+
+		return folders;
 	}
 
 	@Override
@@ -59,107 +111,134 @@ public class GoogleDriveFolder extends GoogleDriveModel implements Folder {
 
 	@Override
 	public long getCompanyId() {
-		return 0;
+		return _googleDriveRepository.getCompanyId();
 	}
 
 	@Override
 	public Date getCreateDate() {
-		return null;
+		return _createDate;
 	}
 
 	@Override
 	public String getDescription() {
-		return null;
-	}
-
-	@Override
-	public ExpandoBridge getExpandoBridge() {
-		return null;
+		return _description;
 	}
 
 	@Override
 	public long getFolderId() {
-		return 0;
+		return _folderId;
 	}
 
 	@Override
 	public long getGroupId() {
-		return 0;
+		return _googleDriveRepository.getGroupId();
 	}
 
 	@Override
 	public Date getLastPostDate() {
-		return null;
+		return getModifiedDate();
 	}
 
 	@Override
 	public Object getModel() {
-		return null;
+		return this;
 	}
 
 	@Override
 	public Class<?> getModelClass() {
-		return null;
-	}
-
-	@Override
-	public String getModelClassName() {
-		return null;
+		return DLFileEntry.class;
 	}
 
 	@Override
 	public Date getModifiedDate() {
-		return null;
+		return _modifiedDate;
 	}
 
 	@Override
 	public String getName() {
-		return null;
+		if (isRoot()) {
+			try {
+				Folder folder = DLAppLocalServiceUtil.getMountFolder(
+					getRepositoryId());
+
+				return folder.getName();
+			}
+			catch (Exception e) {
+				_log.error(e, e);
+			}
+		}
+
+		return _name;
 	}
 
 	@Override
 	public Folder getParentFolder() throws PortalException, SystemException {
-		return null;
-	}
+		Folder parentFolder = null;
 
-	@Override
-	public long getParentFolderId() {
-		return 0;
+		try {
+			parentFolder = super.getParentFolder();
+
+			if (parentFolder != null) {
+				return parentFolder;
+			}
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+		}
+
+		if (getParentFolderId() == DLFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
+			return null;
+		}
+
+		parentFolder = DLAppLocalServiceUtil.getFolder(getParentFolderId());
+
+		setParentFolder(parentFolder);
+
+		return parentFolder;
 	}
 
 	@Override
 	public long getPrimaryKey() {
-		return 0;
+		return _folderId;
 	}
 
 	@Override
 	public long getRepositoryId() {
-		return 0;
+		return _googleDriveRepository.getRepositoryId();
 	}
 
 	@Override
 	public StagedModelType getStagedModelType() {
-		return null;
+		return new StagedModelType(Folder.class);
 	}
 
 	@Override
 	public long getUserId() {
-		return 0;
+		long userId = 0;
+
+		try {
+			userId = UserLocalServiceUtil.getDefaultUser(
+				getCompanyId()).getUserId();
+		}
+		catch (Exception e) {
+		}
+
+		return userId;
 	}
 
 	@Override
 	public String getUserName() {
-		return null;
+		return StringPool.BLANK;
 	}
 
 	@Override
 	public String getUserUuid() throws SystemException {
-		return null;
+		return StringPool.BLANK;
 	}
 
 	@Override
 	public String getUuid() {
-		return null;
+		return _uuid;
 	}
 
 	@Override
@@ -194,7 +273,12 @@ public class GoogleDriveFolder extends GoogleDriveModel implements Folder {
 
 	@Override
 	public boolean isRoot() {
-		return false;
+		if (getParentFolderId() == DLFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 
 	@Override
@@ -229,12 +313,22 @@ public class GoogleDriveFolder extends GoogleDriveModel implements Folder {
 
 	@Override
 	public Folder toEscapedModel() {
-		return null;
+		return this;
 	}
 
 	@Override
 	public Folder toUnescapedModel() {
-		return null;
+		return this;
 	}
+
+	private static Log _log = LogFactoryUtil.getLog(GoogleDriveFolder.class);
+
+	private Date _createDate;
+	private String _description;
+	private long _folderId;
+	private GoogleDriveRepository _googleDriveRepository;
+	private Date _modifiedDate;
+	private String _name;
+	private String _uuid;
 
 }
