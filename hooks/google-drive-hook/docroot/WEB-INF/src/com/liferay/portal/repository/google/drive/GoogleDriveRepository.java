@@ -75,6 +75,7 @@ import com.liferay.portlet.documentlibrary.NoSuchFileEntryException;
 import com.liferay.portlet.documentlibrary.model.DLFileEntryConstants;
 import com.liferay.portlet.documentlibrary.model.DLFolderConstants;
 import com.liferay.portlet.documentlibrary.service.DLAppLocalServiceUtil;
+import com.liferay.portlet.expando.model.ExpandoBridge;
 import com.liferay.util.portlet.PortletProps;
 
 import java.io.IOException;
@@ -864,14 +865,15 @@ public class GoogleDriveRepository extends BaseRepositoryImpl {
 						setJsonFactory(jsonFactory).
 						setClientSecrets(_CLIENT_ID, _CLIENT_SECRET).build();
 
-				// Need to get the accessToken and refreshToken from expando.
-				// This will be implemented in the upcoming commits.
+				ExpandoBridge expandoBridge = user.getExpandoBridge();
 
-				String accessToken = StringPool.BLANK;
-				String refreshToken = StringPool.BLANK;
+				String googleAccessToken = GetterUtil.getString(
+					expandoBridge.getAttribute("googleAccessToken", false));
+				String googleRefreshToken = GetterUtil.getString(
+					expandoBridge.getAttribute("googleRefreshToken", false));
 
-				googleCredential.setAccessToken(accessToken);
-				googleCredential.setRefreshToken(refreshToken);
+				googleCredential.setAccessToken(googleAccessToken);
+				googleCredential.setRefreshToken(googleRefreshToken);
 
 				Drive drive = new Drive.Builder(
 					httpTransport, jsonFactory, googleCredential).build();
