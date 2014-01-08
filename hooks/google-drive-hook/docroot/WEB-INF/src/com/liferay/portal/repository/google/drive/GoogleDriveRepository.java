@@ -14,6 +14,7 @@
 
 package com.liferay.portal.repository.google.drive;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.GenericUrl;
@@ -49,6 +50,7 @@ import com.liferay.portal.kernel.util.AutoResetThreadLocal;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
+import com.liferay.portal.kernel.util.PrefsPropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
@@ -76,10 +78,10 @@ import com.liferay.portlet.documentlibrary.model.DLFileEntryConstants;
 import com.liferay.portlet.documentlibrary.model.DLFolderConstants;
 import com.liferay.portlet.documentlibrary.service.DLAppLocalServiceUtil;
 import com.liferay.portlet.expando.model.ExpandoBridge;
-import com.liferay.util.portlet.PortletProps;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -236,7 +238,7 @@ public class GoogleDriveRepository extends BaseRepositoryImpl {
 		}
 	}
 
-	public Drive getDrive() throws PortalException {
+	public Drive getDrive() throws PortalException, SystemException {
 		HttpSession httpSession = PortalSessionThreadLocal.getHttpSession();
 
 		Drive drive = null;
@@ -850,7 +852,7 @@ public class GoogleDriveRepository extends BaseRepositoryImpl {
 		}
 	}
 
-	protected Drive createDrive() throws PortalException {
+	protected Drive createDrive() throws PortalException, SystemException {
 		HttpTransport httpTransport = new NetHttpTransport();
 		JacksonFactory jsonFactory = new JacksonFactory();
 
@@ -860,10 +862,40 @@ public class GoogleDriveRepository extends BaseRepositoryImpl {
 			User user = UserLocalServiceUtil.getUser(userId);
 
 			if (!user.isDefaultUser()) {
-				GoogleCredential googleCredential =
-					new GoogleCredential.Builder().setTransport(httpTransport).
-						setJsonFactory(jsonFactory).
-						setClientSecrets(_CLIENT_ID, _CLIENT_SECRET).build();
+				String googleClientId = PrefsPropsUtil.getString(
+					user.getCompanyId(), "google.client.id");
+				String googleClientSecret = PrefsPropsUtil.getString(
+					user.getCompanyId(), "google.client.secret");
+
+				GoogleCredential googleCredential = null;
+
+				if (Validator.isNull(googleClientId) ||
+					Validator.isNull(googleClientSecret)) {
+
+					InputStream is =
+						GoogleDriveRepository.class.getResourceAsStream(
+							_CLIENT_SECRETS_LOCATION);
+
+					try {
+						GoogleClientSecrets clientSecrets =
+							GoogleClientSecrets.load(
+								jsonFactory, new InputStreamReader(is));
+
+						googleCredential = new GoogleCredential.Builder().
+							setTransport(httpTransport).
+							setJsonFactory(jsonFactory).
+							setClientSecrets(clientSecrets).build();
+					}
+					catch (IOException ioe) {
+						throw new SystemException(ioe);
+					}
+				}
+				else {
+					googleCredential = new GoogleCredential.Builder().
+						setTransport(httpTransport).setJsonFactory(jsonFactory).
+						setClientSecrets(googleClientId, googleClientSecret).
+						build();
+				}
 
 				ExpandoBridge expandoBridge = user.getExpandoBridge();
 
@@ -1201,11 +1233,8 @@ public class GoogleDriveRepository extends BaseRepositoryImpl {
 		}
 	}
 
-	private static final String _CLIENT_ID = PortletProps.get(
-		"google.client.id");
-
-	private static final String _CLIENT_SECRET = PortletProps.get(
-		"google.client.secret");
+	private static final String _CLIENT_SECRETS_LOCATION =
+		"client_secrets.json";
 
 	private static final String _FOLDER_MIME_TYPE =
 		"application/vnd.google-apps.folder";
