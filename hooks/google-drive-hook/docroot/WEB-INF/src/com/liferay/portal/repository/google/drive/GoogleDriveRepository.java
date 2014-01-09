@@ -534,8 +534,8 @@ public class GoogleDriveRepository extends BaseRepositoryImpl {
 					"'" + fileId + "' in parents and trashed = false").execute();
 			}
 			else {
-				fileList = drive.files().list().setQ(
-					"'root' in parents and trashed = false").execute();
+				fileList =
+					drive.files().list().setQ("trashed = false").execute();
 			}
 
 			List<File> files = fileList.getItems();
