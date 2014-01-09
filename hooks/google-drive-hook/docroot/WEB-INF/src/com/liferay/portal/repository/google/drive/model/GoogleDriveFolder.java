@@ -23,6 +23,7 @@ import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.repository.model.Folder;
+import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.repository.google.drive.GoogleDriveRepository;
 import com.liferay.portal.security.permission.PermissionChecker;
@@ -59,9 +60,9 @@ public class GoogleDriveFolder extends GoogleDriveModel implements Folder {
 
 		_modifiedDate = new Date(modifiedDateTime.getValue());
 
-		_name = file.getTitle();
+		_name = GetterUtil.getString(file.getTitle());
 
-		_description = file.getDescription();
+		_description = GetterUtil.getString(file.getDescription());
 	}
 
 	@Override

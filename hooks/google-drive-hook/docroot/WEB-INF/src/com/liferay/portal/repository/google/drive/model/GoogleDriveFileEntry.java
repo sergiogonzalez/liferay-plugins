@@ -74,9 +74,9 @@ public class GoogleDriveFileEntry
 
 		_modifiedDate = new Date(modifiedDateTime.getValue());
 
-		_title = file.getTitle();
+		_title = GetterUtil.getString(file.getTitle());
 
-		_description = file.getDescription();
+		_description = GetterUtil.getString(file.getDescription());
 
 		_extension = file.getFileExtension();
 
