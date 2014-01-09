@@ -666,7 +666,7 @@ public class GoogleDriveRepository extends BaseRepositoryImpl {
 
 	@Override
 	public void initRepository() throws PortalException, SystemException {
-		/* TODO */
+		getDrive();
 	}
 
 	@Override
@@ -727,9 +727,15 @@ public class GoogleDriveRepository extends BaseRepositoryImpl {
 			long fileEntryId, String version, ServiceContext serviceContext)
 		throws PortalException, SystemException {
 
-		/* TODO */
+		FileEntry fileEntry = DLAppLocalServiceUtil.getFileEntry(fileEntryId);
 
-		throw new UnsupportedOperationException();
+		FileVersion fileVersion = fileEntry.getFileVersion(version);
+
+		updateFileEntry(
+			fileEntryId, fileVersion.getTitle(), fileVersion.getMimeType(),
+			fileVersion.getTitle(), fileVersion.getDescription(),
+			fileVersion.getChangeLog(), false,
+			fileVersion.getContentStream(false), fileVersion.getSize(), null);
 	}
 
 	@Override
