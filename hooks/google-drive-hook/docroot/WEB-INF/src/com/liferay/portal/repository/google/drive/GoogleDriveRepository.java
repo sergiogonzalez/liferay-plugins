@@ -1053,6 +1053,14 @@ public class GoogleDriveRepository extends BaseRepositoryImpl {
 	protected FileEntry toFileEntry(File file)
 		throws PortalException, SystemException {
 
+		Map<String, FileEntry> toFileEntryCache = _toFileEntryCache.get();
+
+		FileEntry fileEntry = toFileEntryCache.get(file.getId());
+
+		if (fileEntry != null) {
+			return fileEntry;
+		}
+
 		Object[] ids = getRepositoryEntryIds(file.getId());
 
 		long fileEntryId = (Long)ids[0];
@@ -1114,6 +1122,8 @@ public class GoogleDriveRepository extends BaseRepositoryImpl {
 
 		boolean updateAssetEnabled = _updateAssetEnabledThreadLocal.get();
 
+		toFileEntryCache.put(file.getId(), googleDriveFileEntry);
+
 		if (!updateAssetEnabled) {
 			return googleDriveFileEntry;
 		}
@@ -1161,6 +1171,14 @@ public class GoogleDriveRepository extends BaseRepositoryImpl {
 	protected File toFileObject(long entryId)
 		throws PortalException, SystemException {
 
+		Map<Long, File> toFileObjectEntryCache = _toFileObjectEntryCache.get();
+
+		File file = toFileObjectEntryCache.get(entryId);
+
+		if (file != null) {
+			return file;
+		}
+
 		RepositoryEntry repositoryEntry = RepositoryEntryUtil.fetchByPrimaryKey(
 			entryId);
 
@@ -1171,7 +1189,11 @@ public class GoogleDriveRepository extends BaseRepositoryImpl {
 		Drive drive = getDrive();
 
 		try {
-			return drive.files().get(repositoryEntry.getMappedId()).execute();
+			file = drive.files().get(repositoryEntry.getMappedId()).execute();
+
+			toFileObjectEntryCache.put(entryId, file);
+
+			return file;
 		}
 		catch (IOException ioe) {
 			ioe.printStackTrace();
@@ -1286,6 +1308,14 @@ public class GoogleDriveRepository extends BaseRepositoryImpl {
 		new AutoResetThreadLocal<Map<Long, Folder>>(
 			GoogleDriveRepository.class + "._folderCache",
 			new HashMap<Long, Folder>());
+	private static ThreadLocal<Map<String, FileEntry>> _toFileEntryCache =
+		new AutoResetThreadLocal<Map<String, FileEntry>>(
+			GoogleDriveRepository.class + "._toFileEntryCache",
+			new HashMap<String, FileEntry>());
+	private static ThreadLocal<Map<Long, File>> _toFileObjectEntryCache =
+		new AutoResetThreadLocal<Map<Long, File>>(
+			GoogleDriveRepository.class + "._toFileObjectEntryCache",
+			new HashMap<Long, File>());
 
 	private AutoResetThreadLocal<Drive> _driveThreadLocal =
 		new AutoResetThreadLocal<Drive>(Drive.class.getName());
