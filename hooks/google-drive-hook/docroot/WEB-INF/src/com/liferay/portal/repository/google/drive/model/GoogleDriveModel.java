@@ -17,12 +17,15 @@ package com.liferay.portal.repository.google.drive.model;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.repository.model.Folder;
+import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portlet.expando.model.ExpandoBridge;
 import com.liferay.portlet.expando.util.ExpandoBridgeFactoryUtil;
 
 import java.io.Serializable;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Sergio González
@@ -32,6 +35,36 @@ public abstract class GoogleDriveModel {
 	@Override
 	public Object clone() {
 		return this;
+	}
+
+	public boolean containsPermission(String role, String actionId) {
+		if (_unsupportedActionKeys.contains(actionId)) {
+			return false;
+		}
+
+		if (ActionKeys.ACCESS.equals(actionId)) {
+			return true;
+		}
+		else if (ActionKeys.ADD_DOCUMENT.equals(actionId)) {
+			return role.equals("owner") || role.equals("writer");
+		}
+		else if (ActionKeys.ADD_FOLDER.equals(actionId)) {
+			return role.equals("owner") || role.equals("writer");
+		}
+		else if (ActionKeys.ADD_SUBFOLDER.equals(actionId)) {
+			return role.equals("owner") || role.equals("writer");
+		}
+		else if (ActionKeys.DELETE.equals(actionId)) {
+			return role.equals("owner");
+		}
+		else if (ActionKeys.VIEW.equals(actionId)) {
+			return true;
+		}
+		else if (ActionKeys.UPDATE.equals(actionId)) {
+			return role.equals("owner") || role.equals("writer");
+		}
+
+		return false;
 	}
 
 	public abstract long getCompanyId();
@@ -99,7 +132,17 @@ public abstract class GoogleDriveModel {
 		return _parentFolder;
 	}
 
+	private static Set<String> _unsupportedActionKeys = new HashSet<String>();
+
 	private Folder _parentFolder;
 	private long _parentFolderId;
+
+	static {
+		_unsupportedActionKeys.add(ActionKeys.ADD_DISCUSSION);
+		_unsupportedActionKeys.add(ActionKeys.ADD_SHORTCUT);
+		_unsupportedActionKeys.add(ActionKeys.DELETE_DISCUSSION);
+		_unsupportedActionKeys.add(ActionKeys.PERMISSIONS);
+		_unsupportedActionKeys.add(ActionKeys.UPDATE_DISCUSSION);
+	}
 
 }

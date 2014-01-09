@@ -16,6 +16,7 @@ package com.liferay.portal.repository.google.drive.model;
 
 import com.google.api.client.util.DateTime;
 import com.google.api.services.drive.model.File;
+import com.google.api.services.drive.model.Permission;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
@@ -63,6 +64,8 @@ public class GoogleDriveFolder extends GoogleDriveModel implements Folder {
 		_name = GetterUtil.getString(file.getTitle());
 
 		_description = GetterUtil.getString(file.getDescription());
+
+		_permission = file.getUserPermission();
 	}
 
 	@Override
@@ -70,7 +73,7 @@ public class GoogleDriveFolder extends GoogleDriveModel implements Folder {
 			PermissionChecker permissionChecker, String actionId)
 		throws PortalException, SystemException {
 
-		return true;
+		return containsPermission(_permission.getRole(), actionId);
 	}
 
 	@Override
@@ -330,6 +333,7 @@ public class GoogleDriveFolder extends GoogleDriveModel implements Folder {
 	private GoogleDriveRepository _googleDriveRepository;
 	private Date _modifiedDate;
 	private String _name;
+	private Permission _permission;
 	private String _uuid;
 
 }

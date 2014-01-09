@@ -16,6 +16,7 @@ package com.liferay.portal.repository.google.drive.model;
 
 import com.google.api.client.util.DateTime;
 import com.google.api.services.drive.model.File;
+import com.google.api.services.drive.model.Permission;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
@@ -89,6 +90,8 @@ public class GoogleDriveFileEntry
 		_fileId = file.getId();
 
 		_revisionId = getVersionLabel(version).getRevisionId();
+
+		_permission = file.getUserPermission();
 	}
 
 	@Override
@@ -96,7 +99,7 @@ public class GoogleDriveFileEntry
 			PermissionChecker permissionChecker, String actionId)
 		throws PortalException, SystemException {
 
-		return true;
+		return containsPermission(_permission.getRole(), actionId);
 	}
 
 	@Override
@@ -480,6 +483,7 @@ public class GoogleDriveFileEntry
 	private List<GoogleDriveVersionLabel> _googleDriveVersionLabels;
 	private String _mimeType;
 	private Date _modifiedDate;
+	private Permission _permission;
 	private String _revisionId;
 	private long _size;
 	private String _title;
