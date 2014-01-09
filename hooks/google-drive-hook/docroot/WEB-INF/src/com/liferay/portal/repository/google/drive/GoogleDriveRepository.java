@@ -776,9 +776,32 @@ public class GoogleDriveRepository extends BaseRepositoryImpl {
 			ServiceContext serviceContext)
 		throws PortalException, SystemException {
 
-		/* TODO */
+		Drive drive = getDrive();
 
-		return null;
+		File file = toFileObject(fileEntryId);
+
+		file.setTitle(title);
+		file.setDescription(description);
+
+		try {
+			if (is != null) {
+				InputStreamContent inputStreamContent = new InputStreamContent(
+					mimeType, is);
+
+				file = drive.files().update(
+					file.getId(), file, inputStreamContent).execute();
+			}
+			else {
+				file = drive.files().update(file.getId(), file).execute();
+			}
+
+			return toFileEntry(file);
+		}
+		catch (IOException ioe) {
+			ioe.printStackTrace();
+
+			throw new PortalException(ioe);
+		}
 	}
 
 	@Override
@@ -787,9 +810,23 @@ public class GoogleDriveRepository extends BaseRepositoryImpl {
 			ServiceContext serviceContext)
 		throws PortalException, SystemException {
 
-		/* TODO */
+		Drive drive = getDrive();
 
-		return null;
+		File file = toFileObject(folderId);
+
+		file.setTitle(title);
+		file.setDescription(description);
+
+		try {
+			file = drive.files().update(file.getId(), file).execute();
+
+			return toFolder(file);
+		}
+		catch (IOException ioe) {
+			ioe.printStackTrace();
+
+			throw new PortalException(ioe);
+		}
 	}
 
 	@Override
