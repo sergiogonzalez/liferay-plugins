@@ -17,17 +17,44 @@ package com.liferay.repository.external;
 import java.util.Date;
 
 /**
+ * An external repository model object describes a folder, file or version
+ * contained in an external repository.
+ *
+ * All data returned by implementations is in native repository format.
+ *
  * @author Iván Zaera
  * @author Sergio González
  */
 public interface ExtRepositoryModel {
 
+	/**
+	 * Gets the creation date of this ext repository model.
+	 *
+	 * @return the creation date of this ext repository model
+	 */
 	public Date getCreateDate();
 
+	/**
+	 * Gets the primary key of this model in the ext repository.
+	 *
+	 * @return a primary key in ext repository format
+	 */
 	public String getExtRepositoryModelKey();
 
+	/**
+	 * Gets the owner of this ext repository model. The returned user identifier
+	 * is converted from native to Liferay format by means of the method
+	 * {@link ExtRepository#getLiferayLogin(String)}.
+	 *
+	 * @return a user identifier in the native ext repository format
+	 */
 	public String getOwner();
 
+	/**
+	 * Get the size of this ext repository model in bytes.
+	 *
+	 * @return the size of this ext repository model in bytes
+	 */
 	public long getSize();
 
 }
