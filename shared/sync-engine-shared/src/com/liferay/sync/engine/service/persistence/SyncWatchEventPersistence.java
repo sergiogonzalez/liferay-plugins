@@ -33,23 +33,23 @@ public class SyncWatchEventPersistence
 		super(SyncWatchEvent.class);
 	}
 
-	public SyncWatchEvent fetchSyncWatchEvent(
-			String filePathName, String kindName, long timestamp)
+	public SyncWatchEvent fetchByE_F_T(
+			String eventType, String filePathName, long timestamp)
 		throws SQLException {
 
 		QueryBuilder<SyncWatchEvent, Long> queryBuilder = queryBuilder();
 
-		Where where = queryBuilder.where();
+		Where<SyncWatchEvent, Long> where = queryBuilder.where();
+
+		where.eq("eventType", eventType);
+
+		where.and();
 
 		where.eq("filePathName", filePathName);
 
 		where.and();
 
-		where.eq("kindName", kindName);
-
-		where.and();
-
-		where.le("timestamp", timestamp);
+		where.between("timestamp", timestamp - 1000, timestamp + 1000);
 
 		List<SyncWatchEvent> syncWatchEvents = query(queryBuilder.prepare());
 

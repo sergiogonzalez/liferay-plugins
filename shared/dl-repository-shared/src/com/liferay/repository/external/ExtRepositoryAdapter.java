@@ -223,6 +223,11 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 
 		_extRepository.deleteExtRepositoryObject(
 			ExtRepositoryObjectType.FILE, extRepositoryFileEntryKey);
+
+		ExtRepositoryAdapterCache extRepositoryAdapterCache =
+			ExtRepositoryAdapterCache.getInstance();
+
+		extRepositoryAdapterCache.remove(extRepositoryFileEntryKey);
 	}
 
 	@Override
@@ -233,6 +238,11 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 
 		_extRepository.deleteExtRepositoryObject(
 			ExtRepositoryObjectType.FOLDER, extRepositoryFolderKey);
+
+		ExtRepositoryAdapterCache extRepositoryAdapterCache =
+			ExtRepositoryAdapterCache.getInstance();
+
+		extRepositoryAdapterCache.remove(extRepositoryFolderKey);
 	}
 
 	public String getAuthType() {
@@ -1220,16 +1230,31 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 			ExtRepositoryFileVersion extRepositoryFileVersion)
 		throws SystemException {
 
-		Object[] repositoryEntryIds = getRepositoryEntryIds(
-			extRepositoryFileVersion.getExtRepositoryModelKey());
+		ExtRepositoryAdapterCache extRepositoryAdapterCache =
+			ExtRepositoryAdapterCache.getInstance();
 
-		long extRepositoryObjectId = (Long)repositoryEntryIds[0];
+		String extRepositoryModelKey =
+			extRepositoryFileVersion.getExtRepositoryModelKey();
 
-		String uuid = (String)repositoryEntryIds[1];
+		ExtRepositoryFileVersionAdapter extRepositoryVersionAdapter =
+			extRepositoryAdapterCache.get(extRepositoryModelKey);
 
-		return new ExtRepositoryFileVersionAdapter(
-			this, extRepositoryObjectId, uuid, extRepositoryFileEntryAdapter,
-			extRepositoryFileVersion);
+		if (extRepositoryVersionAdapter == null) {
+			Object[] repositoryEntryIds = getRepositoryEntryIds(
+				extRepositoryModelKey);
+
+			long extRepositoryObjectId = (Long)repositoryEntryIds[0];
+
+			String uuid = (String)repositoryEntryIds[1];
+
+			extRepositoryVersionAdapter = new ExtRepositoryFileVersionAdapter(
+				this, extRepositoryObjectId, uuid,
+				extRepositoryFileEntryAdapter, extRepositoryFileVersion);
+
+			extRepositoryAdapterCache.put(extRepositoryVersionAdapter);
+		}
+
+		return extRepositoryVersionAdapter;
 	}
 
 	private List<ExtRepositoryFileVersionAdapter>
@@ -1263,16 +1288,23 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 				ExtRepositoryObject extRepositoryObject)
 		throws PortalException, SystemException {
 
-		Object[] repositoryEntryIds = getRepositoryEntryIds(
-			extRepositoryObject.getExtRepositoryModelKey());
+		ExtRepositoryAdapterCache extRepositoryAdapterCache =
+			ExtRepositoryAdapterCache.getInstance();
 
-		long extRepositoryObjectId = (Long)repositoryEntryIds[0];
+		String extRepositoryModelKey =
+			extRepositoryObject.getExtRepositoryModelKey();
 
-		String uuid = (String)repositoryEntryIds[1];
-
-		ExtRepositoryObjectAdapter<?> extRepositoryObjectAdapter = null;
+		ExtRepositoryObjectAdapter<?> extRepositoryObjectAdapter =
+			extRepositoryAdapterCache.get(extRepositoryModelKey);
 
 		if (extRepositoryObjectAdapter == null) {
+			Object[] repositoryEntryIds = getRepositoryEntryIds(
+				extRepositoryModelKey);
+
+			long extRepositoryObjectId = (Long)repositoryEntryIds[0];
+
+			String uuid = (String)repositoryEntryIds[1];
+
 			if (extRepositoryObject instanceof ExtRepositoryFolder) {
 				ExtRepositoryFolder extRepositoryFolder =
 					(ExtRepositoryFolder)extRepositoryObject;
@@ -1290,6 +1322,8 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 				_forceGetVersions(
 					(ExtRepositoryFileEntryAdapter)extRepositoryObjectAdapter);
 			}
+
+			extRepositoryAdapterCache.put(extRepositoryObjectAdapter);
 		}
 
 		if (extRepositoryObjectAdapterType ==
