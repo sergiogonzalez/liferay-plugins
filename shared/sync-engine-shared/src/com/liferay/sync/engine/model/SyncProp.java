@@ -23,7 +23,7 @@ import com.liferay.sync.engine.service.persistence.BasePersistenceImpl;
  * @author Shinn Lok
  */
 @DatabaseTable(daoClass = BasePersistenceImpl.class, tableName = "SyncProp")
-public class SyncProp {
+public class SyncProp extends BaseModel {
 
 	public String getKey() {
 		return key;

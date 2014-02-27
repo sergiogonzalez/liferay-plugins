@@ -58,7 +58,8 @@ public class WatcherTest extends BaseTestCase {
 		super.setUp();
 
 		_syncSite = SyncSiteService.addSyncSite(
-			filePathName + "/test-site", 10184, syncAccount.getSyncAccountId());
+			10158, filePathName + "/test-site", 10184,
+			syncAccount.getSyncAccountId());
 
 		ScheduledExecutorService scheduledExecutorService =
 			Executors.newSingleThreadScheduledExecutor();
@@ -101,7 +102,7 @@ public class WatcherTest extends BaseTestCase {
 
 	@Test
 	public void testRunAddFile() throws Exception {
-		setMockPostResponse("dependencies/watcher_test_add_file.json");
+		setPostResponse("dependencies/watcher_test_add_file.json");
 
 		Path filePath = Paths.get(_syncSite.getFilePathName() + "/test.txt");
 
@@ -117,11 +118,32 @@ public class WatcherTest extends BaseTestCase {
 
 	@Test
 	public void testRunAddIgnoredFile() throws Exception {
-		setMockPostResponse("dependencies/watcher_test_add_file.json");
+		setPostResponse("dependencies/watcher_test_add_file.json");
 
-		Path filePath = Paths.get(_syncSite.getFilePathName() + "/.DS_Store");
+		if (OSDetector.isWindows()) {
+			Path hiddenFilePath = Paths.get(
+				_syncSite.getFilePathName() + "/hidden_file.txt");
 
-		Files.createFile(filePath);
+			Files.createFile(hiddenFilePath);
+
+			Files.setAttribute(hiddenFilePath, "dos:hidden", true);
+
+			Path shortcutFilePath = Paths.get(
+				_syncSite.getFilePathName() + "/test.txt - Shortcut.lnk");
+
+			Files.createFile(shortcutFilePath);
+		}
+		else {
+			Path ignoredFilePath = Paths.get(
+				_syncSite.getFilePathName() + "/.DS_Store");
+
+			Files.createFile(ignoredFilePath);
+
+			Path symbolicLinkFilePath = Paths.get(
+				_syncSite.getFilePathName() + "/symbolic_link");
+
+			Files.createSymbolicLink(symbolicLinkFilePath, ignoredFilePath);
+		}
 
 		sleep();
 
@@ -133,7 +155,7 @@ public class WatcherTest extends BaseTestCase {
 
 	@Test
 	public void testRunDeleteFile() throws Exception {
-		setMockPostResponse("dependencies/watcher_test_delete_file.json");
+		setPostResponse("dependencies/watcher_test_delete_file.json");
 
 		Path filePath = Paths.get(_syncSite.getFilePathName() + "/test.txt");
 
@@ -157,7 +179,7 @@ public class WatcherTest extends BaseTestCase {
 
 	@Test
 	public void testRunModifyFile() throws Exception {
-		setMockPostResponse("dependencies/watcher_test_modify_file.json");
+		setPostResponse("dependencies/watcher_test_modify_file.json");
 
 		Path filePath = Paths.get(_syncSite.getFilePathName() + "/test.txt");
 
@@ -190,23 +212,22 @@ public class WatcherTest extends BaseTestCase {
 
 	@Test
 	public void testRunMoveFile() throws Exception {
-		setMockPostResponse("dependencies/watcher_test_move_file.json");
+		setPostResponse("dependencies/watcher_test_move_file.json");
 
 		Path sourceFilePath = Paths.get(
 			_syncSite.getFilePathName() + "/test.txt");
 
 		Files.createFile(sourceFilePath);
 
-		Path destinationFilePath = Paths.get(
-			_syncSite.getFilePathName() + "/test");
+		Path targetFilePath = Paths.get(_syncSite.getFilePathName() + "/test");
 
-		Files.createDirectory(destinationFilePath);
+		Files.createDirectory(targetFilePath);
 
 		sleep();
 
 		Files.move(
 			sourceFilePath,
-			destinationFilePath.resolve(sourceFilePath.getFileName()));
+			targetFilePath.resolve(sourceFilePath.getFileName()));
 
 		sleep();
 
@@ -216,13 +237,13 @@ public class WatcherTest extends BaseTestCase {
 		Assert.assertEquals(4, _syncFiles.size());
 		Assert.assertNotNull(
 			SyncFileService.fetchSyncFile(
-				FilePathNameUtil.getFilePathName(destinationFilePath),
+				FilePathNameUtil.getFilePathName(targetFilePath),
 				syncAccount.getSyncAccountId()));
 	}
 
 	@Test
 	public void testRunRenameFile() throws Exception {
-		setMockPostResponse("dependencies/watcher_test_rename_file.json");
+		setPostResponse("dependencies/watcher_test_rename_file.json");
 
 		Path sourceFilePath = Paths.get(
 			_syncSite.getFilePathName() + "/test.txt");
@@ -231,10 +252,10 @@ public class WatcherTest extends BaseTestCase {
 
 		sleep();
 
-		Path destinationFilePath = Paths.get(
+		Path targetFilePath = Paths.get(
 			_syncSite.getFilePathName() + "/test2.txt");
 
-		Files.move(sourceFilePath, destinationFilePath);
+		Files.move(sourceFilePath, targetFilePath);
 
 		sleep();
 
@@ -244,13 +265,13 @@ public class WatcherTest extends BaseTestCase {
 		Assert.assertEquals(3, _syncFiles.size());
 		Assert.assertNotNull(
 			SyncFileService.fetchSyncFile(
-				FilePathNameUtil.getFilePathName(destinationFilePath),
+				FilePathNameUtil.getFilePathName(targetFilePath),
 				syncAccount.getSyncAccountId()));
 	}
 
 	protected void sleep() throws InterruptedException {
 		if (OSDetector.isApple()) {
-			Thread.sleep(12000);
+			Thread.sleep(3000);
 		}
 		else {
 			Thread.sleep(1000);

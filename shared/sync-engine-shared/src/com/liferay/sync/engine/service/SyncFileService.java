@@ -22,6 +22,7 @@ import com.liferay.sync.engine.documentlibrary.event.MoveFolderEvent;
 import com.liferay.sync.engine.documentlibrary.event.MoveFolderToTrashEvent;
 import com.liferay.sync.engine.documentlibrary.event.UpdateFileEntryEvent;
 import com.liferay.sync.engine.documentlibrary.event.UpdateFolderEvent;
+import com.liferay.sync.engine.model.ModelListener;
 import com.liferay.sync.engine.model.SyncFile;
 import com.liferay.sync.engine.service.persistence.SyncFilePersistence;
 import com.liferay.sync.engine.util.FilePathNameUtil;
@@ -374,6 +375,12 @@ public class SyncFileService {
 		return syncFile;
 	}
 
+	public static void registerModelListener(
+		ModelListener<SyncFile> modelListener) {
+
+		_syncFilePersistence.registerModelListener(modelListener);
+	}
+
 	public static SyncFile update(SyncFile syncFile) {
 		try {
 			_syncFilePersistence.createOrUpdate(syncFile);
@@ -395,7 +402,8 @@ public class SyncFileService {
 
 		// Local sync file
 
-		String changeLog = String.valueOf(syncFile.getVersion() + .1);
+		String changeLog = String.valueOf(
+			Double.valueOf(syncFile.getVersion()) + .1);
 		String checksum = FileUtil.getChecksum(filePath);
 		String name = String.valueOf(filePath.getFileName());
 

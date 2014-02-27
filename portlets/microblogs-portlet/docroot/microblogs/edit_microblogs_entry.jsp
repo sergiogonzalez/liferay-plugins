@@ -225,7 +225,7 @@ if (comment) {
 
 	var MAP_USERS = {};
 
-	var REGEX_USER_NAME = /@[^\s]+$/;
+	var REGEX_USER_NAME = /@[^\s]+/;
 
 	var TPL_SEARCH_RESULTS = '<div class="microblogs-autocomplete">' +
 		'<div class="thumbnail">' +
@@ -391,9 +391,11 @@ if (comment) {
 
 			var contentInputHeight = contentInput.height();
 
-			autocomplete.height(contentInputHeight);
+			if (contentInputHeight > 45) {
+				autocomplete.height(contentInputHeight);
 
-			highlighterContent.height(contentInputHeight);
+				highlighterContent.height(contentInputHeight);
+			}
 		};
 
 		var updateContentTextbox = function(event) {

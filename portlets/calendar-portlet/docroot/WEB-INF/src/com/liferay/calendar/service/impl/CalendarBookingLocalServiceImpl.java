@@ -343,10 +343,16 @@ public class CalendarBookingLocalServiceImpl
 			recurrenceObj.addExceptionDate(startTimeJCalendar);
 		}
 
-		calendarBooking.setRecurrence(
-			RecurrenceSerializer.serialize(recurrenceObj));
+		String recurrence = RecurrenceSerializer.serialize(recurrenceObj);
 
-		calendarBookingPersistence.update(calendarBooking);
+		List<CalendarBooking> childCalendarBookings = getChildCalendarBookings(
+			calendarBooking.getCalendarBookingId());
+
+		for (CalendarBooking childCalendarBooking : childCalendarBookings) {
+			childCalendarBooking.setRecurrence(recurrence);
+
+			calendarBookingPersistence.update(childCalendarBooking);
+		}
 	}
 
 	@Override
@@ -893,8 +899,7 @@ public class CalendarBookingLocalServiceImpl
 
 					NotificationUtil.notifyCalendarBookingRecipients(
 						childCalendarBooking, notificationType,
-						NotificationTemplateType.MOVED_TO_TRASH,
-						serviceContext);
+						NotificationTemplateType.MOVED_TO_TRASH);
 				}
 				catch (Exception e) {
 					if (_log.isWarnEnabled()) {
@@ -927,7 +932,7 @@ public class CalendarBookingLocalServiceImpl
 
 					NotificationUtil.notifyCalendarBookingRecipients(
 						childCalendarBooking, notificationType,
-						NotificationTemplateType.INVITE, serviceContext);
+						NotificationTemplateType.INVITE);
 				}
 				catch (Exception e) {
 					if (_log.isWarnEnabled()) {
@@ -1058,7 +1063,7 @@ public class CalendarBookingLocalServiceImpl
 
 				NotificationUtil.notifyCalendarBookingRecipients(
 					childCalendarBooking, notificationType,
-					notificationTemplateType, serviceContext);
+					notificationTemplateType);
 			}
 			catch (Exception e) {
 				if (_log.isWarnEnabled()) {
