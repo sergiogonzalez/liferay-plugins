@@ -26,9 +26,10 @@ import java.nio.file.Paths;
 
 import java.sql.SQLException;
 
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,15 +105,14 @@ public class SyncAccountService {
 		}
 	}
 
-	public static List<Long> getActiveSyncAccountIds() {
+	public static Set<Long> getActiveSyncAccountIds() {
 		try {
-			if ((_activeSyncAccountIds != null) &&
-				!_activeSyncAccountIds.isEmpty()) {
-
+			if (_activeSyncAccountIds != null) {
 				return _activeSyncAccountIds;
 			}
 
-			_activeSyncAccountIds = _syncAccountPersistence.findByActive(true);
+			_activeSyncAccountIds = new HashSet<Long>(
+				_syncAccountPersistence.findByActive(true));
 
 			return _activeSyncAccountIds;
 		}
@@ -121,7 +121,7 @@ public class SyncAccountService {
 				_logger.debug(sqle.getMessage(), sqle);
 			}
 
-			return Collections.emptyList();
+			return Collections.emptySet();
 		}
 	}
 
@@ -148,9 +148,7 @@ public class SyncAccountService {
 		_syncAccountPersistence.registerModelListener(modelListener);
 	}
 
-	public static void setActiveSyncAccountIds(
-		List<Long> activeSyncAccountIds) {
-
+	public static void setActiveSyncAccountIds(Set<Long> activeSyncAccountIds) {
 		_activeSyncAccountIds = activeSyncAccountIds;
 	}
 
@@ -175,30 +173,10 @@ public class SyncAccountService {
 		}
 	}
 
-	public static SyncAccount updateUIEvent(long syncAccountId, int uiEvent) {
-		try {
-			SyncAccount syncAccount = _syncAccountPersistence.queryForId(
-				syncAccountId);
-
-			syncAccount.setUiEvent(uiEvent);
-
-			_syncAccountPersistence.update(syncAccount);
-
-			return syncAccount;
-		}
-		catch (SQLException sqle) {
-			if (_logger.isDebugEnabled()) {
-				_logger.debug(sqle.getMessage(), sqle);
-			}
-
-			return null;
-		}
-	}
-
 	private static Logger _logger = LoggerFactory.getLogger(
 		SyncAccountService.class);
 
-	private static List<Long> _activeSyncAccountIds = new ArrayList<Long>();
+	private static Set<Long> _activeSyncAccountIds;
 	private static SyncAccountPersistence _syncAccountPersistence =
 		getSyncAccountPersistence();
 

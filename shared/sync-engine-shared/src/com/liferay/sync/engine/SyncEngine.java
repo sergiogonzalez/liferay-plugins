@@ -36,8 +36,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -56,6 +56,10 @@ public class SyncEngine {
 		throws Exception {
 
 		Object[] syncAccountTasks = _syncAccountTasks.get(syncAccountId);
+
+		if (syncAccountTasks == null) {
+			return;
+		}
 
 		ScheduledFuture<?> scheduledFuture =
 			(ScheduledFuture<?>)syncAccountTasks[0];
@@ -77,7 +81,7 @@ public class SyncEngine {
 
 			@Override
 			public void run() {
-				List<Long> syncSiteIds = SyncSiteService.getActiveSyncSiteIds(
+				Set<Long> syncSiteIds = SyncSiteService.getActiveSyncSiteIds(
 					syncAccount.getSyncAccountId());
 
 				for (long syncSiteId : syncSiteIds) {
