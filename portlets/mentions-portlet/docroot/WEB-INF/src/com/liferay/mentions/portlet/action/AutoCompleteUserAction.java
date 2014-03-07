@@ -14,7 +14,6 @@
 
 package com.liferay.mentions.portlet.action;
 
-import com.liferay.mentions.util.WebKeys;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
@@ -23,7 +22,7 @@ import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.search.Hits;
 import com.liferay.portal.kernel.search.Sort;
-import com.liferay.portal.kernel.servlet.HttpHeaders;
+import com.liferay.portal.kernel.servlet.ServletResponseUtil;
 import com.liferay.portal.kernel.struts.BaseStrutsAction;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.ParamUtil;
@@ -36,8 +35,6 @@ import com.liferay.portal.service.UserLocalServiceUtil;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portlet.usersadmin.util.UsersAdminUtil;
-
-import java.io.PrintWriter;
 
 import java.util.List;
 
@@ -54,31 +51,18 @@ public class AutoCompleteUserAction extends BaseStrutsAction {
 			HttpServletRequest request, HttpServletResponse response)
 		throws Exception {
 
-		String text = null;
-
 		try {
 			JSONArray jsonArray = getJSONArray(request);
 
-			text = jsonArray.toString();
+			response.setContentType(ContentTypes.APPLICATION_JSON);
+
+			ServletResponseUtil.write(response, jsonArray.toString());
 		}
 		catch (Exception e) {
 			PortalUtil.sendError(
 				HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e, request,
 				response);
-
-			return null;
 		}
-
-		response.setContentType(ContentTypes.TEXT_PLAIN_UTF8);
-		response.setHeader(
-			HttpHeaders.CACHE_CONTROL,
-			HttpHeaders.CACHE_CONTROL_NO_CACHE_VALUE);
-
-		PrintWriter printWriter = response.getWriter();
-
-		printWriter.write(text);
-
-		printWriter.close();
 
 		return null;
 	}
