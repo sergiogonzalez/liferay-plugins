@@ -37,6 +37,8 @@ import com.liferay.portlet.bookmarks.service.BookmarksFolderLocalServiceUtil;
 import com.liferay.portlet.documentlibrary.model.DLFileEntryType;
 import com.liferay.portlet.documentlibrary.service.DLAppLocalServiceUtil;
 import com.liferay.portlet.documentlibrary.service.DLFileEntryTypeLocalServiceUtil;
+import com.liferay.portlet.dynamicdatamapping.model.DDMStructure;
+import com.liferay.portlet.dynamicdatamapping.service.DDMStructureLocalServiceUtil;
 import com.liferay.portlet.journal.model.JournalFolder;
 import com.liferay.portlet.journal.service.JournalFolderLocalServiceUtil;
 import com.liferay.portlet.messageboards.model.MBCategory;
@@ -139,6 +141,16 @@ public class MySubscriptionsUtil {
 				BookmarksFolderLocalServiceUtil.getBookmarksFolder(classPK);
 
 			return bookmarksFolder.getName();
+		}
+		else if (className.equals(DDMStructure.class.getName())) {
+			if (group != null) {
+				return LanguageUtil.get(locale, "basic-web-content");
+			}
+
+			DDMStructure ddmStructure =
+				DDMStructureLocalServiceUtil.getStructure(classPK);
+
+			return ddmStructure.getName(locale);
 		}
 		else if (className.equals(DLFileEntryType.class.getName())) {
 			DLFileEntryType dlFileEntryType =
