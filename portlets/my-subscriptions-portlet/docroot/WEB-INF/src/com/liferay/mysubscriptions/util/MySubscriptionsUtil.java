@@ -19,6 +19,7 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.repository.model.Folder;
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
@@ -95,6 +96,23 @@ public class MySubscriptionsUtil {
 		if (className.equals(MBCategory.class.getName())) {
 			return PortalUtil.getLayoutFullURL(
 				classPK, PortletKeys.MESSAGE_BOARDS);
+		}
+
+		if (className.equals(PortletPreferences.class.getName())) {
+			Object[] layoutAndPreferences = getLayoutAndPortletPreferences(
+				classPK);
+
+			if (ArrayUtil.isEmpty(layoutAndPreferences)) {
+				return null;
+			}
+
+			Layout layout = (Layout)layoutAndPreferences[0];
+
+			PortletPreferences portletPreferences =
+				(PortletPreferences)layoutAndPreferences[1];
+
+			return PortalUtil.getLayoutFullURL(
+				layout.getGroupId(), portletPreferences.getPortletId());
 		}
 
 		if (className.equals(WikiNode.class.getName())) {
@@ -242,16 +260,17 @@ public class MySubscriptionsUtil {
 			return LanguageUtil.get(locale, "message-boards");
 		}
 		else if (className.equals(PortletPreferences.class.getName())) {
-			PortletPreferences portletPreferences =
-				PortletPreferencesLocalServiceUtil.fetchPortletPreferences(
-					classPK);
+			Object[] layoutAndPreferences = getLayoutAndPortletPreferences(
+				classPK);
 
-			if (portletPreferences == null) {
+			if (ArrayUtil.isEmpty(layoutAndPreferences)) {
 				return String.valueOf(classPK);
 			}
 
-			Layout layout = LayoutLocalServiceUtil.getLayout(
-				portletPreferences.getPlid());
+			Layout layout = (Layout)layoutAndPreferences[0];
+
+			PortletPreferences portletPreferences =
+				(PortletPreferences)layoutAndPreferences[1];
 
 			javax.portlet.PortletPreferences preferences =
 				PortletPreferencesFactoryUtil.getLayoutPortletSetup(
@@ -308,6 +327,22 @@ public class MySubscriptionsUtil {
 				className);
 
 		return assetRendererFactory.getAssetRenderer(classPK);
+	}
+
+	protected static Object[] getLayoutAndPortletPreferences(long classPK)
+		throws PortalException, SystemException {
+
+		PortletPreferences portletPreferences =
+			PortletPreferencesLocalServiceUtil.fetchPortletPreferences(classPK);
+
+		if (portletPreferences == null) {
+			return new Object[0];
+		}
+
+		Layout layout = LayoutLocalServiceUtil.getLayout(
+			portletPreferences.getPlid());
+
+		return new Object[] {layout, portletPreferences};
 	}
 
 	private static final String _KNOWLEDGE_BASE_MODEL_CLASSNAME =
