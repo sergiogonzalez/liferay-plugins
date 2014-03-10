@@ -169,7 +169,11 @@ public class MySubscriptionsUtil {
 			return journalFolder.getName();
 		}
 		else if (className.equals(_KNOWLEDGE_BASE_MODEL_CLASSNAME)) {
-			title = "Knowledge Base Article at ";
+			if (group == null) {
+				return  "Knowledge Base Article";
+			}
+
+			title =  LanguageUtil.get(locale, "Knowledge Base at");
 		}
 		else if (className.equals(Layout.class.getName())) {
 			Layout layout = LayoutLocalServiceUtil.getLayout(classPK);
