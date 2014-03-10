@@ -20,15 +20,19 @@ import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.repository.model.Folder;
 import com.liferay.portal.kernel.util.StringBundler;
+import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.Group;
 import com.liferay.portal.model.Layout;
+import com.liferay.portal.model.PortletPreferences;
 import com.liferay.portal.security.permission.ResourceActionsUtil;
 import com.liferay.portal.service.GroupLocalServiceUtil;
 import com.liferay.portal.service.LayoutLocalServiceUtil;
+import com.liferay.portal.service.PortletPreferencesLocalServiceUtil;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.Portal;
 import com.liferay.portal.util.PortalUtil;
+import com.liferay.portlet.PortletPreferencesFactoryUtil;
 import com.liferay.portlet.asset.AssetRendererFactoryRegistryUtil;
 import com.liferay.portlet.asset.model.AssetRenderer;
 import com.liferay.portlet.asset.model.AssetRendererFactory;
@@ -152,9 +156,9 @@ public class MySubscriptionsUtil {
 		if (className.equals(BlogsEntry.class.getName())) {
 			return LanguageUtil.format(
 				locale, "x-at-x",
-					new String[] {
-						LanguageUtil.get(locale, "blog"),
-						group.getDescriptiveName(locale)},
+				new String[] {
+					LanguageUtil.get(locale, "blog"),
+					group.getDescriptiveName(locale)},
 				false);
 		}
 		else if (className.equals(BookmarksFolder.class.getName())) {
@@ -236,6 +240,33 @@ public class MySubscriptionsUtil {
 			}
 
 			return LanguageUtil.get(locale, "message-boards");
+		}
+		else if (className.equals(PortletPreferences.class.getName())) {
+			PortletPreferences portletPreferences =
+				PortletPreferencesLocalServiceUtil.fetchPortletPreferences(
+					classPK);
+
+			if (portletPreferences == null) {
+				return String.valueOf(classPK);
+			}
+
+			Layout layout = LayoutLocalServiceUtil.getLayout(
+				portletPreferences.getPlid());
+
+			javax.portlet.PortletPreferences preferences =
+				PortletPreferencesFactoryUtil.getLayoutPortletSetup(
+					layout, portletPreferences.getPortletId());
+
+			group = layout.getGroup();
+
+			return LanguageUtil.format(
+				locale, "x-in-x-at-x",
+				new String[] {
+					preferences.getValue(
+						"portletSetupTitle_" + locale.toString(),
+						StringPool.BLANK),
+					layout.getName(locale), group.getDescriptiveName(locale)},
+				false);
 		}
 		else if (className.equals(WikiNode.class.getName())) {
 			WikiNode wikiNode = WikiNodeLocalServiceUtil.getWikiNode(classPK);
