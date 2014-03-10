@@ -133,24 +133,24 @@ public class MySubscriptionsUtil {
 			title = "Blog at ";
 		}
 		else if (className.equals(BookmarksFolder.class.getName())) {
-			if (group != null) {
-				return LanguageUtil.get(locale, "home");
+			if (group == null) {
+				BookmarksFolder bookmarksFolder =
+					BookmarksFolderLocalServiceUtil.getBookmarksFolder(classPK);
+
+				return bookmarksFolder.getName();
 			}
 
-			BookmarksFolder bookmarksFolder =
-				BookmarksFolderLocalServiceUtil.getBookmarksFolder(classPK);
-
-			return bookmarksFolder.getName();
+			title = LanguageUtil.get(locale, "home") + " at ";
 		}
 		else if (className.equals(DDMStructure.class.getName())) {
-			if (group != null) {
-				return LanguageUtil.get(locale, "basic-web-content");
+			if (group == null) {
+				DDMStructure ddmStructure =
+					DDMStructureLocalServiceUtil.getStructure(classPK);
+
+				return ddmStructure.getName(locale);
 			}
 
-			DDMStructure ddmStructure =
-				DDMStructureLocalServiceUtil.getStructure(classPK);
-
-			return ddmStructure.getName(locale);
+			title = LanguageUtil.get(locale, "basic-web-content") + " at ";
 		}
 		else if (className.equals(DLFileEntryType.class.getName())) {
 			DLFileEntryType dlFileEntryType =
@@ -159,21 +159,21 @@ public class MySubscriptionsUtil {
 			return dlFileEntryType.getName(locale);
 		}
 		else if (className.equals(JournalFolder.class.getName())) {
-			if (group != null) {
-				return LanguageUtil.get(locale, "home");
+			if (group == null) {
+				JournalFolder journalFolder =
+					JournalFolderLocalServiceUtil.getFolder(classPK);
+
+				return journalFolder.getName();
 			}
 
-			JournalFolder journalFolder =
-				JournalFolderLocalServiceUtil.getFolder(classPK);
-
-			return journalFolder.getName();
+			title = LanguageUtil.get(locale, "home") + " at ";
 		}
 		else if (className.equals(_KNOWLEDGE_BASE_MODEL_CLASSNAME)) {
 			if (group == null) {
-				return  "Knowledge Base Article";
+				return "Knowledge Base Article";
 			}
 
-			title =  LanguageUtil.get(locale, "Knowledge Base at");
+			title = LanguageUtil.get(locale, "Knowledge Base at ");
 		}
 		else if (className.equals(Layout.class.getName())) {
 			Layout layout = LayoutLocalServiceUtil.getLayout(classPK);
@@ -189,13 +189,13 @@ public class MySubscriptionsUtil {
 			return wikiNode.getName();
 		}
 		else if (className.equals(Folder.class.getName())) {
-			if (group != null) {
-				return LanguageUtil.get(locale, "home");
+			if (group == null) {
+				Folder folder = DLAppLocalServiceUtil.getFolder(classPK);
+
+				return folder.getName();
 			}
 
-			Folder folder = DLAppLocalServiceUtil.getFolder(classPK);
-
-			return folder.getName();
+			title = LanguageUtil.get(locale, "home") + " at";
 		}
 
 		if (group != null) {
