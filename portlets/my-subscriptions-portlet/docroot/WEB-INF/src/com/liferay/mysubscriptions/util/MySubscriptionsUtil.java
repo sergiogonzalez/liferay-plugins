@@ -53,6 +53,7 @@ import java.util.Locale;
 /**
  * @author Peter Shin
  * @author Jonathan Lee
+ * @author Roberto Díaz
  */
 public class MySubscriptionsUtil {
 
@@ -130,27 +131,42 @@ public class MySubscriptionsUtil {
 		Group group = GroupLocalServiceUtil.fetchGroup(classPK);
 
 		if (className.equals(BlogsEntry.class.getName())) {
-			title = "Blog at ";
+			return LanguageUtil.format(
+				locale, "x-at-x",
+					new String[] {
+						LanguageUtil.get(locale, "blog"),
+						group.getDescriptiveName(locale)},
+				false);
 		}
 		else if (className.equals(BookmarksFolder.class.getName())) {
-			if (group == null) {
-				BookmarksFolder bookmarksFolder =
-					BookmarksFolderLocalServiceUtil.getBookmarksFolder(classPK);
-
-				return bookmarksFolder.getName();
+			if (group != null) {
+				return LanguageUtil.format(
+					locale, "x-at-x",
+					new String[] {
+						LanguageUtil.get(locale, "home"),
+						group.getDescriptiveName(locale)},
+					false);
 			}
 
-			title = LanguageUtil.get(locale, "home") + " at ";
+			BookmarksFolder bookmarksFolder =
+				BookmarksFolderLocalServiceUtil.getBookmarksFolder(classPK);
+
+			return bookmarksFolder.getName();
 		}
 		else if (className.equals(DDMStructure.class.getName())) {
-			if (group == null) {
-				DDMStructure ddmStructure =
-					DDMStructureLocalServiceUtil.getStructure(classPK);
-
-				return ddmStructure.getName(locale);
+			if (group != null) {
+				return LanguageUtil.format(
+					locale, "x-at-x",
+					new String[] {
+						LanguageUtil.get(locale, "basic-web-content"),
+						group.getDescriptiveName(locale)},
+					false);
 			}
 
-			title = LanguageUtil.get(locale, "basic-web-content") + " at ";
+			DDMStructure ddmStructure =
+				DDMStructureLocalServiceUtil.getStructure(classPK);
+
+			return ddmStructure.getName(locale);
 		}
 		else if (className.equals(DLFileEntryType.class.getName())) {
 			DLFileEntryType dlFileEntryType =
@@ -159,21 +175,31 @@ public class MySubscriptionsUtil {
 			return dlFileEntryType.getName(locale);
 		}
 		else if (className.equals(JournalFolder.class.getName())) {
-			if (group == null) {
-				JournalFolder journalFolder =
-					JournalFolderLocalServiceUtil.getFolder(classPK);
-
-				return journalFolder.getName();
+			if (group != null) {
+				return LanguageUtil.format(
+					locale, "x-at-x",
+					new String[] {
+						LanguageUtil.get(locale, "home"),
+						group.getDescriptiveName(locale)},
+					false);
 			}
 
-			title = LanguageUtil.get(locale, "home") + " at ";
+			JournalFolder journalFolder =
+				JournalFolderLocalServiceUtil.getFolder(classPK);
+
+			return journalFolder.getName();
 		}
 		else if (className.equals(_KNOWLEDGE_BASE_MODEL_CLASSNAME)) {
-			if (group == null) {
-				return "Knowledge Base Article";
+			if (group != null) {
+				return LanguageUtil.format(
+					locale, "x-at-x",
+					new String[] {
+						LanguageUtil.get(locale, "knowledge-base"),
+						group.getDescriptiveName(locale)},
+					false);
 			}
 
-			title = LanguageUtil.get(locale, "Knowledge Base at ");
+			return LanguageUtil.get(locale, "knowledge-base-article");
 		}
 		else if (className.equals(Layout.class.getName())) {
 			Layout layout = LayoutLocalServiceUtil.getLayout(classPK);
@@ -181,7 +207,16 @@ public class MySubscriptionsUtil {
 			return layout.getName(locale);
 		}
 		else if (className.equals(MBCategory.class.getName())) {
-			title = "Message Board at ";
+			if (group != null) {
+				return LanguageUtil.format(
+					locale, "x-at-x",
+					new String[] {
+						LanguageUtil.get(locale, "message-boards"),
+						group.getDescriptiveName(locale)},
+					false);
+			}
+
+			return LanguageUtil.get(locale, "message-boards");
 		}
 		else if (className.equals(WikiNode.class.getName())) {
 			WikiNode wikiNode = WikiNodeLocalServiceUtil.getWikiNode(classPK);
@@ -189,24 +224,21 @@ public class MySubscriptionsUtil {
 			return wikiNode.getName();
 		}
 		else if (className.equals(Folder.class.getName())) {
-			if (group == null) {
-				Folder folder = DLAppLocalServiceUtil.getFolder(classPK);
-
-				return folder.getName();
+			if (group != null) {
+				return LanguageUtil.format(
+					locale, "x-at-x",
+					new String[] {
+						LanguageUtil.get(locale, "home"),
+						group.getDescriptiveName(locale)},
+					false);
 			}
 
-			title = LanguageUtil.get(locale, "home") + " at";
+			Folder folder = DLAppLocalServiceUtil.getFolder(classPK);
+
+			return folder.getName();
 		}
 
-		if (group != null) {
-			title += group.getDescriptiveName(locale);
-		}
-
-		if (Validator.isNull(title)) {
-			title = String.valueOf(classPK);
-		}
-
-		return title;
+		return String.valueOf(classPK);
 	}
 
 	protected static AssetRenderer doGetAssetRenderer(
