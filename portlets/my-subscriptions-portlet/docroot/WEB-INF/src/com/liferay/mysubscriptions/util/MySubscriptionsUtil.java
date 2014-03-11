@@ -19,22 +19,34 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.repository.model.Folder;
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.StringBundler;
+import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.Group;
 import com.liferay.portal.model.Layout;
+import com.liferay.portal.model.PortletPreferences;
+import com.liferay.portal.security.permission.ResourceActionsUtil;
 import com.liferay.portal.service.GroupLocalServiceUtil;
 import com.liferay.portal.service.LayoutLocalServiceUtil;
+import com.liferay.portal.service.PortletPreferencesLocalServiceUtil;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.Portal;
 import com.liferay.portal.util.PortalUtil;
+import com.liferay.portlet.PortletPreferencesFactoryUtil;
 import com.liferay.portlet.asset.AssetRendererFactoryRegistryUtil;
 import com.liferay.portlet.asset.model.AssetRenderer;
 import com.liferay.portlet.asset.model.AssetRendererFactory;
 import com.liferay.portlet.blogs.model.BlogsEntry;
 import com.liferay.portlet.bookmarks.model.BookmarksFolder;
 import com.liferay.portlet.bookmarks.service.BookmarksFolderLocalServiceUtil;
+import com.liferay.portlet.documentlibrary.model.DLFileEntryType;
 import com.liferay.portlet.documentlibrary.service.DLAppLocalServiceUtil;
+import com.liferay.portlet.documentlibrary.service.DLFileEntryTypeLocalServiceUtil;
+import com.liferay.portlet.dynamicdatamapping.model.DDMStructure;
+import com.liferay.portlet.dynamicdatamapping.service.DDMStructureLocalServiceUtil;
+import com.liferay.portlet.journal.model.JournalFolder;
+import com.liferay.portlet.journal.service.JournalFolderLocalServiceUtil;
 import com.liferay.portlet.messageboards.model.MBCategory;
 import com.liferay.portlet.messageboards.model.MBMessage;
 import com.liferay.portlet.messageboards.model.MBThread;
@@ -47,6 +59,7 @@ import java.util.Locale;
 /**
  * @author Peter Shin
  * @author Jonathan Lee
+ * @author Roberto Díaz
  */
 public class MySubscriptionsUtil {
 
@@ -85,6 +98,23 @@ public class MySubscriptionsUtil {
 				classPK, PortletKeys.MESSAGE_BOARDS);
 		}
 
+		if (className.equals(PortletPreferences.class.getName())) {
+			Object[] layoutAndPreferences = getLayoutAndPortletPreferences(
+				classPK);
+
+			if (ArrayUtil.isEmpty(layoutAndPreferences)) {
+				return null;
+			}
+
+			Layout layout = (Layout)layoutAndPreferences[0];
+
+			PortletPreferences portletPreferences =
+				(PortletPreferences)layoutAndPreferences[1];
+
+			return PortalUtil.getLayoutFullURL(
+				layout.getGroupId(), portletPreferences.getPortletId());
+		}
+
 		if (className.equals(WikiNode.class.getName())) {
 			long plid = PortalUtil.getPlidFromPortletId(
 				themeDisplay.getScopeGroupId(), PortletKeys.WIKI);
@@ -113,6 +143,24 @@ public class MySubscriptionsUtil {
 		return null;
 	}
 
+	public static String getModelResource(
+			Locale locale, String className, long classPK)
+		throws SystemException {
+
+		Group group = GroupLocalServiceUtil.fetchGroup(classPK);
+
+		if (group == null) {
+			if (className.equals(BlogsEntry.class.getName())) {
+				return LanguageUtil.get(locale, "blogs-entry");
+			}
+			else if (className.equals(_KNOWLEDGE_BASE_MODEL_CLASSNAME)) {
+				return LanguageUtil.get(locale, "knowledge-base-article");
+			}
+		}
+
+		return ResourceActionsUtil.getModelResource(locale, className);
+	}
+
 	public static String getTitleText(
 			Locale locale, String className, long classPK, String title)
 		throws PortalException, SystemException {
@@ -124,16 +172,75 @@ public class MySubscriptionsUtil {
 		Group group = GroupLocalServiceUtil.fetchGroup(classPK);
 
 		if (className.equals(BlogsEntry.class.getName())) {
-			title = "Blog at ";
+			return LanguageUtil.format(
+				locale, "x-at-x",
+				new String[] {
+					LanguageUtil.get(locale, "blog"),
+					group.getDescriptiveName(locale)},
+				false);
 		}
 		else if (className.equals(BookmarksFolder.class.getName())) {
+			if (group != null) {
+				return LanguageUtil.format(
+					locale, "x-at-x",
+					new String[] {
+						LanguageUtil.get(locale, "home"),
+						group.getDescriptiveName(locale)},
+					false);
+			}
+
 			BookmarksFolder bookmarksFolder =
 				BookmarksFolderLocalServiceUtil.getBookmarksFolder(classPK);
 
 			return bookmarksFolder.getName();
 		}
+		else if (className.equals(DDMStructure.class.getName())) {
+			if (group != null) {
+				return LanguageUtil.format(
+					locale, "x-at-x",
+					new String[] {
+						LanguageUtil.get(locale, "basic-web-content"),
+						group.getDescriptiveName(locale)},
+					false);
+			}
+
+			DDMStructure ddmStructure =
+				DDMStructureLocalServiceUtil.getStructure(classPK);
+
+			return ddmStructure.getName(locale);
+		}
+		else if (className.equals(DLFileEntryType.class.getName())) {
+			DLFileEntryType dlFileEntryType =
+				DLFileEntryTypeLocalServiceUtil.getDLFileEntryType(classPK);
+
+			return dlFileEntryType.getName(locale);
+		}
+		else if (className.equals(JournalFolder.class.getName())) {
+			if (group != null) {
+				return LanguageUtil.format(
+					locale, "x-at-x",
+					new String[] {
+						LanguageUtil.get(locale, "home"),
+						group.getDescriptiveName(locale)},
+					false);
+			}
+
+			JournalFolder journalFolder =
+				JournalFolderLocalServiceUtil.getFolder(classPK);
+
+			return journalFolder.getName();
+		}
 		else if (className.equals(_KNOWLEDGE_BASE_MODEL_CLASSNAME)) {
-			title = "Knowledge Base Article at ";
+			if (group != null) {
+				return LanguageUtil.format(
+					locale, "x-at-x",
+					new String[] {
+						LanguageUtil.get(locale, "knowledge-base"),
+						group.getDescriptiveName(locale)},
+					false);
+			}
+
+			return LanguageUtil.get(locale, "knowledge-base-article");
 		}
 		else if (className.equals(Layout.class.getName())) {
 			Layout layout = LayoutLocalServiceUtil.getLayout(classPK);
@@ -141,7 +248,44 @@ public class MySubscriptionsUtil {
 			return layout.getName(locale);
 		}
 		else if (className.equals(MBCategory.class.getName())) {
-			title = "Message Board at ";
+			if (group != null) {
+				return LanguageUtil.format(
+					locale, "x-at-x",
+					new String[] {
+						LanguageUtil.get(locale, "message-boards"),
+						group.getDescriptiveName(locale)},
+					false);
+			}
+
+			return LanguageUtil.get(locale, "message-boards");
+		}
+		else if (className.equals(PortletPreferences.class.getName())) {
+			Object[] layoutAndPreferences = getLayoutAndPortletPreferences(
+				classPK);
+
+			if (ArrayUtil.isEmpty(layoutAndPreferences)) {
+				return String.valueOf(classPK);
+			}
+
+			Layout layout = (Layout)layoutAndPreferences[0];
+
+			PortletPreferences portletPreferences =
+				(PortletPreferences)layoutAndPreferences[1];
+
+			javax.portlet.PortletPreferences preferences =
+				PortletPreferencesFactoryUtil.getLayoutPortletSetup(
+					layout, portletPreferences.getPortletId());
+
+			group = layout.getGroup();
+
+			return LanguageUtil.format(
+				locale, "x-in-x-at-x",
+				new String[] {
+					preferences.getValue(
+						"portletSetupTitle_" + locale.toString(),
+						StringPool.BLANK),
+					layout.getName(locale), group.getDescriptiveName(locale)},
+				false);
 		}
 		else if (className.equals(WikiNode.class.getName())) {
 			WikiNode wikiNode = WikiNodeLocalServiceUtil.getWikiNode(classPK);
@@ -150,7 +294,12 @@ public class MySubscriptionsUtil {
 		}
 		else if (className.equals(Folder.class.getName())) {
 			if (group != null) {
-				return LanguageUtil.get(locale, "home");
+				return LanguageUtil.format(
+					locale, "x-at-x",
+					new String[] {
+						LanguageUtil.get(locale, "home"),
+						group.getDescriptiveName(locale)},
+					false);
 			}
 
 			Folder folder = DLAppLocalServiceUtil.getFolder(classPK);
@@ -158,15 +307,7 @@ public class MySubscriptionsUtil {
 			return folder.getName();
 		}
 
-		if (group != null) {
-			title += group.getDescriptiveName(locale);
-		}
-
-		if (Validator.isNull(title)) {
-			title = String.valueOf(classPK);
-		}
-
-		return title;
+		return String.valueOf(classPK);
 	}
 
 	protected static AssetRenderer doGetAssetRenderer(
@@ -186,6 +327,22 @@ public class MySubscriptionsUtil {
 				className);
 
 		return assetRendererFactory.getAssetRenderer(classPK);
+	}
+
+	protected static Object[] getLayoutAndPortletPreferences(long classPK)
+		throws PortalException, SystemException {
+
+		PortletPreferences portletPreferences =
+			PortletPreferencesLocalServiceUtil.fetchPortletPreferences(classPK);
+
+		if (portletPreferences == null) {
+			return new Object[0];
+		}
+
+		Layout layout = LayoutLocalServiceUtil.getLayout(
+			portletPreferences.getPlid());
+
+		return new Object[] {layout, portletPreferences};
 	}
 
 	private static final String _KNOWLEDGE_BASE_MODEL_CLASSNAME =
