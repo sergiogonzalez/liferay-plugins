@@ -19,7 +19,7 @@
 <aui:script use="liferay-autocomplete-input">
 	new Liferay.AutoCompleteInput(
 		{
-			'acConfig.resultTextLocator': 'text',
+			'acConfig.resultTextLocator': 'result',
 			'acConfig.resultFilters': function(query, results) {
 				return results;
 			},

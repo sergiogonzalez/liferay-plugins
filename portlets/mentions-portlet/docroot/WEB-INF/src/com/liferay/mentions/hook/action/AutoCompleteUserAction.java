@@ -95,6 +95,7 @@ public class AutoCompleteUserAction extends BaseStrutsAction {
 			jsonObject.put("fullName", user.getFullName());
 			jsonObject.put("portraitURL", user.getPortraitURL(themeDisplay));
 			jsonObject.put("screenName", StringPool.AT + user.getScreenName());
+			jsonObject.put("result", user.getScreenName());
 
 			jsonArray.put(jsonObject);
 		}
