@@ -23,6 +23,7 @@ import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.Group;
 import com.liferay.portal.model.Layout;
+import com.liferay.portal.security.permission.ResourceActionsUtil;
 import com.liferay.portal.service.GroupLocalServiceUtil;
 import com.liferay.portal.service.LayoutLocalServiceUtil;
 import com.liferay.portal.theme.ThemeDisplay;
@@ -33,8 +34,10 @@ import com.liferay.portlet.asset.model.AssetRenderer;
 import com.liferay.portlet.asset.model.AssetRendererFactory;
 import com.liferay.portlet.blogs.model.BlogsEntry;
 import com.liferay.portlet.bookmarks.model.BookmarksFolder;
-import com.liferay.portlet.bookmarks.service.BookmarksFolderLocalServiceUtil;
+import com.liferay.portlet.documentlibrary.model.DLFileEntryType;
 import com.liferay.portlet.documentlibrary.service.DLAppLocalServiceUtil;
+import com.liferay.portlet.documentlibrary.service.DLFileEntryTypeLocalServiceUtil;
+import com.liferay.portlet.journal.model.JournalFolder;
 import com.liferay.portlet.messageboards.model.MBCategory;
 import com.liferay.portlet.messageboards.model.MBMessage;
 import com.liferay.portlet.messageboards.model.MBThread;
@@ -113,6 +116,21 @@ public class MySubscriptionsUtil {
 		return null;
 	}
 
+	public static String getModelResource(
+			Locale locale, String className, long classPK)
+		throws SystemException {
+
+		Group group = GroupLocalServiceUtil.fetchGroup(classPK);
+
+		if (className.equals(_KNOWLEDGE_BASE_MODEL_CLASSNAME) &&
+			(group != null)) {
+
+			return "Knowledge Base";
+		}
+
+		return ResourceActionsUtil.getModelResource(locale, className);
+	}
+
 	public static String getTitleText(
 			Locale locale, String className, long classPK, String title)
 		throws PortalException, SystemException {
@@ -127,13 +145,27 @@ public class MySubscriptionsUtil {
 			title = "Blog at ";
 		}
 		else if (className.equals(BookmarksFolder.class.getName())) {
-			BookmarksFolder bookmarksFolder =
-				BookmarksFolderLocalServiceUtil.getBookmarksFolder(classPK);
+			if (group != null) {
+				return LanguageUtil.get(locale, "home");
+			}
+		}
+		else if (className.equals(DLFileEntryType.class.getName())) {
+			if (group != null) {
+				return LanguageUtil.get(locale, "basic-document");
+			}
 
-			return bookmarksFolder.getName();
+			DLFileEntryType dlFileEntryType =
+				DLFileEntryTypeLocalServiceUtil.getDLFileEntryType(classPK);
+
+			return dlFileEntryType.getName(locale);
+		}
+		else if (className.equals(JournalFolder.class.getName())) {
+			if (group != null) {
+				return LanguageUtil.get(locale, "home");
+			}
 		}
 		else if (className.equals(_KNOWLEDGE_BASE_MODEL_CLASSNAME)) {
-			title = "Knowledge Base Article at ";
+			title = "Knowledge Base at ";
 		}
 		else if (className.equals(Layout.class.getName())) {
 			Layout layout = LayoutLocalServiceUtil.getLayout(classPK);
