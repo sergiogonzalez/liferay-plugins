@@ -149,7 +149,7 @@ public class MySubscriptionsUtil {
 			}
 		}
 		else if (className.equals(_KNOWLEDGE_BASE_MODEL_CLASSNAME)) {
-			title = "Knowledge Base Article at ";
+			title =  "Knowledge Base at ";
 		}
 		else if (className.equals(Layout.class.getName())) {
 			Layout layout = LayoutLocalServiceUtil.getLayout(classPK);
