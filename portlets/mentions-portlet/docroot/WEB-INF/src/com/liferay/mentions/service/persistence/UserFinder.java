@@ -12,23 +12,24 @@
  * details.
  */
 
-package com.liferay.mentions.util;
+package com.liferay.mentions.service.persistence;
 
-import com.liferay.util.portlet.PortletProps;
+import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.model.User;
+
+import java.util.List;
 
 /**
- * @author Brian Wing Shun Chan
+ * @author Sergio González
  */
-public class PortletPropsValues {
+public interface UserFinder {
 
-	public static final String MB_DISCUSSION_EMAIL_BODY = PortletProps.get(
-		PortletPropsKeys.MB_DISCUSSION_EMAIL_BODY);
+	public List<User> findBySocialRelationTypes(
+			String query, long userId, int[] types, int max)
+		throws SystemException;
 
-	public static final String MB_DISCUSSION_EMAIL_SUBJECT = PortletProps.get(
-		PortletPropsKeys.MB_DISCUSSION_EMAIL_SUBJECT);
-
-	public static final String[] MENTIONS_USERS_LIST_SITE_EXCLUDES =
-		PortletProps.getArray(
-			PortletPropsKeys.MENTIONS_USERS_LIST_SITE_EXCLUDES);
+	public List<User> findByUsersGroups(
+			String query, long userId, String[] groupNames, int max)
+		throws SystemException;
 
 }
