@@ -53,6 +53,10 @@ public class UserFinderImpl implements UserFinder {
 			String query, long userId, int[] types, int max)
 		throws SystemException {
 
+		if (types.length == 0) {
+			return new ArrayList<User>();
+		}
+
 		DataSource dataSource = InfrastructureUtil.getDataSource();
 
 		Connection con = null;
