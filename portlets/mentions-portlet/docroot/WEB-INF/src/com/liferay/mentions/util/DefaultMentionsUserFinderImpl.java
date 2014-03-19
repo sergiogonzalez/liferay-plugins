@@ -103,7 +103,7 @@ public class DefaultMentionsUserFinderImpl implements MentionsUserFinder {
 		Hits hits = UserLocalServiceUtil.search(
 			themeDisplay.getCompanyId(), query, query, query, query,
 			StringPool.BLANK, WorkflowConstants.STATUS_APPROVED, null, false, 0,
-			100, (Sort)null);
+			PortletPropsValues.MENTIONS_USERS_LIST_MAX_USERS, (Sort)null);
 
 		return UsersAdminUtil.getUsers(hits);
 	}
@@ -138,7 +138,8 @@ public class DefaultMentionsUserFinderImpl implements MentionsUserFinder {
 		}
 
 		return _userFinder.findBySocialRelationTypes(
-			query, themeDisplay.getUserId(), types, 100);
+			query, themeDisplay.getUserId(), types,
+			PortletPropsValues.MENTIONS_USERS_LIST_MAX_USERS);
 	}
 
 	protected List<User> getUsersGroups(String query, ThemeDisplay themeDisplay)
@@ -146,7 +147,8 @@ public class DefaultMentionsUserFinderImpl implements MentionsUserFinder {
 
 		return _userFinder.findByUsersGroups(
 			query, themeDisplay.getUserId(),
-			PortletPropsValues.MENTIONS_USERS_LIST_SITE_EXCLUDES, 100);
+			PortletPropsValues.MENTIONS_USERS_LIST_SITE_EXCLUDES,
+			PortletPropsValues.MENTIONS_USERS_LIST_MAX_USERS);
 	}
 
 	private UserFinder _userFinder;

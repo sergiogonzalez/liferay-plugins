@@ -25,6 +25,9 @@ public interface PortletPropsKeys {
 	public static final String MB_DISCUSSION_EMAIL_SUBJECT =
 		"mb.discussion.email.subject";
 
+	public static final String MENTIONS_USERS_LIST_MAX_USERS =
+		"mentions.users.list.max.users";
+
 	public static final String MENTIONS_USERS_LIST_SITE_EXCLUDES =
 		"mentions.users.list.site.excludes";
 
