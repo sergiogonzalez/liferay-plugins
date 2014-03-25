@@ -33,16 +33,13 @@ import com.liferay.knowledgebase.service.KBTemplateServiceUtil;
 import com.liferay.knowledgebase.util.PortletKeys;
 import com.liferay.knowledgebase.util.WebKeys;
 import com.liferay.portal.NoSuchSubscriptionException;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.portlet.PortletResponseUtil;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.servlet.SessionErrors;
+import com.liferay.portal.kernel.upload.UploadException;
 import com.liferay.portal.kernel.upload.UploadPortletRequest;
-import com.liferay.portal.kernel.util.Constants;
-import com.liferay.portal.kernel.util.GetterUtil;
-import com.liferay.portal.kernel.util.HttpUtil;
-import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.StreamUtil;
-import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.util.*;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.portletfilerepository.PortletFileRepositoryUtil;
 import com.liferay.portal.security.auth.PrincipalException;
@@ -58,6 +55,7 @@ import com.liferay.portlet.documentlibrary.FileSizeException;
 import com.liferay.portlet.documentlibrary.NoSuchFileException;
 import com.liferay.util.bridges.mvc.MVCPortlet;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -73,6 +71,8 @@ import javax.portlet.RenderResponse;
 import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * @author Peter Shin
  * @author Brian Wing Shun Chan
@@ -86,6 +86,8 @@ public class AdminPortlet extends MVCPortlet {
 
 		UploadPortletRequest uploadPortletRequest =
 			PortalUtil.getUploadPortletRequest(actionRequest);
+
+		checkExceededSizeLimit(uploadPortletRequest);
 
 		String portletId = PortalUtil.getPortletId(actionRequest);
 
@@ -273,6 +275,33 @@ public class AdminPortlet extends MVCPortlet {
 			fileEntry.getContentStream(), fileEntry.getMimeType());
 	}
 
+	public void serveTempAttachment(
+			ResourceRequest resourceRequest, ResourceResponse resourceResponse)
+		throws Exception {
+
+		String portletId = PortalUtil.getPortletId(resourceRequest);
+
+		long resourcePrimKey = ParamUtil.getLong(
+			resourceRequest, "resourcePrimKey");
+
+		String fileName = ParamUtil.getString(resourceRequest, "fileName");
+
+		ServiceContext serviceContext = ServiceContextFactory.getInstance(
+			KBArticle.class.getName(), resourceRequest);
+
+		File file = KBArticleServiceUtil.getAttachmentFile(
+			portletId, resourcePrimKey, fileName, serviceContext);
+
+		String attachmentName = fileName.substring(
+			fileName.lastIndexOf(CharPool.SLASH) + 1);
+
+		String contentType = MimeTypesUtil.getContentType(file, attachmentName);
+
+		PortletResponseUtil.sendFile(
+			resourceRequest, resourceResponse, attachmentName,
+			FileUtil.getBytes(file), contentType);
+	}
+
 	@Override
 	public void serveResource(
 			ResourceRequest resourceRequest, ResourceResponse resourceResponse)
@@ -282,7 +311,14 @@ public class AdminPortlet extends MVCPortlet {
 			String resourceID = resourceRequest.getResourceID();
 
 			if (resourceID.equals("attachment")) {
-				serveAttachment(resourceRequest, resourceResponse);
+				long fileEntryId = ParamUtil.getLong(resourceRequest, "fileEntryId");
+
+				if (fileEntryId == 0) {
+					serveTempAttachment(resourceRequest, resourceResponse);
+				}
+				else {
+					serveAttachment(resourceRequest, resourceResponse);
+				}
 			}
 		}
 		catch (IOException ioe) {
@@ -539,6 +575,21 @@ public class AdminPortlet extends MVCPortlet {
 		}
 
 		super.addSuccessMessage(actionRequest, actionResponse);
+	}
+
+	protected void checkExceededSizeLimit(HttpServletRequest request)
+		throws PortalException {
+
+		UploadException uploadException = (UploadException)request.getAttribute(
+			WebKeys.UPLOAD_EXCEPTION);
+
+		if (uploadException != null) {
+			if (uploadException.isExceededSizeLimit()) {
+				throw new FileSizeException(uploadException.getCause());
+			}
+
+			throw new PortalException(uploadException.getCause());
+		}
 	}
 
 	@Override
