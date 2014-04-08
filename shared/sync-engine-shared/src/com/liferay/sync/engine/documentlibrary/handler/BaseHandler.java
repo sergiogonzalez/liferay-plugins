@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -16,7 +16,11 @@ package com.liferay.sync.engine.documentlibrary.handler;
 
 import com.liferay.sync.engine.documentlibrary.event.Event;
 import com.liferay.sync.engine.model.SyncAccount;
+import com.liferay.sync.engine.model.SyncFile;
 import com.liferay.sync.engine.service.SyncAccountService;
+import com.liferay.sync.engine.service.SyncFileService;
+
+import java.io.FileNotFoundException;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -50,9 +54,16 @@ public class BaseHandler implements Handler<Void> {
 		SyncAccount syncAccount = SyncAccountService.fetchSyncAccount(
 			getSyncAccountId());
 
-		syncAccount.setState(SyncAccount.STATE_DISCONNECTED);
+		if (e instanceof FileNotFoundException) {
+			SyncFile syncFile = (SyncFile)getParameterValue("syncFile");
 
-		if (e instanceof HttpHostConnectException) {
+			if (syncFile.getVersion() == null) {
+				SyncFileService.deleteSyncFile(syncFile);
+			}
+
+			return;
+		}
+		else if (e instanceof HttpHostConnectException) {
 			syncAccount.setUiEvent(SyncAccount.UI_EVENT_CONNECTION_EXCEPTION);
 		}
 		else if (e instanceof HttpResponseException) {
@@ -69,6 +80,8 @@ public class BaseHandler implements Handler<Void> {
 					SyncAccount.UI_EVENT_CONNECTION_EXCEPTION);
 			}
 		}
+
+		syncAccount.setState(SyncAccount.STATE_DISCONNECTED);
 
 		SyncAccountService.update(syncAccount);
 
@@ -137,7 +150,7 @@ public class BaseHandler implements Handler<Void> {
 				SyncAccountService.synchronizeSyncAccount(getSyncAccountId());
 
 				syncAccount = SyncAccountService.synchronizeSyncAccount(
-						getSyncAccountId());
+					getSyncAccountId());
 
 				if (syncAccount.getState() == SyncAccount.STATE_DISCONNECTED) {
 					throw new Exception();

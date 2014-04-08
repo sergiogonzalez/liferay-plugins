@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,7 +14,9 @@
 
 package com.liferay.sync.engine.filesystem;
 
+import com.liferay.sync.engine.model.SyncFile;
 import com.liferay.sync.engine.model.SyncWatchEvent;
+import com.liferay.sync.engine.service.SyncFileService;
 
 import java.io.IOException;
 
@@ -145,6 +147,8 @@ public class Watcher implements Runnable {
 	protected void register(Path filePath, boolean recursive)
 		throws IOException {
 
+		long startTime = System.currentTimeMillis();
+
 		if (recursive) {
 			Files.walkFileTree(
 				filePath,
@@ -166,8 +170,10 @@ public class Watcher implements Runnable {
 						Path filePath,
 						BasicFileAttributes basicFileAttributes) {
 
-						fireWatchEventListener(
-							SyncWatchEvent.EVENT_TYPE_CREATE, filePath);
+						if (Files.exists(filePath)) {
+							fireWatchEventListener(
+								SyncWatchEvent.EVENT_TYPE_CREATE, filePath);
+						}
 
 						return FileVisitResult.CONTINUE;
 					}
@@ -191,6 +197,15 @@ public class Watcher implements Runnable {
 			if (_logger.isTraceEnabled()) {
 				_logger.trace("Registered file path {}", filePath);
 			}
+		}
+
+		List<SyncFile> syncFiles = SyncFileService.findSyncFiles(
+			startTime, _watchEventListener.getSyncAccountId());
+
+		for (SyncFile syncFile : syncFiles) {
+			fireWatchEventListener(
+				SyncWatchEvent.EVENT_TYPE_DELETE,
+				java.nio.file.Paths.get(syncFile.getFilePathName()));
 		}
 	}
 

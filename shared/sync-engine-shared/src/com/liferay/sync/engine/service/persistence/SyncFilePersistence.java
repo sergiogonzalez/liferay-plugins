@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -13,6 +13,9 @@
  */
 
 package com.liferay.sync.engine.service.persistence;
+
+import com.j256.ormlite.stmt.QueryBuilder;
+import com.j256.ormlite.stmt.Where;
 
 import com.liferay.sync.engine.model.SyncFile;
 
@@ -93,6 +96,22 @@ public class SyncFilePersistence extends BasePersistenceImpl<SyncFile, Long> {
 		fieldValues.put("syncAccountId", syncAccountId);
 
 		return queryForFieldValues(fieldValues);
+	}
+
+	public List<SyncFile> findByL_S(long localSyncTime, long syncAccountId)
+		throws SQLException {
+
+		QueryBuilder<SyncFile, Long> queryBuilder = queryBuilder();
+
+		Where<SyncFile, Long> where = queryBuilder.where();
+
+		where.lt("localSyncTime", localSyncTime);
+
+		where.and();
+
+		where.eq("syncAccountId", syncAccountId);
+
+		return query(queryBuilder.prepare());
 	}
 
 	public List<SyncFile> findBySyncAccountId(long syncAccountId)

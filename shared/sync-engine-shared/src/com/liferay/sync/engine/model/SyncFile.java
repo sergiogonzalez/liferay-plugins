@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -120,6 +120,10 @@ public class SyncFile extends StateAwareModel {
 		return filePathName;
 	}
 
+	public long getLocalSyncTime() {
+		return localSyncTime;
+	}
+
 	public long getLockExpirationDate() {
 		return lockExpirationDate;
 	}
@@ -220,6 +224,10 @@ public class SyncFile extends StateAwareModel {
 		this.filePathName = filePathName;
 	}
 
+	public void setLocalSyncTime(long localSyncTime) {
+		this.localSyncTime = localSyncTime;
+	}
+
 	public void setLockExpirationDate(long lockExpirationDate) {
 		this.lockExpirationDate = lockExpirationDate;
 	}
@@ -309,6 +317,9 @@ public class SyncFile extends StateAwareModel {
 
 	@DatabaseField(useGetSet = true, width = 16777216)
 	protected String filePathName;
+
+	@DatabaseField(useGetSet = true)
+	protected long localSyncTime;
 
 	@DatabaseField(useGetSet = true)
 	protected long lockExpirationDate;

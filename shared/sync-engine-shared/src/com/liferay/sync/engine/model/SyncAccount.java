@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -49,8 +49,16 @@ public class SyncAccount extends StateAwareModel {
 		return login;
 	}
 
+	public String getName() {
+		return name;
+	}
+
 	public String getPassword() {
 		return password;
+	}
+
+	public boolean getSocialOfficeInstalled() {
+		return socialOfficeInstalled;
 	}
 
 	public long getSyncAccountId() {
@@ -65,8 +73,16 @@ public class SyncAccount extends StateAwareModel {
 		return url;
 	}
 
+	public long getUserId() {
+		return userId;
+	}
+
 	public boolean isActive() {
 		return getActive();
+	}
+
+	public boolean isSocialOfficeInstalled() {
+		return getSocialOfficeInstalled();
 	}
 
 	public boolean isTrustSelfSigned() {
@@ -89,8 +105,16 @@ public class SyncAccount extends StateAwareModel {
 		this.login = login;
 	}
 
+	public void setName(String name) {
+		this.name = name;
+	}
+
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public void setSocialOfficeInstalled(boolean socialOfficeInstalled) {
+		this.socialOfficeInstalled = socialOfficeInstalled;
 	}
 
 	public void setSyncAccountId(long syncAccountId) {
@@ -105,6 +129,10 @@ public class SyncAccount extends StateAwareModel {
 		this.url = url;
 	}
 
+	public void setUserId(long userId) {
+		this.userId = userId;
+	}
+
 	@DatabaseField(useGetSet = true)
 	protected boolean active;
 
@@ -117,8 +145,14 @@ public class SyncAccount extends StateAwareModel {
 	@DatabaseField(useGetSet = true, width = 16777216)
 	protected String login;
 
+	@DatabaseField(useGetSet = true)
+	protected String name;
+
 	@DatabaseField(useGetSet = true, width = 16777216)
 	protected String password;
+
+	@DatabaseField(useGetSet = true)
+	protected boolean socialOfficeInstalled;
 
 	@DatabaseField(generatedId = true, useGetSet = true)
 	protected long syncAccountId;
@@ -128,5 +162,8 @@ public class SyncAccount extends StateAwareModel {
 
 	@DatabaseField(useGetSet = true, width = 16777216)
 	protected String url;
+
+	@DatabaseField(useGetSet = true)
+	protected long userId;
 
 }

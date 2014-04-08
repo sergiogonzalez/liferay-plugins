@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -71,15 +71,16 @@ public class GetAllSyncDLObjectsEventTest extends BaseTestCase {
 
 		Map<String, Object> parameters = new HashMap<String, Object>();
 
-		parameters.put("folderId", 0);
+		parameters.put("companyId", _syncSite.getCompanyId());
+		parameters.put("lastAccessTime", 0);
 		parameters.put("repositoryId", _syncSite.getGroupId());
 		parameters.put("syncSite", _syncSite);
 
-		GetAllSyncDLObjectsEvent getAllSyncDLObjectsEvent =
-			new GetAllSyncDLObjectsEvent(
+		GetSyncDLObjectUpdateEvent getSyncDLObjectUpdateEvent =
+			new GetSyncDLObjectUpdateEvent(
 				syncAccount.getSyncAccountId(), parameters);
 
-		getAllSyncDLObjectsEvent.run();
+		getSyncDLObjectUpdateEvent.run();
 
 		_syncFiles = SyncFileService.findSyncFiles(
 			syncAccount.getSyncAccountId());

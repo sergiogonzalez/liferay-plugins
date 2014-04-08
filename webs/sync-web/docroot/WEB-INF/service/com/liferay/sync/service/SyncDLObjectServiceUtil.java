@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -121,13 +121,6 @@ public class SyncDLObjectServiceUtil {
 		return getService()
 				   .checkOutFileEntry(fileEntryId, owner, expirationTime,
 			serviceContext);
-	}
-
-	public static com.liferay.sync.model.SyncDLObjectUpdate getAllSyncDLObjects(
-		long repositoryId, long folderId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
-		return getService().getAllSyncDLObjects(repositoryId, folderId);
 	}
 
 	public static com.liferay.sync.model.SyncDLObject getFileEntrySyncDLObject(

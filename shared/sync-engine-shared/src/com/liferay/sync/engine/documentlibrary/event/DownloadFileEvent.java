@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -63,6 +63,10 @@ public class DownloadFileEvent extends BaseEvent {
 			sb.append(getParameterValue("sourceVersion"));
 			sb.append("&targetVersion=");
 			sb.append(getParameterValue("targetVersion"));
+		}
+		else {
+			sb.append("?version=");
+			sb.append(syncFile.getVersion());
 		}
 
 		executeGet(sb.toString());

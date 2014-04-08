@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -393,6 +393,14 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 
 		return kbArticlePersistence.fetchByR_S_First(
 			resourcePrimKey, status, new KBArticleVersionComparator());
+	}
+
+	@Override
+	public File getAttachment(long companyId, String fileName)
+		throws PortalException, SystemException {
+
+		return DLStoreUtil.getFile(
+			companyId, CompanyConstants.SYSTEM, fileName);
 	}
 
 	public List<KBArticle> getCompanyKBArticles(
@@ -1261,32 +1269,41 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 			companyId, CompanyConstants.SYSTEM, _TEMP_DIR_NAME_PREFIX);
 
 		for (String dirName : dirNames) {
-			String[] fileNames = DLStoreUtil.getFileNames(
-				companyId, CompanyConstants.SYSTEM, dirName);
+			String[] attachmentDirNames = DLStoreUtil.getFileNames(
+				companyId, CompanyConstants.SYSTEM,
+				KnowledgeBaseUtil.trimLeadingSlash(dirName));
 
-			File file = null;
+			for (String attachmentDirName : attachmentDirNames) {
+				String[] fileNames = DLStoreUtil.getFileNames(
+					companyId, CompanyConstants.SYSTEM,
+					KnowledgeBaseUtil.trimLeadingSlash(attachmentDirName));
 
-			for (String fileName : fileNames) {
-				try {
-					file = DLStoreUtil.getFile(
-						companyId, CompanyConstants.SYSTEM, fileName);
-				}
-				catch (Exception e) {
-					if (_log.isWarnEnabled()) {
-						_log.warn("Unable to get temp file: " + e.getMessage());
+				File file = null;
+
+				for (String fileName : fileNames) {
+					try {
+						file = DLStoreUtil.getFile(
+							companyId, CompanyConstants.SYSTEM,
+							KnowledgeBaseUtil.trimLeadingSlash(fileName));
+					}
+					catch (Exception e) {
+						if (_log.isWarnEnabled()) {
+							_log.warn(
+								"Unable to get temp file: " + e.getMessage());
+						}
+					}
+
+					if (file != null) {
+						break;
 					}
 				}
 
-				if (file != null) {
-					break;
+				if ((file != null) &&
+					(now.getTime() - file.lastModified()) > Time.DAY) {
+
+					DLStoreUtil.deleteDirectory(
+						companyId, CompanyConstants.SYSTEM, dirName);
 				}
-			}
-
-			if ((file != null) &&
-				(now.getTime() - file.lastModified()) > Time.DAY) {
-
-				DLStoreUtil.deleteDirectory(
-					companyId, CompanyConstants.SYSTEM, dirName);
 			}
 		}
 	}

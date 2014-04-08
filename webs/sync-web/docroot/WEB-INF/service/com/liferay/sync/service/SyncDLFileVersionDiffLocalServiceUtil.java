@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -276,13 +276,13 @@ public class SyncDLFileVersionDiffLocalServiceUtil {
 	}
 
 	public static com.liferay.sync.model.SyncDLFileVersionDiff addSyncDLFileVersionDiff(
-		long fileEntryId, long sourceFileVersionId,
-		long destinationFileVersionId, java.io.File file)
+		long fileEntryId, long sourceFileVersionId, long targetFileVersionId,
+		java.io.File file)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		return getService()
 				   .addSyncDLFileVersionDiff(fileEntryId, sourceFileVersionId,
-			destinationFileVersionId, file);
+			targetFileVersionId, file);
 	}
 
 	public static void deleteExpiredSyncDLFileVersionDiffs()
@@ -292,12 +292,11 @@ public class SyncDLFileVersionDiffLocalServiceUtil {
 	}
 
 	public static com.liferay.sync.model.SyncDLFileVersionDiff fetchSyncDLFileVersionDiff(
-		long fileEntryId, long sourceFileVersionId,
-		long destinationFileVersionId)
+		long fileEntryId, long sourceFileVersionId, long targetFileVersionId)
 		throws com.liferay.portal.kernel.exception.SystemException {
 		return getService()
 				   .fetchSyncDLFileVersionDiff(fileEntryId,
-			sourceFileVersionId, destinationFileVersionId);
+			sourceFileVersionId, targetFileVersionId);
 	}
 
 	public static void refreshExpirationDate(long syncDLFileVersionDiffId)

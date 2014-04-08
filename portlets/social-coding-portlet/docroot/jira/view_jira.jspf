@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -78,7 +78,7 @@ String jiraUserId = ExpandoValueLocalServiceUtil.getData(company.getCompanyId(),
 			<input name="<portlet:namespace />redirect" type="hidden" value="<%= currentURL %>" />
 
 			<div class="alert alert-info">
-				<%= LanguageUtil.format(pageContext, "set-your-login-for-x-to-track-your-jira-activity", "http://support.liferay.com", false) %>
+				<%= LanguageUtil.format(pageContext, "set-your-login-for-x-to-track-your-jira-activity", PortletPropsValues.JIRA_URL, false) %>
 			</div>
 
 			<table class="lfr-table">
