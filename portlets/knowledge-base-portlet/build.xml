@@ -4,5 +4,5 @@
 <project name="knowledge-base-portlet" basedir="." default="deploy">
 	<import file="../build-common-portlet.xml" />
 
-	<property name="import.shared" value="knowledge-base-shared" />
+	<property name="import.shared" value="knowledge-base-shared,layout-prototypes-shared" />
 </project>

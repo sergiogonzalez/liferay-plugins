@@ -5,6 +5,7 @@
 /jstl-api.jar
 /jstl-impl.jar
 /knowledge-base-shared.jar
+/layout-prototypes-shared.jar
 /log4j.jar
 /portal-compat-shared.jar
 /rome.jar
