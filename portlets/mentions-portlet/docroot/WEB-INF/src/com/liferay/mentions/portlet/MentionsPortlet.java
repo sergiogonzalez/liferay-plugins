@@ -60,9 +60,7 @@ public class MentionsPortlet extends MVCPortlet {
 				(ThemeDisplay)resourceRequest.getAttribute(
 					WebKeys.THEME_DISPLAY);
 
-			if (!MentionsUtil.isMentionsEnabled(
-					themeDisplay.getSiteGroupId())) {
-
+			if (!MentionsUtil.isMentionsEnabled(themeDisplay.getCompanyId())) {
 				return;
 			}
 
