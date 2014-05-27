@@ -16,35 +16,23 @@ package com.liferay.mentions.util;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
-import com.liferay.portal.kernel.util.GetterUtil;
-import com.liferay.portal.kernel.util.PrefsPropsUtil;
-import com.liferay.portal.model.Group;
-import com.liferay.portal.service.GroupLocalServiceUtil;
-
-import javax.portlet.PortletPreferences;
+import com.liferay.portlet.social.util.SocialInteractionsConfiguration;
+import com.liferay.portlet.social.util.SocialInteractionsConfigurationUtil;
 
 /**
  * @author Sergio González
+ * @author Adolfo Pérez
  */
 public class MentionsUtil {
 
-	public static boolean isMentionsEnabled(long siteGroupId)
+	public static boolean isMentionsEnabled(long companyId)
 		throws PortalException, SystemException {
 
-		Group group = GroupLocalServiceUtil.getGroup(siteGroupId);
+		SocialInteractionsConfiguration socialInteractionsConfiguration =
+			SocialInteractionsConfigurationUtil.
+				getSocialInteractionsConfiguration(companyId);
 
-		PortletPreferences companyPortletPreferences =
-			PrefsPropsUtil.getPreferences(group.getCompanyId(), true);
-
-		boolean companyMentionsEnabled = GetterUtil.getBoolean(
-			companyPortletPreferences.getValue("mentionsEnabled", null), true);
-
-		if (!companyMentionsEnabled) {
-			return false;
-		}
-
-		return GetterUtil.getBoolean(
-			group.getLiveParentTypeSettingsProperty("mentionsEnabled"), true);
+		return socialInteractionsConfiguration.isSocialInteractionsEnabled();
 	}
 
 }

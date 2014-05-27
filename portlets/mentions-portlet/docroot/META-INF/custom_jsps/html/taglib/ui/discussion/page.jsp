@@ -20,7 +20,7 @@
 
 <%@ page import="java.lang.reflect.Method" %>
 
-<c:if test="<%= _isMentionsEnabled(themeDisplay.getSiteGroupId()) %>">
+<c:if test="<%= _isMentionsEnabled(themeDisplay.getCompanyId()) %>">
 	<liferay-portlet:resourceURL portletName="1_WAR_mentionsportlet" var="autoCompleteUserURL" />
 
 	<aui:script use="liferay-autocomplete-input">
@@ -42,13 +42,13 @@
 </c:if>
 
 <%!
-private boolean _isMentionsEnabled(long siteGroupId) throws Exception {
+private boolean _isMentionsEnabled(long companyId) throws Exception {
 	ClassLoader classLoader = PortletClassLoaderUtil.getClassLoader("1_WAR_mentionsportlet");
 
 	Class<?> clazz = classLoader.loadClass("com.liferay.mentions.util.MentionsUtil");
 
 	Method method = clazz.getMethod("isMentionsEnabled", long.class);
 
-	return (Boolean)method.invoke(null, siteGroupId);
+	return (Boolean)method.invoke(null, companyId);
 }
 %>

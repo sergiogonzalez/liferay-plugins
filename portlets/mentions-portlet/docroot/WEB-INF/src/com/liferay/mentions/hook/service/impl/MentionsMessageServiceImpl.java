@@ -62,9 +62,9 @@ public class MentionsMessageServiceImpl extends MBMessageLocalServiceWrapper {
 			userId, userName, groupId, className, classPK, threadId,
 			parentMessageId, subject, body, serviceContext);
 
-		long siteGroupId = PortalUtil.getSiteGroupId(message.getGroupId());
+		long companyId = serviceContext.getCompanyId();
 
-		if (!MentionsUtil.isMentionsEnabled(siteGroupId)) {
+		if (!MentionsUtil.isMentionsEnabled(companyId)) {
 			return message;
 		}
 
@@ -83,9 +83,9 @@ public class MentionsMessageServiceImpl extends MBMessageLocalServiceWrapper {
 			userId, messageId, className, classPK, subject, body,
 			serviceContext);
 
-		long siteGroupId = PortalUtil.getSiteGroupId(message.getGroupId());
+		long companyId = serviceContext.getCompanyId();
 
-		if (!MentionsUtil.isMentionsEnabled(siteGroupId)) {
+		if (!MentionsUtil.isMentionsEnabled(companyId)) {
 			return message;
 		}
 
