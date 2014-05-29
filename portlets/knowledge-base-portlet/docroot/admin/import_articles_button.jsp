@@ -1,3 +1,4 @@
+<%--
 /**
  * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
@@ -11,24 +12,14 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
+--%>
 
-package com.liferay.mentions.util;
+<%@ include file="/admin/init.jsp" %>
 
-import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
-import com.liferay.portal.model.User;
-import com.liferay.portlet.social.util.SocialInteractionsConfiguration;
+<portlet:renderURL var="importURL" windowState="<%= WindowState.MAXIMIZED.toString() %>">
+	<portlet:param name="mvcPath" value="/admin/import.jsp" />
+</portlet:renderURL>
 
-import java.util.List;
-
-/**
- * @author Sergio González
- */
-public interface MentionsUserFinder {
-
-	public List<User> getUsers(
-			long companyId, long userId, String query,
-			SocialInteractionsConfiguration socialInteractionsConfiguration)
-		throws PortalException, SystemException;
-
-}
+<span class="lfr-toolbar-button add-button <%= StringPool.BLANK %>">
+	<a href="<%= importURL %>"><liferay-ui:message key="import" /></a>
+</span>

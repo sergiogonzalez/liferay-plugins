@@ -12,23 +12,29 @@
  * details.
  */
 
-package com.liferay.mentions.util;
+package com.liferay.knowledgebase;
 
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
-import com.liferay.portal.model.User;
-import com.liferay.portlet.social.util.SocialInteractionsConfiguration;
-
-import java.util.List;
 
 /**
- * @author Sergio González
+ * @author James Hinkey
  */
-public interface MentionsUserFinder {
+public class KBArticleImportException extends PortalException {
 
-	public List<User> getUsers(
-			long companyId, long userId, String query,
-			SocialInteractionsConfiguration socialInteractionsConfiguration)
-		throws PortalException, SystemException;
+	public KBArticleImportException() {
+		super();
+	}
+
+	public KBArticleImportException(String msg) {
+		super(msg);
+	}
+
+	public KBArticleImportException(String msg, Throwable cause) {
+		super(msg, cause);
+	}
+
+	public KBArticleImportException(Throwable cause) {
+		super(cause);
+	}
 
 }
