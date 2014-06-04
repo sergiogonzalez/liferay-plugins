@@ -28,6 +28,7 @@ import com.liferay.knowledgebase.service.KBCommentLocalServiceUtil;
 import com.liferay.knowledgebase.service.KBCommentServiceUtil;
 import com.liferay.knowledgebase.service.permission.KBArticlePermission;
 import com.liferay.knowledgebase.util.ActionKeys;
+import com.liferay.knowledgebase.util.KnowledgeBaseUtil;
 import com.liferay.knowledgebase.util.PortletKeys;
 import com.liferay.knowledgebase.util.WebKeys;
 import com.liferay.knowledgebase.util.comparator.KBArticlePriorityComparator;
@@ -41,12 +42,15 @@ import com.liferay.portal.kernel.upload.UploadException;
 import com.liferay.portal.kernel.upload.UploadPortletRequest;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.ContentTypes;
+import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.StreamUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
+import com.liferay.portal.model.Company;
+import com.liferay.portal.model.CompanyConstants;
 import com.liferay.portal.portletfilerepository.PortletFileRepositoryUtil;
 import com.liferay.portal.security.auth.PrincipalException;
 import com.liferay.portal.security.permission.PermissionChecker;
@@ -59,9 +63,12 @@ import com.liferay.portlet.asset.AssetTagException;
 import com.liferay.portlet.documentlibrary.DuplicateFileException;
 import com.liferay.portlet.documentlibrary.FileNameException;
 import com.liferay.portlet.documentlibrary.FileSizeException;
+import com.liferay.portlet.documentlibrary.NoSuchFileEntryException;
 import com.liferay.portlet.documentlibrary.NoSuchFileException;
+import com.liferay.portlet.documentlibrary.store.DLStoreUtil;
 import com.liferay.util.bridges.mvc.MVCPortlet;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -239,12 +246,29 @@ public class DisplayPortlet extends MVCPortlet {
 
 		long fileEntryId = ParamUtil.getLong(resourceRequest, "fileEntryId");
 
-		FileEntry fileEntry = PortletFileRepositoryUtil.getPortletFileEntry(
-			fileEntryId);
+		try {
+			FileEntry fileEntry = PortletFileRepositoryUtil.getPortletFileEntry(
+				fileEntryId);
 
-		PortletResponseUtil.sendFile(
-			resourceRequest, resourceResponse, fileEntry.getTitle(),
-			fileEntry.getContentStream(), fileEntry.getMimeType());
+			PortletResponseUtil.sendFile(
+				resourceRequest, resourceResponse, fileEntry.getTitle(),
+				fileEntry.getContentStream(), fileEntry.getMimeType());
+		}
+		catch (NoSuchFileEntryException nsfee) {
+			String fileName = ParamUtil.getString(resourceRequest, "fileName");
+
+			Company company = PortalUtil.getCompany(resourceRequest);
+
+			File file = DLStoreUtil.getFile(
+				company.getCompanyId(), CompanyConstants.SYSTEM, fileName);
+
+			byte[] bytes = FileUtil.getBytes(file);
+
+			String mimeType = KnowledgeBaseUtil.getMimeType(bytes, fileName);
+
+			PortletResponseUtil.sendFile(
+				resourceRequest, resourceResponse, fileName, bytes, mimeType);
+		}
 	}
 
 	public void serveKBArticleRSS(
