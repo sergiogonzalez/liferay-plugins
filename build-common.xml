@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE project>
 
-<project name="build-common" xmlns:antelope="antlib:ise.antelope.tasks">
+<project name="build-common" xmlns:antelope="antlib:ise.antelope.tasks" xmlns:ivy="antlib:org.apache.ivy.ant">
 	<dirname file="${ant.file.build-common}" property="sdk.dir.native" />
 
 	<pathconvert property="sdk.dir" targetos="unix">
@@ -76,6 +76,10 @@
 	</path>
 
 	<taskdef classpathref="classpath.aQute.bnd" resource="aQute/bnd/ant/taskdef.properties" />
+
+	<path id="classpath.com.liferay.ant.arquillian">
+		<fileset dir="${sdk.dir}/dependencies/com.liferay.ant.arquillian/lib" includes="*.jar" />
+	</path>
 
 	<path id="classpath.com.liferay.ant.bnd">
 		<fileset dir="${sdk.dir}/dependencies/com.liferay.ant.bnd/lib" includes="*.jar" />
@@ -838,9 +842,24 @@ Please find a solution that does not require portal-impl.jar.
 						<fileset dir="@{module.dir}/test/@{test.type}" includes="**/*.png,**/*.properties,**/*.xml" />
 					</copy>
 
-					<path id="plugin-test-type.classpath">
-						<pathelement location="@{module.dir}/test-classes/@{test.type}" />
-					</path>
+					<if>
+						<available file="@{module.dir}/ivy.xml" />
+						<then>
+							<path id="plugin-test-type.classpath">
+								<pathelement location="@{module.dir}/test-classes/@{test.type}" />
+								<ivy:resources
+									conf="test"
+									file="@{module.dir}/ivy.xml"
+									transitive="${ivy.resolve.transitive.dependencies}"
+								/>
+							</path>
+						</then>
+						<else>
+							<path id="plugin-test-type.classpath">
+								<pathelement location="@{module.dir}/test-classes/@{test.type}" />
+							</path>
+						</else>
+					</if>
 
 					<compile-java
 						javac.classpathref="test.classpath"
@@ -1914,6 +1933,144 @@ Please find a solution that does not require portal-impl.jar.
 		</sequential>
 	</macrodef>
 
+	<macrodef name="setup-arquillian">
+		<attribute name="module.dir" />
+
+		<sequential>
+			<if>
+				<and>
+					<available file="@{module.dir}/test/integration" />
+					<resourcecontains
+						resource="${module.dir.unix}/build.xml"
+						substring="/build-common-osgi-plugin.xml&quot;"
+					/>
+				</and>
+				<then>
+					<echo file="@{module.dir}/test/integration/arquillian.xml"><![CDATA[<?xml version="1.0"?>
+
+<arquillian
+	xmlns="http://jboss.org/schema/arquillian"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://jboss.org/schema/arquillian http://jboss.org/schema/arquillian/arquillian_1_0.xsd"
+>
+	<container qualifier="tomcat" default="true">
+		<configuration>
+			<property name="jmxPort">${jmx.remote.port}</property>
+			<property name="pass">${app.server.tomcat.manager.password}</property>
+			<property name="user">${app.server.tomcat.manager.user}</property>
+		</configuration>
+	</container>
+</arquillian>]]></echo>
+				</then>
+			</if>
+		</sequential>
+	</macrodef>
+
+	<macrodef name="setup-tomcat-jmx">
+		<sequential>
+			<if>
+				<os family="unix" />
+				<then>
+					<echo file="${app.server.tomcat.dir}/bin/setenv.sh" append="true">
+						<![CDATA[
+							JMX_OPTS="-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=${jmx.remote.authenticate} -Dcom.sun.management.jmxremote.port=${jmx.remote.port} -Dcom.sun.management.jmxremote.ssl=${jmx.remote.ssl}"
+
+							CATALINA_OPTS="${CATALINA_OPTS} ${JMX_OPTS}"
+						]]>
+					</echo>
+				</then>
+				<else>
+					<echo file="${app.server.tomcat.dir}/bin/setenv.bat" append="true">
+						<![CDATA[
+							set JMX_OPTS="-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=${jmx.remote.authenticate} -Dcom.sun.management.jmxremote.port=${jmx.remote.port} -Dcom.sun.management.jmxremote.ssl=${jmx.remote.ssl}"
+
+							set CATALINA_OPTS="%CATALINA_OPTS% %JMX_OPTS%"
+						]]>
+					</echo>
+				</else>
+			</if>
+		</sequential>
+	</macrodef>
+
+	<macrodef name="setup-tomcat-manager">
+		<sequential>
+			<if>
+				<not>
+					<available file="${app.server.tomcat.dir}/webapps/manager" type="dir" />
+				</not>
+				<then>
+					<antelope:stringutil string="${app.server.tomcat.dir}" property="tomcat.version.beginindex">
+						<antelope:indexof string="tomcat-" fromindex="0" />
+					</antelope:stringutil>
+
+					<antelope:math
+						datatype="int"
+						operand1="${tomcat.version.beginindex}"
+						operand2="7"
+						operation="+"
+						result="tomcat.version.beginindex"
+					/>
+
+					<antelope:stringutil string="${app.server.tomcat.dir}" property="tomcat.version">
+						<antelope:substring beginindex="${tomcat.version.beginindex}" />
+					</antelope:stringutil>
+
+					<antelope:stringutil string="${tomcat.version}" property="tomcat.major.version.endindex">
+						<antelope:indexof string="." fromindex="0" />
+					</antelope:stringutil>
+
+					<antelope:stringutil string="${tomcat.version}" property="tomcat.major.version">
+						<antelope:substring beginindex="0" endindex="${tomcat.major.version.endindex}" />
+					</antelope:stringutil>
+
+					<get
+						dest="tomcat.zip"
+						src="http://archive.apache.org/dist/tomcat/tomcat-${tomcat.major.version}/v${tomcat.version}/bin/apache-tomcat-${tomcat.version}.zip"
+					/>
+
+			        <unzip
+						dest="${app.server.tomcat.dir}/webapps/"
+						src="tomcat.zip"
+			        >
+						<patternset
+							includes="apache-tomcat-${tomcat.version}/webapps/manager/**/*"
+						/>
+						<mapper>
+							<globmapper from="apache-tomcat-${tomcat.version}/webapps/*" to="*"/>
+						</mapper>
+			        </unzip>
+
+			        <delete file="tomcat.zip" />
+
+					<copy
+						file="${app.server.tomcat.dir}/conf/tomcat-users.xml"
+						overwrite="true"
+						tofile="${app.server.tomcat.dir}/conf/tomcat-users.xml.orig"
+					/>
+
+					<echo file="${app.server.tomcat.dir}/conf/tomcat-users.xml">
+						<![CDATA[
+							<?xml version="1.0"?>
+
+							<tomcat-users>
+								<role rolename="tomcat" />
+								<role rolename="manager-gui" />
+								<role rolename="manager-script" />
+								<role rolename="manager-jmx" />
+								<role rolename="manager-status" />
+								<user
+									password="${app.server.tomcat.manager.password}"
+									roles="tomcat,manager-gui,manager-script,manager-jmx,manager-status"
+									username="${app.server.tomcat.manager.user}"
+								/>
+							</tomcat-users>
+						]]>
+					</echo>
+				</then>
+			</if>
+		</sequential>
+	</macrodef>
+
 	<macrodef name="test">
 		<attribute name="module.dir" />
 
@@ -2017,14 +2174,29 @@ Please find a solution that does not require portal-impl.jar.
 						test.type="@{test.type}"
 					/>
 
-					<path id="plugin-test-type.classpath">
-						<pathelement location="@{module.dir}/test-classes/@{test.type}" />
-					</path>
+					<if>
+						<available file="@{module.dir}/ivy.xml" />
+						<then>
+							<path id="plugin-test-type.classpath">
+								<pathelement location="@{module.dir}/test-classes/@{test.type}" />
+								<ivy:resources
+									conf="test"
+									file="@{module.dir}/ivy.xml"
+									transitive="${ivy.resolve.transitive.dependencies}"
+								/>
+							</path>
+						</then>
+						<else>
+							<path id="plugin-test-type.classpath">
+								<pathelement location="@{module.dir}/test-classes/@{test.type}" />
+							</path>
+						</else>
+					</if>
 
 					<if>
 						<available file="@{module.dir}/test/@{test.type}" type="dir" />
 						<then>
-							<junit dir="${sdk.dir}" fork="on" forkmode="@{junit.forkmode}" outputtoformatters="false" printsummary="on" showoutput="true">
+							<junit dir="@{module.dir}" fork="on" forkmode="@{junit.forkmode}" outputtoformatters="false" printsummary="on" showoutput="true">
 								<sysproperty key="app.server.tomcat.dir" value="${app.server.tomcat.dir}" />
 								<sysproperty key="net.sourceforge.cobertura.datafile" file="@{module.dir}/test-coverage/cobertura.ser" />
 								<jvmarg line="${junit.debug.jpda}" />
@@ -2459,6 +2631,13 @@ for (String path : paths) {
 		</tstamp>
 
 		<echo message="${current.time}" />
+	</target>
+
+	<target name="setup-arquillian">
+		<loop-macrodef-or-target
+			module.dirs="${plugins.includes.path}"
+			target.name="setup-arquillian"
+		/>
 	</target>
 
 	<target name="setup-eclipse">
