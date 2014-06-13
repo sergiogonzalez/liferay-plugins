@@ -1,4 +1,3 @@
-<%--
 /**
  * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
@@ -12,17 +11,27 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
---%>
 
-<%@ include file="/admin/init.jsp" %>
+package com.liferay.knowledgebase.hook.upgrade;
 
-<%
-KBArticle kbArticle = (KBArticle)request.getAttribute(WebKeys.KNOWLEDGE_BASE_KB_ARTICLE);
-%>
+import com.liferay.knowledgebase.hook.upgrade.v1_4_0.UpgradeRatingsEntry;
+import com.liferay.knowledgebase.hook.upgrade.v1_4_0.UpgradeRatingsStats;
+import com.liferay.portal.kernel.upgrade.UpgradeProcess;
 
-<c:if test="<%= enableKBArticleRatings %>">
-	<liferay-ui:ratings
-		className="<%= KBArticle.class.getName() %>"
-		classPK="<%= kbArticle.getResourcePrimKey() %>"
-	/>
-</c:if>
+/**
+ * @author Peter Shin
+ */
+public class UpgradeProcess_1_4_0 extends UpgradeProcess {
+
+	@Override
+	public int getThreshold() {
+		return 140;
+	}
+
+	@Override
+	protected void doUpgrade() throws Exception {
+		upgrade(UpgradeRatingsEntry.class);
+		upgrade(UpgradeRatingsStats.class);
+	}
+
+}
