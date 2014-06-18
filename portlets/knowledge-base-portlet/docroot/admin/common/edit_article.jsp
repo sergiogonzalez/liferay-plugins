@@ -24,6 +24,11 @@ KBTemplate kbTemplate = (KBTemplate)request.getAttribute(WebKeys.KNOWLEDGE_BASE_
 long resourcePrimKey = BeanParamUtil.getLong(kbArticle, request, "resourcePrimKey");
 
 long parentResourcePrimKey = BeanParamUtil.getLong(kbArticle, request, "parentResourcePrimKey", KBArticleConstants.DEFAULT_PARENT_RESOURCE_PRIM_KEY);
+
+if (kbArticle != null && parentResourcePrimKey == kbArticle.getKbArticleId()) {
+	kbArticle = null;
+}
+
 String content = BeanParamUtil.getString(kbArticle, request, "content", BeanPropertiesUtil.getString(kbTemplate, "content"));
 String[] sections = AdminUtil.unescapeSections(BeanPropertiesUtil.getString(kbArticle, "sections", StringUtil.merge(PortletPropsValues.ADMIN_KB_ARTICLE_DEFAULT_SECTIONS)));
 
