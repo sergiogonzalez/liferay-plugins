@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+
+<ivy-module
+	version="2.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ant.apache.org/ivy/schemas/ivy.xsd"
+>
+	<info module="knowledge-base-portlet" organisation="com.liferay" />
+
+	<dependencies defaultconf="default">
+		<dependency org="asm" name="asm-analysis" rev="3.3"/>
+		<dependency org="asm" name="asm-commons" rev="3.3"/>
+		<dependency org="asm" name="asm-tree" rev="3.3"/>
+		<dependency org="asm" name="asm-util" rev="3.3"/>
+		<dependency org="asm" name="asm-xml" rev="3.3"/>
+		<dependency org="asm" name="asm" rev="3.3"/>
+		<dependency org="org.parboiled" name="parboiled-core" rev="1.1.6"/>
+		<dependency org="org.parboiled" name="parboiled-java" rev="1.1.6"/>
+		<dependency org="org.pegdown" name="pegdown" rev="1.4.2"/>
+	</dependencies>
+</ivy-module>
