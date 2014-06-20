@@ -302,9 +302,9 @@ else if (tabs2.equals("article-updated-email")) {
 
 						<aui:input label="show-asset-entries" name="preferences--showKBArticleAssetEntries--" type="checkbox" value="<%= showKBArticleAssetEntries %>" />
 
-						<aui:input label="enable-comments" name="preferences--enableKBArticleKBComments--" type="checkbox" value="<%= enableKBArticleKBComments %>" />
+						<aui:input label="enable-feedback" name="preferences--enableKBArticleFeedback--" type="checkbox" value="<%= enableKBArticleFeedback %>" />
 
-						<aui:input label="show-comments" name="preferences--showKBArticleKBComments--" type="checkbox" value="<%= showKBArticleKBComments %>" />
+						<aui:input label="show-feedback" name="preferences--showKBArticleFeedback--" type="checkbox" value="<%= showKBArticleFeedback %>" />
 
 						<aui:input label="enable-view-count-increment" name="preferences--enableKBArticleViewCountIncrement--" type="checkbox" value="<%= enableKBArticleViewCountIncrement %>" />
 					</c:when>
