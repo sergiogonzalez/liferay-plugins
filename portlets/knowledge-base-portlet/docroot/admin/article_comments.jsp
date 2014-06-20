@@ -34,7 +34,7 @@ long kbCommentId = BeanParamUtil.getLong(kbComment, request, "kbCommentId");
 boolean helpful = BeanParamUtil.getBoolean(kbComment, request, "helpful", true);
 %>
 
-<c:if test="<%= ((enableKBArticleKBComments && themeDisplay.isSignedIn()) || showKBArticleKBComments) && (kbArticle.isApproved() || !kbArticle.isFirstVersion()) %>">
+<c:if test="<%= ((enableKBArticleFeedback && themeDisplay.isSignedIn()) || showKBArticleFeedback) && (kbArticle.isApproved() || !kbArticle.isFirstVersion()) %>">
 	<div class="kb-article-comments">
 		<aui:form method="post" name="fm" onSubmit='<%= "event.preventDefault(); " + renderResponse.getNamespace() + "updateKBComment();" %>'>
 			<aui:input name="<%= Constants.CMD %>" type="hidden" />
@@ -47,7 +47,7 @@ boolean helpful = BeanParamUtil.getBoolean(kbComment, request, "helpful", true);
 			<aui:model-context model="<%= KBComment.class %>" />
 
 			<aui:fieldset>
-				<c:if test="<%= enableKBArticleKBComments && themeDisplay.isSignedIn() %>">
+				<c:if test="<%= enableKBArticleFeedback && themeDisplay.isSignedIn() %>">
 					<c:if test="<%= kbComment == null %>">
 						<liferay-ui:message key="did-you-like-this-article" /> <a href="javascript:<portlet:namespace />showFeedbackControls();"><liferay-ui:message key="help-us-improve-it" /></a>
 					</c:if>
@@ -98,7 +98,7 @@ boolean helpful = BeanParamUtil.getBoolean(kbComment, request, "helpful", true);
 					</div>
 				</c:if>
 
-				<c:if test="<%= showKBArticleKBComments %>">
+				<c:if test="<%= showKBArticleFeedback %>">
 					<liferay-portlet:renderURL varImpl="iteratorURL">
 						<portlet:param name="mvcPath" value='<%= templatePath + "view_article.jsp" %>' />
 						<portlet:param name="resourcePrimKey" value="<%= String.valueOf(kbArticle.getResourcePrimKey()) %>" />
