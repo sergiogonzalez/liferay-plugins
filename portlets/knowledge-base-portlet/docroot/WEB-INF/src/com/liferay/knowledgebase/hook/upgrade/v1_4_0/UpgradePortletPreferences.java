@@ -39,7 +39,7 @@ public class UpgradePortletPreferences extends BaseUpgradePortletPreferences {
 		boolean value = GetterUtil.getBoolean(
 			portletPreferences.getValue(oldName, null));
 
-		portletPreferences.setValue(newName, Boolean.toString(value));
+		portletPreferences.setValue(newName, String.valueOf(value));
 
 		portletPreferences.reset(oldName);
 	}
