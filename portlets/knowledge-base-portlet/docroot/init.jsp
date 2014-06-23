@@ -50,6 +50,7 @@ page import="com.liferay.knowledgebase.service.permission.KBArticlePermission" %
 page import="com.liferay.knowledgebase.service.permission.KBCommentPermission" %><%@
 page import="com.liferay.knowledgebase.service.permission.KBTemplatePermission" %><%@
 page import="com.liferay.knowledgebase.util.ActionKeys" %><%@
+page import="com.liferay.knowledgebase.util.KnowledgeBaseConstants" %><%@
 page import="com.liferay.knowledgebase.util.KnowledgeBaseUtil" %><%@
 page import="com.liferay.knowledgebase.util.PortletKeys" %><%@
 page import="com.liferay.knowledgebase.util.PortletPropsValues" %><%@
