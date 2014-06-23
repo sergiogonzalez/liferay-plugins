@@ -28,18 +28,18 @@ PortletURL microblogsEntriesURL = (PortletURL)request.getAttribute(WebKeys.MICRO
 <c:if test="<%= microblogsEntries.isEmpty() %>">
 
 	<%
-	String message = LanguageUtil.get(pageContext, "there-are-no-microblog-entries");
+	String message = LanguageUtil.get(request, "there-are-no-microblog-entries");
 
 	Group group = themeDisplay.getScopeGroup();
 
 	if (group.isUser()) {
 		if (group.getGroupId() == user.getGroupId()) {
-			message = LanguageUtil.get(pageContext, "you-do-not-have-any-microblog-entries");
+			message = LanguageUtil.get(request, "you-do-not-have-any-microblog-entries");
 		}
 		else {
 			User user2 = UserLocalServiceUtil.getUser(group.getClassPK());
 
-			message = LanguageUtil.format(pageContext, "x-does-not-have-any-microblog-entries" , HtmlUtil.escape(user2.getFullName()), false);
+			message = LanguageUtil.format(request, "x-does-not-have-any-microblog-entries" , HtmlUtil.escape(user2.getFullName()), false);
 		}
 	}
 	%>
@@ -70,7 +70,7 @@ if (microblogsEntries != null) {
 
 		<div class="microblogs-entry" id="<portlet:namespace />microblogsEntry<%= microblogsEntry.getMicroblogsEntryId() %>">
 			<span class="thumbnail">
-				<a href="<%= userDisplayURL %>"><img alt="<%= userFullName %>" src="<%= userPortaitURL %>" /></a>
+				<a href="<%= userDisplayURL %>"><img alt="<%= HtmlUtil.escapeAttribute(userFullName) %>" src="<%= userPortaitURL %>" /></a>
 			</span>
 
 			<div class="entry-bubble">
@@ -125,7 +125,7 @@ if (microblogsEntries != null) {
 							</portlet:renderURL>
 
 							<%
-							String repostURL = "javascript:Liferay.Microblogs.displayPopup('" + repostMicroblogsEntryURL + "','" + LanguageUtil.get(pageContext, "repost") + "');";
+							String repostURL = "javascript:Liferay.Microblogs.displayPopup('" + repostMicroblogsEntryURL + "','" + LanguageUtil.get(request, "repost") + "');";
 							%>
 
 							<span class="action repost">

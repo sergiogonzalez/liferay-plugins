@@ -56,7 +56,7 @@ catch (NoSuchRoleException nsre) {
 			</liferay-portlet:actionURL>
 
 			<a class="so-logo" href="<%= dashboardURL %>">
-				<img alt="<liferay-ui:message key="social-office" /> <liferay-ui:message key="logo" />" height="32" src="<%= PortalUtil.getPathContext(request) + "/user_bar/images/so_logo.png" %>" width="32" />
+				<img alt="<liferay-ui:message escapeAttribute="<%= true %>" key="social-office" /> <liferay-ui:message escapeAttribute="<%= true %>" key="logo" />" height="32" src='<%= PortalUtil.getPathContext(request) + "/user_bar/images/so_logo.png" %>' width="32" />
 			</a>
 
 			<nav>
@@ -104,7 +104,7 @@ catch (NoSuchRoleException nsre) {
 					resizable: false,
 					width: 650
 				},
-				title: '<%= UnicodeLanguageUtil.get(pageContext, "sites-directory") %>',
+				title: '<%= UnicodeLanguageUtil.get(request, "sites-directory") %>',
 
 				<liferay-portlet:renderURL portletName="<%= PortletKeys.SO_SITES %>" var="viewSitesURL" windowState="<%= LiferayWindowState.POP_UP.toString() %>">
 					<portlet:param name="mvcPath" value="/sites/view_sites.jsp" />
