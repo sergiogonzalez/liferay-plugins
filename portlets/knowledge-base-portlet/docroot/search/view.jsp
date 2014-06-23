@@ -33,13 +33,34 @@
 </aui:nav-bar>
 
 <aui:script use="autocomplete,autocomplete-highlighters">
-	A.one('#<portlet:namespace />kbSearchButton').plug(
+	var node = A.one('#<portlet:namespace />kbSearchButton');
+
+	node.plug(
 		A.Plugin.AutoComplete,
 		{
 			requestTemplate: '&<portlet:namespace />query={query}',
 			resultHighlighter: 'phraseMatch',
 			resultTextLocator: 'title',
 			source: '<portlet:resourceURL id="incrementalSearchResults" />'
+		}
+	);
+
+	node.ac.on(
+		'select',
+		function(e) {
+			var kbArticle = e.result.raw;
+			var classPK = kbArticle.id;
+
+			var baseURL = '<portlet:renderURL />';
+			var renderURL = Liferay.PortletURL.createURL(
+				baseURL,
+				{
+					mvcPath: '/search/view_article.jsp',
+					resourcePrimKey: classPK
+				}
+			);
+
+			document.location = renderURL.toString();
 		}
 	);
 </aui:script>
