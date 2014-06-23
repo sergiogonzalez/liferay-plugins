@@ -21,6 +21,7 @@ import com.liferay.knowledgebase.KBCommentContentException;
 import com.liferay.knowledgebase.NoSuchArticleException;
 import com.liferay.knowledgebase.NoSuchCommentException;
 import com.liferay.knowledgebase.model.KBArticle;
+import com.liferay.knowledgebase.model.KBArticleConstants;
 import com.liferay.knowledgebase.model.KBComment;
 import com.liferay.knowledgebase.service.KBArticleLocalServiceUtil;
 import com.liferay.knowledgebase.service.KBArticleServiceUtil;
@@ -193,27 +194,33 @@ public class DisplayPortlet extends MVCPortlet {
 
 			renderRequest.setAttribute(WebKeys.KNOWLEDGE_BASE_STATUS, status);
 
-			KBArticle kbArticle = null;
+			long parentResourcePrimKey = ParamUtil.getLong(
+				renderRequest, "parentResourcePrimKey",
+				KBArticleConstants.DEFAULT_PARENT_RESOURCE_PRIM_KEY);
 
-			long resourcePrimKey = getResourcePrimKey(renderRequest);
+			if (parentResourcePrimKey !=
+					KBArticleConstants.DEFAULT_PARENT_RESOURCE_PRIM_KEY) {
 
-			if (resourcePrimKey > 0) {
-				kbArticle = KBArticleServiceUtil.getLatestKBArticle(
-					resourcePrimKey, status);
-			}
-			else {
-				List<KBArticle> kbArticles =
-					KBArticleLocalServiceUtil.getGroupKBArticles(
-						themeDisplay.getScopeGroupId(), status, 0, 1,
-						new KBArticlePriorityComparator());
+				KBArticle kbArticle = null;
 
-				if (!kbArticles.isEmpty()) {
-					kbArticle = kbArticles.get(0);
+				long resourcePrimKey = getResourcePrimKey(renderRequest);
+
+				if (resourcePrimKey > 0) {
+					kbArticle = KBArticleServiceUtil.getLatestKBArticle(
+						resourcePrimKey, status);
+				} else {
+					List<KBArticle> kbArticles =
+						KBArticleLocalServiceUtil.getGroupKBArticles(
+							themeDisplay.getScopeGroupId(), status, 0, 1, null);
+
+					if (!kbArticles.isEmpty()) {
+						kbArticle = kbArticles.get(0);
+					}
 				}
-			}
 
-			renderRequest.setAttribute(
-				WebKeys.KNOWLEDGE_BASE_KB_ARTICLE, kbArticle);
+				renderRequest.setAttribute(
+					WebKeys.KNOWLEDGE_BASE_KB_ARTICLE, kbArticle);
+			}
 		}
 		catch (Exception e) {
 			if (e instanceof NoSuchArticleException ||
