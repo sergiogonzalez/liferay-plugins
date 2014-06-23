@@ -145,18 +145,18 @@ if (entry == null) {
 				%>
 
 				<a href="<%= currentUser.getDisplayURL(themeDisplay) %>">
-					<img alt="<%= currentUser.getFullName() %>" src="<%= currentUser.getPortraitURL(themeDisplay) %>" />
+					<img alt="<%= HtmlUtil.escapeAttribute(currentUser.getFullName()) %>" src="<%= currentUser.getPortraitURL(themeDisplay) %>" />
 				</a>
 			</span>
 		</div>
 
 		<div class="entry-header">
 			<div class="entry-action">
-				<%= LanguageUtil.format(pageContext, "x-to-x", new Object[] {"<a href=\"" + currentUser.getDisplayURL(themeDisplay) + "\">" + HtmlUtil.escape(currentUser.getFullName()) + "</a>", "<span class=\"scope\" id=\"" + renderResponse.getNamespace() + "scope\"></span>"}, false) %>
+				<%= LanguageUtil.format(request, "x-to-x", new Object[] {"<a href=\"" + currentUser.getDisplayURL(themeDisplay) + "\">" + HtmlUtil.escape(currentUser.getFullName()) + "</a>", "<span class=\"scope\" id=\"" + renderResponse.getNamespace() + "scope\"></span>"}, false) %>
 			</div>
 
 			<div class="entry-time">
-				<%= LanguageUtil.get(pageContext, "about-a-minute-ago") %>
+				<%= LanguageUtil.get(request, "about-a-minute-ago") %>
 			</div>
 		</div>
 

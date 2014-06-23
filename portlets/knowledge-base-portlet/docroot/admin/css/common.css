@@ -19,6 +19,12 @@
 	}
 }
 
+.kb-configuration {
+	.kb-ratings-number-of-stars {
+		margin-left: 10px;
+	}
+}
+
 /* ---------- Portal ---------- */
 
 .knowledge-base-portlet {

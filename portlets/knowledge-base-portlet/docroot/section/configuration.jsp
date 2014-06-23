@@ -38,7 +38,7 @@ if (PortalUtil.isRSSFeedsEnabled()) {
 	url="<%= configurationRenderURL %>"
 />
 
-<aui:form action="<%= configurationActionURL %>" method="post" name="fm">
+<aui:form action="<%= configurationActionURL %>" cssClass="kb-configuration" method="post" name="fm">
 	<aui:input name="<%= Constants.CMD %>" type="hidden" value="<%= Constants.UPDATE %>" />
 	<aui:input name="tabs2" type="hidden" value="<%= tabs2 %>" />
 
@@ -55,7 +55,7 @@ if (PortalUtil.isRSSFeedsEnabled()) {
 					Map<String, String> sectionsMap = new TreeMap<String, String>();
 
 					for (String section : PortletPropsValues.ADMIN_KB_ARTICLE_SECTIONS) {
-						sectionsMap.put(LanguageUtil.get(pageContext, section), section);
+						sectionsMap.put(LanguageUtil.get(request, section), section);
 					}
 
 					for (Map.Entry<String, String> entry : sectionsMap.entrySet()) {
@@ -119,6 +119,10 @@ if (PortalUtil.isRSSFeedsEnabled()) {
 
 				<aui:input label="enable-ratings" name="preferences--enableKBArticleRatings--" type="checkbox" value="<%= enableKBArticleRatings %>" />
 
+				<div class="kb-ratings-number-of-stars" id="<portlet:namespace />kbRatingsNumberOfStars">
+					<aui:input label="number-of-stars" name="preferences--kbArticleRatingsStars--" size="10" type="text" value="<%= kbArticleRatingsStars %>" />
+				</div>
+
 				<aui:input label="show-asset-entries" name="preferences--showKBArticleAssetEntries--" type="checkbox" value="<%= showKBArticleAssetEntries %>" />
 
 				<aui:input label="enable-comments" name="preferences--enableKBArticleKBComments--" type="checkbox" value="<%= enableKBArticleKBComments %>" />
@@ -126,6 +130,10 @@ if (PortalUtil.isRSSFeedsEnabled()) {
 				<aui:input label="show-comments" name="preferences--showKBArticleKBComments--" type="checkbox" value="<%= showKBArticleKBComments %>" />
 
 				<aui:input label="enable-view-count-increment" name="preferences--enableKBArticleViewCountIncrement--" type="checkbox" value="<%= enableKBArticleViewCountIncrement %>" />
+
+				<aui:script>
+					Liferay.Util.toggleBoxes('<portlet:namespace />enableKBArticleRatings', '<portlet:namespace />kbRatingsNumberOfStars');
+				</aui:script>
 			</c:when>
 			<c:when test='<%= tabs2.equals("rss") %>'>
 				<liferay-ui:rss-settings

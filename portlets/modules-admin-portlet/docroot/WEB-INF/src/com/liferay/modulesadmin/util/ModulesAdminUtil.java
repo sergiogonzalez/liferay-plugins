@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.PageContext;
 
 import org.osgi.framework.Bundle;
@@ -128,15 +129,18 @@ public class ModulesAdminUtil {
 				sb.append("]}");
 			}
 
+			HttpServletRequest request =
+				(HttpServletRequest)pageContext.getRequest();
+
 			if (!satisfied) {
 				sb.append(" <strong class=\"resolved\">");
-				sb.append(LanguageUtil.get(pageContext, "un-resolved"));
+				sb.append(LanguageUtil.get(request, "un-resolved"));
 				sb.append("</strong>");
 			}
 
 			if (resolution.equals("optional")) {
 				sb.append(" <strong class=\"resolution\">");
-				sb.append(LanguageUtil.get(pageContext, resolution));
+				sb.append(LanguageUtil.get(request, resolution));
 				sb.append("</strong>");
 			}
 

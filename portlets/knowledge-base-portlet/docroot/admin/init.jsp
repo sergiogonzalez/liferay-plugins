@@ -35,7 +35,7 @@ boolean showKBArticleAssetEntries = GetterUtil.getBoolean(portletPreferences.get
 boolean enableKBArticleKBComments = GetterUtil.getBoolean(portletPreferences.getValue("enableKBArticleKBComments", null));
 boolean showKBArticleKBComments = GetterUtil.getBoolean(portletPreferences.getValue("showKBArticleKBComments", null));
 boolean enableKBArticleViewCountIncrement = GetterUtil.getBoolean(portletPreferences.getValue("enableKBArticleViewCountIncrement", null));
-
+int kbArticleRatingsStars = GetterUtil.getInteger(portletPreferences.getValue("kbArticleRatingsStars", null), KnowledgeBaseConstants.DEFAULT_RATINGS_STARS);
 boolean enableKBTemplateKBComments = GetterUtil.getBoolean(portletPreferences.getValue("enableKBTemplateKBComments", null));
 boolean showKBTemplateKBComments = GetterUtil.getBoolean(portletPreferences.getValue("showKBTemplateKBComments", null));
 

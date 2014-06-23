@@ -57,7 +57,7 @@ else if (tabs2.equals("article-updated-email")) {
 	url="<%= configurationRenderURL %>"
 />
 
-<aui:form action="<%= configurationActionURL %>" method="post" name="fm">
+<aui:form action="<%= configurationActionURL %>" cssClass="kb-configuration" method="post" name="fm">
 	<aui:input name="<%= Constants.CMD %>" type="hidden" value="<%= Constants.UPDATE %>" />
 	<aui:input name="tabs2" type="hidden" value="<%= tabs2 %>" />
 	<aui:input name="tabs3" type="hidden" value="<%= tabs3 %>" />
@@ -298,7 +298,11 @@ else if (tabs2.equals("article-updated-email")) {
 					<c:when test='<%= tabs3.equals("article") %>'>
 						<aui:input label="enable-description" name="preferences--enableKBArticleDescription--" type="checkbox" value="<%= enableKBArticleDescription %>" />
 
-						<aui:input label="enable-ratings" name="preferences--enableKBArticleRatings--" type="checkbox" value="<%= enableKBArticleRatings %>" />
+						<aui:input id="<portlet:namespace />enableKBArticleRatings" label="enable-ratings" name="preferences--enableKBArticleRatings--" type="checkbox" value="<%= enableKBArticleRatings %>" />
+
+						<div class="kb-ratings-number-of-stars" id="<portlet:namespace />kbRatingsNumberOfStars">
+							<aui:input label="number-of-stars" name="preferences--kbArticleRatingsStars--" size="10" type="text" value="<%= kbArticleRatingsStars %>" />
+						</div>
 
 						<aui:input label="show-asset-entries" name="preferences--showKBArticleAssetEntries--" type="checkbox" value="<%= showKBArticleAssetEntries %>" />
 
@@ -307,6 +311,10 @@ else if (tabs2.equals("article-updated-email")) {
 						<aui:input label="show-comments" name="preferences--showKBArticleKBComments--" type="checkbox" value="<%= showKBArticleKBComments %>" />
 
 						<aui:input label="enable-view-count-increment" name="preferences--enableKBArticleViewCountIncrement--" type="checkbox" value="<%= enableKBArticleViewCountIncrement %>" />
+
+						<aui:script>
+							Liferay.Util.toggleBoxes('<portlet:namespace />enableKBArticleRatings', '<portlet:namespace />kbRatingsNumberOfStars');
+						</aui:script>
 					</c:when>
 					<c:when test='<%= tabs3.equals("template") %>'>
 						<aui:input label="enable-comments" name="preferences--enableKBTemplateKBComments--" type="checkbox" value="<%= enableKBTemplateKBComments %>" />
