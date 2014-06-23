@@ -38,6 +38,7 @@
 		{
 			requestTemplate: '&<portlet:namespace />query={query}',
 			resultHighlighter: 'phraseMatch',
+			resultTextLocator: 'title',
 			source: '<portlet:resourceURL id="incrementalSearchResults" />'
 		}
 	);
