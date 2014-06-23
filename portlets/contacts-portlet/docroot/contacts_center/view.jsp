@@ -162,7 +162,7 @@ portletURL.setWindowState(WindowState.NORMAL);
 
 								String lastName = user2.getLastName();
 
-								String curLastNameAnchor = LanguageUtil.get(pageContext, "no-last-name");
+								String curLastNameAnchor = LanguageUtil.get(request, "no-last-name");
 
 								if (Validator.isNotNull(lastName)) {
 									curLastNameAnchor = StringUtil.upperCase(lastName.substring(0, 1));
@@ -193,7 +193,7 @@ portletURL.setWindowState(WindowState.NORMAL);
 
 									<div class="lfr-contact-grid-item" data-userId="<%= user2.getUserId() %>" data-viewSummaryURL="<%= viewUserSummaryURL %>">
 										<div class="lfr-contact-thumb">
-											<img alt="<%= HtmlUtil.escape(user2.getFullName()) %>" src="<%= user2.getPortraitURL(themeDisplay) %>" />
+											<img alt="<%= HtmlUtil.escapeAttribute(user2.getFullName()) %>" src="<%= user2.getPortraitURL(themeDisplay) %>" />
 										</div>
 
 										<div class="lfr-contact-info">
@@ -223,7 +223,7 @@ portletURL.setWindowState(WindowState.NORMAL);
 
 								String fullName = entry.getFullName();
 
-								String curLastNameAnchor = LanguageUtil.get(pageContext, "no-last-name");
+								String curLastNameAnchor = LanguageUtil.get(request, "no-last-name");
 
 								if (Validator.isNotNull(fullName)) {
 									curLastNameAnchor = StringUtil.upperCase(fullName.substring(0, 1));
@@ -255,7 +255,7 @@ portletURL.setWindowState(WindowState.NORMAL);
 
 									<div class="lfr-contact-grid-item" data-userId="" data-viewSummaryURL="<%= viewContactSummaryURL %>">
 										<div class="lfr-contact-thumb">
-											<img alt="<%= HtmlUtil.escape(fullName) %>" src='<%= themeDisplay.getPathImage() + "/user_male_portrait?img_id=0&t=" %>' />
+											<img alt="<%= HtmlUtil.escapeAttribute(fullName) %>" src='<%= themeDisplay.getPathImage() + "/user_male_portrait?img_id=0&t=" %>' />
 										</div>
 
 										<div class="lfr-contact-info">
@@ -573,7 +573,7 @@ portletURL.setWindowState(WindowState.NORMAL);
 						addContact.on(
 							'click',
 							function(event) {
-								contactsCenter.showPopup('<%= LanguageUtil.get(pageContext, "add-contact") %>', '<portlet:renderURL windowState="<%= LiferayWindowState.EXCLUSIVE.toString() %>"><portlet:param name="mvcPath" value="/contacts_center/edit_entry.jsp" /><portlet:param name="redirect" value="<%= currentURL %>" /></portlet:renderURL>');
+								contactsCenter.showPopup('<%= LanguageUtil.get(request, "add-contact") %>', '<portlet:renderURL windowState="<%= LiferayWindowState.EXCLUSIVE.toString() %>"><portlet:param name="mvcPath" value="/contacts_center/edit_entry.jsp" /><portlet:param name="redirect" value="<%= currentURL %>" /></portlet:renderURL>');
 							}
 						);
 					}

@@ -21,13 +21,26 @@
 </liferay-portlet:renderURL>
 
 <aui:nav-bar>
-	<aui:nav-bar-search cssClass="pull-right">
+	<aui:nav-bar-search cssClass="pull-right yui3-skin-sam">
 		<div class="form-search">
 			<aui:form action="<%= searchURL %>" method="get" name="searchFm">
 				<liferay-portlet:renderURLParams varImpl="searchURL" />
 
-				<liferay-ui:input-search />
+				<liferay-ui:input-search id="kbSearchButton" />
 			</aui:form>
 		</div>
 	</aui:nav-bar-search>
 </aui:nav-bar>
+
+<aui:script>
+	YUI().use('autocomplete', 'autocomplete-highlighters', function(Y) {
+		Y.one('#<portlet:namespace />kbSearchButton').plug(
+			Y.Plugin.AutoComplete,
+			{
+				requestTemplate: '&<portlet:namespace />query={query}',
+				resultHighlighter: 'phraseMatch',
+				source: '<portlet:resourceURL id="incrementalSearchResults" />'
+			}
+		);
+	});
+</aui:script>
