@@ -31,8 +31,19 @@ import com.liferay.knowledgebase.util.PortletKeys;
 import com.liferay.knowledgebase.util.WebKeys;
 import com.liferay.portal.NoSuchSubscriptionException;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.json.JSONArray;
+import com.liferay.portal.kernel.json.JSONFactoryUtil;
+import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.portlet.PortletResponseUtil;
 import com.liferay.portal.kernel.repository.model.FileEntry;
+import com.liferay.portal.kernel.search.Document;
+import com.liferay.portal.kernel.search.Field;
+import com.liferay.portal.kernel.search.Hits;
+import com.liferay.portal.kernel.search.Indexer;
+import com.liferay.portal.kernel.search.IndexerRegistryUtil;
+import com.liferay.portal.kernel.search.SearchContext;
+import com.liferay.portal.kernel.search.SearchContextFactory;
+import com.liferay.portal.kernel.search.SearchException;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.upload.UploadException;
 import com.liferay.portal.kernel.upload.UploadPortletRequest;
@@ -268,6 +279,10 @@ public class SearchPortlet extends MVCPortlet {
 			}
 			else if (resourceID.equals("kbArticleRSS")) {
 				serveKBArticleRSS(resourceRequest, resourceResponse);
+			}
+			else if (resourceID.equals("incrementalSearchResults")) {
+				serveIncrementalSearchResults(
+					resourceRequest, resourceResponse);
 			}
 		}
 		catch (IOException ioe) {
@@ -554,6 +569,44 @@ public class SearchPortlet extends MVCPortlet {
 		}
 
 		return false;
+	}
+
+	protected void serveIncrementalSearchResults(
+			ResourceRequest resourceRequest, ResourceResponse resourceResponse)
+		throws IOException, SearchException {
+
+		String keywords = ParamUtil.getString(resourceRequest, "query");
+
+		SearchContext searchContext = SearchContextFactory.getInstance(
+			PortalUtil.getHttpServletRequest(resourceRequest));
+
+		searchContext.setAttribute("paginationType", "regular");
+		searchContext.setEnd(10);
+		searchContext.setKeywords(keywords);
+		searchContext.setStart(0);
+
+		Indexer indexer = IndexerRegistryUtil.getIndexer(KBArticle.class);
+
+		Hits hits = indexer.search(searchContext);
+
+		JSONArray jsonArray = JSONFactoryUtil.createJSONArray();
+
+		if (hits.getLength() > 0) {
+			for (Document document : hits.getDocs()) {
+				JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
+
+				jsonObject.put(
+					"id", document.getField(Field.ENTRY_CLASS_PK).getValue());
+				jsonObject.put(
+					"title", document.getField(Field.TITLE).getValue());
+
+				jsonArray.put(jsonObject);
+			}
+		}
+
+		resourceResponse.setContentType(ContentTypes.APPLICATION_JSON);
+
+		PortletResponseUtil.write(resourceResponse, jsonArray.toString());
 	}
 
 }

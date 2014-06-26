@@ -21,13 +21,46 @@
 </liferay-portlet:renderURL>
 
 <aui:nav-bar>
-	<aui:nav-bar-search cssClass="pull-right">
+	<aui:nav-bar-search cssClass="pull-right yui3-skin-sam">
 		<div class="form-search">
 			<aui:form action="<%= searchURL %>" method="get" name="searchFm">
 				<liferay-portlet:renderURLParams varImpl="searchURL" />
 
-				<liferay-ui:input-search />
+				<liferay-ui:input-search id="kbSearchButton" />
 			</aui:form>
 		</div>
 	</aui:nav-bar-search>
 </aui:nav-bar>
+
+<aui:script use="autocomplete,autocomplete-highlighters">
+	var node = A.one('#<portlet:namespace />kbSearchButton');
+
+	node.plug(
+		A.Plugin.AutoComplete,
+		{
+			requestTemplate: '&<portlet:namespace />query={query}',
+			resultHighlighter: 'phraseMatch',
+			resultTextLocator: 'title',
+			source: '<portlet:resourceURL id="incrementalSearchResults" />'
+		}
+	);
+
+	node.ac.on(
+		'select',
+		function(e) {
+			var kbArticle = e.result.raw;
+			var classPK = kbArticle.id;
+
+			var baseURL = '<portlet:renderURL />';
+			var renderURL = Liferay.PortletURL.createURL(
+				baseURL,
+				{
+					mvcPath: '/search/view_article.jsp',
+					resourcePrimKey: classPK
+				}
+			);
+
+			document.location = renderURL.toString();
+		}
+	);
+</aui:script>
