@@ -15,11 +15,11 @@
 package com.liferay.mentions.hook.service.impl;
 
 import com.liferay.mentions.util.MentionsConstants;
+import com.liferay.mentions.util.MentionsUserFinderUtil;
 import com.liferay.mentions.util.MentionsUtil;
 import com.liferay.mentions.util.PortletKeys;
 import com.liferay.mentions.util.PortletPropsValues;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.PrefsPropsUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
@@ -32,9 +32,12 @@ import com.liferay.portal.util.SubscriptionSender;
 import com.liferay.portlet.messageboards.model.MBMessage;
 import com.liferay.portlet.messageboards.service.MBMessageLocalService;
 import com.liferay.portlet.messageboards.service.MBMessageLocalServiceWrapper;
+import com.liferay.portlet.social.util.SocialInteractionsConfiguration;
+import com.liferay.portlet.social.util.SocialInteractionsConfigurationUtil;
 import com.liferay.util.ContentUtil;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -56,7 +59,7 @@ public class MentionsMessageServiceImpl extends MBMessageLocalServiceWrapper {
 			long userId, String userName, long groupId, String className,
 			long classPK, long threadId, long parentMessageId, String subject,
 			String body, ServiceContext serviceContext)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		MBMessage message = super.addDiscussionMessage(
 			userId, userName, groupId, className, classPK, threadId,
@@ -77,7 +80,7 @@ public class MentionsMessageServiceImpl extends MBMessageLocalServiceWrapper {
 	public MBMessage updateDiscussionMessage(
 			long userId, long messageId, String className, long classPK,
 			String subject, String body, ServiceContext serviceContext)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		MBMessage message = super.updateDiscussionMessage(
 			userId, messageId, className, classPK, subject, body,
@@ -94,7 +97,14 @@ public class MentionsMessageServiceImpl extends MBMessageLocalServiceWrapper {
 		return message;
 	}
 
-	protected String[] getMentionedUsersScreenNames(MBMessage message) {
+	protected String[] getMentionedUsersScreenNames(MBMessage message)
+		throws PortalException {
+
+		SocialInteractionsConfiguration socialInteractionsConfiguration =
+			SocialInteractionsConfigurationUtil.
+				getSocialInteractionsConfiguration(
+					message.getCompanyId(), PortletKeys.MENTIONS);
+
 		Matcher matcher = _pattern.matcher(message.getBody());
 
 		Set<String> mentionedUsersScreenNames = new HashSet<String>();
@@ -102,7 +112,17 @@ public class MentionsMessageServiceImpl extends MBMessageLocalServiceWrapper {
 		while (matcher.find()) {
 			String mentionedUserScreenName = matcher.group(1);
 
-			mentionedUsersScreenNames.add(mentionedUserScreenName);
+			List<User> users = MentionsUserFinderUtil.getUsers(
+				message.getCompanyId(), message.getUserId(),
+				mentionedUserScreenName, socialInteractionsConfiguration);
+
+			for (User user : users) {
+				if (mentionedUserScreenName.equals(user.getScreenName())) {
+					mentionedUsersScreenNames.add(mentionedUserScreenName);
+
+					break;
+				}
+			}
 		}
 
 		return mentionedUsersScreenNames.toArray(
@@ -110,7 +130,7 @@ public class MentionsMessageServiceImpl extends MBMessageLocalServiceWrapper {
 	}
 
 	protected void notifyUsers(MBMessage message, ServiceContext serviceContext)
-		throws SystemException {
+		throws PortalException {
 
 		if (!message.isDiscussion()) {
 			return;
