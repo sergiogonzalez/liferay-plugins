@@ -63,4 +63,8 @@ public class PortletPropsValues {
 	public static final String[] ADMIN_KB_ARTICLE_SECTIONS =
 		PortletProps.getArray(PortletPropsKeys.ADMIN_KB_ARTICLE_SECTIONS);
 
+	public static final String[] MARKDOWN_IMPORTER_IMAGE_FILE_EXTENSIONS =
+		PortletProps.getArray(
+			PortletPropsKeys.MARKDOWN_IMPORTER_IMAGE_FILE_EXTENSIONS);
+
 }
