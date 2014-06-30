@@ -22,6 +22,7 @@ import com.liferay.knowledgebase.service.permission.KBArticlePermission;
 import com.liferay.knowledgebase.util.ActionKeys;
 import com.liferay.knowledgebase.util.PortletKeys;
 import com.liferay.portal.NoSuchLayoutException;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.portlet.LiferayWindowState;
 import com.liferay.portal.kernel.struts.BaseStrutsAction;
 import com.liferay.portal.kernel.struts.StrutsAction;
@@ -35,6 +36,7 @@ import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
+import com.liferay.portal.model.Group;
 import com.liferay.portal.model.Layout;
 import com.liferay.portal.model.LayoutConstants;
 import com.liferay.portal.model.LayoutTypePortlet;
@@ -43,7 +45,9 @@ import com.liferay.portal.model.PortletConstants;
 import com.liferay.portal.security.auth.AuthTokenUtil;
 import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.security.permission.PermissionThreadLocal;
+import com.liferay.portal.service.GroupLocalServiceUtil;
 import com.liferay.portal.service.LayoutLocalServiceUtil;
+import com.liferay.portal.service.permission.LayoutPermissionUtil;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portlet.PortletPreferencesFactoryUtil;
@@ -73,19 +77,19 @@ public class FindKBArticleAction extends BaseStrutsAction {
 		ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
-		long plid = ParamUtil.getLong(request, "plid");
+		long defaultPlid = ParamUtil.getLong(
+			request, "plid", themeDisplay.getPlid());
 		long resourcePrimKey = ParamUtil.getLong(request, "resourcePrimKey");
 		int status = ParamUtil.getInteger(
 			request, "status", WorkflowConstants.STATUS_APPROVED);
 		boolean maximized = ParamUtil.getBoolean(request, "maximized");
 
-		if (!isValidPlid(plid)) {
-			plid = themeDisplay.getPlid();
-		}
+		KBArticle kbArticle = getKBArticle(resourcePrimKey, status);
+
+		long plid = findTargetPlid(
+			themeDisplay.getPermissionChecker(), kbArticle, defaultPlid);
 
 		PortletURL portletURL = null;
-
-		KBArticle kbArticle = getKBArticle(resourcePrimKey, status);
 
 		if (kbArticle == null) {
 			portletURL = getDynamicPortletURL(plid, status, request);
@@ -115,6 +119,39 @@ public class FindKBArticleAction extends BaseStrutsAction {
 		response.sendRedirect(portletURL.toString());
 
 		return null;
+	}
+
+	protected long findTargetPlid(
+			PermissionChecker permissionChecker, KBArticle kbArticle,
+			long defaultPlid)
+		throws PortalException {
+
+		long groupId = kbArticle.getGroupId();
+
+		Group group = GroupLocalServiceUtil.getGroup(groupId);
+
+		if (group.isLayout()) {
+			Layout layout = LayoutLocalServiceUtil.getLayout(
+				group.getClassPK());
+
+			return layout.getPlid();
+		}
+
+		long publicLayoutPlid = scanGroupLayouts(
+			permissionChecker, groupId, false);
+
+		if (isValidPlid(publicLayoutPlid)) {
+			return publicLayoutPlid;
+		}
+
+		long privateLayoutPlid = scanGroupLayouts(
+			permissionChecker, groupId, true);
+
+		if (isValidPlid(publicLayoutPlid)) {
+			return privateLayoutPlid;
+		}
+
+		return defaultPlid;
 	}
 
 	protected PortletURL getDynamicPortletURL(
@@ -327,7 +364,7 @@ public class FindKBArticleAction extends BaseStrutsAction {
 		return PortletKeys.KNOWLEDGE_BASE_ARTICLE_DEFAULT_INSTANCE;
 	}
 
-	protected boolean isValidPlid(long plid) throws Exception {
+	protected boolean isValidPlid(long plid) throws PortalException {
 		try {
 			LayoutLocalServiceUtil.getLayout(plid);
 		}
@@ -336,6 +373,34 @@ public class FindKBArticleAction extends BaseStrutsAction {
 		}
 
 		return true;
+	}
+
+	protected long scanGroupLayouts(
+			PermissionChecker permissionChecker, long groupId,
+			boolean privateLayout)
+		throws PortalException {
+
+		Iterable<Layout> groupLayouts = LayoutLocalServiceUtil.getLayouts(
+			groupId, privateLayout, LayoutConstants.TYPE_PORTLET);
+
+		for (Layout layout : groupLayouts) {
+			if (!LayoutPermissionUtil.contains(
+					permissionChecker, layout, ActionKeys.VIEW)) {
+
+				continue;
+			}
+
+			LayoutTypePortlet layoutTypePortlet =
+				(LayoutTypePortlet)layout.getLayoutType();
+
+			if (layoutTypePortlet.hasPortletId(
+					PortletKeys.KNOWLEDGE_BASE_DISPLAY)) {
+
+				return layout.getPlid();
+			}
+		}
+
+		return LayoutConstants.DEFAULT_PLID;
 	}
 
 	private static final boolean _PORTLET_ADD_DEFAULT_RESOURCE_CHECK_ENABLED =
