@@ -35,8 +35,8 @@ boolean helpful = BeanParamUtil.getBoolean(kbComment, request, "helpful", true);
 %>
 
 <c:if test="<%= ((enableKBArticleKBComments && themeDisplay.isSignedIn()) || showKBArticleKBComments) && (kbArticle.isApproved() || !kbArticle.isFirstVersion()) %>">
-	<div class="kb-article-comments">
-		<aui:form method="post" name="fm" onSubmit='<%= "event.preventDefault(); " + renderResponse.getNamespace() + "updateKBComment();" %>'>
+	<div class="kb-article-comments" id="<portlet:namespace />userFeedback">
+		<aui:form id="fm" method="post" name="fm">
 			<aui:input name="<%= Constants.CMD %>" type="hidden" />
 			<aui:input name="kbCommentId" type="hidden" value="<%= kbCommentId %>" />
 			<aui:input name="classNameId" type="hidden" value="<%= PortalUtil.getClassNameId(KBArticle.class) %>" />
@@ -49,7 +49,7 @@ boolean helpful = BeanParamUtil.getBoolean(kbComment, request, "helpful", true);
 			<aui:fieldset>
 				<c:if test="<%= enableKBArticleKBComments && themeDisplay.isSignedIn() %>">
 					<c:if test="<%= kbComment == null %>">
-						<liferay-ui:message key="did-you-like-this-article" /> <a id="<portlet:namespace />showFeedbackControl" href="javascript:;"><liferay-ui:message key="help-us-improve-it" /></a>
+						<liferay-ui:message key="did-you-like-this-article" /> <a id="<portlet:namespace />showFeedbackControl" href="javascript:void(0);"><liferay-ui:message key="help-us-improve-it" /></a>
 					</c:if>
 
 					<div class="kb-helpful-container <%= (kbComment != null) ? StringPool.BLANK : "hide" %>" id="<portlet:namespace />feedbackControls">
@@ -70,13 +70,16 @@ boolean helpful = BeanParamUtil.getBoolean(kbComment, request, "helpful", true);
 						<aui:button-row cssClass="kb-submit-buttons">
 							<aui:button type="submit" value="submit" />
 
+							<%
+							Map<String, Object> deleteButtonData = new java.util.HashMap<String, Object>();
+
+							if (kbComment != null) {
+								deleteButtonData.put("comment-id", Long.toString(kbComment.getKbCommentId()));
+							}
+							%>
+
 							<c:if test="<%= kbComment != null %>">
-
-								<%
-								String deleteURL = "javascript:" + renderResponse.getNamespace() + "deleteKBComment(" + kbComment.getKbCommentId() + ");";
-								%>
-
-								<aui:button onClick="<%= deleteURL %>" type="button" value="delete-feedback" />
+								<aui:button cssClass="kb-article-delete-feedback" data="<%= deleteButtonData %>" type="button" value="delete-feedback" />
 							</c:if>
 						</aui:button-row>
 					</div>
@@ -133,27 +136,49 @@ boolean helpful = BeanParamUtil.getBoolean(kbComment, request, "helpful", true);
 	<aui:script use="aui-base">
 		var showFeedbackControlNode = A.one('#<portlet:namespace />showFeedbackControl');
 
-		showFeedbackControlNode.on(
+		if (showFeedbackControlNode) {
+			showFeedbackControlNode.on(
+				'click',
+				function() {
+					var feedbackControlsNode = A.one('#<portlet:namespace />feedbackControls');
+
+					feedbackControlsNode.show();
+
+					var contentNode = A.one('#<portlet:namespace />content');
+
+					contentNode.focus();
+				}
+			);
+		}
+
+		var deleteFeedbackNodes = A.all('#<portlet:namespace />userFeedback .kb-article-delete-feedback');
+
+		deleteFeedbackNodes.on(
 			'click',
-			function <portlet:namespace />showFeedbackControls() {
-				var feedbackControlsNode = A.one('#<portlet:namespace />feedbackControls');
+			function(e) {
+				var node = e.target;
+				var kbCommentId = node.getAttribute('data-comment-id');
 
-				feedbackControlsNode.show();
+				if (!kbCommentId) {
+					var parent = node.ancestor('.kb-article-delete-feedback');
+					kbCommentId = parent.getAttribute('data-comment-id');
+				}
 
-				var contentNode = A.one('#<portlet:namespace />content');
-
-				contentNode.focus();
+				document.<portlet:namespace />fm.<portlet:namespace />kbCommentId.value = kbCommentId;
+				submitForm(document.<portlet:namespace />fm, '<liferay-portlet:actionURL name="deleteKBComment"><portlet:param name="mvcPath" value='<%= templatePath + "view_article.jsp" %>' /><portlet:param name="redirect" value="<%= redirect %>" /><portlet:param name="resourcePrimKey" value="<%= String.valueOf(kbArticle.getResourcePrimKey()) %>" /><portlet:param name="status" value="<%= String.valueOf(status) %>" /></liferay-portlet:actionURL>');
 			}
 		);
 
-		function <portlet:namespace />deleteKBComment(kbCommentId) {
-			document.<portlet:namespace />fm.<portlet:namespace />kbCommentId.value = kbCommentId;
-			submitForm(document.<portlet:namespace />fm, '<liferay-portlet:actionURL name="deleteKBComment"><portlet:param name="mvcPath" value='<%= templatePath + "view_article.jsp" %>' /><portlet:param name="redirect" value="<%= redirect %>" /><portlet:param name="resourcePrimKey" value="<%= String.valueOf(kbArticle.getResourcePrimKey()) %>" /><portlet:param name="status" value="<%= String.valueOf(status) %>" /></liferay-portlet:actionURL>');
-		}
+		var form = A.one('#<portlet:namespace />fm');
 
-		function <portlet:namespace />updateKBComment() {
-			document.<portlet:namespace />fm.<portlet:namespace /><%= Constants.CMD %>.value = '<%= (kbComment == null) ? Constants.ADD : Constants.UPDATE %>';
-			submitForm(document.<portlet:namespace />fm, '<liferay-portlet:actionURL name="updateKBComment"><portlet:param name="mvcPath" value='<%= templatePath + "view_article.jsp" %>' /><portlet:param name="redirect" value="<%= redirect %>" /><portlet:param name="resourcePrimKey" value="<%= String.valueOf(kbArticle.getResourcePrimKey()) %>" /><portlet:param name="status" value="<%= String.valueOf(status) %>" /></liferay-portlet:actionURL>');
-		}
+		form.on(
+			'submit',
+			function(e) {
+				e.preventDefault();
+
+				document.<portlet:namespace />fm.<portlet:namespace /><%= Constants.CMD %>.value = '<%= (kbComment == null) ? Constants.ADD : Constants.UPDATE %>';
+				submitForm(document.<portlet:namespace />fm, '<liferay-portlet:actionURL name="updateKBComment"><portlet:param name="mvcPath" value='<%= templatePath + "view_article.jsp" %>' /><portlet:param name="redirect" value="<%= redirect %>" /><portlet:param name="resourcePrimKey" value="<%= String.valueOf(kbArticle.getResourcePrimKey()) %>" /><portlet:param name="status" value="<%= String.valueOf(status) %>" /></liferay-portlet:actionURL>');
+			}
+		);
 	</aui:script>
 </c:if>

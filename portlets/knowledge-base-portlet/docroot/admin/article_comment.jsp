@@ -58,16 +58,21 @@ KBComment kbComment = (KBComment)request.getAttribute("article_comment.jsp-kb_co
 				<%= LanguageUtil.format(request, "posted-on-x", dateFormatDateTime.format(kbComment.getModifiedDate()), false) %>
 			</div>
 
-			<c:if test="<%= KBCommentPermission.contains(permissionChecker, kbComment, ActionKeys.DELETE) %>">
+			<c:if test="<%= true || KBCommentPermission.contains(permissionChecker, kbComment, ActionKeys.DELETE) %>">
 				<br />
 
 				<%
-				String deleteURL = "javascript:" + renderResponse.getNamespace() + "deleteKBComment(" + kbComment.getKbCommentId() + ");";
+				Map<String, Object> deleteIconData = new java.util.HashMap<String, Object>();
+
+				deleteIconData.put("comment-id", Long.toString(kbComment.getKbCommentId()));
 				%>
 
-				<liferay-ui:icon-delete
-					label="<%= true %>"
-					url="<%= deleteURL %>"
+				<aui:icon
+					cssClass="kb-article-delete-feedback"
+					data="<%= deleteIconData %>"
+					image="remove"
+					label="delete"
+					url="javascript:void(0)"
 				/>
 			</c:if>
 		</td>
