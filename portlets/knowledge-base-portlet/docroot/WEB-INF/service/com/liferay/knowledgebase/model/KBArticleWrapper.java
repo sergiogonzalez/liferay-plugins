@@ -1012,8 +1012,7 @@ public class KBArticleWrapper implements KBArticle, ModelWrapper<KBArticle> {
 
 	@Override
 	public java.util.List<java.lang.Long> getAncestorResourcePrimaryKeys()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _kbArticle.getAncestorResourcePrimaryKeys();
 	}
 
@@ -1024,22 +1023,19 @@ public class KBArticleWrapper implements KBArticle, ModelWrapper<KBArticle> {
 
 	@Override
 	public java.util.List<com.liferay.portal.kernel.repository.model.FileEntry> getAttachmentsFileEntries()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _kbArticle.getAttachmentsFileEntries();
 	}
 
 	@Override
 	public java.lang.String[] getAttachmentsFileNames()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _kbArticle.getAttachmentsFileNames();
 	}
 
 	@Override
 	public long getAttachmentsFolderId()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _kbArticle.getAttachmentsFolderId();
 	}
 
@@ -1049,10 +1045,21 @@ public class KBArticleWrapper implements KBArticle, ModelWrapper<KBArticle> {
 	}
 
 	@Override
+	public com.liferay.knowledgebase.model.KBArticle getNextKBArticle()
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _kbArticle.getNextKBArticle();
+	}
+
+	@Override
 	public com.liferay.knowledgebase.model.KBArticle getParentKBArticle()
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException {
 		return _kbArticle.getParentKBArticle();
+	}
+
+	@Override
+	public com.liferay.knowledgebase.model.KBArticle getPreviousKBArticle()
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _kbArticle.getPreviousKBArticle();
 	}
 
 	@Override
