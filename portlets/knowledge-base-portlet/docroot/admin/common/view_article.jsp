@@ -48,13 +48,17 @@ if (enableKBArticleViewCountIncrement && !kbArticle.isDraft()) {
 
 	<liferay-util:include page="/admin/article_icons.jsp" servletContext="<%= application %>" />
 
-	<%= kbArticle.getContent() %>
+	<div class="kb-article-body-<%= kbArticle.getResourcePrimKey() %>">
+		<%= kbArticle.getContent() %>
+	</div>
 
 	<liferay-util:include page="/admin/article_attachments.jsp" servletContext="<%= application %>" />
 
 	<liferay-util:include page="/admin/article_assets.jsp" servletContext="<%= application %>" />
 
 	<liferay-util:include page="/admin/article_ratings.jsp" servletContext="<%= application %>" />
+
+	<liferay-util:include page="/admin/article_social_bookmarks.jsp" servletContext="<%= application %>" />
 
 	<liferay-util:include page="/admin/article_child.jsp" servletContext="<%= application %>" />
 
