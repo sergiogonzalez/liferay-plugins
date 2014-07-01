@@ -1,3 +1,4 @@
+<%@ taglib prefix="liferay-ui" uri="http://liferay.com/tld/ui" %>
 <%--
 /**
  * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
@@ -136,6 +137,13 @@ String dirName = ParamUtil.getString(request, "dirName");
 
 				<aui:input classPK="<%= (kbArticle != null) ? kbArticle.getClassPK() : 0 %>" name="tags" type="assetTags" />
 			</aui:fieldset>
+		</liferay-ui:panel>
+
+		<liferay-ui:panel collapsible="<%= true %>" defaultState="closed" extended="<%= false %>" persistState="<%= true %>" title="related-assets">
+			<liferay-ui:input-asset-links
+				className="<%= KBArticle.class.getName() %>"
+				classPK="<%= kbArticle == null ? 0 : kbArticle.getClassPK() %>"
+			/>
 		</liferay-ui:panel>
 
 		<aui:button-row cssClass="kb-submit-buttons">
