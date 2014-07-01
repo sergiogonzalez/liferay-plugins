@@ -51,4 +51,7 @@ public class PortletPropsKeys {
 	public static final String ADMIN_KB_ARTICLE_SECTIONS =
 		"admin.kb.article.sections";
 
+	public static final String KNOWLEDGE_BASE_RATINGS_DEFAULT_NUMBER_OF_STARS =
+		"knowledge.base.ratings.default.number.of.stars";
+
 }
