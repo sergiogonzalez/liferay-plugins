@@ -15,6 +15,8 @@
 package com.liferay.knowledgebase.util;
 
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.PropsKeys;
+import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.util.portlet.PortletProps;
 
 /**
@@ -62,5 +64,15 @@ public class PortletPropsValues {
 
 	public static final String[] ADMIN_KB_ARTICLE_SECTIONS =
 		PortletProps.getArray(PortletPropsKeys.ADMIN_KB_ARTICLE_SECTIONS);
+
+	public static final int KNOWLEDGE_BASE_RATINGS_DEFAULT_NUMBER_OF_STARS =
+		GetterUtil.getInteger(
+			PortletProps.get(
+				PortletPropsKeys.
+					KNOWLEDGE_BASE_RATINGS_DEFAULT_NUMBER_OF_STARS));
+
+	public static final int PORTAL_RATINGS_DEFAULT_NUMBER_OF_STARS =
+		GetterUtil.getInteger(
+			PropsUtil.get(PropsKeys.RATINGS_DEFAULT_NUMBER_OF_STARS));
 
 }
