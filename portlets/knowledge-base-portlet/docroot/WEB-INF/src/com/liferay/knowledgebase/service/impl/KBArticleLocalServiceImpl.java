@@ -89,7 +89,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -402,22 +401,6 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 			resourcePrimKey, status, new KBArticleVersionComparator());
 	}
 
-	public KBArticle fetchPredecessorKBArticle(
-		long groupId, long parentResourcePrimKey, long resourcePrimKey,
-		int status) {
-
-		return fetchSibling(
-			groupId, parentResourcePrimKey, resourcePrimKey, status, true);
-	}
-
-	public KBArticle fetchSuccessorKBArticle(
-		long groupId, long parentResourcePrimKey, long resourcePrimKey,
-		int status) {
-
-		return fetchSibling(
-			groupId, parentResourcePrimKey, resourcePrimKey, status, false);
-	}
-
 	public List<KBArticle> getAllDescendantKBArticles(
 		long resourcePrimKey, int status, OrderByComparator orderByComparator) {
 
@@ -601,6 +584,19 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 
 		return kbArticlePersistence.countByG_P_S(
 			groupId, parentResourcePrimKey, status);
+	}
+
+	public KBArticle[] getKBArticlesPrevAndNext(long kbArticleId)
+		throws PortalException {
+
+		KBArticle kbArticle = kbArticlePersistence.findByPrimaryKey(
+			kbArticleId);
+
+		return kbArticlePersistence.findByG_P_S_PrevAndNext(
+			kbArticleId, kbArticle.getGroupId(),
+			kbArticle.getParentResourcePrimKey(),
+			WorkflowConstants.STATUS_APPROVED,
+			new KBArticlePriorityComparator(true));
 	}
 
 	public List<KBArticle> getKBArticleVersions(
@@ -1413,40 +1409,6 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 		for (Subscription subscription : subscriptions) {
 			unsubscribeKBArticle(
 				subscription.getUserId(), subscription.getClassPK());
-		}
-	}
-
-	protected KBArticle fetchSibling(
-		long groupId, long parentResourcePrimKey, long resourcePrimKey,
-		int status, boolean predecessor) {
-
-		List<KBArticle> siblings = getKBArticles(
-			groupId, parentResourcePrimKey, status, QueryUtil.ALL_POS,
-			QueryUtil.ALL_POS, new KBArticlePriorityComparator(true));
-
-		Iterator<KBArticle> iterator = siblings.iterator();
-
-		KBArticle sibling = null;
-
-		while (iterator.hasNext()) {
-			KBArticle kbArticle = iterator.next();
-
-			if (kbArticle.getResourcePrimKey() == resourcePrimKey) {
-				break;
-			}
-
-			sibling = kbArticle;
-		}
-
-		if (predecessor) {
-			return sibling;
-		}
-
-		if (iterator.hasNext()) {
-			return iterator.next();
-		}
-		else {
-			return null;
 		}
 	}
 
