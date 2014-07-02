@@ -1,4 +1,3 @@
-<%@ taglib prefix="liferay-ui" uri="http://liferay.com/tld/ui" %>
 <%--
 /**
  * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
@@ -142,7 +141,7 @@ String dirName = ParamUtil.getString(request, "dirName");
 		<liferay-ui:panel collapsible="<%= true %>" defaultState="closed" extended="<%= false %>" persistState="<%= true %>" title="related-assets">
 			<liferay-ui:input-asset-links
 				className="<%= KBArticle.class.getName() %>"
-				classPK="<%= kbArticle == null ? 0 : kbArticle.getClassPK() %>"
+				classPK="<%= (kbArticle == null) ? KBArticleConstants.DEFAULT_PARENT_RESOURCE_PRIM_KEY : kbArticle.getClassPK() %>"
 			/>
 		</liferay-ui:panel>
 
