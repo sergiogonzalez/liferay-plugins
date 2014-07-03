@@ -141,6 +141,13 @@ public class KBCommentLocalServiceImpl extends KBCommentLocalServiceBaseImpl {
 
 	@Override
 	public List<KBComment> getKBComments(
+		long groupId, int status, int start, int end) {
+
+		return kbCommentFinder.findByG_S(groupId, status, start, end);
+	}
+
+	@Override
+	public List<KBComment> getKBComments(
 		String className, long classPK, int start, int end,
 		OrderByComparator<KBComment> orderByComparator) {
 
@@ -148,6 +155,11 @@ public class KBCommentLocalServiceImpl extends KBCommentLocalServiceBaseImpl {
 
 		return kbCommentPersistence.findByC_C(
 			classNameId, classPK, start, end, orderByComparator);
+	}
+
+	@Override
+	public int getKBCommentsCount(long groupId, int status) {
+		return kbCommentFinder.countByG_S(groupId, status);
 	}
 
 	@Override
