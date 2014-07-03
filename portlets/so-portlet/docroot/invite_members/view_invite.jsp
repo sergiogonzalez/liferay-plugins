@@ -40,6 +40,13 @@ Group group = GroupLocalServiceUtil.getGroup(scopeGroupId);
 		<div class="search">
 			<div class="list"></div>
 		</div>
+
+		<liferay-ui:icon
+			cssClass="footnote"
+			image="check"
+			label="<%= true %>"
+			message="previous-invitation-was-sent"
+		/>
 	</div>
 
 	<div class="invited-users-wrapper">
@@ -236,7 +243,7 @@ Group group = GroupLocalServiceUtil.getGroup(scopeGroupId);
 						return A.Lang.sub(
 							userTemplate,
 							{
-								cssClass: invited ? "invited user" : "user",
+								cssClass: result.hasPendingMemberRequest ? "pending-member-request user" : (invited ? "invited user" : "user"),
 								userEmailAddress: result.userEmailAddress,
 								userFullName: result.userFullName,
 								userId: result.userId
@@ -296,9 +303,9 @@ Group group = GroupLocalServiceUtil.getGroup(scopeGroupId);
 						}
 					},
 					data: {
-						<portlet:namespace />end: <portlet:namespace />end,
+						<portlet:namespace />end: end,
 						<portlet:namespace />keywords: inviteUserSearch.get('value'),
-						<portlet:namespace />start: <portlet:namespace />start
+						<portlet:namespace />start: start
 					},
 					dataType: 'json'
 				}

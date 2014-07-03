@@ -28,6 +28,7 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portlet.PortletResponseUtil;
 import com.liferay.portal.kernel.repository.model.FileEntry;
+import com.liferay.portal.kernel.servlet.ServletResponseUtil;
 import com.liferay.portal.kernel.upload.UploadPortletRequest;
 import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.ContentTypes;
@@ -71,6 +72,8 @@ import javax.portlet.PortletException;
 import javax.portlet.PortletRequest;
 import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
+
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * @author Scott Lee
@@ -153,14 +156,42 @@ public class PrivateMessagingPortlet extends MVCPortlet {
 		}
 	}
 
+	@Override
+	public void processAction(
+			ActionRequest actionRequest, ActionResponse actionResponse)
+		throws PortletException {
+
+		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
+			WebKeys.THEME_DISPLAY);
+
+		if (!themeDisplay.isSignedIn()) {
+			return;
+		}
+
+		try {
+			String actionName = ParamUtil.getString(
+				actionRequest, ActionRequest.ACTION_NAME);
+
+			if (actionName.equals("sendMessage")) {
+				sendMessage(actionRequest, actionResponse);
+			}
+			else {
+				super.processAction(actionRequest, actionResponse);
+			}
+		}
+		catch (Exception e) {
+			throw new PortletException(e);
+		}
+	}
+
 	public void sendMessage(
-			ResourceRequest resourceRequest, ResourceResponse resourceResponse)
+			ActionRequest actionRequest, ActionResponse actionResponse)
 		throws Exception {
 
 		UploadPortletRequest uploadPortletRequest =
-			PortalUtil.getUploadPortletRequest(resourceRequest);
+			PortalUtil.getUploadPortletRequest(actionRequest);
 
-		ThemeDisplay themeDisplay = (ThemeDisplay)resourceRequest.getAttribute(
+		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
 		long userId = ParamUtil.getLong(uploadPortletRequest, "userId");
@@ -195,8 +226,9 @@ public class PrivateMessagingPortlet extends MVCPortlet {
 				}
 				catch (Exception e) {
 					_log.error(
-						translate(resourceRequest, "unable to attach file ") +
-							fileName, e);
+						translate(actionRequest, "unable to attach file ") +
+							fileName,
+						e);
 				}
 			}
 
@@ -207,7 +239,7 @@ public class PrivateMessagingPortlet extends MVCPortlet {
 			jsonObject.put("success", Boolean.TRUE);
 		}
 		catch (Exception e) {
-			jsonObject.put("message", getMessage(resourceRequest, e));
+			jsonObject.put("message", getMessage(actionRequest, e));
 
 			jsonObject.put("success", Boolean.FALSE);
 		}
@@ -221,7 +253,7 @@ public class PrivateMessagingPortlet extends MVCPortlet {
 			}
 		}
 
-		writeJSON(resourceRequest, resourceResponse, jsonObject);
+		writeJSON(actionRequest, actionResponse, jsonObject);
 	}
 
 	@Override
@@ -238,9 +270,6 @@ public class PrivateMessagingPortlet extends MVCPortlet {
 			}
 			else if (resourceID.equals("getUsers")) {
 				getUsers(resourceRequest, resourceResponse);
-			}
-			else if (resourceID.equals("sendMessage")) {
-				sendMessage(resourceRequest, resourceResponse);
 			}
 			else {
 				super.serveResource(resourceRequest, resourceResponse);
@@ -427,6 +456,22 @@ public class PrivateMessagingPortlet extends MVCPortlet {
 
 			throw new UserScreenNameException(sb.toString());
 		}
+	}
+
+	@Override
+	protected void writeJSON(
+			PortletRequest portletRequest, ActionResponse actionResponse,
+			Object json)
+		throws IOException {
+
+		HttpServletResponse response = PortalUtil.getHttpServletResponse(
+			actionResponse);
+
+		response.setContentType(ContentTypes.TEXT_HTML);
+
+		ServletResponseUtil.write(response, json.toString());
+
+		response.flushBuffer();
 	}
 
 	@Override

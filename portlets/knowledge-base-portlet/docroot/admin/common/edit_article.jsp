@@ -32,7 +32,8 @@ String dirName = ParamUtil.getString(request, "dirName");
 
 <liferay-ui:header
 	backURL="<%= redirect %>"
-	title='<%= (kbArticle != null) ? kbArticle.getTitle() : "new-article" %>'
+	localizeTitle="<%= (kbArticle == null) %>"
+	title='<%= (kbArticle == null) ? "new-article" : kbArticle.getTitle() %>'
 />
 
 <liferay-portlet:actionURL name="updateKBArticle" var="updateKBArticleURL" />
@@ -75,6 +76,8 @@ String dirName = ParamUtil.getString(request, "dirName");
 	<aui:fieldset>
 		<aui:input name="title" />
 
+		<aui:input disabled="<%= kbArticle != null %>" label="friendly-url" name="urlTitle" />
+
 		<aui:field-wrapper label="content">
 			<liferay-ui:input-editor width="100%" />
 
@@ -93,7 +96,7 @@ String dirName = ParamUtil.getString(request, "dirName");
 			</div>
 		</aui:field-wrapper>
 
-		<c:if test="<%= Validator.isNotNull(PortletPropsValues.ADMIN_KB_ARTICLE_SECTIONS) || (parentResourcePrimKey == KBArticleConstants.DEFAULT_PARENT_RESOURCE_PRIM_KEY) %>">
+		<c:if test="<%= ArrayUtil.isNotEmpty(PortletPropsValues.ADMIN_KB_ARTICLE_SECTIONS) && (parentResourcePrimKey == KBArticleConstants.DEFAULT_PARENT_RESOURCE_PRIM_KEY) %>">
 			<aui:model-context bean="<%= null %>" model="<%= KBArticle.class %>" />
 
 			<aui:select ignoreRequestValue="<%= true %>" multiple="<%= true %>" name="sections">
@@ -149,21 +152,21 @@ String dirName = ParamUtil.getString(request, "dirName");
 
 <aui:script>
 	function <portlet:namespace />initEditor() {
-		return "<%= UnicodeFormatter.toString(content) %>";
+		return '<%= UnicodeFormatter.toString(content) %>';
 	}
 
 	function <portlet:namespace />publishKBArticle() {
-		document.<portlet:namespace />fm.<portlet:namespace />workflowAction.value = "<%= WorkflowConstants.ACTION_PUBLISH %>";
+		document.<portlet:namespace />fm.<portlet:namespace />workflowAction.value = '<%= WorkflowConstants.ACTION_PUBLISH %>';
 		<portlet:namespace />updateKBArticle();
 	}
 
 	function <portlet:namespace />updateAttachments(dirName, html) {
 		document.<portlet:namespace />fm.<portlet:namespace />dirName.value = dirName;
-		document.getElementById("<portlet:namespace />attachments").innerHTML = html;
+		document.getElementById('<portlet:namespace />attachments').innerHTML = html;
 	}
 
 	function <portlet:namespace />updateKBArticle() {
-		document.<portlet:namespace />fm.<portlet:namespace /><%= Constants.CMD %>.value = "<%= (kbArticle == null) ? Constants.ADD : Constants.UPDATE %>";
+		document.<portlet:namespace />fm.<portlet:namespace /><%= Constants.CMD %>.value = '<%= (kbArticle == null) ? Constants.ADD : Constants.UPDATE %>';
 		document.<portlet:namespace />fm.<portlet:namespace />content.value = window.<portlet:namespace />editor.getHTML();
 		submitForm(document.<portlet:namespace />fm);
 	}

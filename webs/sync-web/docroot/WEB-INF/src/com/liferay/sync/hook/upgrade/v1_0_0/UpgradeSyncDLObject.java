@@ -70,7 +70,7 @@ public class UpgradeSyncDLObject extends UpgradeProcess {
 				String event = StringPool.BLANK;
 
 				if (dlFileEntry.isInTrash()) {
-					event = SyncConstants.EVENT_MOVE_TO_TRASH;
+					event = SyncConstants.EVENT_TRASH;
 				}
 				else {
 					event = SyncConstants.EVENT_ADD;
@@ -83,7 +83,7 @@ public class UpgradeSyncDLObject extends UpgradeProcess {
 
 				String type = fileEntrySyncDLObject.getType();
 
-				if (type.equals(SyncConstants.TYPE_PRIVATE_WORKNG_COPY)) {
+				if (type.equals(SyncConstants.TYPE_PRIVATE_WORKING_COPY)) {
 					SyncDLObject approvedSyncDLObject = SyncUtil.toSyncDLObject(
 						dlFileEntry, event, true);
 
@@ -101,7 +101,7 @@ public class UpgradeSyncDLObject extends UpgradeProcess {
 				String event = StringPool.BLANK;
 
 				if (dlFolder.isInTrash()) {
-					event = SyncConstants.EVENT_MOVE_TO_TRASH;
+					event = SyncConstants.EVENT_TRASH;
 				}
 				else {
 					event = SyncConstants.EVENT_ADD;

@@ -14,8 +14,7 @@
 
 package com.liferay.jsonwebserviceclient;
 
-import com.liferay.portal.kernel.json.JSONDeserializer;
-import com.liferay.portal.kernel.json.JSONFactoryUtil;
+import flexjson.JSONDeserializer;
 
 import java.io.IOException;
 
@@ -60,7 +59,7 @@ public abstract class BaseJSONWebServiceClientHandler {
 		}
 
 		JSONDeserializer<List<T>> jsonDeserializer =
-			JSONFactoryUtil.createJSONDeserializer();
+			new JSONDeserializer<List<T>>();
 
 		jsonDeserializer.use("values", clazz);
 
@@ -73,11 +72,17 @@ public abstract class BaseJSONWebServiceClientHandler {
 
 		String json = doGet(url, parametersArray);
 
+		if ((json == null) || json.equals("")) {
+			return null;
+		}
+
 		if (json.contains("exception")) {
 			throw new Exception(getExceptionMessage(json));
 		}
 
-		return JSONFactoryUtil.looseDeserialize(json, clazz);
+		JSONDeserializer<T> jsonDeserializer = new JSONDeserializer<T>();
+
+		return jsonDeserializer.deserialize(json, clazz);
 	}
 
 	protected <T> T doGetToObject(String url, String... parametersArray)
@@ -85,12 +90,15 @@ public abstract class BaseJSONWebServiceClientHandler {
 
 		String json = doGet(url, parametersArray);
 
+		if ((json == null) || json.equals("")) {
+			return null;
+		}
+
 		if (json.contains("exception")) {
 			throw new Exception(getExceptionMessage(json));
 		}
 
-		JSONDeserializer<T> jsonDeserializer =
-			JSONFactoryUtil.createJSONDeserializer();
+		JSONDeserializer<T> jsonDeserializer = new JSONDeserializer<T>();
 
 		return jsonDeserializer.deserialize(json);
 	}

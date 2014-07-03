@@ -8,17 +8,18 @@
 *.swp
 .ant_targets
 .ant-targets-build.xml
-.ivy
 .sass-cache
 .sass_cache_*.css
 _sass_cache_*.css
 
 /.bnd
+/.ivy
 
 /*/*/bin
 /*/*/classes
 /*/*/javadoc
 /*/*/temp
+/*/*/test/integration/arquillian.xml
 /*/*/test-classes
 /*/*/test-results
 /*/*/tmp

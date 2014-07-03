@@ -1,3 +1,6 @@
+@import "compass";
+@import "mixins";
+
 .so-portlet-invite-members {
 	.email-invited h2 span {
 		color: #999;
@@ -39,6 +42,11 @@
 		border: 1px solid #B0BAFF;
 		float: left;
 		padding: 12px;
+
+		.footnote {
+			color: #AAA;
+			font-size: 0.8em;
+		}
 	}
 
 	.invited-users-wrapper {
@@ -147,6 +155,10 @@
 		padding-left: 10px;
 	}
 
+	.pending-member-request {
+		background: url(@theme_image_path@/common/check.png) no-repeat 0 50%;
+	}
+
 	.invited {
 		background: #DFD url(@theme_image_path@/arrows/01_minus.png) no-repeat 0 50%;
 		border-color: #AFA;
@@ -181,7 +193,7 @@
 
 /* ---------- Responsive ---------- */
 
-@media (max-width: 767px) {
+@include respond-to(phone) {
 	.so-portlet-invite-members.modal {
 		.user-search-wrapper {
 			float: none;

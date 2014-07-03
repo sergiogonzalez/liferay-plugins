@@ -188,11 +188,11 @@ if (entry == null) {
 
 <aui:script>
 	function <portlet:namespace />initEditor() {
-		var ckEditor = CKEDITOR.instances["<portlet:namespace />editor"];
+		var ckEditor = CKEDITOR.instances['<portlet:namespace />editor'];
 
-		ckEditor.resize("100%", "200");
+		ckEditor.resize('100%', '200');
 
-		return "<%= UnicodeFormatter.toString(content) %>";
+		return '<%= UnicodeFormatter.toString(content) %>';
 	}
 
 	function <portlet:namespace />closeEntry() {
@@ -218,7 +218,7 @@ if (entry == null) {
 		}
 
 		if (<%= entry != null %>) {
-			var scope = A.one('#<portlet:namespace />scope').get('value');;
+			var scope = A.one('#<portlet:namespace />scope').get('value');
 		}
 		else {
 			var optValue = A.one('select[name="<portlet:namespace />distributionScope"]').get('value');

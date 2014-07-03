@@ -4,8 +4,10 @@
 <project name="build-common-plugin" xmlns:antelope="antlib:ise.antelope.tasks">
 	<import file="build-common.xml" />
 
+	<property name="plugins.includes.path" value="${basedir}" />
+
 	<set-module-properties
-		module.dir="."
+		module.dir="${basedir}"
 	/>
 
 	<macrodef name="classpath-to-jar">
@@ -128,14 +130,9 @@
 	</target>
 
 	<target name="build-lang-cmd">
-		<path id="lang.classpath">
-			<path refid="lib.classpath" />
-			<path refid="portal.classpath" />
-		</path>
-
 		<java
 			classname="com.liferay.portal.tools.LangBuilder"
-			classpathref="lang.classpath"
+			classpathref="portal.classpath"
 			fork="true"
 			newenvironment="true"
 		>
@@ -153,22 +150,31 @@
 	</target>
 
 	<target name="build-service">
-		<mkdir dir="docroot/WEB-INF/classes" />
-		<mkdir dir="docroot/WEB-INF/lib" />
-		<mkdir dir="docroot/WEB-INF/service" />
-		<mkdir dir="docroot/WEB-INF/sql" />
-		<mkdir dir="docroot/WEB-INF/src" />
+		<if>
+			<not>
+				<isset property="service.base.dir" />
+			</not>
+			<then>
+				<property name="service.base.dir" value="docroot/WEB-INF" />
+			</then>
+		</if>
 
-		<copy todir="docroot/WEB-INF/classes">
-			<fileset dir="docroot/WEB-INF/src" excludes="**/*.java" />
+		<mkdir dir="${service.base.dir}/classes" />
+		<mkdir dir="${service.base.dir}/lib" />
+		<mkdir dir="${service.base.dir}/service" />
+		<mkdir dir="${service.base.dir}/sql" />
+		<mkdir dir="${service.base.dir}/src" />
+
+		<copy todir="${service.base.dir}/classes">
+			<fileset dir="${service.base.dir}/src" excludes="**/*.java" />
 		</copy>
 
 		<path id="service.classpath">
 			<path refid="lib.classpath" />
 			<path refid="portal.classpath" />
 			<fileset dir="${app.server.lib.portal.dir}" includes="commons-digester.jar,commons-lang.jar,easyconf.jar" />
-			<fileset dir="docroot/WEB-INF/lib" includes="*.jar" />
-			<pathelement location="docroot/WEB-INF/classes" />
+			<fileset dir="${service.base.dir}/lib" includes="*.jar" />
+			<pathelement location="${service.base.dir}/classes" />
 		</path>
 
 		<if>
@@ -186,7 +192,7 @@
 				<isset property="service.input.file" />
 			</not>
 			<then>
-				<property name="service.input.file" value="${basedir}/docroot/WEB-INF/service.xml" />
+				<property name="service.input.file" value="${basedir}/${service.base.dir}/service.xml" />
 			</then>
 		</if>
 
@@ -204,20 +210,20 @@
 			<arg value="-Dexternal-properties=com/liferay/portal/tools/dependencies/portal-tools.properties" />
 			<arg value="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger" />
 			<arg value="service.input.file=${service.input.file}" />
-			<arg value="service.hbm.file=${basedir}/docroot/WEB-INF/src/META-INF/portlet-hbm.xml" />
-			<arg value="service.orm.file=${basedir}/docroot/WEB-INF/src/META-INF/portlet-orm.xml" />
-			<arg value="service.model.hints.file=${basedir}/docroot/WEB-INF/src/META-INF/portlet-model-hints.xml" />
-			<arg value="service.spring.file=${basedir}/docroot/WEB-INF/src/META-INF/portlet-spring.xml" />
-			<arg value="service.spring.base.file=${basedir}/docroot/WEB-INF/src/META-INF/base-spring.xml" />
-			<arg value="service.spring.cluster.file=${basedir}/docroot/WEB-INF/src/META-INF/cluster-spring.xml" />
-			<arg value="service.spring.dynamic.data.source.file=${basedir}/docroot/WEB-INF/src/META-INF/dynamic-data-source-spring.xml" />
-			<arg value="service.spring.hibernate.file=${basedir}/docroot/WEB-INF/src/META-INF/hibernate-spring.xml" />
-			<arg value="service.spring.infrastructure.file=${basedir}/docroot/WEB-INF/src/META-INF/infrastructure-spring.xml" />
-			<arg value="service.spring.shard.data.source.file=${basedir}/docroot/WEB-INF/src/META-INF/shard-data-source-spring.xml" />
-			<arg value="service.api.dir=${basedir}/docroot/WEB-INF/service" />
-			<arg value="service.impl.dir=${basedir}/docroot/WEB-INF/src" />
+			<arg value="service.hbm.file=${basedir}/${service.base.dir}/src/META-INF/portlet-hbm.xml" />
+			<arg value="service.orm.file=${basedir}/${service.base.dir}/src/META-INF/portlet-orm.xml" />
+			<arg value="service.model.hints.file=${basedir}/${service.base.dir}/src/META-INF/portlet-model-hints.xml" />
+			<arg value="service.spring.file=${basedir}/${service.base.dir}/src/META-INF/portlet-spring.xml" />
+			<arg value="service.spring.base.file=${basedir}/${service.base.dir}/src/META-INF/base-spring.xml" />
+			<arg value="service.spring.cluster.file=${basedir}/${service.base.dir}/src/META-INF/cluster-spring.xml" />
+			<arg value="service.spring.dynamic.data.source.file=${basedir}/${service.base.dir}/src/META-INF/dynamic-data-source-spring.xml" />
+			<arg value="service.spring.hibernate.file=${basedir}/${service.base.dir}/src/META-INF/hibernate-spring.xml" />
+			<arg value="service.spring.infrastructure.file=${basedir}/${service.base.dir}/src/META-INF/infrastructure-spring.xml" />
+			<arg value="service.spring.shard.data.source.file=${basedir}/${service.base.dir}/src/META-INF/shard-data-source-spring.xml" />
+			<arg value="service.api.dir=${basedir}/${service.base.dir}/service" />
+			<arg value="service.impl.dir=${basedir}/${service.base.dir}/src" />
 			<arg value="service.json.file=${basedir}/docroot/js/service.js" />
-			<arg value="service.sql.dir=${basedir}/docroot/WEB-INF/sql" />
+			<arg value="service.sql.dir=${basedir}/${service.base.dir}/sql" />
 			<arg value="service.sql.file=tables.sql" />
 			<arg value="service.sql.indexes.file=indexes.sql" />
 			<arg value="service.sql.indexes.properties.file=indexes.properties" />
@@ -247,32 +253,32 @@
 			</then>
 		</if>
 
-		<mkdir dir="docroot/WEB-INF/service-classes" />
+		<mkdir dir="${service.base.dir}/service-classes" />
 
 		<path id="service.classpath">
 			<path refid="lib.classpath" />
 			<fileset dir="${app.server.lib.global.dir}" includes="*.jar" />
-			<fileset dir="docroot/WEB-INF/lib" excludes="${plugin.name}-service.jar" includes="*.jar" />
+			<fileset dir="${service.base.dir}/lib" excludes="${plugin.name}-service.jar" includes="*.jar" />
 		</path>
 
 		<compile-java
 			javac.classpathref="service.classpath"
-			javac.destdir="docroot/WEB-INF/service-classes"
-			javac.srcdir="docroot/WEB-INF/service"
+			javac.destdir="${service.base.dir}/service-classes"
+			javac.srcdir="${service.base.dir}/service"
 		/>
 
 		<zip
-			basedir="docroot/WEB-INF/service-classes"
-			destfile="docroot/WEB-INF/lib/${plugin.name}-service.jar"
+			basedir="${service.base.dir}/service-classes"
+			destfile="${service.base.dir}/lib/${plugin.name}-service.jar"
 		/>
 
-		<delete dir="docroot/WEB-INF/service-classes" />
+		<delete dir="${service.base.dir}/service-classes" />
 	</target>
 
 	<target name="build-wsdd">
-		<call-macrodef-or-target
-			macrodef.name="compile"
-			module.dir="."
+		<loop-macrodef-or-target
+			module.dirs="${basedir}"
+			target.name="compile"
 		/>
 
 		<path id="wsdd.classpath">
@@ -415,51 +421,27 @@
 		<delete dir="${tstamp.value}" />
 	</target>
 
-	<target name="clean">
-		<clean
-			module.dir="."
-		/>
-	</target>
-
-	<target name="compile">
-		<compile
-			module.dir="."
-		/>
-	</target>
-
 	<target name="compile-import-shared">
 		<compile-import-shared
-			module.dir="."
+			module.dir="${basedir}"
 		/>
 	</target>
 
 	<target name="compile-test">
 		<compile-test
-			module.dir="."
+			module.dir="${basedir}"
 		/>
 	</target>
 
 	<target name="compile-test-integration">
 		<compile-test-integration
-			module.dir="."
+			module.dir="${basedir}"
 		/>
 	</target>
 
 	<target name="compile-test-unit">
 		<compile-test-unit
-			module.dir="."
-		/>
-	</target>
-
-	<target name="deploy">
-		<deploy
-			module.dir="."
-		/>
-	</target>
-
-	<target name="direct-deploy">
-		<direct-deploy
-			module.dir="."
+			module.dir="${basedir}"
 		/>
 	</target>
 
@@ -511,31 +493,31 @@
 
 	<target name="jar-javadoc" depends="javadoc">
 		<jar-javadoc
-			module.dir="."
+			module.dir="${basedir}"
 		/>
 	</target>
 
 	<target name="jar-source">
 		<jar-source
-			module.dir="."
+			module.dir="${basedir}"
 		/>
 	</target>
 
 	<target name="javadoc">
 		<javadoc-macro
-			module.dir="."
+			module.dir="${basedir}"
 		/>
 	</target>
 
 	<target name="merge">
 		<merge
-			module.dir="."
+			module.dir="${basedir}"
 		/>
 	</target>
 
 	<target name="merge-unzip">
 		<merge-unzip
-			module.dir="."
+			module.dir="${basedir}"
 		/>
 	</target>
 
@@ -566,12 +548,41 @@
 					dest="${plugin.source.dir}"
 					src="${patch.original.lib.name}-sources.jar"
 				>
+					<mapper
+						type="glob"
+						from="src/java/*"
+						to="*"
+					/>
 					<patternset includes="${patch.destination}" />
 				</unjar>
 
 				<delete file="${patch.original.lib.name}-sources.jar" />
 
-				<patch dir="${plugin.source.dir}" patchfile="${patch.source}" strip="1" />
+				<if>
+					<available file="${patch.source}" type="dir" />
+					<then>
+						<pathconvert property="patch.files">
+							<path>
+								<fileset dir="${patch.source}" />
+							</path>
+						</pathconvert>
+					</then>
+					<else>
+						<pathconvert property="patch.files">
+							<path>
+								<fileset file="${patch.source}" />
+							</path>
+						</pathconvert>
+					</else>
+				</if>
+
+				<for delimiter=":" list="${patch.files}" param="patch.file">
+					<sequential>
+						<echo>Applying patch @{patch.file}.</echo>
+
+						<patch dir="${plugin.source.dir}" patchfile="@{patch.file}" strip="1" />
+					</sequential>
+				</for>
 			</then>
 		</if>
 
@@ -627,34 +638,10 @@
 		<delete dir="${tstamp.value}" />
 	</target>
 
-	<target name="test">
-		<test
-			module.dir="."
-		/>
-	</target>
-
 	<target name="test-class">
 		<test-class
-			module.dir="."
+			module.dir="${basedir}"
 			test.class="${test.class}"
-		/>
-	</target>
-
-	<target name="test-integration">
-		<test-integration
-			module.dir="."
-		/>
-	</target>
-
-	<target name="test-unit">
-		<test-unit
-			module.dir="."
-		/>
-	</target>
-
-	<target name="war">
-		<war-macro
-			module.dir="."
 		/>
 	</target>
 </project>

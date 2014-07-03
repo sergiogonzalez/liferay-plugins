@@ -76,15 +76,25 @@ public class KBArticleServiceUtil {
 
 	public static com.liferay.knowledgebase.model.KBArticle addKBArticle(
 		java.lang.String portletId, long parentResourcePrimKey,
-		java.lang.String title, java.lang.String content,
-		java.lang.String description, java.lang.String[] sections,
-		java.lang.String dirName,
+		java.lang.String title, java.lang.String urlTitle,
+		java.lang.String content, java.lang.String description,
+		java.lang.String[] sections, java.lang.String dirName,
 		com.liferay.portal.service.ServiceContext serviceContext)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		return getService()
 				   .addKBArticle(portletId, parentResourcePrimKey, title,
-			content, description, sections, dirName, serviceContext);
+			urlTitle, content, description, sections, dirName, serviceContext);
+	}
+
+	public static void addKBArticlesMarkdown(long groupId,
+		java.lang.String fileName, java.io.InputStream inputStream,
+		com.liferay.portal.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		getService()
+			.addKBArticlesMarkdown(groupId, fileName, inputStream,
+			serviceContext);
 	}
 
 	public static void deleteAttachment(long companyId, long groupId,
@@ -152,6 +162,20 @@ public class KBArticleServiceUtil {
 		return getService().getKBArticle(resourcePrimKey, version);
 	}
 
+	public static java.util.List<com.liferay.knowledgebase.model.KBArticle> getKBArticleAndAllDescendantKBArticles(
+		long groupId, long resourcePrimKey, int status,
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getService()
+				   .getKBArticleAndAllDescendantKBArticles(groupId,
+			resourcePrimKey, status, orderByComparator);
+	}
+
+	/**
+	* @deprecated As of 7.0.0, replaced by
+	{@link #getKBArticleAndAllDescendantKBArticles(long, long,
+	int, com.liferay.portal.kernel.util.OrderByComparator)}
+	*/
 	public static java.util.List<com.liferay.knowledgebase.model.KBArticle> getKBArticleAndAllDescendants(
 		long groupId, long resourcePrimKey, int status,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
@@ -173,6 +197,16 @@ public class KBArticleServiceUtil {
 	}
 
 	public static java.util.List<com.liferay.knowledgebase.model.KBArticle> getKBArticles(
+		long groupId, long parentResourcePrimKey, int status, int start,
+		int end,
+		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getService()
+				   .getKBArticles(groupId, parentResourcePrimKey, status,
+			start, end, orderByComparator);
+	}
+
+	public static java.util.List<com.liferay.knowledgebase.model.KBArticle> getKBArticles(
 		long groupId, long[] resourcePrimKeys, int status, int start, int end,
 		com.liferay.portal.kernel.util.OrderByComparator orderByComparator)
 		throws com.liferay.portal.kernel.exception.SystemException {
@@ -188,6 +222,13 @@ public class KBArticleServiceUtil {
 		return getService()
 				   .getKBArticles(groupId, resourcePrimKeys, status,
 			orderByComparator);
+	}
+
+	public static int getKBArticlesCount(long groupId,
+		long parentResourcePrimKey, int status)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return getService()
+				   .getKBArticlesCount(groupId, parentResourcePrimKey, status);
 	}
 
 	public static int getKBArticlesCount(long groupId, long[] resourcePrimKeys,
@@ -247,6 +288,11 @@ public class KBArticleServiceUtil {
 		return getService().getSectionsKBArticlesCount(groupId, sections, status);
 	}
 
+	/**
+	* @deprecated As of 7.0.0, replaced by {@link #getKBArticles(long, long,
+	int, int, int,
+	com.liferay.portal.kernel.util.OrderByComparator)}
+	*/
 	public static java.util.List<com.liferay.knowledgebase.model.KBArticle> getSiblingKBArticles(
 		long groupId, long parentResourcePrimKey, int status, int start,
 		int end,
@@ -257,6 +303,10 @@ public class KBArticleServiceUtil {
 			status, start, end, orderByComparator);
 	}
 
+	/**
+	* @deprecated As of 7.0.0, replaced by {@link #getKBArticlesCount(long,
+	long, int)}
+	*/
 	public static int getSiblingKBArticlesCount(long groupId,
 		long parentResourcePrimKey, int status)
 		throws com.liferay.portal.kernel.exception.SystemException {

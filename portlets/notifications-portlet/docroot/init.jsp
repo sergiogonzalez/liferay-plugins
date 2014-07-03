@@ -37,6 +37,7 @@ page import="com.liferay.portal.kernel.util.FastDateFormatFactoryUtil" %><%@
 page import="com.liferay.portal.kernel.util.HtmlUtil" %><%@
 page import="com.liferay.portal.kernel.util.ParamUtil" %><%@
 page import="com.liferay.portal.kernel.util.StringPool" %><%@
+page import="com.liferay.portal.kernel.util.StringUtil" %><%@
 page import="com.liferay.portal.model.Group" %><%@
 page import="com.liferay.portal.model.GroupConstants" %><%@
 page import="com.liferay.portal.model.LayoutConstants" %><%@
@@ -51,19 +52,24 @@ page import="com.liferay.portal.service.ServiceContextFactory" %><%@
 page import="com.liferay.portal.service.UserLocalServiceUtil" %><%@
 page import="com.liferay.portal.service.UserNotificationDeliveryLocalServiceUtil" %><%@
 page import="com.liferay.portal.service.UserNotificationEventLocalServiceUtil" %><%@
-page import="com.liferay.portal.util.PortalUtil" %>
+page import="com.liferay.portal.util.PortalUtil" %><%@
+page import="com.liferay.portlet.PortletURLFactoryUtil" %>
 
 <%@ page import="java.text.Format" %>
 
-<%@ page import="java.util.List" %><%@
+<%@ page import="java.util.ArrayList" %><%@
+page import="java.util.List" %><%@
 page import="java.util.Map" %>
+
+<%@ page import="javax.portlet.PortletRequest" %>
 
 <portlet:defineObjects />
 
 <liferay-theme:defineObjects />
 
 <%
-int delta = 10;
+int dockbarViewDelta = 5;
+int fullViewDelta = 10;
 
 Format simpleDateFormat = FastDateFormatFactoryUtil.getSimpleDateFormat("EEEE, MMMMM dd, yyyy 'at' h:mm a", themeDisplay.getLocale(), themeDisplay.getTimeZone());
 %>

@@ -44,12 +44,13 @@ if (!roles.isEmpty()) {
 
 <liferay-portlet:actionURL portletConfiguration="true" var="configurationActionURL" />
 
-<liferay-portlet:renderURL portletConfiguration="true" var="configurationRenderURL">
-	<portlet:param name="tabs1" value="<%= tabs1 %>" />
-</liferay-portlet:renderURL>
-
 <aui:form action="<%= configurationActionURL %>" method="post" name="fm" onSubmit='<%= "event.preventDefault(); " + renderResponse.getNamespace() + "saveConfigurations();" %>'>
 	<aui:input name="<%= Constants.CMD %>" type="hidden" value="<%= Constants.UPDATE %>" />
+
+	<liferay-portlet:renderURL portletConfiguration="true" var="configurationRenderURL">
+		<portlet:param name="tabs1" value="<%= tabs1 %>" />
+	</liferay-portlet:renderURL>
+
 	<aui:input name="redirect" type="hidden" value="<%= configurationRenderURL %>" />
 
 	<liferay-ui:panel-container extended="<%= true %>" id="soAnnouncementsConfigurationsPanelContainer" persistState="<%= true %>">
@@ -291,7 +292,7 @@ if (!roles.isEmpty()) {
 
 	var selected = form.all('.left-selector');
 
-	var selectedHTML = "";
+	var selectedHTML = '';
 
 	for (var i = selected._nodes.length - 1; i >= 0; --i) {
 		selectedHTML = selectedHTML.concat(selected._nodes[i].innerHTML);
@@ -300,7 +301,7 @@ if (!roles.isEmpty()) {
 	Liferay.on(
 		'inputmoveboxes:moveItem',
 		function(event) {
-			var currSelectedHTML = "";
+			var currSelectedHTML = '';
 
 			for (var i = selected._nodes.length - 1; i >= 0; --i) {
 				currSelectedHTML = currSelectedHTML.concat(selected._nodes[i].innerHTML);

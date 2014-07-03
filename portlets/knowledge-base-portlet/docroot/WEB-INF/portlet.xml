@@ -3,7 +3,7 @@
 <portlet-app xmlns="http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd" version="2.0">
 	<portlet>
 		<portlet-name>1</portlet-name>
-		<display-name>Knowledge Base (Admin)</display-name>
+		<display-name>Knowledge Base</display-name>
 		<portlet-class>com.liferay.knowledgebase.admin.portlet.AdminPortlet</portlet-class>
 		<init-param>
 			<name>config-template</name>
@@ -27,9 +27,9 @@
 		</supports>
 		<resource-bundle>content.Language</resource-bundle>
 		<portlet-info>
-			<title>Knowledge Base (Admin)</title>
-			<short-title>Knowledge Base (Admin)</short-title>
-			<keywords>Knowledge Base (Admin)</keywords>
+			<title>Knowledge Base</title>
+			<short-title>Knowledge Base</short-title>
+			<keywords>Knowledge Base Admin</keywords>
 		</portlet-info>
 		<portlet-preferences>
 			<preference>
@@ -88,7 +88,7 @@
 	</portlet>
 	<portlet>
 		<portlet-name>2</portlet-name>
-		<display-name>Knowledge Base (Display)</display-name>
+		<display-name>Knowledge Base Display</display-name>
 		<portlet-class>com.liferay.knowledgebase.display.portlet.DisplayPortlet</portlet-class>
 		<init-param>
 			<name>config-template</name>
@@ -112,9 +112,9 @@
 		</supports>
 		<resource-bundle>content.Language</resource-bundle>
 		<portlet-info>
-			<title>Knowledge Base (Display)</title>
-			<short-title>Knowledge Base (Display)</short-title>
-			<keywords>Knowledge Base (Display)</keywords>
+			<title>Knowledge Base Display</title>
+			<short-title>Knowledge Base Display</short-title>
+			<keywords>Knowledge Base Display</keywords>
 		</portlet-info>
 		<portlet-preferences>
 			<preference>
@@ -134,16 +134,8 @@
 				<value>true</value>
 			</preference>
 			<preference>
-				<name>enableKBTemplateKBComments</name>
-				<value>true</value>
-			</preference>
-			<preference>
-				<name>kbArticlesOrderByCol</name>
-				<value>priority</value>
-			</preference>
-			<preference>
-				<name>kbArticlesOrderByType</name>
-				<value>desc</value>
+				<name>resourcePrimKey</name>
+				<value>0</value>
 			</preference>
 			<preference>
 				<name>rssDelta</name>
@@ -162,36 +154,8 @@
 				<value>true</value>
 			</preference>
 			<preference>
-				<name>showKBArticleAuthorColumn</name>
-				<value>true</value>
-			</preference>
-			<preference>
-				<name>showKBArticleCreateDateColumn</name>
-				<value>true</value>
-			</preference>
-			<preference>
 				<name>showKBArticleKBComments</name>
 				<value>false</value>
-			</preference>
-			<preference>
-				<name>showKBArticleModifiedDateColumn</name>
-				<value>true</value>
-			</preference>
-			<preference>
-				<name>showKBArticlePriorityColumn</name>
-				<value>true</value>
-			</preference>
-			<preference>
-				<name>showKBArticleStatusColumn</name>
-				<value>true</value>
-			</preference>
-			<preference>
-				<name>showKBArticleViewsColumn</name>
-				<value>true</value>
-			</preference>
-			<preference>
-				<name>showKBTemplateKBComments</name>
-				<value>true</value>
 			</preference>
 		</portlet-preferences>
 		<security-role-ref>
@@ -206,8 +170,6 @@
 		<security-role-ref>
 			<role-name>user</role-name>
 		</security-role-ref>
-		<supported-public-render-parameter>categoryId</supported-public-render-parameter>
-		<supported-public-render-parameter>tag</supported-public-render-parameter>
 	</portlet>
 	<portlet>
 		<portlet-name>3</portlet-name>

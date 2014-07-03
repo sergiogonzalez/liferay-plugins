@@ -14,6 +14,7 @@
 
 package com.liferay.portal.search.solr.facet;
 
+import com.liferay.compat.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.search.facet.collector.DefaultTermCollector;
 import com.liferay.portal.kernel.search.facet.collector.FacetCollector;
 import com.liferay.portal.kernel.search.facet.collector.TermCollector;
@@ -36,9 +37,11 @@ public class SolrFacetFieldCollector implements FacetCollector {
 
 		List<Count> counts = facetField.getValues();
 
-		if (counts != null) {
+		if (ListUtil.isNotEmpty(counts)) {
 			for (Count count : counts) {
-				_counts.put(count.getName(), count);
+				if (count.getCount() > 0) {
+					_counts.put(count.getName(), count);
+				}
 			}
 		}
 	}

@@ -29,6 +29,7 @@ double priority = BeanParamUtil.getDouble(kbArticle, request, "priority");
 
 <liferay-ui:header
 	backURL="<%= redirect %>"
+	localizeTitle="<%= false %>"
 	title="<%= kbArticle.getTitle() %>"
 />
 
@@ -69,6 +70,6 @@ double priority = BeanParamUtil.getDouble(kbArticle, request, "priority");
 <aui:script>
 	function <portlet:namespace />selectKBArticle(parentResourcePrimKey, html) {
 		document.<portlet:namespace />fm.<portlet:namespace />parentResourcePrimKey.value = parentResourcePrimKey;
-		document.getElementById("<portlet:namespace />newParent").innerHTML = html;
+		document.getElementById('<portlet:namespace />newParent').innerHTML = html;
 	}
 </aui:script>

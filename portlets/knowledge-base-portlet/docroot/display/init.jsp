@@ -16,17 +16,10 @@
 
 <%@ include file="/init.jsp" %>
 
-<%@ page import="com.liferay.knowledgebase.display.search.KBArticleSearch" %>
-
 <%
-String kbArticlesOrderByCol = portletPreferences.getValue("kbArticlesOrderByCol", StringPool.BLANK);
-String kbArticlesOrderByType = portletPreferences.getValue("kbArticlesOrderByType", StringPool.BLANK);
-boolean showKBArticlePriorityColumn = GetterUtil.getBoolean(portletPreferences.getValue("showKBArticlePriorityColumn", null));
-boolean showKBArticleAuthorColumn = GetterUtil.getBoolean(portletPreferences.getValue("showKBArticleAuthorColumn", null));
-boolean showKBArticleCreateDateColumn = GetterUtil.getBoolean(portletPreferences.getValue("showKBArticleCreateDateColumn", null));
-boolean showKBArticleModifiedDateColumn = GetterUtil.getBoolean(portletPreferences.getValue("showKBArticleModifiedDateColumn", null));
-boolean showKBArticleStatusColumn = GetterUtil.getBoolean(portletPreferences.getValue("showKBArticleStatusColumn", null));
-boolean showKBArticleViewsColumn = GetterUtil.getBoolean(portletPreferences.getValue("showKBArticleViewsColumn", null));
+String portletResource = ParamUtil.getString(request, "portletResource");
+
+long resourcePrimKey = GetterUtil.getLong(portletPreferences.getValue("resourcePrimKey", null));
 
 boolean enableKBArticleDescription = GetterUtil.getBoolean(portletPreferences.getValue("enableKBArticleDescription", null));
 boolean enableKBArticleRatings = GetterUtil.getBoolean(portletPreferences.getValue("enableKBArticleRatings", null));
@@ -34,9 +27,10 @@ boolean showKBArticleAssetEntries = GetterUtil.getBoolean(portletPreferences.get
 boolean enableKBArticleKBComments = GetterUtil.getBoolean(portletPreferences.getValue("enableKBArticleKBComments", null));
 boolean showKBArticleKBComments = GetterUtil.getBoolean(portletPreferences.getValue("showKBArticleKBComments", null));
 boolean enableKBArticleViewCountIncrement = GetterUtil.getBoolean(portletPreferences.getValue("enableKBArticleViewCountIncrement", null));
-
-boolean enableKBTemplateKBComments = GetterUtil.getBoolean(portletPreferences.getValue("enableKBTemplateKBComments", null));
-boolean showKBTemplateKBComments = GetterUtil.getBoolean(portletPreferences.getValue("showKBTemplateKBComments", null));
+boolean enableKBArticleSubscriptions = GetterUtil.getBoolean(portletPreferences.getValue("enableKBArticleSubscriptions", null), true);
+boolean enableKBArticleHistory = GetterUtil.getBoolean(portletPreferences.getValue("enableKBArticleHistory", null), true);
+boolean enableKBArticlePrint = GetterUtil.getBoolean(portletPreferences.getValue("enableKBArticlePrint", null), true);
+boolean enableSocialBookmarks = GetterUtil.getBoolean(portletPreferences.getValue("enableSocialBookmarks", null), false);
 
 boolean enableRSS = !PortalUtil.isRSSFeedsEnabled() ? false : GetterUtil.getBoolean(portletPreferences.getValue("enableRss", null), true);
 int rssDelta = GetterUtil.getInteger(portletPreferences.getValue("rssDelta", StringPool.BLANK), SearchContainer.DEFAULT_DELTA);

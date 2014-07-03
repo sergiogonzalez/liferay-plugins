@@ -63,6 +63,7 @@ public class KBArticleWrapper implements KBArticle, ModelWrapper<KBArticle> {
 		attributes.put("parentResourcePrimKey", getParentResourcePrimKey());
 		attributes.put("version", getVersion());
 		attributes.put("title", getTitle());
+		attributes.put("urlTitle", getUrlTitle());
 		attributes.put("content", getContent());
 		attributes.put("description", getDescription());
 		attributes.put("priority", getPriority());
@@ -157,6 +158,12 @@ public class KBArticleWrapper implements KBArticle, ModelWrapper<KBArticle> {
 
 		if (title != null) {
 			setTitle(title);
+		}
+
+		String urlTitle = (String)attributes.get("urlTitle");
+
+		if (urlTitle != null) {
+			setUrlTitle(urlTitle);
 		}
 
 		String content = (String)attributes.get("content");
@@ -531,6 +538,26 @@ public class KBArticleWrapper implements KBArticle, ModelWrapper<KBArticle> {
 	@Override
 	public void setTitle(java.lang.String title) {
 		_kbArticle.setTitle(title);
+	}
+
+	/**
+	* Returns the url title of this k b article.
+	*
+	* @return the url title of this k b article
+	*/
+	@Override
+	public java.lang.String getUrlTitle() {
+		return _kbArticle.getUrlTitle();
+	}
+
+	/**
+	* Sets the url title of this k b article.
+	*
+	* @param urlTitle the url title of this k b article
+	*/
+	@Override
+	public void setUrlTitle(java.lang.String urlTitle) {
+		_kbArticle.setUrlTitle(urlTitle);
 	}
 
 	/**
@@ -988,6 +1015,13 @@ public class KBArticleWrapper implements KBArticle, ModelWrapper<KBArticle> {
 	}
 
 	@Override
+	public java.util.List<java.lang.Long> getAncestorResourcePrimaryKeys()
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _kbArticle.getAncestorResourcePrimaryKeys();
+	}
+
+	@Override
 	public java.lang.String getAttachmentsDirName() {
 		return _kbArticle.getAttachmentsDirName();
 	}
@@ -1016,6 +1050,13 @@ public class KBArticleWrapper implements KBArticle, ModelWrapper<KBArticle> {
 	@Override
 	public long getClassPK() {
 		return _kbArticle.getClassPK();
+	}
+
+	@Override
+	public com.liferay.knowledgebase.model.KBArticle getParentKBArticle()
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _kbArticle.getParentKBArticle();
 	}
 
 	@Override

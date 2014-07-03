@@ -1,7 +1,9 @@
 AUI().use(
 	'aui-base',
 	'aui-io-plugin-deprecated',
+	'aui-modal',
 	'liferay-util-window',
+	'liferay-widget-zindex',
 	function(A) {
 		Liferay.namespace('Tasks');
 
@@ -38,55 +40,30 @@ AUI().use(
 				instance.updateTaskList();
 			},
 
-			closePopup: function() {
-				var instance = this;
-
-				instance.getPopup().hide();
-			},
-
 			displayPopup: function(url, title) {
 				var instance = this;
 
-				var viewportRegion = A.getBody().get('viewportRegion');
-
-				var popup = instance.getPopup();
-
-				popup.show();
-
-				popup.titleNode.html(title);
-
-				popup.io.set('uri', url);
-				popup.io.start();
-			},
-
-			getPopup: function() {
-				var instance = this;
-
-				if (!instance._popup) {
-					instance._popup = Liferay.Util.Window.getWindow(
-						{
-							dialog: {
-								align: {
-									node: null,
-									points: ['tc', 'tc']
-								},
-								constrain2view: true,
-								cssClass: 'tasks-dialog',
-								modal: true,
-								resizable: false,
-								width: 600
-							}
-						}
-					).plug(
-						A.Plugin.IO,
-						{autoLoad: false}
-					).render();
-				}
-
-				instance._popup.io.set('form', null);
-				instance._popup.io.set('uri', null);
-
-				return instance._popup;
+				Liferay.Util.openWindow(
+					{
+						dialog: {
+							after: {
+								destroy: function(event) {
+									instance.updateTaskList();
+								}
+							},
+							centered: true,
+							constrain: true,
+							cssClass: 'tasks-dialog',
+							destroyOnHide: true,
+							modal: true,
+							plugins: [Liferay.WidgetZIndex],
+							width: 800
+						},
+						id: instance._namespace + 'Dialog',
+						title: title,
+						uri: url
+					}
+				);
 			},
 
 			openTask: function(href) {

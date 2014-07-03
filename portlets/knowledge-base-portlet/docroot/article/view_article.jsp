@@ -16,10 +16,14 @@
 
 <%@ include file="/article/init.jsp" %>
 
+<div id="<portlet:namespace/>message-container"></div>
+
 <c:if test="<%= Validator.equals(portletDisplay.getId(), PortletKeys.KNOWLEDGE_BASE_ARTICLE_DEFAULT_INSTANCE) && PortletPermissionUtil.contains(permissionChecker, plid, portletDisplay.getId(), ActionKeys.CONFIGURATION) %>">
 	<div class="portlet-configuration alert alert-info">
 		<aui:a href="<%= portletDisplay.getURLConfiguration() %>" label='<%= LanguageUtil.format(pageContext, "portlet-configuration-page-x-instance-id-x", new String[] {layout.getName(locale), portletDisplay.getInstanceId()}, false) %>' onClick="<%= portletDisplay.getURLConfigurationJS() %>" />
 	</div>
 </c:if>
 
-<liferay-util:include page="/admin/common/view_article.jsp" servletContext="<%= application %>" />
+<div class="kb-article-container">
+	<liferay-util:include page="/admin/common/view_article.jsp" servletContext="<%= application %>" />
+</div>

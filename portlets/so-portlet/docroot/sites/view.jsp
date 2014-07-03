@@ -20,27 +20,20 @@
 <%@ include file="/sites/init.jsp" %>
 
 <%
-String tabs1 = ParamUtil.getString(request, "tabs1", "my-sites");
+String tabs1 = ParamUtil.getString(request, "tabs1", userPortletPreferences.getValue("defaultSearchTab", "my-favorites"));
 
 String name = ParamUtil.getString(request, "name");
 
 List<Group> groups = null;
 int groupsCount = 0;
 
-if (tabs1.equals("my-sites")) {
-	groups = SitesUtil.getVisibleSites(themeDisplay.getCompanyId(), themeDisplay.getUserId(), name, true, 0, maxResultSize);
-	groupsCount = SitesUtil.getVisibleSitesCount(themeDisplay.getCompanyId(), themeDisplay.getUserId(), name, true);
-
-	if (groupsCount == 0) {
-		tabs1 = "all-sites";
-
-		groups = SitesUtil.getVisibleSites(themeDisplay.getCompanyId(), themeDisplay.getUserId(), name, false, 0, maxResultSize);
-		groupsCount = SitesUtil.getVisibleSitesCount(themeDisplay.getCompanyId(), themeDisplay.getUserId(), name, false);
-	}
-}
-else if (tabs1.equals("my-favorites")) {
+if (tabs1.equals("my-favorites")) {
 	groups = SitesUtil.getFavoriteSitesGroups(themeDisplay.getUserId(), name, 0, maxResultSize);
 	groupsCount = SitesUtil.getFavoriteSitesGroupsCount(themeDisplay.getUserId(), name);
+}
+else if (tabs1.equals("my-sites")) {
+	groups = SitesUtil.getVisibleSites(themeDisplay.getCompanyId(), themeDisplay.getUserId(), name, true, 0, maxResultSize);
+	groupsCount = SitesUtil.getVisibleSitesCount(themeDisplay.getCompanyId(), themeDisplay.getUserId(), name, true);
 }
 else {
 	groups = SitesUtil.getVisibleSites(themeDisplay.getCompanyId(), themeDisplay.getUserId(), name, false, 0, maxResultSize);
@@ -102,8 +95,14 @@ pageContext.setAttribute("portletURL", portletURL);
 		var addSiteButton = new A.Toolbar(
 			{
 				children: [
-					<c:if test="<%= PortalPermissionUtil.contains(permissionChecker, ActionKeys.ADD_COMMUNITY) %>">
+
+					<%
+					boolean addSiteEnabled = PortalPermissionUtil.contains(permissionChecker, ActionKeys.ADD_COMMUNITY) && (enableOpenSites || enablePublicRestrictedSites || enablePrivateRestrictedSites || enablePrivateSites);
+					%>
+
+					<c:if test="<%= addSiteEnabled %>">
 						{
+							cssClass: 'site-controls-double',
 							icon: 'icon-plus',
 							label: '<liferay-ui:message key="add-site" unicode="<%= true %>" />',
 							on: {
@@ -118,6 +117,7 @@ pageContext.setAttribute("portletURL", portletURL);
 						},
 					</c:if>
 					{
+						cssClass: '<%= addSiteEnabled ? "site-controls-double" : "site-controls-single" %>',
 						icon: 'icon-reorder',
 						label: '<liferay-ui:message key="sites-directory" unicode="<%= true %>" />',
 						on: {

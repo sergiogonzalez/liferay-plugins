@@ -1,4 +1,5 @@
-@import "compass/css3";
+@import "compass";
+@import "mixins";
 
 $defaultBackgroundColor: #252D31;
 $defaultTextColor: #202020;
@@ -104,7 +105,7 @@ $defaultTextColor: #202020;
 				border-top-width: 0;
 				margin: 0;
 				position: static;
-				right: 0px;
+				right: 0;
 
 				> li {
 					background: $defaultBackgroundColor url(../images/user_bar_default_bg.png) 0 0 repeat-x;
@@ -127,6 +128,10 @@ $defaultTextColor: #202020;
 
 					> a:hover, > a.selected, &.open > a {
 						@include primary-hover-state;
+					}
+
+					&.info-items {
+						background: transparent;
 					}
 				}
 			}
@@ -263,7 +268,7 @@ $defaultTextColor: #202020;
 
 /* ---------- Responsive ---------- */
 
-@media (max-width: 979px) {
+@include respond-to(phone, tablet) {
 	.aui .so-portlet-user-bar {
 		height: 3.15em;
 		z-index: auto;
@@ -334,6 +339,7 @@ $defaultTextColor: #202020;
 							margin-left: 0;
 							min-width: 100%;
 							padding: 0;
+							position: static;
 
 							li {
 								background-color: transparent;
@@ -462,7 +468,7 @@ $defaultTextColor: #202020;
 	}
 }
 
-@media (max-width: 767px) {
+@include respond-to(phone) {
 	html.aui body {
 		padding: 0;
 	}

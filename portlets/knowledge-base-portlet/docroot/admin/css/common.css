@@ -67,6 +67,10 @@
 
 	/* ---------- Portlet ---------- */
 
+	.kb-add-article-button {
+		font-weight: normal;
+	}
+
 	.kb-article-breadcrumbs {
 		margin: 0 5px 10px;
 	}
@@ -82,7 +86,7 @@
 		}
 	}
 
-	.kb-article-siblings {
+	.kb-article-child {
 		border: 1px solid #CCC;
 		margin: 15px -7px 0;
 
@@ -190,7 +194,7 @@
 		}
 
 		.kb-article-comments, .kb-template-comments {
-			margin: 15px -7px 0;
+			margin-top: 15px;
 
 			.field-content {
 				margin: 0;
@@ -202,8 +206,18 @@
 				margin: 0 10px 10px;
 			}
 
+			.kb-helpful-container {
+				margin: 25px, 0, 25px, 5px;
+
+				.kb-feedback-title {
+					font-size: 1.2em;
+					font-weight: bold;
+					padding: 0;
+				}
+			}
+
 			.kb-helpful-inputs {
-				margin: 4px 0 0;
+				margin: 4px 5px 0;
 
 				label {
 					font-weight: normal;

@@ -49,6 +49,9 @@ public class DockbarNotificationsPollerProcessor extends BasePollerProcessor {
 			"newUserNotificationsCount",
 			String.valueOf(newUserNotificationsCount));
 
+		pollerResponse.setParameter(
+			"timestamp", String.valueOf(System.currentTimeMillis()));
+
 		int unreadUserNotificationsCount =
 			UserNotificationEventLocalServiceUtil.
 				getArchivedUserNotificationEventsCount(

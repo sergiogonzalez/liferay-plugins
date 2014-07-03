@@ -106,5 +106,17 @@ if (row != null) {
 				url="<%= startMeetingWithRecordingURL %>"
 			/>
 		</c:if>
+
+		<c:if test="<%= bbbMeeting.getStatus() == BBBMeetingConstants.STATUS_IN_PROGRESS %>">
+			<portlet:actionURL name="joinBBBMeeting" var="joinMeetingURL">
+				<portlet:param name="bbbMeetingId" value="<%= String.valueOf(bbbMeeting.getBbbMeetingId()) %>" />
+			</portlet:actionURL>
+
+			<liferay-ui:icon
+				image="conversation"
+				message="join-meeting"
+				url="<%= joinMeetingURL %>"
+			/>
+		</c:if>
 	</c:if>
 </liferay-ui:icon-menu>

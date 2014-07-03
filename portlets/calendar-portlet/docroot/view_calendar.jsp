@@ -17,7 +17,7 @@
 <%@ include file="/init.jsp" %>
 
 <%
-String activeView = ParamUtil.getString(request, "activeView", defaultView);
+String activeView = ParamUtil.getString(request, "activeView", sessionClicksDefaultView);
 long date = ParamUtil.getLong(request, "date", System.currentTimeMillis());
 
 List<Calendar> groupCalendars = null;
@@ -34,7 +34,7 @@ if (userCalendarResource != null) {
 
 List<Calendar> otherCalendars = new ArrayList<Calendar>();
 
-long[] calendarIds = StringUtil.split(SessionClicks.get(request, "otherCalendars", StringPool.BLANK), 0L);
+long[] calendarIds = StringUtil.split(SessionClicks.get(request, "calendar-portlet-other-calendars", StringPool.BLANK), 0L);
 
 for (long calendarId : calendarIds) {
 	Calendar calendar = CalendarServiceUtil.fetchCalendar(calendarId);
@@ -81,7 +81,7 @@ boolean columnOptionsVisible = GetterUtil.getBoolean(SessionClicks.get(request, 
 
 			<div id="<portlet:namespace />calendarListContainer">
 				<c:if test="<%= themeDisplay.isSignedIn() %>">
-					<div class="toggler-header-expanded calendar-portlet-list-header">
+					<div class="calendar-portlet-list-header toggler-header-expanded">
 						<span class="calendar-portlet-list-arrow"></span>
 
 						<span class="calendar-portlet-list-text"><liferay-ui:message key="my-calendars" /></span>
@@ -95,7 +95,7 @@ boolean columnOptionsVisible = GetterUtil.getBoolean(SessionClicks.get(request, 
 				</c:if>
 
 				<c:if test="<%= groupCalendarResource != null %>">
-					<div class="toggler-header-expanded calendar-portlet-list-header">
+					<div class="calendar-portlet-list-header toggler-header-expanded">
 						<span class="calendar-portlet-list-arrow"></span>
 
 						<span class="calendar-portlet-list-text"><liferay-ui:message key="current-site-calendars" /></span>
@@ -140,8 +140,16 @@ boolean columnOptionsVisible = GetterUtil.getBoolean(SessionClicks.get(request, 
 					<portlet:param name="calendarBookingId" value="{calendarBookingId}" />
 					<portlet:param name="calendarId" value="{calendarId}" />
 					<portlet:param name="date" value="{date}" />
-					<portlet:param name="endTime" value="{endTime}" />
-					<portlet:param name="startTime" value="{startTime}" />
+					<portlet:param name="endTimeDay" value="{endTimeDay}" />
+					<portlet:param name="endTimeHour" value="{endTimeHour}" />
+					<portlet:param name="endTimeMinute" value="{endTimeMinute}" />
+					<portlet:param name="endTimeMonth" value="{endTimeMonth}" />
+					<portlet:param name="endTimeYear" value="{endTimeYear}" />
+					<portlet:param name="startTimeDay" value="{startTimeDay}" />
+					<portlet:param name="startTimeHour" value="{startTimeHour}" />
+					<portlet:param name="startTimeMinute" value="{startTimeMinute}" />
+					<portlet:param name="startTimeMonth" value="{startTimeMonth}" />
+					<portlet:param name="startTimeYear" value="{startTimeYear}" />
 					<portlet:param name="titleCurrentValue" value="{titleCurrentValue}" />
 				</portlet:renderURL>
 
@@ -160,12 +168,13 @@ boolean columnOptionsVisible = GetterUtil.getBoolean(SessionClicks.get(request, 
 
 				<liferay-util:param name="permissionsCalendarBookingURL" value="<%= permissionsCalendarBookingURL %>" />
 
+				<liferay-util:param name="showAddEventBtn" value="<%= String.valueOf((userDefaultCalendar != null) && CalendarPermission.contains(permissionChecker, userDefaultCalendar, ActionKeys.MANAGE_BOOKINGS)) %>" />
+
 				<portlet:renderURL var="viewCalendarBookingURL" windowState="<%= LiferayWindowState.POP_UP.toString() %>">
 					<portlet:param name="mvcPath" value="/view_calendar_booking.jsp" />
 					<portlet:param name="calendarBookingId" value="{calendarBookingId}" />
 				</portlet:renderURL>
 
-				<liferay-util:param name="showAddEventBtn" value="<%= String.valueOf((userDefaultCalendar != null) && CalendarPermission.contains(permissionChecker, userDefaultCalendar, ActionKeys.MANAGE_BOOKINGS)) %>" />
 				<liferay-util:param name="viewCalendarBookingURL" value="<%= viewCalendarBookingURL %>" />
 			</liferay-util:include>
 		</aui:col>
@@ -205,6 +214,8 @@ boolean columnOptionsVisible = GetterUtil.getBoolean(SessionClicks.get(request, 
 
 	window.<portlet:namespace />syncCalendarsMap = syncCalendarsMap;
 
+	window.<portlet:namespace />calendarLists = {};
+
 	<c:if test="<%= themeDisplay.isSignedIn() || (groupCalendarResource != null) %>">
 		window.<portlet:namespace />myCalendarList = new Liferay.CalendarList(
 			{
@@ -228,6 +239,8 @@ boolean columnOptionsVisible = GetterUtil.getBoolean(SessionClicks.get(request, 
 				visible: <%= themeDisplay.isSignedIn() %>
 			}
 		).render();
+
+		window.<portlet:namespace />calendarLists['<%= userCalendarResource.getCalendarResourceId() %>'] = window.<portlet:namespace />myCalendarList;
 	</c:if>
 
 	<c:if test="<%= themeDisplay.isSignedIn() %>">
@@ -241,7 +254,7 @@ boolean columnOptionsVisible = GetterUtil.getBoolean(SessionClicks.get(request, 
 
 						var calendarIds = A.Array.invoke(event.newVal, 'get', 'calendarId');
 
-						Liferay.Store('otherCalendars', calendarIds.join());
+						Liferay.Store('calendar-portlet-other-calendars', calendarIds.join());
 					},
 					'scheduler-calendar:visibleChange': function(event) {
 						syncCalendarsMap();
@@ -284,13 +297,15 @@ boolean columnOptionsVisible = GetterUtil.getBoolean(SessionClicks.get(request, 
 				simpleMenu: window.<portlet:namespace />calendarsMenu
 			}
 		).render();
+
+		window.<portlet:namespace />calendarLists['<%= groupCalendarResource.getCalendarResourceId() %>'] = window.<portlet:namespace />siteCalendarList;
 	</c:if>
 
 	syncCalendarsMap();
 
 	A.each(
 		Liferay.CalendarUtil.availableCalendars,
-		function(item, index, collection) {
+		function(item, index) {
 			item.on(
 				{
 					'visibleChange': function(event) {
@@ -315,9 +330,9 @@ boolean columnOptionsVisible = GetterUtil.getBoolean(SessionClicks.get(request, 
 	);
 
 	<c:if test="<%= themeDisplay.isSignedIn() %>">
-		<liferay-portlet:resourceURL copyCurrentRenderParameters="<%= false %>" id="calendarResources" var="calendarResourcesURL" />
-
 		var addOtherCalendarInput = A.one('#<portlet:namespace />addOtherCalendar');
+
+		<liferay-portlet:resourceURL copyCurrentRenderParameters="<%= false %>" id="calendarResources" var="calendarResourcesURL" />
 
 		Liferay.CalendarUtil.createCalendarsAutoComplete(
 			'<%= calendarResourcesURL %>',

@@ -1,4 +1,5 @@
 @import "compass";
+@import "mixins";
 
 $microblogs-border-color: #EAEAEA;
 
@@ -279,7 +280,7 @@ $microblogs-border-color: #EAEAEA;
 			width: 100%;
 		}
 
-		@media (max-width: 979px) {
+		@include respond-to(phone, tablet) {
 			font-size: 18px;
 		}
 	}
@@ -318,5 +319,19 @@ $microblogs-border-color: #EAEAEA;
 
 	.taglib-page-iterator {
 		padding: 5px 25px;
+	}
+}
+
+/* ---------- Responsive ---------- */
+
+@include respond-to(phone, tablet) {
+	.microblogs-portlet .microblogs-entry .footer .action {
+		display: inline-block;
+	}
+}
+
+@include respond-to(phone) {
+	.microblogs-portlet .microblogs-post {
+		width: auto;
 	}
 }

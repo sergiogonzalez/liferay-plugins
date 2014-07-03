@@ -183,7 +183,7 @@ portletURL.setParameter("tabs1", tabs1);
 
 									A.Array.each(
 										responseData.comments,
-										function(item, index, collection) {
+										function(item, index) {
 											Liferay.SO.Activities.addNewComment(commentsList, item);
 										}
 									);
@@ -393,6 +393,13 @@ portletURL.setParameter("tabs1", tabs1);
 			Liferay.SO.Activities.toggleEntry(event, '<portlet:namespace />');
 		},
 		'.toggle-entry'
+	);
+
+	Liferay.on(
+		'microblogPosted',
+		function(event) {
+			Liferay.Portlet.refresh('#p_p_id<portlet:namespace />');
+		}
 	);
 
 	Liferay.on(
