@@ -1,3 +1,5 @@
+<%@ page import="com.liferay.knowledgebase.model.KBCommentConstants" %>
+
 <%--
 /**
  * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
@@ -16,4 +18,12 @@
 
 <%@ include file="/admin/init.jsp" %>
 
-In Progress feedback (placeholder text)
+<%
+String emptyResultsMessage = "no-in-progress-feedback-was-found";
+
+int feedbackStatus = KBCommentConstants.STATUS_IN_PROGRESS;
+
+String navItem = "viewInProgressFeedback";
+%>
+
+<%@ include file="/admin/view_feedback_in_state.jspf" %>
