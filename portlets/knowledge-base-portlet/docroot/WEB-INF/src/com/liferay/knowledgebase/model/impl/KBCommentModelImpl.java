@@ -79,12 +79,13 @@ public class KBCommentModelImpl extends BaseModelImpl<KBComment>
 			{ "userName", Types.VARCHAR },
 			{ "createDate", Types.TIMESTAMP },
 			{ "modifiedDate", Types.TIMESTAMP },
+			{ "status", Types.INTEGER },
 			{ "classNameId", Types.BIGINT },
 			{ "classPK", Types.BIGINT },
 			{ "content", Types.VARCHAR },
 			{ "helpful", Types.BOOLEAN }
 		};
-	public static final String TABLE_SQL_CREATE = "create table KBComment (uuid_ VARCHAR(75) null,kbCommentId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,classNameId LONG,classPK LONG,content STRING null,helpful BOOLEAN)";
+	public static final String TABLE_SQL_CREATE = "create table KBComment (uuid_ VARCHAR(75) null,kbCommentId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,status INTEGER,classNameId LONG,classPK LONG,content STRING null,helpful BOOLEAN)";
 	public static final String TABLE_SQL_DROP = "drop table KBComment";
 	public static final String ORDER_BY_JPQL = " ORDER BY kbComment.modifiedDate DESC";
 	public static final String ORDER_BY_SQL = " ORDER BY KBComment.modifiedDate DESC";
@@ -129,6 +130,7 @@ public class KBCommentModelImpl extends BaseModelImpl<KBComment>
 		model.setUserName(soapModel.getUserName());
 		model.setCreateDate(soapModel.getCreateDate());
 		model.setModifiedDate(soapModel.getModifiedDate());
+		model.setStatus(soapModel.getStatus());
 		model.setClassNameId(soapModel.getClassNameId());
 		model.setClassPK(soapModel.getClassPK());
 		model.setContent(soapModel.getContent());
@@ -205,6 +207,7 @@ public class KBCommentModelImpl extends BaseModelImpl<KBComment>
 		attributes.put("userName", getUserName());
 		attributes.put("createDate", getCreateDate());
 		attributes.put("modifiedDate", getModifiedDate());
+		attributes.put("status", getStatus());
 		attributes.put("classNameId", getClassNameId());
 		attributes.put("classPK", getClassPK());
 		attributes.put("content", getContent());
@@ -264,6 +267,12 @@ public class KBCommentModelImpl extends BaseModelImpl<KBComment>
 
 		if (modifiedDate != null) {
 			setModifiedDate(modifiedDate);
+		}
+
+		Integer status = (Integer)attributes.get("status");
+
+		if (status != null) {
+			setStatus(status);
 		}
 
 		Long classNameId = (Long)attributes.get("classNameId");
@@ -451,6 +460,17 @@ public class KBCommentModelImpl extends BaseModelImpl<KBComment>
 		_modifiedDate = modifiedDate;
 	}
 
+	@JSON
+	@Override
+	public int getStatus() {
+		return _status;
+	}
+
+	@Override
+	public void setStatus(int status) {
+		_status = status;
+	}
+
 	@Override
 	public String getClassName() {
 		if (getClassNameId() <= 0) {
@@ -594,6 +614,7 @@ public class KBCommentModelImpl extends BaseModelImpl<KBComment>
 		kbCommentImpl.setUserName(getUserName());
 		kbCommentImpl.setCreateDate(getCreateDate());
 		kbCommentImpl.setModifiedDate(getModifiedDate());
+		kbCommentImpl.setStatus(getStatus());
 		kbCommentImpl.setClassNameId(getClassNameId());
 		kbCommentImpl.setClassPK(getClassPK());
 		kbCommentImpl.setContent(getContent());
@@ -732,6 +753,8 @@ public class KBCommentModelImpl extends BaseModelImpl<KBComment>
 			kbCommentCacheModel.modifiedDate = Long.MIN_VALUE;
 		}
 
+		kbCommentCacheModel.status = getStatus();
+
 		kbCommentCacheModel.classNameId = getClassNameId();
 
 		kbCommentCacheModel.classPK = getClassPK();
@@ -751,7 +774,7 @@ public class KBCommentModelImpl extends BaseModelImpl<KBComment>
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(25);
+		StringBundler sb = new StringBundler(27);
 
 		sb.append("{uuid=");
 		sb.append(getUuid());
@@ -769,6 +792,8 @@ public class KBCommentModelImpl extends BaseModelImpl<KBComment>
 		sb.append(getCreateDate());
 		sb.append(", modifiedDate=");
 		sb.append(getModifiedDate());
+		sb.append(", status=");
+		sb.append(getStatus());
 		sb.append(", classNameId=");
 		sb.append(getClassNameId());
 		sb.append(", classPK=");
@@ -784,7 +809,7 @@ public class KBCommentModelImpl extends BaseModelImpl<KBComment>
 
 	@Override
 	public String toXmlString() {
-		StringBundler sb = new StringBundler(40);
+		StringBundler sb = new StringBundler(43);
 
 		sb.append("<model><model-name>");
 		sb.append("com.liferay.knowledgebase.model.KBComment");
@@ -821,6 +846,10 @@ public class KBCommentModelImpl extends BaseModelImpl<KBComment>
 		sb.append(
 			"<column><column-name>modifiedDate</column-name><column-value><![CDATA[");
 		sb.append(getModifiedDate());
+		sb.append("]]></column-value></column>");
+		sb.append(
+			"<column><column-name>status</column-name><column-value><![CDATA[");
+		sb.append(getStatus());
 		sb.append("]]></column-value></column>");
 		sb.append(
 			"<column><column-name>classNameId</column-name><column-value><![CDATA[");
@@ -863,6 +892,7 @@ public class KBCommentModelImpl extends BaseModelImpl<KBComment>
 	private String _userName;
 	private Date _createDate;
 	private Date _modifiedDate;
+	private int _status;
 	private long _classNameId;
 	private long _originalClassNameId;
 	private boolean _setOriginalClassNameId;

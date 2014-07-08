@@ -17,6 +17,7 @@ package com.liferay.knowledgebase.service.base;
 import com.liferay.knowledgebase.model.KBArticle;
 import com.liferay.knowledgebase.service.KBArticleLocalService;
 import com.liferay.knowledgebase.service.persistence.KBArticlePersistence;
+import com.liferay.knowledgebase.service.persistence.KBCommentFinder;
 import com.liferay.knowledgebase.service.persistence.KBCommentPersistence;
 import com.liferay.knowledgebase.service.persistence.KBTemplatePersistence;
 
@@ -554,6 +555,24 @@ public abstract class KBArticleLocalServiceBaseImpl extends BaseLocalServiceImpl
 	public void setKBCommentPersistence(
 		KBCommentPersistence kbCommentPersistence) {
 		this.kbCommentPersistence = kbCommentPersistence;
+	}
+
+	/**
+	 * Returns the k b comment finder.
+	 *
+	 * @return the k b comment finder
+	 */
+	public KBCommentFinder getKBCommentFinder() {
+		return kbCommentFinder;
+	}
+
+	/**
+	 * Sets the k b comment finder.
+	 *
+	 * @param kbCommentFinder the k b comment finder
+	 */
+	public void setKBCommentFinder(KBCommentFinder kbCommentFinder) {
+		this.kbCommentFinder = kbCommentFinder;
 	}
 
 	/**
@@ -1391,6 +1410,8 @@ public abstract class KBArticleLocalServiceBaseImpl extends BaseLocalServiceImpl
 	protected com.liferay.knowledgebase.service.KBCommentService kbCommentService;
 	@BeanReference(type = KBCommentPersistence.class)
 	protected KBCommentPersistence kbCommentPersistence;
+	@BeanReference(type = KBCommentFinder.class)
+	protected KBCommentFinder kbCommentFinder;
 	@BeanReference(type = com.liferay.knowledgebase.service.KBTemplateLocalService.class)
 	protected com.liferay.knowledgebase.service.KBTemplateLocalService kbTemplateLocalService;
 	@BeanReference(type = com.liferay.knowledgebase.service.KBTemplateService.class)

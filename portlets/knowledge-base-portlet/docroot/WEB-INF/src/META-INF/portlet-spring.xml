@@ -7,6 +7,7 @@
 	<bean id="com.liferay.knowledgebase.service.KBCommentLocalService" class="com.liferay.knowledgebase.service.impl.KBCommentLocalServiceImpl" />
 	<bean id="com.liferay.knowledgebase.service.KBCommentService" class="com.liferay.knowledgebase.service.impl.KBCommentServiceImpl" />
 	<bean id="com.liferay.knowledgebase.service.persistence.KBCommentPersistence" class="com.liferay.knowledgebase.service.persistence.impl.KBCommentPersistenceImpl" parent="basePersistence" />
+	<bean id="com.liferay.knowledgebase.service.persistence.KBCommentFinder" class="com.liferay.knowledgebase.service.persistence.impl.KBCommentFinderImpl" parent="basePersistence" />
 	<bean id="com.liferay.knowledgebase.service.KBTemplateLocalService" class="com.liferay.knowledgebase.service.impl.KBTemplateLocalServiceImpl" />
 	<bean id="com.liferay.knowledgebase.service.KBTemplateService" class="com.liferay.knowledgebase.service.impl.KBTemplateServiceImpl" />
 	<bean id="com.liferay.knowledgebase.service.persistence.KBTemplatePersistence" class="com.liferay.knowledgebase.service.persistence.impl.KBTemplatePersistenceImpl" parent="basePersistence" />

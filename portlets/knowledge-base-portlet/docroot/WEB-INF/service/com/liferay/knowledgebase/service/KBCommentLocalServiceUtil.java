@@ -291,6 +291,11 @@ public class KBCommentLocalServiceUtil {
 			orderByComparator);
 	}
 
+	public static java.util.List<com.liferay.knowledgebase.model.KBComment> getKBComments(
+		long groupId, int status, int start, int end) {
+		return getService().getKBComments(groupId, status, start, end);
+	}
+
 	/**
 	* Returns a range of all the k b comments.
 	*
@@ -319,6 +324,10 @@ public class KBCommentLocalServiceUtil {
 	public static int getKBCommentsCount(java.lang.String className,
 		long classPK) {
 		return getService().getKBCommentsCount(className, classPK);
+	}
+
+	public static int getKBCommentsCount(long groupId, int status) {
+		return getService().getKBCommentsCount(groupId, status);
 	}
 
 	public static com.liferay.portal.model.PersistedModel getPersistedModel(
@@ -355,12 +364,19 @@ public class KBCommentLocalServiceUtil {
 
 	public static com.liferay.knowledgebase.model.KBComment updateKBComment(
 		long kbCommentId, long classNameId, long classPK,
-		java.lang.String content, boolean helpful,
+		java.lang.String content, boolean helpful, int status,
 		com.liferay.portal.service.ServiceContext serviceContext)
 		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService()
 				   .updateKBComment(kbCommentId, classNameId, classPK, content,
-			helpful, serviceContext);
+			helpful, status, serviceContext);
+	}
+
+	public static com.liferay.knowledgebase.model.KBComment updateStatus(
+		long kbCommentId, int status,
+		com.liferay.portal.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return getService().updateStatus(kbCommentId, status, serviceContext);
 	}
 
 	public static void clearService() {

@@ -207,6 +207,20 @@ public interface KBCommentModel extends AttachedModel, BaseModel<KBComment>,
 	public void setModifiedDate(Date modifiedDate);
 
 	/**
+	 * Returns the status of this k b comment.
+	 *
+	 * @return the status of this k b comment
+	 */
+	public int getStatus();
+
+	/**
+	 * Sets the status of this k b comment.
+	 *
+	 * @param status the status of this k b comment
+	 */
+	public void setStatus(int status);
+
+	/**
 	 * Returns the fully qualified class name of this k b comment.
 	 *
 	 * @return the fully qualified class name of this k b comment
