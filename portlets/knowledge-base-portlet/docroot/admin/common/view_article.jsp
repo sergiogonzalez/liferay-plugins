@@ -31,9 +31,9 @@ if (enableKBArticleViewCountIncrement && !kbArticle.isDraft()) {
 <liferay-util:include page="/admin/article_breadcrumbs.jsp" servletContext="<%= application %>" />
 
 <div class="float-container kb-entity-header">
-	<div class="kb-title">
-		<%= HtmlUtil.escape(kbArticle.getTitle()) %>
-	</div>
+	<h1 class="kb-title">
+		<%= kbArticle.getTitle() %>
+	</h1>
 
 	<div class="kb-tools">
 		<liferay-util:include page="/admin/article_tools.jsp" servletContext="<%= application %>" />
@@ -52,19 +52,19 @@ if (enableKBArticleViewCountIncrement && !kbArticle.isDraft()) {
 		<%= kbArticle.getContent() %>
 	</div>
 
+	<liferay-util:include page="/admin/article_child.jsp" servletContext="<%= application %>" />
+
 	<liferay-util:include page="/admin/article_siblings.jsp" servletContext="<%= application %>" />
 
 	<liferay-util:include page="/admin/article_attachments.jsp" servletContext="<%= application %>" />
 
 	<liferay-util:include page="/admin/article_assets.jsp" servletContext="<%= application %>" />
 
-	<liferay-util:include page="/admin/article_ratings.jsp" servletContext="<%= application %>" />
+	<liferay-util:include page="/admin/article_asset_entries.jsp" servletContext="<%= application %>" />
 
-	<liferay-util:include page="/admin/article_social_bookmarks.jsp" servletContext="<%= application %>" />
+	<liferay-util:include page="/admin/article_ratings.jsp" servletContext="<%= application %>" />
 
 	<liferay-util:include page="/admin/article_comments.jsp" servletContext="<%= application %>" />
 
-	<liferay-util:include page="/admin/article_child.jsp" servletContext="<%= application %>" />
-
-	<liferay-util:include page="/admin/article_asset_entries.jsp" servletContext="<%= application %>" />
+	<liferay-util:include page="/admin/article_social_bookmarks.jsp" servletContext="<%= application %>" />
 </div>
