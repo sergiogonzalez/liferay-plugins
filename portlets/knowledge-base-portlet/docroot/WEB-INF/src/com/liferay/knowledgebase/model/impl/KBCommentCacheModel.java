@@ -38,7 +38,7 @@ public class KBCommentCacheModel implements CacheModel<KBComment>,
 	Externalizable {
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(25);
+		StringBundler sb = new StringBundler(27);
 
 		sb.append("{uuid=");
 		sb.append(uuid);
@@ -56,6 +56,8 @@ public class KBCommentCacheModel implements CacheModel<KBComment>,
 		sb.append(createDate);
 		sb.append(", modifiedDate=");
 		sb.append(modifiedDate);
+		sb.append(", status=");
+		sb.append(status);
 		sb.append(", classNameId=");
 		sb.append(classNameId);
 		sb.append(", classPK=");
@@ -106,6 +108,7 @@ public class KBCommentCacheModel implements CacheModel<KBComment>,
 			kbCommentImpl.setModifiedDate(new Date(modifiedDate));
 		}
 
+		kbCommentImpl.setStatus(status);
 		kbCommentImpl.setClassNameId(classNameId);
 		kbCommentImpl.setClassPK(classPK);
 
@@ -133,6 +136,7 @@ public class KBCommentCacheModel implements CacheModel<KBComment>,
 		userName = objectInput.readUTF();
 		createDate = objectInput.readLong();
 		modifiedDate = objectInput.readLong();
+		status = objectInput.readInt();
 		classNameId = objectInput.readLong();
 		classPK = objectInput.readLong();
 		content = objectInput.readUTF();
@@ -163,6 +167,7 @@ public class KBCommentCacheModel implements CacheModel<KBComment>,
 
 		objectOutput.writeLong(createDate);
 		objectOutput.writeLong(modifiedDate);
+		objectOutput.writeInt(status);
 		objectOutput.writeLong(classNameId);
 		objectOutput.writeLong(classPK);
 
@@ -184,6 +189,7 @@ public class KBCommentCacheModel implements CacheModel<KBComment>,
 	public String userName;
 	public long createDate;
 	public long modifiedDate;
+	public int status;
 	public long classNameId;
 	public long classPK;
 	public String content;

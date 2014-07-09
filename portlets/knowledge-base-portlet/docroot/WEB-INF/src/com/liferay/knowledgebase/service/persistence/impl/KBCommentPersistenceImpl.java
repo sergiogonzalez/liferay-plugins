@@ -3643,6 +3643,7 @@ public class KBCommentPersistenceImpl extends BasePersistenceImpl<KBComment>
 		kbCommentImpl.setUserName(kbComment.getUserName());
 		kbCommentImpl.setCreateDate(kbComment.getCreateDate());
 		kbCommentImpl.setModifiedDate(kbComment.getModifiedDate());
+		kbCommentImpl.setStatus(kbComment.getStatus());
 		kbCommentImpl.setClassNameId(kbComment.getClassNameId());
 		kbCommentImpl.setClassPK(kbComment.getClassPK());
 		kbCommentImpl.setContent(kbComment.getContent());
