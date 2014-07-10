@@ -1,3 +1,4 @@
+<%--
 /**
  * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
@@ -11,13 +12,16 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
+--%>
 
-package com.liferay.sync.service.persistence;
+<%@ page import="com.liferay.portal.util.PortletKeys" %>
 
-/**
- * @author Brian Wing Shun Chan
- */
-public interface SyncDLObjectFinder {
-	public java.util.List<com.liferay.sync.model.SyncDLObject> filterFindByC_M_R(
-		long companyId, long modifiedTime, long repositoryId);
-}
+<%
+String portletId = ParamUtil.getString(request, "p_p_id");
+%>
+
+<c:if test="<%= portletId.equals(PortletKeys.MESSAGE_BOARDS) || portletId.equals(PortletKeys.MESSAGE_BOARDS_ADMIN) %>">
+	var ckEditor = CKEDITOR.instances['<%= HtmlUtil.escapeJS(name) %>'];
+
+	ckEditor.config.extraPlugins += ',autocomplete';
+</c:if>
