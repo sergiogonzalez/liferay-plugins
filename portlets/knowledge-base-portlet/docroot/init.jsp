@@ -152,9 +152,13 @@ page import="javax.portlet.WindowState" %>
 <%
 WindowState windowState = renderRequest.getWindowState();
 
+String redirect = ParamUtil.getString(request, "redirect");
+
+String backURL = ParamUtil.getString(request, "backURL", redirect);
+
 String currentURL = PortalUtil.getCurrentURL(request);
 
-String redirect = ParamUtil.getString(request, "redirect", currentURL);
+redirect = GetterUtil.getString(redirect, currentURL);
 
 String rootPortletId = portletDisplay.getRootPortletId();
 
