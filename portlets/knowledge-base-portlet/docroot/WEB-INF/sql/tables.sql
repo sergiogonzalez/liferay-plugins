@@ -35,6 +35,7 @@ create table KBComment (
 	userName VARCHAR(75) null,
 	createDate DATE null,
 	modifiedDate DATE null,
+	status INTEGER,
 	classNameId LONG,
 	classPK LONG,
 	content STRING null,

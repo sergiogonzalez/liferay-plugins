@@ -17,6 +17,7 @@ package com.liferay.knowledgebase.service.base;
 import com.liferay.knowledgebase.model.KBTemplate;
 import com.liferay.knowledgebase.service.KBTemplateLocalService;
 import com.liferay.knowledgebase.service.persistence.KBArticlePersistence;
+import com.liferay.knowledgebase.service.persistence.KBCommentFinder;
 import com.liferay.knowledgebase.service.persistence.KBCommentPersistence;
 import com.liferay.knowledgebase.service.persistence.KBTemplatePersistence;
 
@@ -518,6 +519,24 @@ public abstract class KBTemplateLocalServiceBaseImpl
 	}
 
 	/**
+	 * Returns the k b comment finder.
+	 *
+	 * @return the k b comment finder
+	 */
+	public KBCommentFinder getKBCommentFinder() {
+		return kbCommentFinder;
+	}
+
+	/**
+	 * Sets the k b comment finder.
+	 *
+	 * @param kbCommentFinder the k b comment finder
+	 */
+	public void setKBCommentFinder(KBCommentFinder kbCommentFinder) {
+		this.kbCommentFinder = kbCommentFinder;
+	}
+
+	/**
 	 * Returns the k b template local service.
 	 *
 	 * @return the k b template local service
@@ -938,6 +957,8 @@ public abstract class KBTemplateLocalServiceBaseImpl
 	protected com.liferay.knowledgebase.service.KBCommentService kbCommentService;
 	@BeanReference(type = KBCommentPersistence.class)
 	protected KBCommentPersistence kbCommentPersistence;
+	@BeanReference(type = KBCommentFinder.class)
+	protected KBCommentFinder kbCommentFinder;
 	@BeanReference(type = com.liferay.knowledgebase.service.KBTemplateLocalService.class)
 	protected com.liferay.knowledgebase.service.KBTemplateLocalService kbTemplateLocalService;
 	@BeanReference(type = com.liferay.knowledgebase.service.KBTemplateService.class)

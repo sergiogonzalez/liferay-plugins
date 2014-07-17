@@ -58,6 +58,7 @@ public class KBCommentWrapper implements KBComment, ModelWrapper<KBComment> {
 		attributes.put("userName", getUserName());
 		attributes.put("createDate", getCreateDate());
 		attributes.put("modifiedDate", getModifiedDate());
+		attributes.put("status", getStatus());
 		attributes.put("classNameId", getClassNameId());
 		attributes.put("classPK", getClassPK());
 		attributes.put("content", getContent());
@@ -114,6 +115,12 @@ public class KBCommentWrapper implements KBComment, ModelWrapper<KBComment> {
 
 		if (modifiedDate != null) {
 			setModifiedDate(modifiedDate);
+		}
+
+		Integer status = (Integer)attributes.get("status");
+
+		if (status != null) {
+			setStatus(status);
 		}
 
 		Long classNameId = (Long)attributes.get("classNameId");
@@ -269,6 +276,16 @@ public class KBCommentWrapper implements KBComment, ModelWrapper<KBComment> {
 	@Override
 	public java.io.Serializable getPrimaryKeyObj() {
 		return _kbComment.getPrimaryKeyObj();
+	}
+
+	/**
+	* Returns the status of this k b comment.
+	*
+	* @return the status of this k b comment
+	*/
+	@Override
+	public int getStatus() {
+		return _kbComment.getStatus();
 	}
 
 	/**
@@ -482,6 +499,16 @@ public class KBCommentWrapper implements KBComment, ModelWrapper<KBComment> {
 	@Override
 	public void setPrimaryKeyObj(java.io.Serializable primaryKeyObj) {
 		_kbComment.setPrimaryKeyObj(primaryKeyObj);
+	}
+
+	/**
+	* Sets the status of this k b comment.
+	*
+	* @param status the status of this k b comment
+	*/
+	@Override
+	public void setStatus(int status) {
+		_kbComment.setStatus(status);
 	}
 
 	/**
