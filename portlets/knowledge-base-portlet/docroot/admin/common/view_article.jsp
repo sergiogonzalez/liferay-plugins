@@ -29,6 +29,13 @@ if (enableKBArticleViewCountIncrement && !kbArticle.isDraft()) {
 %>
 
 <div class="float-container kb-entity-header">
+	<c:if test="<%= Validator.isNotNull(backURL) %>">
+		<liferay-ui:header
+			backURL="<%= backURL %>"
+			title="<%= kbArticle.getTitle() %>"
+		/>
+	</c:if>
+
 	<h1 class="kb-title">
 		<%= kbArticle.getTitle() %>
 	</h1>

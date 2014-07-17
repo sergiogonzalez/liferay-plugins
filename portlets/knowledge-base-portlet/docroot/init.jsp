@@ -44,6 +44,7 @@ page import="com.liferay.knowledgebase.model.KBTemplateSearchDisplay" %><%@
 page import="com.liferay.knowledgebase.service.KBArticleLocalServiceUtil" %><%@
 page import="com.liferay.knowledgebase.service.KBArticleServiceUtil" %><%@
 page import="com.liferay.knowledgebase.service.KBCommentLocalServiceUtil" %><%@
+page import="com.liferay.knowledgebase.service.KBCommentServiceUtil" %><%@
 page import="com.liferay.knowledgebase.service.KBTemplateServiceUtil" %><%@
 page import="com.liferay.knowledgebase.service.permission.AdminPermission" %><%@
 page import="com.liferay.knowledgebase.service.permission.DisplayPermission" %><%@
@@ -125,6 +126,7 @@ page import="com.liferay.portlet.documentlibrary.NoSuchFileException" %><%@
 page import="com.liferay.portlet.journal.model.JournalArticle" %><%@
 page import="com.liferay.portlet.messageboards.model.MBMessage" %><%@
 page import="com.liferay.portlet.wiki.model.WikiPage" %><%@
+page import="com.liferay.taglib.search.DateSearchEntry" %><%@
 page import="com.liferay.taglib.search.ResultRow" %><%@
 page import="com.liferay.util.RSSUtil" %>
 
@@ -150,9 +152,13 @@ page import="javax.portlet.WindowState" %>
 <%
 WindowState windowState = renderRequest.getWindowState();
 
+String redirect = ParamUtil.getString(request, "redirect");
+
+String backURL = ParamUtil.getString(request, "backURL", redirect);
+
 String currentURL = PortalUtil.getCurrentURL(request);
 
-String redirect = ParamUtil.getString(request, "redirect", currentURL);
+redirect = GetterUtil.getString(redirect, currentURL);
 
 String rootPortletId = portletDisplay.getRootPortletId();
 

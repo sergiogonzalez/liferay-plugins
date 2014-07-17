@@ -21,6 +21,8 @@ import com.liferay.knowledgebase.util.ActionKeys;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.service.ServiceContext;
 
+import java.util.List;
+
 /**
  * @author Brian Wing Shun Chan
  */
@@ -45,9 +47,28 @@ public class KBCommentServiceImpl extends KBCommentServiceBaseImpl {
 	}
 
 	@Override
+	public KBComment getKBComment(long kbCommentId) throws PortalException {
+		KBComment kbComment = kbCommentLocalService.getKBComment(kbCommentId);
+
+		KBCommentPermission.check(
+			getPermissionChecker(), kbComment, ActionKeys.VIEW);
+
+		return kbComment;
+	}
+
+	public List<KBComment> getKBComments(
+		long groupId, int status, int start, int end) {
+
+		return kbCommentFinder.filterFindByG_S(groupId, status, start, end);
+	}
+
+	public int getKBCommentsCount(long groupId, int status) {
+		return kbCommentFinder.filterCountByG_S(groupId, status);
+	}
+
 	public KBComment updateKBComment(
 			long kbCommentId, long classNameId, long classPK, String content,
-			boolean helpful, ServiceContext serviceContext)
+			boolean helpful, int status, ServiceContext serviceContext)
 		throws PortalException {
 
 		KBComment kbComment = kbCommentPersistence.findByPrimaryKey(
@@ -57,8 +78,35 @@ public class KBCommentServiceImpl extends KBCommentServiceBaseImpl {
 			getPermissionChecker(), kbComment, ActionKeys.UPDATE);
 
 		return kbCommentLocalService.updateKBComment(
-			kbCommentId, classNameId, classPK, content, helpful,
+			kbCommentId, classNameId, classPK, content, helpful, status,
 			serviceContext);
+	}
+
+	public KBComment updateKBComment(
+			long kbCommentId, long classNameId, long classPK, String content,
+			boolean helpful, ServiceContext serviceContext)
+		throws PortalException {
+
+		KBComment kbComment = kbCommentPersistence.findByPrimaryKey(
+			kbCommentId);
+
+		return updateKBComment(
+			kbCommentId, classNameId, classPK, content, helpful,
+			kbComment.getStatus(), serviceContext);
+	}
+
+	public KBComment updateStatus(
+			long kbCommentId, int status, ServiceContext serviceContext)
+		throws PortalException {
+
+		KBComment kbComment = kbCommentPersistence.findByPrimaryKey(
+			kbCommentId);
+
+		KBCommentPermission.check(
+			getPermissionChecker(), kbComment, ActionKeys.UPDATE);
+
+		return kbCommentLocalService.updateStatus(
+			kbCommentId, status, serviceContext);
 	}
 
 }
