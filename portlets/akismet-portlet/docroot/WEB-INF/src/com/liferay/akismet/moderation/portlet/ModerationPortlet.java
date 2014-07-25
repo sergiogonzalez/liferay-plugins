@@ -213,7 +213,7 @@ public class ModerationPortlet extends MVCPortlet {
 		}
 
 		if (!wikiPageLinks.isEmpty()) {
-			SessionMessages.add(actionRequest, "requestProcessed");
+			addSuccessMessage(actionRequest, actionResponse);
 
 			SessionMessages.add(
 				actionRequest, "anotherUserHasMadeChangesToThesePages",
