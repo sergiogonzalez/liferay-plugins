@@ -306,8 +306,8 @@ Format dateFormatDateTime = FastDateFormatFactoryUtil.getDateTime(locale, timeZo
 									<c:if test="<%= (message != null) && !message.isApproved() %>">
 										<aui:model-context bean="<%= message %>" model="<%= MBMessage.class %>" />
 
-										<div>
-											<aui:workflow-status model="<%= MBDiscussion.class %>" status="<%= message.getStatus() %>" />
+										<div class="alert alert-danger">
+											<%= LanguageUtil.get(request, "your-message-has-been-flagged-as-spam.-an-administrator-will-review-your-message-as-soon-as-possible") %>
 										</div>
 									</c:if>
 
