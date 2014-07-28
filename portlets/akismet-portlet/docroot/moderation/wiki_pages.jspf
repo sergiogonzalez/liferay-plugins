@@ -34,7 +34,7 @@
 			<aui:button-row>
 				<aui:button onClick='<%= renderResponse.getNamespace() + "notSpamWikiPages();" %>' value="not-spam" />
 
-				<aui:button onClick='<%= renderResponse.getNamespace() + "spamWikiPages();" %>' value="spam" />
+				<aui:button onClick='<%= renderResponse.getNamespace() + "spamWikiPages();" %>' value="delete" />
 			</aui:button-row>
 		</c:if>
 
