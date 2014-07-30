@@ -1,0 +1,127 @@
+<script type="text/javascript">
+
+  // The API developer key obtained from the Google Developers Console.
+  var developerKey = 'AIzaSyBbjZ3CVbBUxjGcX_sZFJL4JNQF9fePQUk';
+
+  // The Client ID obtained from the Google Developers Console.
+  var clientId = '904613887818-cuebvbjs9jppcastkh4fp2cbssfdc66d.apps.googleusercontent.com';
+
+  // Scope to use to access user's photos.
+  var scope = [
+    'https://www.googleapis.com/auth/drive.readonly',
+    'https://www.googleapis.com/auth/drive',
+    'https://www.googleapis.com/auth/photos',
+    'https://www.googleapis.com/auth/photos.upload',
+    'https://www.googleapis.com/auth/youtube'
+  ];
+
+  var pickerApiLoaded = false;
+  var oauthToken;
+
+  // Use the API Loader script to load google.picker and gapi.auth.
+  function onApiLoad() {
+    gapi.load('auth', {'callback': onAuthApiLoad});
+    gapi.load('picker', {'callback': onPickerApiLoad});
+  }
+
+  function onAuthApiLoad() {
+    window.gapi.auth.authorize(
+        {
+          'client_id': clientId,
+          'scope': scope,
+          'immediate': false
+        },
+        handleAuthResult);
+  }
+
+  function onPickerApiLoad() {
+    pickerApiLoaded = true;
+    //createPicker();
+  }
+
+  function handleAuthResult(authResult) {
+    if (authResult && !authResult.error) {
+      oauthToken = authResult.access_token;
+      //createPicker();
+    }
+  }
+
+  // Create and render a Picker object for picking user Photos.
+  function createPicker() {
+	if (oauthToken == null) return;
+	if (!pickerApiLoaded) return;
+
+    var groupDocuments = new google.picker.ViewGroup(google.picker.ViewId.DOCS);
+    groupDocuments.addView(google.picker.ViewId.DOCUMENTS);
+    groupDocuments.addView(google.picker.ViewId.SPREADSHEETS);
+    groupDocuments.addView(google.picker.ViewId.PRESENTATIONS);
+
+    //groupDocuments.addView(google.picker.ViewId.PDFS);
+    //groupDocuments.addView(google.picker.ViewId.DOCS_IMAGES);
+    //groupDocuments.addView(google.picker.ViewId.FORMS);
+    //groupDocuments.addView(google.picker.ViewId.DRAWINGS);
+    //groupDocuments.addView(google.picker.ViewId.DOCS_VIDEOS);
+
+
+    var groupPhotos = new google.picker.ViewGroup(google.picker.ViewId.PHOTOS);
+    //groupPhotos.addView(google.picker.ViewId.PHOTO_ALBUMS);
+    groupPhotos.addView(google.picker.ViewId.PHOTO_UPLOAD);
+    groupPhotos.addView(google.picker.ViewId.WEBCAM);
+    groupPhotos.addView(google.picker.ViewId.IMAGE_SEARCH);
+
+
+    var groupVideos = new google.picker.ViewGroup(google.picker.ViewId.YOUTUBE);
+    groupVideos.addView(google.picker.ViewId.VIDEO_SEARCH);
+
+
+    var picker = new google.picker.PickerBuilder();
+    picker.addViewGroup(groupDocuments);
+    picker.addViewGroup(groupPhotos);
+    picker.addViewGroup(groupVideos);
+    picker.addView(google.picker.ViewId.RECENTLY_PICKED);
+
+    //picker.addView(google.picker.ViewId.YOUTUBE);
+
+    //addView(google.picker.ViewId.PHOTO_ALBUMS).
+    //addView(google.picker.ViewId.PHOTOS).
+    //addView(google.picker.ViewId.PHOTO_UPLOAD).
+    //addView(google.picker.ViewId.WEBCAM).
+
+    //picker.addView(google.picker.ViewId.VIDEO_SEARCH);
+
+    //addView(google.picker.ViewId.DOCUMENTS);
+    //addView(google.picker.ViewId.DRAWINGS);
+    //addView(google.picker.ViewId.FOLDERS);
+    //addView(google.picker.ViewId.FORMS);
+    //addView(google.picker.ViewId.PDFS);
+    //addView(google.picker.ViewId.PRESENTATIONS);
+    //addView(google.picker.ViewId.SPREADSHEETS);
+
+    picker.setOAuthToken(oauthToken);
+    picker.setDeveloperKey(developerKey);
+    picker.setCallback(pickerCallback);
+
+    picker.build().setVisible(true);
+  }
+
+  // A simple callback implementation.
+  function pickerCallback(data) {
+    var url = 'nothing';
+    if (data[google.picker.Response.ACTION] == google.picker.Action.PICKED) {
+      var doc = data[google.picker.Response.DOCUMENTS][0];
+      window.[$$CALLBACK_FUNCTION$$]({
+    	  "id":          doc[google.picker.Document.ID],
+    	  "title":       doc[google.picker.Document.NAME],
+    	  "description": doc[google.picker.Document.DESCRIPTION],
+    	  "icon":        doc[google.picker.Document.ICON_URL],
+    	  "embedURL":    doc[google.picker.Document.EMBEDDABLE_URL],
+    	  "editURL":     doc[google.picker.Document.URL]
+   	  });
+    }
+  }
+</script>
+
+<!-- The Google API Loader script. -->
+<script type="text/javascript" src="https://apis.google.com/js/api.js?onload=onApiLoad"></script>
+
+<input type="button" value="Select Google Document" onclick="createPicker()">

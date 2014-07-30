@@ -1,0 +1,3 @@
+Bundle-Name: Google Drive Connector
+Include-Resource: classes
+Private-Package: *
