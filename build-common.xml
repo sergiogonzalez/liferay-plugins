@@ -68,6 +68,7 @@
 		<path refid="plugin.classpath" />
 		<path refid="plugin-test-type.classpath" />
 		<fileset dir="${app.server.lib.portal.dir}" excludes="ant.jar" includes="*.jar" />
+		<fileset dir="${module.framework.base.dir}/test" erroronmissingdir="false" includes="portal-test*.jar" />
 	</path>
 
 	<path id="classpath.aQute.bnd">
@@ -741,7 +742,7 @@ Error-Prone was automatically installed. Please rerun your task.
 			</if>
 
 			<copy todir="@{module.dir}/docroot/WEB-INF/tld">
-				<fileset dir="${app.server.portal.dir}/WEB-INF/tld" includes="${plugin.tlds}" />
+				<fileset dir="${app.server.portal.dir}/WEB-INF/tld" erroronmissingdir="false" includes="${plugin.tlds}" />
 			</copy>
 
 			<if>
@@ -2186,6 +2187,19 @@ Please find a solution that does not require portal-impl.jar.
 		</sequential>
 	</macrodef>
 
+	<macrodef name="setup-osgi-jmx">
+		<sequential>
+			<ivy:resolve>
+				<dependency name="org.apache.aries.jmx" org="org.apache.aries.jmx" rev="1.1.1" />
+				<dependency name="org.apache.aries.util" org="org.apache.aries" rev="1.1.0" />
+				<exclude org="org.eclipse" />
+				<exclude org="org.osgi" />
+			</ivy:resolve>
+
+			<ivy:retrieve pattern="${module.framework.base.dir}/test/[artifact]-[revision].[ext]" type="bundle,jar" />
+		</sequential>
+	</macrodef>
+
 	<macrodef name="setup-tomcat-jmx">
 		<sequential>
 			<if>
@@ -2248,19 +2262,19 @@ Please find a solution that does not require portal-impl.jar.
 						src="http://archive.apache.org/dist/tomcat/tomcat-${tomcat.major.version}/v${tomcat.version}/bin/apache-tomcat-${tomcat.version}.zip"
 					/>
 
-			        <unzip
-						dest="${app.server.tomcat.dir}/webapps/"
+					<unzip
+						dest="${app.server.tomcat.dir}/webapps"
 						src="tomcat.zip"
-			        >
+					>
 						<patternset
 							includes="apache-tomcat-${tomcat.version}/webapps/manager/**/*"
 						/>
 						<mapper>
 							<globmapper from="apache-tomcat-${tomcat.version}/webapps/*" to="*" />
 						</mapper>
-			        </unzip>
+					</unzip>
 
-			        <delete file="tomcat.zip" />
+					<delete file="tomcat.zip" />
 
 					<copy
 						file="${app.server.tomcat.dir}/conf/tomcat-users.xml"
@@ -3086,6 +3100,8 @@ for (String path : paths) {
 	</target>
 
 	<target name="setup-testable-tomcat">
+		<setup-osgi-jmx />
+
 		<setup-tomcat-jmx />
 
 		<setup-tomcat-manager />

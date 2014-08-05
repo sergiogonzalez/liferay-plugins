@@ -36,6 +36,30 @@ public class GetSyncContextHandler extends BaseJSONHandler {
 
 	@Override
 	public void handleException(Exception e) {
+		SyncAccount syncAccount = SyncAccountService.fetchSyncAccount(
+			getSyncAccountId());
+
+		syncAccount.setState(SyncAccount.STATE_DISCONNECTED);
+
+		SyncAccountService.update(syncAccount);
+	}
+
+	@Override
+	protected boolean handlePortalException(String exception) throws Exception {
+		if (exception.equals(
+				"com.liferay.sync.SyncServicesUnavailableException")) {
+
+			SyncAccount syncAccount = SyncAccountService.fetchSyncAccount(
+				getSyncAccountId());
+
+			syncAccount.setState(SyncAccount.STATE_DISCONNECTED);
+			syncAccount.setUiEvent(
+				SyncAccount.UI_EVENT_SYNC_SERVICES_NOT_ACTIVE);
+
+			return true;
+		}
+
+		return super.handlePortalException(exception);
 	}
 
 	@Override
@@ -70,7 +94,6 @@ public class GetSyncContextHandler extends BaseJSONHandler {
 			syncAccount.setState(SyncAccount.STATE_CONNECTED);
 		}
 		else {
-			syncAccount.setActive(false);
 			syncAccount.setState(SyncAccount.STATE_DISCONNECTED);
 			syncAccount.setUiEvent(SyncAccount.UI_EVENT_SYNC_WEB_OUT_OF_DATE);
 		}

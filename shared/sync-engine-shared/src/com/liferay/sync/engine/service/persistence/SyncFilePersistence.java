@@ -14,6 +14,7 @@
 
 package com.liferay.sync.engine.service.persistence;
 
+import com.j256.ormlite.dao.ReferenceObjectCache;
 import com.j256.ormlite.stmt.QueryBuilder;
 import com.j256.ormlite.stmt.SelectArg;
 import com.j256.ormlite.stmt.Where;
@@ -33,6 +34,18 @@ public class SyncFilePersistence extends BasePersistenceImpl<SyncFile, Long> {
 
 	public SyncFilePersistence() throws SQLException {
 		super(SyncFile.class);
+
+		setObjectCache(ReferenceObjectCache.makeSoftCache());
+	}
+
+	public long countByState(int state) throws SQLException {
+		QueryBuilder<SyncFile, Long> queryBuilder = queryBuilder();
+
+		Where<SyncFile, Long> where = queryBuilder.where();
+
+		where.eq("state", state);
+
+		return where.countOf();
 	}
 
 	public SyncFile fetchByFK_S(String fileKey, long syncAccountId)
@@ -125,6 +138,10 @@ public class SyncFilePersistence extends BasePersistenceImpl<SyncFile, Long> {
 
 		where.and();
 
+		where.ne("state", SyncFile.STATE_IN_PROGRESS_DOWNLOADING);
+
+		where.and();
+
 		where.eq("syncAccountId", syncAccountId);
 
 		where.and();
@@ -134,8 +151,15 @@ public class SyncFilePersistence extends BasePersistenceImpl<SyncFile, Long> {
 		return query(queryBuilder.prepare());
 	}
 
-	public List<SyncFile> findByState(int state) throws SQLException {
-		return queryForEq("state", state);
+	public List<SyncFile> findByS_S(int state, long syncAccountId)
+		throws SQLException {
+
+		Map<String, Object> fieldValues = new HashMap<String, Object>();
+
+		fieldValues.put("state", state);
+		fieldValues.put("syncAccountId", syncAccountId);
+
+		return queryForFieldValues(fieldValues);
 	}
 
 	public List<SyncFile> findBySyncAccountId(long syncAccountId)
