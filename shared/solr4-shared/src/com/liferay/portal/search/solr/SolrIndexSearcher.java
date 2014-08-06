@@ -46,6 +46,8 @@ import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.search.solr.facet.SolrFacetFieldCollector;
 import com.liferay.portal.search.solr.facet.SolrFacetQueryCollector;
 
+import java.io.Serializable;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -137,6 +139,16 @@ public class SolrIndexSearcher extends BaseIndexSearcher {
 					String facetQuery =
 						facetConfiguration.getFieldName() +
 							StringPool.COLON + range;
+
+					solrQuery.addFacetQuery(facetQuery);
+				}
+
+				Serializable modified = searchContext.getAttribute("modified");
+
+				if (Validator.isNotNull(modified)) {
+					String facetQuery =
+						facetConfiguration.getFieldName() + StringPool.COLON +
+							GetterUtil.getString(modified);
 
 					solrQuery.addFacetQuery(facetQuery);
 				}
@@ -417,24 +429,12 @@ public class SolrIndexSearcher extends BaseIndexSearcher {
 					continue;
 				}
 
-				String sortFieldName = sort.getFieldName();
-
-				if (DocumentImpl.isSortableTextField(sortFieldName)) {
-					sortFieldName = DocumentImpl.getSortableFieldName(
-						sortFieldName);
-				}
+				String sortFieldName = DocumentImpl.getSortFieldName(
+					sort, "score");
 
 				ORDER order = ORDER.asc;
 
-				if (Validator.isNull(sortFieldName) ||
-					!sortFieldName.endsWith("sortable")) {
-
-					sortFieldName = "score";
-
-					order = ORDER.desc;
-				}
-
-				if (sort.isReverse()) {
+				if (sort.isReverse() || sortFieldName.equals("score")) {
 					order = ORDER.desc;
 				}
 

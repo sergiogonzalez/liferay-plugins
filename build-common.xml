@@ -68,6 +68,7 @@
 		<path refid="plugin.classpath" />
 		<path refid="plugin-test-type.classpath" />
 		<fileset dir="${app.server.lib.portal.dir}" excludes="ant.jar" includes="*.jar" />
+		<fileset dir="${module.framework.base.dir}/test" erroronmissingdir="false" includes="portal-test*.jar" />
 	</path>
 
 	<path id="classpath.aQute.bnd">
@@ -741,7 +742,7 @@ Error-Prone was automatically installed. Please rerun your task.
 			</if>
 
 			<copy todir="@{module.dir}/docroot/WEB-INF/tld">
-				<fileset dir="${app.server.portal.dir}/WEB-INF/tld" includes="${plugin.tlds}" />
+				<fileset dir="${app.server.portal.dir}/WEB-INF/tld" erroronmissingdir="false" includes="${plugin.tlds}" />
 			</copy>
 
 			<if>
@@ -1661,10 +1662,6 @@ Please find a solution that does not require portal-impl.jar.
 									<if>
 										<available file="${temp.deployed.plugin.dir}" />
 										<then>
-											<update-osgi-web-xml
-												web.xml.dir="${temp.deployed.plugin.dir}/WEB-INF"
-											/>
-
 											<jar destfile="${sdk.dir}/dist/${plugin.name}-${plugin.full.version}.war" update="true">
 												<fileset
 													dir="${temp.deployed.plugin.dir}"
@@ -1673,7 +1670,7 @@ Please find a solution that does not require portal-impl.jar.
 											</jar>
 										</then>
 										<else>
-											<echo>Unable to automatically update web.xml.</echo>
+											<echo>Unable to automatically update web.xml in ${plugin.file}.</echo>
 										</else>
 									</if>
 
@@ -2186,6 +2183,19 @@ Please find a solution that does not require portal-impl.jar.
 		</sequential>
 	</macrodef>
 
+	<macrodef name="setup-osgi-jmx">
+		<sequential>
+			<ivy:resolve>
+				<dependency name="org.apache.aries.jmx" org="org.apache.aries.jmx" rev="1.1.1" />
+				<dependency name="org.apache.aries.util" org="org.apache.aries" rev="1.1.0" />
+				<exclude org="org.eclipse" />
+				<exclude org="org.osgi" />
+			</ivy:resolve>
+
+			<ivy:retrieve pattern="${module.framework.base.dir}/test/[artifact]-[revision].[ext]" type="bundle,jar" />
+		</sequential>
+	</macrodef>
+
 	<macrodef name="setup-tomcat-jmx">
 		<sequential>
 			<if>
@@ -2248,19 +2258,19 @@ Please find a solution that does not require portal-impl.jar.
 						src="http://archive.apache.org/dist/tomcat/tomcat-${tomcat.major.version}/v${tomcat.version}/bin/apache-tomcat-${tomcat.version}.zip"
 					/>
 
-			        <unzip
-						dest="${app.server.tomcat.dir}/webapps/"
+					<unzip
+						dest="${app.server.tomcat.dir}/webapps"
 						src="tomcat.zip"
-			        >
+					>
 						<patternset
 							includes="apache-tomcat-${tomcat.version}/webapps/manager/**/*"
 						/>
 						<mapper>
 							<globmapper from="apache-tomcat-${tomcat.version}/webapps/*" to="*" />
 						</mapper>
-			        </unzip>
+					</unzip>
 
-			        <delete file="tomcat.zip" />
+					<delete file="tomcat.zip" />
 
 					<copy
 						file="${app.server.tomcat.dir}/conf/tomcat-users.xml"
@@ -2447,120 +2457,6 @@ Please find a solution that does not require portal-impl.jar.
 				test.class="*Test"
 				test.type="unit"
 			/>
-		</sequential>
-	</macrodef>
-
-	<macrodef name="update-osgi-web-xml">
-		<attribute name="web.xml.dir" />
-
-		<sequential>
-			<replace file="@{web.xml.dir}/web.xml">
-				<replacetoken><![CDATA[taglib-location>/WEB-INF/tld]]></replacetoken>
-				<replacevalue><![CDATA[taglib-location>/META-INF]]></replacevalue>
-			</replace>
-
-			<var name="web.xml.dir" value="@{web.xml.dir}" />
-
-			<script classpathref="portal.classpath" language="beanshell">
-				<![CDATA[
-					import com.liferay.util.xml.XMLFormatter;
-
-					import org.dom4j.Document;
-					import org.dom4j.Element;
-					import org.dom4j.io.SAXReader;
-
-					import java.io.File;
-
-					SAXReader saxReader = new SAXReader();
-
-					Document document = saxReader.read(new File(project.getProperty("web.xml.dir"), "web.xml"));
-
-					Element rootElement = document.getRootElement();
-
-					Element displayNameElement = rootElement.element("display-name");
-
-					if (displayNameElement != null) {
-						displayNameElement.detach();
-					}
-
-					List filterElements = rootElement.elements("filter");
-
-					for (Element filterElement : filterElements) {
-						Element filterNameElement = filterElement.element("filter-name");
-
-						if (filterNameElement == null) {
-							continue;
-						}
-
-						String filterNameText = filterNameElement.getText();
-
-						if (filterNameText.contains("Invoker Filter -")) {
-							filterElement.detach();
-						}
-					}
-
-					List filterMappingElements = rootElement.elements("filter-mapping");
-
-					for (Element filterMappingElement : filterMappingElements) {
-						Element filterNameElement = filterMappingElement.element("filter-name");
-
-						if (filterNameElement == null) {
-							continue;
-						}
-
-						String filterNameText = filterNameElement.getText();
-
-						if (filterNameText.contains("Invoker Filter -")) {
-							filterMappingElement.detach();
-						}
-					}
-
-					List listenerElements = rootElement.elements("listener");
-
-					for (Element listenerElement : listenerElements) {
-						Element listenerClassElement = listenerElement.element("listener-class");
-
-						String listenerClassText = listenerClassElement.getText();
-
-						if (listenerClassText.equals("com.liferay.portal.kernel.servlet.PluginContextListener") ||
-							listenerClassText.equals("com.liferay.portal.kernel.servlet.SerializableSessionAttributeListener")) {
-
-							listenerElement.detach();
-						}
-					}
-
-					List servletElements = rootElement.elements("servlet");
-
-					for (Element servletElement : servletElements) {
-						Element servletNameElement = servletElement.element("servlet-name");
-
-						if (servletNameElement == null) {
-							continue;
-						}
-
-						String servletNameText = servletNameElement.getText();
-
-						if (servletNameText.equals("Dynamic Resource Servlet")) {
-							Element servletClassElement = servletElement.element("servlet-class");
-
-							servletClassElement.setText("com.liferay.portal.webserver.DynamicResourceServlet");
-
-							List initParamElements = servletElement.elements("init-param");
-
-							for (Element initParamElement : initParamElements) {
-								initParamElement.detach();
-							}
-						}
-					}
-
-					project.setProperty("web.xml.content", XMLFormatter.toString(document));
-				]]>
-			</script>
-
-			<echo file="@{web.xml.dir}/web.xml">${web.xml.content}</echo>
-
-			<var name="web.xml.content" unset="true" />
-			<var name="web.xml.dir" unset="true" />
 		</sequential>
 	</macrodef>
 
@@ -3086,6 +2982,8 @@ for (String path : paths) {
 	</target>
 
 	<target name="setup-testable-tomcat">
+		<setup-osgi-jmx />
+
 		<setup-tomcat-jmx />
 
 		<setup-tomcat-manager />
