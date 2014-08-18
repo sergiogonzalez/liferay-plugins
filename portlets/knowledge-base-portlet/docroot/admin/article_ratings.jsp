@@ -59,9 +59,15 @@ boolean hasUpdatePermission = KBArticlePermission.contains(permissionChecker, kb
 						<c:choose>
 							<c:when test="<%= hasUpdatePermission %>">
 								<liferay-ui:message key="there-is-one-suggestion" />
-
 								<c:if test="<%= pendingKBCommentsCount > 0 %>">
-									(<liferay-ui:message arguments="<%= pendingKBCommentsCount %>" key="x-pending" />)
+									<c:choose>
+										<c:when test="<%= pendingKBCommentsCount == 1 %>">
+											(<liferay-ui:message arguments="<%= pendingKBCommentsCount %>" key="there-is-one-pending-suggestion" />)
+										</c:when>
+										<c:otherwise>
+											(<liferay-ui:message arguments="<%= pendingKBCommentsCount %>" key="there-are-x-pending-suggestions" />)
+										</c:otherwise>
+									</c:choose>
 								</c:if>
 							</c:when>
 							<c:otherwise>
@@ -79,7 +85,14 @@ boolean hasUpdatePermission = KBArticlePermission.contains(permissionChecker, kb
 								<liferay-ui:message arguments="<%= kbCommentsCount %>" key="there-are-x-suggestions" />
 
 								<c:if test="<%= pendingKBCommentsCount > 0 %>">
-									(<liferay-ui:message arguments="<%= pendingKBCommentsCount %>" key="x-pending" />)
+									<c:choose>
+										<c:when test="<%= pendingKBCommentsCount == 1 %>">
+											(<liferay-ui:message arguments="<%= pendingKBCommentsCount %>" key="there-is-one-pending-suggestion" />)
+										</c:when>
+										<c:otherwise>
+											(<liferay-ui:message arguments="<%= pendingKBCommentsCount %>" key="there-are-x-pending-suggestions" />)
+										</c:otherwise>
+									</c:choose>
 								</c:if>
 							</c:when>
 							<c:otherwise>
