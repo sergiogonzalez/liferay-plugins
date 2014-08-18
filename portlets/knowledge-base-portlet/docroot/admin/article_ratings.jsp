@@ -59,16 +59,15 @@ boolean hasUpdatePermission = KBArticlePermission.contains(permissionChecker, kb
 						<c:choose>
 							<c:when test="<%= hasUpdatePermission %>">
 								<liferay-ui:message key="there-is-one-suggestion" />
-								<c:if test="<%= pendingKBCommentsCount > 0 %>">
-									<c:choose>
-										<c:when test="<%= pendingKBCommentsCount == 1 %>">
-											(<liferay-ui:message arguments="<%= pendingKBCommentsCount %>" key="there-is-one-pending-suggestion" />)
-										</c:when>
-										<c:otherwise>
-											(<liferay-ui:message arguments="<%= pendingKBCommentsCount %>" key="there-are-x-pending-suggestions" />)
-										</c:otherwise>
-									</c:choose>
-								</c:if>
+
+								<c:choose>
+									<c:when test="<%= pendingKBCommentsCount == 1 %>">
+										(<liferay-ui:message arguments="<%= pendingKBCommentsCount %>" key="there-is-one-pending-suggestion" />)
+									</c:when>
+									<c:when test="<%= pendingKBCommentsCount > 1 %>">
+										(<liferay-ui:message arguments="<%= pendingKBCommentsCount %>" key="there-are-x-pending-suggestions" />)
+									</c:when>
+								</c:choose>
 							</c:when>
 							<c:otherwise>
 								<liferay-ui:message key="you-sent-one-suggestion-for-this-article" />
