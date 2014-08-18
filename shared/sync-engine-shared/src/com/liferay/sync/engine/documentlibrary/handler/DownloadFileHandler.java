@@ -15,14 +15,16 @@
 package com.liferay.sync.engine.documentlibrary.handler;
 
 import com.liferay.sync.engine.documentlibrary.event.Event;
+import com.liferay.sync.engine.model.SyncAccount;
 import com.liferay.sync.engine.model.SyncFile;
+import com.liferay.sync.engine.service.SyncAccountService;
 import com.liferay.sync.engine.service.SyncFileService;
-import com.liferay.sync.engine.util.FileUtil;
 import com.liferay.sync.engine.util.IODeltaUtil;
 import com.liferay.sync.engine.util.StreamUtil;
 
 import java.io.InputStream;
 
+import java.nio.file.FileSystemException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -30,6 +32,11 @@ import java.nio.file.StandardCopyOption;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.HttpResponseException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Shinn Lok
@@ -41,14 +48,48 @@ public class DownloadFileHandler extends BaseHandler {
 	}
 
 	@Override
+	public void handleException(Exception e) {
+		_logger.error(e.getMessage(), e);
+
+		if (!(e instanceof HttpResponseException)) {
+			super.handleException(e);
+
+			return;
+		}
+
+		HttpResponseException hre = (HttpResponseException)e;
+
+		int statusCode = hre.getStatusCode();
+
+		if (statusCode != HttpStatus.SC_NOT_FOUND) {
+			super.handleException(e);
+
+			return;
+		}
+
+		SyncAccount syncAccount = SyncAccountService.fetchSyncAccount(
+			getSyncAccountId());
+
+		if (syncAccount.getState() != SyncAccount.STATE_CONNECTED) {
+			super.handleException(e);
+
+			return;
+		}
+
+		SyncFile syncFile = (SyncFile)getParameterValue("syncFile");
+
+		SyncFileService.deleteSyncFile(syncFile, false);
+	}
+
+	@Override
 	protected void doHandleResponse(HttpResponse httpResponse)
 		throws Exception {
 
 		InputStream inputStream = null;
 
-		try {
-			SyncFile syncFile = (SyncFile)getParameterValue("syncFile");
+		SyncFile syncFile = (SyncFile)getParameterValue("syncFile");
 
+		try {
 			Path filePath = Paths.get(syncFile.getFilePathName());
 
 			HttpEntity httpEntity = httpResponse.getEntity();
@@ -73,19 +114,41 @@ public class DownloadFileHandler extends BaseHandler {
 					StandardCopyOption.REPLACE_EXISTING);
 			}
 
-			syncFile.setFileKey(FileUtil.getFileKey(tempFilePath));
-			syncFile.setState(SyncFile.STATE_SYNCED);
-			syncFile.setUiEvent(SyncFile.UI_EVENT_DOWNLOADED);
-
-			SyncFileService.update(syncFile);
-
 			Files.move(
 				tempFilePath, filePath, StandardCopyOption.ATOMIC_MOVE,
 				StandardCopyOption.REPLACE_EXISTING);
+
+			if (syncFile.getFileKey() == null) {
+				syncFile.setUiEvent(SyncFile.UI_EVENT_DOWNLOADED_NEW);
+			}
+			else {
+				syncFile.setUiEvent(SyncFile.UI_EVENT_DOWNLOADED_UPDATE);
+			}
+
+			syncFile.setState(SyncFile.STATE_SYNCED);
+
+			SyncFileService.update(syncFile);
+
+			SyncFileService.updateFileKeySyncFile(syncFile);
+		}
+		catch (Exception e) {
+			if (e instanceof FileSystemException) {
+				String message = e.getMessage();
+
+				if (message.contains("File name too long")) {
+					syncFile.setState(SyncFile.STATE_ERROR);
+					syncFile.setUiEvent(SyncFile.UI_EVENT_FILE_NAME_TOO_LONG);
+
+					SyncFileService.update(syncFile);
+				}
+			}
 		}
 		finally {
 			StreamUtil.cleanUp(inputStream);
 		}
 	}
+
+	private static Logger _logger = LoggerFactory.getLogger(
+		DownloadFileHandler.class);
 
 }

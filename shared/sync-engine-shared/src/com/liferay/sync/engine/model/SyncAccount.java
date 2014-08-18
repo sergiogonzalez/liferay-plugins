@@ -25,7 +25,9 @@ import com.liferay.sync.engine.service.persistence.BasePersistenceImpl;
 @DatabaseTable(daoClass = BasePersistenceImpl.class, tableName = "SyncAccount")
 public class SyncAccount extends StateAwareModel {
 
-	public static final int STATE_CONNECTED = 1;
+	public static final int STATE_CONNECTED = 2;
+
+	public static final int STATE_CONNECTING = 1;
 
 	public static final int STATE_DISCONNECTED = 0;
 
@@ -34,6 +36,8 @@ public class SyncAccount extends StateAwareModel {
 	public static final int UI_EVENT_CONNECTION_EXCEPTION = 2;
 
 	public static final int UI_EVENT_SYNC_ACCOUNT_FOLDER_MISSING = 3;
+
+	public static final int UI_EVENT_SYNC_SERVICES_NOT_ACTIVE = 6;
 
 	public static final int UI_EVENT_SYNC_WEB_MISSING = 4;
 

@@ -93,8 +93,7 @@ public class SyncAccountService {
 		Files.createDirectories(Paths.get(filePathName));
 
 		SyncFileService.addSyncFile(
-			null, null, filePathName, FileUtil.getFileKey(filePathName),
-			filePathName, null, filePathName, 0, 0,
+			null, null, filePathName, filePathName, null, filePathName, 0, 0,
 			syncAccount.getSyncAccountId(), SyncFile.TYPE_SYSTEM);
 
 		// Sync sites
@@ -108,7 +107,8 @@ public class SyncAccountService {
 				}
 
 				syncSite.setFilePathName(
-					syncAccount.getFilePathName() + "/" + syncSiteName);
+					FileUtil.getFilePathName(
+						syncAccount.getFilePathName(), syncSiteName));
 
 				syncSite.setSyncAccountId(syncAccount.getSyncAccountId());
 
