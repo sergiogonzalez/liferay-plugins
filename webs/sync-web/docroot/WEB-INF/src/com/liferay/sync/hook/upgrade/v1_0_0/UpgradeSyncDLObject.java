@@ -16,6 +16,7 @@ package com.liferay.sync.hook.upgrade.v1_0_0;
 
 import com.liferay.portal.kernel.dao.orm.QueryDefinition;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.upgrade.UpgradeProcess;
@@ -25,6 +26,7 @@ import com.liferay.portal.model.Group;
 import com.liferay.portal.service.GroupLocalServiceUtil;
 import com.liferay.portlet.documentlibrary.NoSuchFileException;
 import com.liferay.portlet.documentlibrary.model.DLFileEntry;
+import com.liferay.portlet.documentlibrary.model.DLFileEntryConstants;
 import com.liferay.portlet.documentlibrary.model.DLFolder;
 import com.liferay.portlet.documentlibrary.model.DLFolderConstants;
 import com.liferay.portlet.documentlibrary.service.DLFolderLocalServiceUtil;
@@ -126,6 +128,10 @@ public class UpgradeSyncDLObject extends UpgradeProcess {
 	}
 
 	protected void updateSyncDLObjects() throws Exception {
+		SyncDLObjectLocalServiceUtil.deleteSyncDLObjects(
+			DLFileEntryConstants.PRIVATE_WORKING_COPY_VERSION,
+			SyncConstants.TYPE_FILE);
+
 		List<Group> groups =
 			GroupLocalServiceUtil.getGroups(
 				QueryUtil.ALL_POS, QueryUtil.ALL_POS);
