@@ -22,6 +22,8 @@ import com.liferay.sync.engine.service.SyncFileService;
 
 import java.io.FileNotFoundException;
 
+import java.util.Map;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.NoHttpResponseException;
@@ -120,6 +122,10 @@ public class BaseHandler implements Handler<Void> {
 		throws Exception {
 	}
 
+	protected Map<String, Object> getParameters() {
+		return _event.getParameters();
+	}
+
 	protected Object getParameterValue(String key) {
 		return _event.getParameterValue(key);
 	}
@@ -157,7 +163,7 @@ public class BaseHandler implements Handler<Void> {
 				syncAccount = SyncAccountService.synchronizeSyncAccount(
 					getSyncAccountId());
 
-				if (syncAccount.getState() == SyncAccount.STATE_DISCONNECTED) {
+				if (syncAccount.getState() != SyncAccount.STATE_CONNECTED) {
 					throw new Exception();
 				}
 
