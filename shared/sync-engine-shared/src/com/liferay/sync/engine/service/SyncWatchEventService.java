@@ -59,6 +59,31 @@ public class SyncWatchEventService {
 		}
 	}
 
+	public static void deleteSyncWatchEvents(long syncAccountId) {
+		try {
+			_syncWatchEventPersistence.deleteBySyncAccountId(syncAccountId);
+		}
+		catch (SQLException sqle) {
+			if (_logger.isDebugEnabled()) {
+				_logger.debug(sqle.getMessage(), sqle);
+			}
+		}
+	}
+
+	public static SyncWatchEvent fetchLastSyncWatchEvent(long syncAccountId) {
+		try {
+			return _syncWatchEventPersistence.findBySyncAccountId_Last(
+				syncAccountId);
+		}
+		catch (SQLException sqle) {
+			if (_logger.isDebugEnabled()) {
+				_logger.debug(sqle.getMessage(), sqle);
+			}
+
+			return null;
+		}
+	}
+
 	public static SyncWatchEvent fetchSyncWatchEvent(long syncWatchEventId) {
 		try {
 			return _syncWatchEventPersistence.queryForId(syncWatchEventId);
@@ -101,11 +126,12 @@ public class SyncWatchEventService {
 		}
 	}
 
-	public static List<SyncWatchEvent> findAll(
-		String orderByColumn, boolean ascending) {
+	public static List<SyncWatchEvent> findBySyncAccountId(
+		long syncAccountId, String orderByColumn, boolean ascending) {
 
 		try {
-			return _syncWatchEventPersistence.findAll(orderByColumn, ascending);
+			return _syncWatchEventPersistence.findBySyncAccountId(
+				syncAccountId, orderByColumn, ascending);
 		}
 		catch (SQLException sqle) {
 			if (_logger.isDebugEnabled()) {

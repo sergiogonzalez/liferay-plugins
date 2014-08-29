@@ -17,7 +17,6 @@ package com.liferay.sync.engine.documentlibrary.handler;
 import com.liferay.sync.engine.documentlibrary.event.Event;
 import com.liferay.sync.engine.model.SyncFile;
 import com.liferay.sync.engine.service.SyncFileService;
-import com.liferay.sync.engine.util.FilePathNameUtil;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -32,11 +31,13 @@ public class BaseSyncDLObjectHandler extends BaseJSONHandler {
 		super(event);
 	}
 
-	protected void processFilePathChange(
+	protected boolean processFilePathChange(
 			SyncFile sourceSyncFile, SyncFile targetSyncFile)
 		throws Exception {
 
 		String targetSyncFileName = targetSyncFile.getName();
+
+		Path sourceFilePath = Paths.get(sourceSyncFile.getFilePathName());
 
 		if (sourceSyncFile.getParentFolderId() !=
 				targetSyncFile.getParentFolderId()) {
@@ -51,12 +52,15 @@ public class BaseSyncDLObjectHandler extends BaseJSONHandler {
 			Path targetFilePath = targetParentFilePath.resolve(
 				targetSyncFileName);
 
-			Files.move(
-				Paths.get(sourceSyncFile.getFilePathName()), targetFilePath);
+			SyncFileService.updateSyncFile(
+				targetFilePath, targetSyncFile.getParentFolderId(),
+				sourceSyncFile);
 
-			sourceSyncFile.setFilePathName(
-				FilePathNameUtil.getFilePathName(targetFilePath));
-			sourceSyncFile.setName(targetSyncFileName);
+			if (Files.exists(sourceFilePath)) {
+				Files.move(sourceFilePath, targetFilePath);
+			}
+
+			return true;
 		}
 		else if (!targetSyncFileName.equals(sourceSyncFile.getName())) {
 			Path sourceSyncFilePath = Paths.get(
@@ -65,13 +69,18 @@ public class BaseSyncDLObjectHandler extends BaseJSONHandler {
 			Path targetFilePath = sourceSyncFilePath.resolveSibling(
 				targetSyncFileName);
 
-			Files.move(
-				Paths.get(sourceSyncFile.getFilePathName()), targetFilePath);
+			SyncFileService.updateSyncFile(
+				targetFilePath, sourceSyncFile.getParentFolderId(),
+				sourceSyncFile);
 
-			sourceSyncFile.setFilePathName(
-				FilePathNameUtil.getFilePathName(targetFilePath));
-			sourceSyncFile.setName(targetSyncFileName);
+			if (Files.exists(sourceFilePath)) {
+				Files.move(sourceFilePath, targetFilePath);
+			}
+
+			return true;
 		}
+
+		return false;
 	}
 
 }

@@ -14,6 +14,8 @@
 
 package com.liferay.calendar.service.persistence.impl;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.calendar.NoSuchResourceException;
 import com.liferay.calendar.model.CalendarResource;
 import com.liferay.calendar.model.impl.CalendarResourceImpl;
@@ -33,7 +35,6 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.GetterUtil;
-import com.liferay.portal.kernel.util.InstanceFactory;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.PropsUtil;
@@ -44,13 +45,11 @@ import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.uuid.PortalUUIDUtil;
 import com.liferay.portal.model.CacheModel;
-import com.liferay.portal.model.ModelListener;
 import com.liferay.portal.security.permission.InlineSQLHelperUtil;
 import com.liferay.portal.service.persistence.impl.BasePersistenceImpl;
 
 import java.io.Serializable;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -71,6 +70,7 @@ import java.util.Set;
  * @see CalendarResourceUtil
  * @generated
  */
+@ProviderType
 public class CalendarResourcePersistenceImpl extends BasePersistenceImpl<CalendarResource>
 	implements CalendarResourcePersistence {
 	/*
@@ -7146,25 +7146,6 @@ public class CalendarResourcePersistenceImpl extends BasePersistenceImpl<Calenda
 	 * Initializes the calendar resource persistence.
 	 */
 	public void afterPropertiesSet() {
-		String[] listenerClassNames = StringUtil.split(GetterUtil.getString(
-					com.liferay.util.service.ServiceProps.get(
-						"value.object.listener.com.liferay.calendar.model.CalendarResource")));
-
-		if (listenerClassNames.length > 0) {
-			try {
-				List<ModelListener<CalendarResource>> listenersList = new ArrayList<ModelListener<CalendarResource>>();
-
-				for (String listenerClassName : listenerClassNames) {
-					listenersList.add((ModelListener<CalendarResource>)InstanceFactory.newInstance(
-							getClassLoader(), listenerClassName));
-				}
-
-				listeners = listenersList.toArray(new ModelListener[listenersList.size()]);
-			}
-			catch (Exception e) {
-				_log.error(e);
-			}
-		}
 	}
 
 	public void destroy() {
@@ -7186,11 +7167,11 @@ public class CalendarResourcePersistenceImpl extends BasePersistenceImpl<Calenda
 	private static final String _NO_SUCH_ENTITY_WITH_KEY = "No CalendarResource exists with the key {";
 	private static final boolean _HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE = GetterUtil.getBoolean(PropsUtil.get(
 				PropsKeys.HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE));
-	private static Log _log = LogFactoryUtil.getLog(CalendarResourcePersistenceImpl.class);
-	private static Set<String> _badColumnNames = SetUtil.fromArray(new String[] {
+	private static final Log _log = LogFactoryUtil.getLog(CalendarResourcePersistenceImpl.class);
+	private static final Set<String> _badColumnNames = SetUtil.fromArray(new String[] {
 				"uuid", "code", "active"
 			});
-	private static CalendarResource _nullCalendarResource = new CalendarResourceImpl() {
+	private static final CalendarResource _nullCalendarResource = new CalendarResourceImpl() {
 			@Override
 			public Object clone() {
 				return this;
@@ -7202,7 +7183,8 @@ public class CalendarResourcePersistenceImpl extends BasePersistenceImpl<Calenda
 			}
 		};
 
-	private static CacheModel<CalendarResource> _nullCalendarResourceCacheModel = new CacheModel<CalendarResource>() {
+	private static final CacheModel<CalendarResource> _nullCalendarResourceCacheModel =
+		new CacheModel<CalendarResource>() {
 			@Override
 			public CalendarResource toEntityModel() {
 				return _nullCalendarResource;
