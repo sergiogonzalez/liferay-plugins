@@ -104,6 +104,8 @@ String[] sections = AdminUtil.unescapeSections(BeanPropertiesUtil.getString(kbAr
 			<aui:input name="description" />
 		</c:if>
 
+		<aui:input name="sourceLocation" />
+
 		<c:if test="<%= ArrayUtil.isNotEmpty(PortletPropsValues.ADMIN_KB_ARTICLE_SECTIONS) && (parentResourcePrimKey == KBArticleConstants.DEFAULT_PARENT_RESOURCE_PRIM_KEY) %>">
 			<aui:model-context bean="<%= null %>" model="<%= KBArticle.class %>" />
 
