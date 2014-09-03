@@ -14,6 +14,8 @@
 
 package com.liferay.knowledgebase.model.impl;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.knowledgebase.model.KBArticle;
 
 import com.liferay.portal.kernel.util.StringBundler;
@@ -34,11 +36,12 @@ import java.util.Date;
  * @see KBArticle
  * @generated
  */
+@ProviderType
 public class KBArticleCacheModel implements CacheModel<KBArticle>,
 	Externalizable {
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(51);
+		StringBundler sb = new StringBundler(53);
 
 		sb.append("{uuid=");
 		sb.append(uuid);
@@ -82,6 +85,8 @@ public class KBArticleCacheModel implements CacheModel<KBArticle>,
 		sb.append(latest);
 		sb.append(", main=");
 		sb.append(main);
+		sb.append(", sourceLocation=");
+		sb.append(sourceLocation);
 		sb.append(", status=");
 		sb.append(status);
 		sb.append(", statusByUserId=");
@@ -177,6 +182,14 @@ public class KBArticleCacheModel implements CacheModel<KBArticle>,
 		kbArticleImpl.setViewCount(viewCount);
 		kbArticleImpl.setLatest(latest);
 		kbArticleImpl.setMain(main);
+
+		if (sourceLocation == null) {
+			kbArticleImpl.setSourceLocation(StringPool.BLANK);
+		}
+		else {
+			kbArticleImpl.setSourceLocation(sourceLocation);
+		}
+
 		kbArticleImpl.setStatus(status);
 		kbArticleImpl.setStatusByUserId(statusByUserId);
 
@@ -222,6 +235,7 @@ public class KBArticleCacheModel implements CacheModel<KBArticle>,
 		viewCount = objectInput.readInt();
 		latest = objectInput.readBoolean();
 		main = objectInput.readBoolean();
+		sourceLocation = objectInput.readUTF();
 		status = objectInput.readInt();
 		statusByUserId = objectInput.readLong();
 		statusByUserName = objectInput.readUTF();
@@ -297,6 +311,14 @@ public class KBArticleCacheModel implements CacheModel<KBArticle>,
 		objectOutput.writeInt(viewCount);
 		objectOutput.writeBoolean(latest);
 		objectOutput.writeBoolean(main);
+
+		if (sourceLocation == null) {
+			objectOutput.writeUTF(StringPool.BLANK);
+		}
+		else {
+			objectOutput.writeUTF(sourceLocation);
+		}
+
 		objectOutput.writeInt(status);
 		objectOutput.writeLong(statusByUserId);
 
@@ -331,6 +353,7 @@ public class KBArticleCacheModel implements CacheModel<KBArticle>,
 	public int viewCount;
 	public boolean latest;
 	public boolean main;
+	public String sourceLocation;
 	public int status;
 	public long statusByUserId;
 	public String statusByUserName;

@@ -95,7 +95,7 @@ String[] sections = AdminUtil.unescapeSections(BeanPropertiesUtil.getString(kbAr
 		<aui:input disabled="<%= kbArticle != null %>" label="friendly-url" name="urlTitle" />
 
 		<aui:field-wrapper label="content">
-			<liferay-ui:input-editor width="100%" />
+			<liferay-ui:input-editor contents="<%= content %>" width="100%" />
 
 			<aui:input name="content" type="hidden" />
 		</aui:field-wrapper>
@@ -103,6 +103,8 @@ String[] sections = AdminUtil.unescapeSections(BeanPropertiesUtil.getString(kbAr
 		<c:if test="<%= enableKBArticleDescription %>">
 			<aui:input name="description" />
 		</c:if>
+
+		<aui:input name="sourceLocation" />
 
 		<c:if test="<%= ArrayUtil.isNotEmpty(PortletPropsValues.ADMIN_KB_ARTICLE_SECTIONS) && (parentResourcePrimKey == KBArticleConstants.DEFAULT_PARENT_RESOURCE_PRIM_KEY) %>">
 			<aui:model-context bean="<%= null %>" model="<%= KBArticle.class %>" />
@@ -202,10 +204,6 @@ String[] sections = AdminUtil.unescapeSections(BeanPropertiesUtil.getString(kbAr
 		},
 		['aui-base']
 	);
-
-	function <portlet:namespace />initEditor() {
-		return '<%= UnicodeFormatter.toString(content) %>';
-	}
 
 	function <portlet:namespace />publishKBArticle() {
 		document.<portlet:namespace />fm.<portlet:namespace />workflowAction.value = '<%= WorkflowConstants.ACTION_PUBLISH %>';

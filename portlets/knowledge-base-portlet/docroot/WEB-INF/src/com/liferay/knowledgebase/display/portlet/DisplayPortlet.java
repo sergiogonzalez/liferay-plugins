@@ -144,6 +144,8 @@ public class DisplayPortlet extends MVCPortlet {
 		long kbCommentId = ParamUtil.getLong(actionRequest, "kbCommentId");
 
 		KBCommentServiceUtil.deleteKBComment(kbCommentId);
+
+		SessionMessages.add(actionRequest, "feedbackDeleted");
 	}
 
 	public void deleteTempAttachment(
@@ -367,6 +369,8 @@ public class DisplayPortlet extends MVCPortlet {
 		String urlTitle = ParamUtil.getString(actionRequest, "urlTitle");
 		String content = ParamUtil.getString(actionRequest, "content");
 		String description = ParamUtil.getString(actionRequest, "description");
+		String sourceLocation = ParamUtil.getString(
+			actionRequest, "sourceLocation");
 		String[] sections = actionRequest.getParameterValues("sections");
 		String[] selectedFileNames = ParamUtil.getParameterValues(
 			actionRequest, "selectedFileName");
@@ -383,12 +387,14 @@ public class DisplayPortlet extends MVCPortlet {
 		if (cmd.equals(Constants.ADD)) {
 			kbArticle = KBArticleServiceUtil.addKBArticle(
 				portletId, parentResourcePrimKey, title, urlTitle, content,
-				description, sections, selectedFileNames, serviceContext);
+				description, sourceLocation, sections, selectedFileNames,
+				serviceContext);
 		}
 		else if (cmd.equals(Constants.UPDATE)) {
 			kbArticle = KBArticleServiceUtil.updateKBArticle(
-				resourcePrimKey, title, content, description, sections,
-				selectedFileNames, removeFileEntryIds, serviceContext);
+				resourcePrimKey, title, content, description, sourceLocation,
+				sections, selectedFileNames, removeFileEntryIds,
+				serviceContext);
 		}
 
 		if (!cmd.equals(Constants.ADD) && !cmd.equals(Constants.UPDATE)) {
@@ -451,6 +457,24 @@ public class DisplayPortlet extends MVCPortlet {
 				kbCommentId, classNameId, classPK, content, helpful,
 				serviceContext);
 		}
+
+		SessionMessages.add(actionRequest, "feedbackSaved");
+	}
+
+	public void updateKBCommentStatus(
+			ActionRequest actionRequest, ActionResponse actionResponse)
+		throws PortalException {
+
+		long kbCommentId = ParamUtil.getLong(actionRequest, "kbCommentId");
+
+		int status = ParamUtil.getInteger(actionRequest, "status");
+
+		ServiceContext serviceContext = ServiceContextFactory.getInstance(
+			KBComment.class.getName(), actionRequest);
+
+		KBCommentServiceUtil.updateStatus(kbCommentId, status, serviceContext);
+
+		SessionMessages.add(actionRequest, "feedbackStatusUpdated");
 	}
 
 	@Override

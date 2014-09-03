@@ -99,8 +99,8 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 	public KBArticle addKBArticle(
 			long userId, long parentResourcePrimKey, String title,
 			String urlTitle, String content, String description,
-			String[] sections, String[] selectedFileNames,
-			ServiceContext serviceContext)
+			String sourceLocation, String[] sections,
+			String[] selectedFileNames, ServiceContext serviceContext)
 		throws PortalException {
 
 		// KB article
@@ -144,6 +144,7 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 		kbArticle.setLatest(true);
 		kbArticle.setMain(false);
 		kbArticle.setStatus(WorkflowConstants.STATUS_DRAFT);
+		kbArticle.setSourceLocation(sourceLocation);
 
 		kbArticlePersistence.update(kbArticle);
 
@@ -875,8 +876,9 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 	@Override
 	public KBArticle updateKBArticle(
 			long userId, long resourcePrimKey, String title, String content,
-			String description, String[] sections, String[] selectedFileNames,
-			long[] removeFileEntryIds, ServiceContext serviceContext)
+			String description, String sourceLocation, String[] sections,
+			String[] selectedFileNames, long[] removeFileEntryIds,
+			ServiceContext serviceContext)
 		throws PortalException {
 
 		// KB article
@@ -932,6 +934,7 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 			StringUtil.merge(AdminUtil.escapeSections(sections)));
 		kbArticle.setLatest(true);
 		kbArticle.setMain(false);
+		kbArticle.setSourceLocation(sourceLocation);
 
 		kbArticlePersistence.update(kbArticle);
 
@@ -1248,7 +1251,7 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 
 			Disjunction disjunction = RestrictionsFactoryUtil.disjunction();
 
-			for (String keyword : KnowledgeBaseUtil.parseKeywords(value)) {
+			for (String keyword : KnowledgeBaseUtil.splitKeywords(value)) {
 				Criterion criterion = RestrictionsFactoryUtil.ilike(
 					key, StringUtil.quote(keyword, StringPool.PERCENT));
 

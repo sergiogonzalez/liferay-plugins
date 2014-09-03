@@ -14,6 +14,8 @@
 
 package com.liferay.knowledgebase.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.bean.PortletBeanLocatorUtil;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
 import com.liferay.portal.service.InvokableLocalService;
@@ -32,6 +34,7 @@ import com.liferay.portal.service.InvokableLocalService;
  * @see com.liferay.knowledgebase.service.impl.KBCommentLocalServiceImpl
  * @generated
  */
+@ProviderType
 public class KBCommentLocalServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -266,6 +269,12 @@ public class KBCommentLocalServiceUtil {
 	}
 
 	public static java.util.List<com.liferay.knowledgebase.model.KBComment> getKBComments(
+		java.lang.String className, long classPK, int[] status, int start,
+		int end) {
+		return getService().getKBComments(className, classPK, status, start, end);
+	}
+
+	public static java.util.List<com.liferay.knowledgebase.model.KBComment> getKBComments(
 		long groupId, int status, int start, int end) {
 		return getService().getKBComments(groupId, status, start, end);
 	}
@@ -320,6 +329,16 @@ public class KBCommentLocalServiceUtil {
 	public static int getKBCommentsCount(java.lang.String className,
 		long classPK) {
 		return getService().getKBCommentsCount(className, classPK);
+	}
+
+	public static int getKBCommentsCount(java.lang.String className,
+		long classPK, int status) {
+		return getService().getKBCommentsCount(className, classPK, status);
+	}
+
+	public static int getKBCommentsCount(java.lang.String className,
+		long classPK, int[] status) {
+		return getService().getKBCommentsCount(className, classPK, status);
 	}
 
 	public static int getKBCommentsCount(long groupId, int status) {

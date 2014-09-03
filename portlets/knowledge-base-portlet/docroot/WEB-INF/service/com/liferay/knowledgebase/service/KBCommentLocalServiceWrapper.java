@@ -14,6 +14,8 @@
 
 package com.liferay.knowledgebase.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.service.ServiceWrapper;
 
 /**
@@ -23,6 +25,7 @@ import com.liferay.portal.service.ServiceWrapper;
  * @see KBCommentLocalService
  * @generated
  */
+@ProviderType
 public class KBCommentLocalServiceWrapper implements KBCommentLocalService,
 	ServiceWrapper<KBCommentLocalService> {
 	public KBCommentLocalServiceWrapper(
@@ -279,6 +282,14 @@ public class KBCommentLocalServiceWrapper implements KBCommentLocalService,
 
 	@Override
 	public java.util.List<com.liferay.knowledgebase.model.KBComment> getKBComments(
+		java.lang.String className, long classPK, int[] status, int start,
+		int end) {
+		return _kbCommentLocalService.getKBComments(className, classPK, status,
+			start, end);
+	}
+
+	@Override
+	public java.util.List<com.liferay.knowledgebase.model.KBComment> getKBComments(
 		long groupId, int status, int start, int end) {
 		return _kbCommentLocalService.getKBComments(groupId, status, start, end);
 	}
@@ -337,6 +348,20 @@ public class KBCommentLocalServiceWrapper implements KBCommentLocalService,
 	@Override
 	public int getKBCommentsCount(java.lang.String className, long classPK) {
 		return _kbCommentLocalService.getKBCommentsCount(className, classPK);
+	}
+
+	@Override
+	public int getKBCommentsCount(java.lang.String className, long classPK,
+		int status) {
+		return _kbCommentLocalService.getKBCommentsCount(className, classPK,
+			status);
+	}
+
+	@Override
+	public int getKBCommentsCount(java.lang.String className, long classPK,
+		int[] status) {
+		return _kbCommentLocalService.getKBCommentsCount(className, classPK,
+			status);
 	}
 
 	@Override

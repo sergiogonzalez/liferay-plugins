@@ -28,46 +28,56 @@ if (enableKBArticleViewCountIncrement && !kbArticle.isDraft()) {
 }
 %>
 
-<div class="float-container kb-entity-header">
-	<h1 class="kb-title">
-		<%= kbArticle.getTitle() %>
-	</h1>
+<div>
+	<div class="float-container kb-entity-header">
+		<div>
+			<c:if test="<%= KnowledgeBaseUtil.isGitHubKBArticle(kbArticle) %>">
+				<a class="kb-article-ribbon" href="<%= kbArticle.getSourceLocation() %>">
+					<img alt='<liferay-ui:message key="fork-me-on-github" />' class="github-ribbon" src="<%= PortalUtil.getPathContext(request) %>/images/blue-white-ribbon.png" />
+				</a>
+			</c:if>
 
-	<c:if test="<%= !kbArticle.isApproved() %>">
-		<div class="kb-article-status">
-			<aui:model-context bean="<%= kbArticle %>" model="<%= KBArticle.class %>" />
-
-			<aui:workflow-status status="<%= kbArticle.getStatus() %>" />
+			<h1 class="kb-title">
+				<%= kbArticle.getTitle() %>
+			</h1>
 		</div>
-	</c:if>
 
-	<div class="kb-tools">
-		<liferay-util:include page="/admin/article_tools.jsp" servletContext="<%= application %>" />
-	</div>
-</div>
+		<c:if test="<%= !kbArticle.isApproved() %>">
+			<div class="kb-article-status">
+				<aui:model-context bean="<%= kbArticle %>" model="<%= KBArticle.class %>" />
 
-<%
-request.setAttribute("article_icons.jsp-kb_article", kbArticle);
-%>
+				<aui:workflow-status status="<%= kbArticle.getStatus() %>" />
+			</div>
+		</c:if>
 
-<liferay-util:include page="/admin/article_icons.jsp" servletContext="<%= application %>" />
-
-<div class="kb-entity-body">
-	<div class="kb-article-body" id="<portlet:namespace /><%= kbArticle.getResourcePrimKey() %>">
-		<%= kbArticle.getContent() %>
+		<div class="kb-tools">
+			<liferay-util:include page="/admin/article_tools.jsp" servletContext="<%= application %>" />
+		</div>
 	</div>
 
-	<liferay-util:include page="/admin/article_child.jsp" servletContext="<%= application %>" />
+	<%
+	request.setAttribute("article_icons.jsp-kb_article", kbArticle);
+	%>
 
-	<liferay-util:include page="/admin/article_siblings.jsp" servletContext="<%= application %>" />
+	<liferay-util:include page="/admin/article_icons.jsp" servletContext="<%= application %>" />
 
-	<liferay-util:include page="/admin/article_assets.jsp" servletContext="<%= application %>" />
+	<div class="kb-entity-body">
+		<div class="kb-article-body" id="<portlet:namespace /><%= kbArticle.getResourcePrimKey() %>">
+			<%= kbArticle.getContent() %>
+		</div>
 
-	<liferay-util:include page="/admin/article_asset_entries.jsp" servletContext="<%= application %>" />
+		<liferay-util:include page="/admin/article_child.jsp" servletContext="<%= application %>" />
 
-	<liferay-util:include page="/admin/article_asset_links.jsp" servletContext="<%= application %>" />
+		<liferay-util:include page="/admin/article_siblings.jsp" servletContext="<%= application %>" />
 
-	<liferay-util:include page="/admin/article_ratings.jsp" servletContext="<%= application %>" />
+		<liferay-util:include page="/admin/article_assets.jsp" servletContext="<%= application %>" />
 
-	<liferay-util:include page="/admin/article_social_bookmarks.jsp" servletContext="<%= application %>" />
+		<liferay-util:include page="/admin/article_asset_entries.jsp" servletContext="<%= application %>" />
+
+		<liferay-util:include page="/admin/article_asset_links.jsp" servletContext="<%= application %>" />
+
+		<liferay-util:include page="/admin/article_ratings.jsp" servletContext="<%= application %>" />
+
+		<liferay-util:include page="/admin/article_social_bookmarks.jsp" servletContext="<%= application %>" />
+	</div>
 </div>
