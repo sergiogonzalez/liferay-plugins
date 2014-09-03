@@ -60,6 +60,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -355,6 +356,19 @@ public class KnowledgeBaseUtil {
 			KBArticle.class.getName(), "urlTitle", title);
 	}
 
+	public static boolean isGitHubKBArticle(KBArticle kbArticle) {
+		String sourceLocation = kbArticle.getSourceLocation();
+
+		if (sourceLocation == null) {
+			return false;
+		}
+
+		Matcher matcher = _GITHUB_SOURCE_LOCATION_PATTERN.matcher(
+			sourceLocation);
+
+		return matcher.lookingAt();
+	}
+
 	public static List<KBArticle> sort(
 		long[] resourcePrimKeys, List<KBArticle> kbArticles) {
 
@@ -420,6 +434,9 @@ public class KnowledgeBaseUtil {
 
 		return s.substring(x, s.length());
 	}
+
+	private static final Pattern _GITHUB_SOURCE_LOCATION_PATTERN =
+		Pattern.compile("^https?://github.com/.*");
 
 	private static final int _SQL_DATA_MAX_PARAMETERS = GetterUtil.getInteger(
 		PropsUtil.get(PropsKeys.SQL_DATA_MAX_PARAMETERS));

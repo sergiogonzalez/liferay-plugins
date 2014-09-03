@@ -314,6 +314,11 @@
 		margin: 5px 0 5px 0;
 		padding: 0 5px 3px;
 
+		.kb-article-ribbon {
+			float: right;
+			margin-top: -18px;
+		}
+
 		.kb-title {
 			float: left;
 		}
