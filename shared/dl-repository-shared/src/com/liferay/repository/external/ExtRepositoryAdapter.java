@@ -1054,6 +1054,10 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 	}
 
 	protected ExtRepositoryAdapter(ExtRepository extRepository) {
+		if (extRepository == null) {
+			extRepository = (ExtRepository)this;
+		}
+
 		_extRepository = extRepository;
 	}
 
@@ -1073,6 +1077,15 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 		repositoryEntry = _getRootRepositoryEntry(rootMountDLFolder);
 
 		return repositoryEntry.getMappedId();
+	}
+
+	private void _checkAssetEntry(
+			ExtRepositoryFileEntryAdapter extRepositoryFileEntryAdapter)
+		throws PortalException {
+
+		dlAppHelperLocalService.checkAssetEntry(
+			PrincipalThreadLocal.getUserId(), extRepositoryFileEntryAdapter,
+			extRepositoryFileEntryAdapter.getFileVersion() );
 	}
 
 	private <T extends ExtRepositoryObjectAdapter<?>> List<T> _filterByMimeType(
@@ -1103,7 +1116,7 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 		return filteredExtRepositoryObjects;
 	}
 
-	private void _forceGetVersions(
+	private void _forceGetFileVersions(
 		ExtRepositoryFileEntryAdapter extRepositoryFileEntryAdapter) {
 
 		extRepositoryFileEntryAdapter.getFileVersions(
@@ -1296,7 +1309,10 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 				extRepositoryObjectAdapter = new ExtRepositoryFileEntryAdapter(
 					this, extRepositoryObjectId, uuid, extRepositoryFileEntry);
 
-				_forceGetVersions(
+				_forceGetFileVersions(
+					(ExtRepositoryFileEntryAdapter)extRepositoryObjectAdapter);
+
+				_checkAssetEntry(
 					(ExtRepositoryFileEntryAdapter)extRepositoryObjectAdapter);
 			}
 
