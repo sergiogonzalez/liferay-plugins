@@ -14,6 +14,8 @@
 
 package com.liferay.knowledgebase.model;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.ModelWrapper;
@@ -31,6 +33,7 @@ import java.util.Map;
  * @see KBArticle
  * @generated
  */
+@ProviderType
 public class KBArticleWrapper implements KBArticle, ModelWrapper<KBArticle> {
 	public KBArticleWrapper(KBArticle kbArticle) {
 		_kbArticle = kbArticle;
@@ -71,6 +74,7 @@ public class KBArticleWrapper implements KBArticle, ModelWrapper<KBArticle> {
 		attributes.put("viewCount", getViewCount());
 		attributes.put("latest", getLatest());
 		attributes.put("main", getMain());
+		attributes.put("sourceLocation", getSourceLocation());
 		attributes.put("status", getStatus());
 		attributes.put("statusByUserId", getStatusByUserId());
 		attributes.put("statusByUserName", getStatusByUserName());
@@ -206,6 +210,12 @@ public class KBArticleWrapper implements KBArticle, ModelWrapper<KBArticle> {
 
 		if (main != null) {
 			setMain(main);
+		}
+
+		String sourceLocation = (String)attributes.get("sourceLocation");
+
+		if (sourceLocation != null) {
+			setSourceLocation(sourceLocation);
 		}
 
 		Integer status = (Integer)attributes.get("status");
@@ -439,6 +449,16 @@ public class KBArticleWrapper implements KBArticle, ModelWrapper<KBArticle> {
 	@Override
 	public java.lang.String getSections() {
 		return _kbArticle.getSections();
+	}
+
+	/**
+	* Returns the source location of this k b article.
+	*
+	* @return the source location of this k b article
+	*/
+	@Override
+	public java.lang.String getSourceLocation() {
+		return _kbArticle.getSourceLocation();
 	}
 
 	/**
@@ -895,6 +915,16 @@ public class KBArticleWrapper implements KBArticle, ModelWrapper<KBArticle> {
 	}
 
 	/**
+	* Sets the source location of this k b article.
+	*
+	* @param sourceLocation the source location of this k b article
+	*/
+	@Override
+	public void setSourceLocation(java.lang.String sourceLocation) {
+		_kbArticle.setSourceLocation(sourceLocation);
+	}
+
+	/**
 	* Sets the status of this k b article.
 	*
 	* @param status the status of this k b article
@@ -1101,5 +1131,5 @@ public class KBArticleWrapper implements KBArticle, ModelWrapper<KBArticle> {
 		_kbArticle.resetOriginalValues();
 	}
 
-	private KBArticle _kbArticle;
+	private final KBArticle _kbArticle;
 }

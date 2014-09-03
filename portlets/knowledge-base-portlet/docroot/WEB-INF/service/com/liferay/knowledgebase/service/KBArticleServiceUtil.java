@@ -14,6 +14,8 @@
 
 package com.liferay.knowledgebase.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.bean.PortletBeanLocatorUtil;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
 import com.liferay.portal.service.InvokableService;
@@ -32,6 +34,7 @@ import com.liferay.portal.service.InvokableService;
  * @see com.liferay.knowledgebase.service.impl.KBArticleServiceImpl
  * @generated
  */
+@ProviderType
 public class KBArticleServiceUtil {
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -42,13 +45,14 @@ public class KBArticleServiceUtil {
 		java.lang.String portletId, long parentResourcePrimKey,
 		java.lang.String title, java.lang.String urlTitle,
 		java.lang.String content, java.lang.String description,
-		java.lang.String[] sections, java.lang.String[] selectedFileNames,
+		java.lang.String sourceLocation, java.lang.String[] sections,
+		java.lang.String[] selectedFileNames,
 		com.liferay.portal.service.ServiceContext serviceContext)
 		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService()
 				   .addKBArticle(portletId, parentResourcePrimKey, title,
-			urlTitle, content, description, sections, selectedFileNames,
-			serviceContext);
+			urlTitle, content, description, sourceLocation, sections,
+			selectedFileNames, serviceContext);
 	}
 
 	public static void addKBArticlesMarkdown(long groupId,
@@ -315,14 +319,15 @@ public class KBArticleServiceUtil {
 
 	public static com.liferay.knowledgebase.model.KBArticle updateKBArticle(
 		long resourcePrimKey, java.lang.String title, java.lang.String content,
-		java.lang.String description, java.lang.String[] sections,
-		java.lang.String[] selectedFileNames, long[] removeFileEntryIds,
+		java.lang.String description, java.lang.String sourceLocation,
+		java.lang.String[] sections, java.lang.String[] selectedFileNames,
+		long[] removeFileEntryIds,
 		com.liferay.portal.service.ServiceContext serviceContext)
 		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService()
 				   .updateKBArticle(resourcePrimKey, title, content,
-			description, sections, selectedFileNames, removeFileEntryIds,
-			serviceContext);
+			description, sourceLocation, sections, selectedFileNames,
+			removeFileEntryIds, serviceContext);
 	}
 
 	public static void updateKBArticlesPriorities(long groupId,
