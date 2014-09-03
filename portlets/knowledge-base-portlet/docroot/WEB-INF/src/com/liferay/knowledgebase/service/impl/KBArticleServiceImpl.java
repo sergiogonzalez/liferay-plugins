@@ -73,8 +73,8 @@ public class KBArticleServiceImpl extends KBArticleServiceBaseImpl {
 	public KBArticle addKBArticle(
 			String portletId, long parentResourcePrimKey, String title,
 			String urlTitle, String content, String description,
-			String[] sections, String[] selectedFileNames,
-			ServiceContext serviceContext)
+			String sourceLocation, String[] sections,
+			String[] selectedFileNames, ServiceContext serviceContext)
 		throws PortalException {
 
 		if (portletId.equals(PortletKeys.KNOWLEDGE_BASE_ADMIN)) {
@@ -90,7 +90,8 @@ public class KBArticleServiceImpl extends KBArticleServiceBaseImpl {
 
 		return kbArticleLocalService.addKBArticle(
 			getUserId(), parentResourcePrimKey, title, urlTitle, content,
-			description, sections, selectedFileNames, serviceContext);
+			description, sourceLocation, sections, selectedFileNames,
+			serviceContext);
 	}
 
 	@Override
@@ -682,16 +683,18 @@ public class KBArticleServiceImpl extends KBArticleServiceBaseImpl {
 	@Override
 	public KBArticle updateKBArticle(
 			long resourcePrimKey, String title, String content,
-			String description, String[] sections, String[] selectedFileNames,
-			long[] removeFileEntryIds, ServiceContext serviceContext)
+			String description, String sourceLocation, String[] sections,
+			String[] selectedFileNames, long[] removeFileEntryIds,
+			ServiceContext serviceContext)
 		throws PortalException {
 
 		KBArticlePermission.check(
 			getPermissionChecker(), resourcePrimKey, ActionKeys.UPDATE);
 
 		return kbArticleLocalService.updateKBArticle(
-			getUserId(), resourcePrimKey, title, content, description, sections,
-			selectedFileNames, removeFileEntryIds, serviceContext);
+			getUserId(), resourcePrimKey, title, content, description,
+			sourceLocation, sections, selectedFileNames, removeFileEntryIds,
+			serviceContext);
 	}
 
 	@Override

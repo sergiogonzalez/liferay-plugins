@@ -187,7 +187,8 @@ public class KBArticleStagedModelDataHandler
 					importedKBArticle = KBArticleLocalServiceUtil.addKBArticle(
 						userId, parentResourcePrimKey, kbArticle.getTitle(),
 						kbArticle.getUrlTitle(), kbArticle.getContent(),
-						kbArticle.getDescription(), sections, null,
+						kbArticle.getDescription(),
+						kbArticle.getSourceLocation(), sections, null,
 						serviceContext);
 
 					KBArticleLocalServiceUtil.updatePriority(
@@ -198,7 +199,8 @@ public class KBArticleStagedModelDataHandler
 					KBArticleLocalServiceUtil.updateKBArticle(
 						userId, existingKBArticle.getResourcePrimKey(),
 						kbArticle.getTitle(), kbArticle.getContent(),
-						kbArticle.getDescription(), sections, null, null,
+						kbArticle.getDescription(),
+						kbArticle.getSourceLocation(), sections, null, null,
 						serviceContext);
 
 					KBArticleLocalServiceUtil.moveKBArticle(
@@ -219,7 +221,8 @@ public class KBArticleStagedModelDataHandler
 			importedKBArticle = KBArticleLocalServiceUtil.addKBArticle(
 				userId, parentResourcePrimKey, kbArticle.getTitle(),
 				kbArticle.getUrlTitle(), kbArticle.getContent(),
-				kbArticle.getDescription(), sections, null, serviceContext);
+				kbArticle.getDescription(), kbArticle.getSourceLocation(),
+				sections, null, serviceContext);
 
 			KBArticleLocalServiceUtil.updatePriority(
 				importedKBArticle.getResourcePrimKey(),
