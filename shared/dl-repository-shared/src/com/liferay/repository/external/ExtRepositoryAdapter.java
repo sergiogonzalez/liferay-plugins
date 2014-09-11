@@ -1215,6 +1215,16 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 		return repositoryEntry;
 	}
 
+	private <T, V extends T> List<T> _subList(
+		List<V> list, int start, int end, OrderByComparator<T> obc) {
+
+		if (obc != null) {
+			list = ListUtil.sort(list, obc);
+		}
+
+		return ListUtil.toList(ListUtil.subList(list, start, end));
+	}
+
 	private ExtRepositoryFileVersionAdapter _toExtRepositoryFileVersionAdapter(
 			ExtRepositoryFileEntryAdapter extRepositoryFileEntryAdapter,
 			ExtRepositoryFileVersion extRepositoryFileVersion)
@@ -1368,16 +1378,6 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 		}
 
 		return extRepositoryObjectAdapters;
-	}
-
-	private <T, V extends T> List<T>_subList(
-		List<V> list, int start, int end, OrderByComparator<T> obc) {
-
-		if (obc != null) {
-			list = ListUtil.sort(list, obc);
-		}
-
-		return ListUtil.toList(ListUtil.subList(list, start, end));
 	}
 
 	private static Log _log = LogFactoryUtil.getLog(ExtRepositoryAdapter.class);
