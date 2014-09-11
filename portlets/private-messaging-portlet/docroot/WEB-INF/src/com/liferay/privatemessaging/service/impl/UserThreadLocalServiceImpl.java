@@ -24,8 +24,6 @@ import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.mail.MailMessage;
-import com.liferay.portal.kernel.notifications.NotificationEvent;
-import com.liferay.portal.kernel.notifications.NotificationEventFactoryUtil;
 import com.liferay.portal.kernel.notifications.UserNotificationManagerUtil;
 import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.FastDateFormatConstants;
@@ -158,8 +156,6 @@ public class UserThreadLocalServiceImpl extends UserThreadLocalServiceBaseImpl {
 			userId);
 
 		for (UserThread userThread : userThreads) {
-			MBThreadLocalServiceUtil.deleteMBThread(userThread.getMbThreadId());
-
 			userThreadPersistence.remove(userThread.getUserThreadId());
 		}
 	}
@@ -511,15 +507,10 @@ public class UserThreadLocalServiceImpl extends UserThreadLocalServiceBaseImpl {
 				continue;
 			}
 
-			NotificationEvent notificationEvent =
-				NotificationEventFactoryUtil.createNotificationEvent(
-					System.currentTimeMillis(), PortletKeys.PRIVATE_MESSAGING,
-					notificationEventJSONObject);
-
-			notificationEvent.setDeliveryRequired(0);
-
-			UserNotificationEventLocalServiceUtil.addUserNotificationEvent(
-				userThread.getUserId(), notificationEvent);
+			UserNotificationEventLocalServiceUtil.sendUserNotificationEvents(
+				userThread.getUserId(), PortletKeys.PRIVATE_MESSAGING,
+				UserNotificationDeliveryConstants.TYPE_WEBSITE,
+				notificationEventJSONObject);
 		}
 	}
 

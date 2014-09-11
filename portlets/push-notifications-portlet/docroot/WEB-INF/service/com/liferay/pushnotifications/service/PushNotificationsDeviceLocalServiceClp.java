@@ -14,12 +14,15 @@
 
 package com.liferay.pushnotifications.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.service.InvokableLocalService;
 
 /**
  * @author Silvio Santos
  * @generated
  */
+@ProviderType
 public class PushNotificationsDeviceLocalServiceClp
 	implements PushNotificationsDeviceLocalService {
 	public PushNotificationsDeviceLocalServiceClp(
@@ -738,14 +741,14 @@ public class PushNotificationsDeviceLocalServiceClp
 	}
 
 	@Override
-	public void sendPushNotification(long userId,
+	public void sendPushNotification(long toUserId,
 		com.liferay.portal.kernel.json.JSONObject jsonObject, int start, int end)
 		throws com.liferay.portal.kernel.exception.PortalException {
 		try {
 			_invokableLocalService.invokeMethod(_methodName22,
 				_methodParameterTypes22,
 				new Object[] {
-					userId,
+					toUserId,
 					
 				ClpSerializer.translateInput(jsonObject),
 					

@@ -42,13 +42,9 @@ public class SyncFile extends StateAwareModel {
 
 	public static final String EVENT_UPDATE = "update";
 
-	public static final int STATE_ERROR = 4;
+	public static final int STATE_ERROR = 2;
 
 	public static final int STATE_IN_PROGRESS = 1;
-
-	public static final int STATE_IN_PROGRESS_DOWNLOADING = 3;
-
-	public static final int STATE_IN_PROGRESS_UPLOADING = 2;
 
 	public static final int STATE_SYNCED = 0;
 
@@ -66,33 +62,57 @@ public class SyncFile extends StateAwareModel {
 
 	public static final int UI_EVENT_DELETED_REMOTE = 4;
 
-	public static final int UI_EVENT_DOWNLOADED = 5;
+	public static final int UI_EVENT_DOWNLOADED_NEW = 5;
 
-	public static final int UI_EVENT_DOWNLOADING = 6;
+	public static final int UI_EVENT_DOWNLOADED_UPDATE = 6;
 
-	public static final int UI_EVENT_DUPLICATE_LOCK = 7;
+	public static final int UI_EVENT_DOWNLOADING = 7;
 
-	public static final int UI_EVENT_EXCEEDED_SIZE_LIMIT = 8;
+	public static final int UI_EVENT_DUPLICATE_LOCK = 8;
 
-	public static final int UI_EVENT_INVALID_FILE_NAME = 9;
+	public static final int UI_EVENT_EXCEEDED_SIZE_LIMIT = 9;
 
-	public static final int UI_EVENT_INVALID_PERMISSIONS = 10;
+	public static final int UI_EVENT_FILE_NAME_TOO_LONG = 10;
 
-	public static final int UI_EVENT_MOVED_LOCAL = 11;
+	public static final int UI_EVENT_INVALID_FILE_NAME = 11;
 
-	public static final int UI_EVENT_MOVED_REMOTE = 12;
+	public static final int UI_EVENT_INVALID_PERMISSIONS = 12;
 
-	public static final int UI_EVENT_TRASHED_LOCAL = 13;
+	public static final int UI_EVENT_MOVED_LOCAL = 13;
 
-	public static final int UI_EVENT_TRASHED_REMOTE = 14;
+	public static final int UI_EVENT_MOVED_REMOTE = 14;
 
-	public static final int UI_EVENT_UPDATED_LOCAL = 15;
+	public static final int UI_EVENT_TRASHED_LOCAL = 15;
 
-	public static final int UI_EVENT_UPDATED_REMOTE = 16;
+	public static final int UI_EVENT_TRASHED_REMOTE = 16;
 
-	public static final int UI_EVENT_UPLOADED = 17;
+	public static final int UI_EVENT_UPDATED_LOCAL = 17;
 
-	public static final int UI_EVENT_UPLOADING = 18;
+	public static final int UI_EVENT_UPDATED_REMOTE = 18;
+
+	public static final int UI_EVENT_UPLOADED = 19;
+
+	public static final int UI_EVENT_UPLOADING = 20;
+
+	@Override
+	public boolean equals(Object object) {
+		if (object == this) {
+			return true;
+		}
+
+		if (!(object instanceof SyncFile)) {
+			return false;
+		}
+
+		SyncFile syncFile = (SyncFile)object;
+
+		if (syncFile.getSyncFileId() == syncFileId) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
 
 	public String getChangeLog() {
 		return changeLog;
@@ -196,6 +216,11 @@ public class SyncFile extends StateAwareModel {
 
 	public String getVersion() {
 		return version;
+	}
+
+	@Override
+	public int hashCode() {
+		return (int)(syncFileId ^ (syncFileId >>> 32));
 	}
 
 	public boolean isFile() {
@@ -310,7 +335,7 @@ public class SyncFile extends StateAwareModel {
 		this.version = version;
 	}
 
-	@DatabaseField(useGetSet = true)
+	@DatabaseField(defaultValue = "", useGetSet = true)
 	protected String changeLog;
 
 	@DatabaseField(useGetSet = true)
@@ -322,7 +347,7 @@ public class SyncFile extends StateAwareModel {
 	@DatabaseField(useGetSet = true)
 	protected long createTime;
 
-	@DatabaseField(useGetSet = true, width = 16777216)
+	@DatabaseField(defaultValue = "", useGetSet = true, width = 16777216)
 	protected String description;
 
 	@DatabaseField(persisted = false)
@@ -334,10 +359,10 @@ public class SyncFile extends StateAwareModel {
 	@DatabaseField(useGetSet = true, width = 16777216)
 	protected String extraSettings;
 
-	@DatabaseField(useGetSet = true)
+	@DatabaseField(index = true, useGetSet = true)
 	protected String fileKey;
 
-	@DatabaseField(useGetSet = true, width = 16777216)
+	@DatabaseField(index = true, useGetSet = true, width = 16777216)
 	protected String filePathName;
 
 	@DatabaseField(useGetSet = true)
@@ -379,7 +404,7 @@ public class SyncFile extends StateAwareModel {
 	@DatabaseField(useGetSet = true)
 	protected String type;
 
-	@DatabaseField(useGetSet = true)
+	@DatabaseField(index = true, useGetSet = true)
 	protected long typePK;
 
 	@DatabaseField(useGetSet = true)

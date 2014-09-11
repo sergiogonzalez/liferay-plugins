@@ -26,6 +26,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * @author Shinn Lok
  */
@@ -33,6 +35,32 @@ public class SyncFilePersistence extends BasePersistenceImpl<SyncFile, Long> {
 
 	public SyncFilePersistence() throws SQLException {
 		super(SyncFile.class);
+	}
+
+	public long countByUIEvent(int uiEvent) throws SQLException {
+		QueryBuilder<SyncFile, Long> queryBuilder = queryBuilder();
+
+		Where<SyncFile, Long> where = queryBuilder.where();
+
+		where.eq("uiEvent", uiEvent);
+
+		return where.countOf();
+	}
+
+	public SyncFile fetchByFilePathName(String filePathName)
+		throws SQLException {
+
+		Map<String, Object> fieldValues = new HashMap<String, Object>();
+
+		fieldValues.put("filePathName", filePathName);
+
+		List<SyncFile> syncFiles = queryForFieldValuesArgs(fieldValues);
+
+		if ((syncFiles == null) || syncFiles.isEmpty()) {
+			return null;
+		}
+
+		return syncFiles.get(0);
 	}
 
 	public SyncFile fetchByFK_S(String fileKey, long syncAccountId)
@@ -44,23 +72,6 @@ public class SyncFilePersistence extends BasePersistenceImpl<SyncFile, Long> {
 		fieldValues.put("syncAccountId", syncAccountId);
 
 		List<SyncFile> syncFiles = queryForFieldValues(fieldValues);
-
-		if ((syncFiles == null) || syncFiles.isEmpty()) {
-			return null;
-		}
-
-		return syncFiles.get(0);
-	}
-
-	public SyncFile fetchByFPN_S(String filePathName, long syncAccountId)
-		throws SQLException {
-
-		Map<String, Object> fieldValues = new HashMap<String, Object>();
-
-		fieldValues.put("filePathName", filePathName);
-		fieldValues.put("syncAccountId", syncAccountId);
-
-		List<SyncFile> syncFiles = queryForFieldValuesArgs(fieldValues);
 
 		if ((syncFiles == null) || syncFiles.isEmpty()) {
 			return null;
@@ -88,34 +99,14 @@ public class SyncFilePersistence extends BasePersistenceImpl<SyncFile, Long> {
 		return syncFiles.get(0);
 	}
 
-	public List<SyncFile> findByC_S(String checksum, long syncAccountId)
-		throws SQLException {
-
-		Map<String, Object> fieldValues = new HashMap<String, Object>();
-
-		fieldValues.put("checksum", checksum);
-		fieldValues.put("syncAccountId", syncAccountId);
-
-		return queryForFieldValues(fieldValues);
-	}
-
-	public List<SyncFile> findByFilePathName(String filePathName)
-		throws SQLException {
-
-		Map<String, Object> fieldValues = new HashMap<String, Object>();
-
-		fieldValues.put("filePathName", filePathName);
-
-		return queryForFieldValuesArgs(fieldValues);
-	}
-
-	public List<SyncFile> findByF_L_S(
-			String filePathName, long localSyncTime, long syncAccountId)
+	public List<SyncFile> findByF_L(String filePathName, long localSyncTime)
 		throws SQLException {
 
 		QueryBuilder<SyncFile, Long> queryBuilder = queryBuilder();
 
 		Where<SyncFile, Long> where = queryBuilder.where();
+
+		filePathName = StringUtils.replace(filePathName, "\\", "\\\\");
 
 		where.like("filePathName", new SelectArg(filePathName + "%"));
 
@@ -125,17 +116,24 @@ public class SyncFilePersistence extends BasePersistenceImpl<SyncFile, Long> {
 
 		where.and();
 
-		where.eq("syncAccountId", syncAccountId);
+		where.ne("type", SyncFile.TYPE_SYSTEM);
 
 		where.and();
 
-		where.ne("type", SyncFile.TYPE_SYSTEM);
+		where.ne("uiEvent", SyncFile.UI_EVENT_DOWNLOADING);
 
 		return query(queryBuilder.prepare());
 	}
 
-	public List<SyncFile> findByState(int state) throws SQLException {
-		return queryForEq("state", state);
+	public List<SyncFile> findByS_U(long syncAccountId, int uiEvent)
+		throws SQLException {
+
+		Map<String, Object> fieldValues = new HashMap<String, Object>();
+
+		fieldValues.put("syncAccountId", syncAccountId);
+		fieldValues.put("uiEvent", uiEvent);
+
+		return queryForFieldValues(fieldValues);
 	}
 
 	public List<SyncFile> findBySyncAccountId(long syncAccountId)

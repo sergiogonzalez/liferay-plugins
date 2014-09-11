@@ -19,9 +19,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.liferay.sync.engine.documentlibrary.event.Event;
 import com.liferay.sync.engine.documentlibrary.model.SyncContext;
+import com.liferay.sync.engine.documentlibrary.model.SyncUser;
 import com.liferay.sync.engine.model.SyncAccount;
 import com.liferay.sync.engine.service.SyncAccountService;
 import com.liferay.sync.engine.util.ReleaseInfo;
+import com.liferay.sync.engine.util.RetryUtil;
 
 import java.util.Map;
 
@@ -32,10 +34,6 @@ public class GetSyncContextHandler extends BaseJSONHandler {
 
 	public GetSyncContextHandler(Event event) {
 		super(event);
-	}
-
-	@Override
-	public void handleException(Exception e) {
 	}
 
 	@Override
@@ -68,14 +66,17 @@ public class GetSyncContextHandler extends BaseJSONHandler {
 
 		if (ReleaseInfo.isServerCompatible(syncContext)) {
 			syncAccount.setState(SyncAccount.STATE_CONNECTED);
+
+			RetryUtil.resetRetryDelay(getSyncAccountId());
 		}
 		else {
-			syncAccount.setActive(false);
 			syncAccount.setState(SyncAccount.STATE_DISCONNECTED);
 			syncAccount.setUiEvent(SyncAccount.UI_EVENT_SYNC_WEB_OUT_OF_DATE);
 		}
 
-		syncAccount.setUserId(syncContext.getUserId());
+		SyncUser syncUser = syncContext.getSyncUser();
+
+		syncAccount.setUserId(syncUser.getUserId());
 
 		SyncAccountService.update(syncAccount);
 	}

@@ -14,6 +14,8 @@
 
 package com.liferay.pushnotifications.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.jsonwebservice.JSONWebService;
@@ -36,6 +38,7 @@ import com.liferay.portal.service.InvokableService;
  */
 @AccessControlled
 @JSONWebService
+@ProviderType
 @Transactional(isolation = Isolation.PORTAL, rollbackFor =  {
 	PortalException.class, SystemException.class})
 public interface PushNotificationsDeviceService extends BaseService,
@@ -45,6 +48,7 @@ public interface PushNotificationsDeviceService extends BaseService,
 	 *
 	 * Never modify or reference this interface directly. Always use {@link PushNotificationsDeviceServiceUtil} to access the push notifications device remote service. Add custom service methods to {@link com.liferay.pushnotifications.service.impl.PushNotificationsDeviceServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
+	@com.liferay.portal.security.ac.AccessControlled(guestAccessEnabled = true)
 	public com.liferay.pushnotifications.model.PushNotificationsDevice addPushNotificationsDevice(
 		java.lang.String token, java.lang.String platform)
 		throws com.liferay.portal.kernel.exception.PortalException;
@@ -65,7 +69,10 @@ public interface PushNotificationsDeviceService extends BaseService,
 		java.lang.String[] parameterTypes, java.lang.Object[] arguments)
 		throws java.lang.Throwable;
 
-	public void sendPushNotification(java.lang.String message)
+	public void sendPushNotification(java.lang.String payload)
+		throws com.liferay.portal.kernel.exception.PortalException;
+
+	public void sendPushNotification(long toUserId, java.lang.String payload)
 		throws com.liferay.portal.kernel.exception.PortalException;
 
 	/**

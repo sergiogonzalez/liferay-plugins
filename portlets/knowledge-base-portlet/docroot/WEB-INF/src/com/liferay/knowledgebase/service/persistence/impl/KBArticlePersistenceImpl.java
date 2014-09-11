@@ -14,6 +14,8 @@
 
 package com.liferay.knowledgebase.service.persistence.impl;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.knowledgebase.NoSuchArticleException;
 import com.liferay.knowledgebase.model.KBArticle;
 import com.liferay.knowledgebase.model.impl.KBArticleImpl;
@@ -34,7 +36,6 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.GetterUtil;
-import com.liferay.portal.kernel.util.InstanceFactory;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.PropsUtil;
@@ -45,13 +46,11 @@ import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.uuid.PortalUUIDUtil;
 import com.liferay.portal.model.CacheModel;
-import com.liferay.portal.model.ModelListener;
 import com.liferay.portal.security.permission.InlineSQLHelperUtil;
 import com.liferay.portal.service.persistence.impl.BasePersistenceImpl;
 
 import java.io.Serializable;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -72,6 +71,7 @@ import java.util.Set;
  * @see KBArticleUtil
  * @generated
  */
+@ProviderType
 public class KBArticlePersistenceImpl extends BasePersistenceImpl<KBArticle>
 	implements KBArticlePersistence {
 	/*
@@ -28740,6 +28740,7 @@ public class KBArticlePersistenceImpl extends BasePersistenceImpl<KBArticle>
 		kbArticleImpl.setViewCount(kbArticle.getViewCount());
 		kbArticleImpl.setLatest(kbArticle.isLatest());
 		kbArticleImpl.setMain(kbArticle.isMain());
+		kbArticleImpl.setSourceURL(kbArticle.getSourceURL());
 		kbArticleImpl.setStatus(kbArticle.getStatus());
 		kbArticleImpl.setStatusByUserId(kbArticle.getStatusByUserId());
 		kbArticleImpl.setStatusByUserName(kbArticle.getStatusByUserName());
@@ -29110,25 +29111,6 @@ public class KBArticlePersistenceImpl extends BasePersistenceImpl<KBArticle>
 	 * Initializes the k b article persistence.
 	 */
 	public void afterPropertiesSet() {
-		String[] listenerClassNames = StringUtil.split(GetterUtil.getString(
-					com.liferay.util.service.ServiceProps.get(
-						"value.object.listener.com.liferay.knowledgebase.model.KBArticle")));
-
-		if (listenerClassNames.length > 0) {
-			try {
-				List<ModelListener<KBArticle>> listenersList = new ArrayList<ModelListener<KBArticle>>();
-
-				for (String listenerClassName : listenerClassNames) {
-					listenersList.add((ModelListener<KBArticle>)InstanceFactory.newInstance(
-							getClassLoader(), listenerClassName));
-				}
-
-				listeners = listenersList.toArray(new ModelListener[listenersList.size()]);
-			}
-			catch (Exception e) {
-				_log.error(e);
-			}
-		}
 	}
 
 	public void destroy() {
@@ -29158,11 +29140,11 @@ public class KBArticlePersistenceImpl extends BasePersistenceImpl<KBArticle>
 	private static final String _NO_SUCH_ENTITY_WITH_KEY = "No KBArticle exists with the key {";
 	private static final boolean _HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE = GetterUtil.getBoolean(PropsUtil.get(
 				PropsKeys.HIBERNATE_CACHE_USE_SECOND_LEVEL_CACHE));
-	private static Log _log = LogFactoryUtil.getLog(KBArticlePersistenceImpl.class);
-	private static Set<String> _badColumnNames = SetUtil.fromArray(new String[] {
+	private static final Log _log = LogFactoryUtil.getLog(KBArticlePersistenceImpl.class);
+	private static final Set<String> _badColumnNames = SetUtil.fromArray(new String[] {
 				"uuid"
 			});
-	private static KBArticle _nullKBArticle = new KBArticleImpl() {
+	private static final KBArticle _nullKBArticle = new KBArticleImpl() {
 			@Override
 			public Object clone() {
 				return this;
@@ -29174,7 +29156,7 @@ public class KBArticlePersistenceImpl extends BasePersistenceImpl<KBArticle>
 			}
 		};
 
-	private static CacheModel<KBArticle> _nullKBArticleCacheModel = new CacheModel<KBArticle>() {
+	private static final CacheModel<KBArticle> _nullKBArticleCacheModel = new CacheModel<KBArticle>() {
 			@Override
 			public KBArticle toEntityModel() {
 				return _nullKBArticle;

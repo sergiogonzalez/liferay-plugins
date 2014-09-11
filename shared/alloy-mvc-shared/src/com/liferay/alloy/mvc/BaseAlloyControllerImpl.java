@@ -135,12 +135,7 @@ public abstract class BaseAlloyControllerImpl implements AlloyController {
 			}
 		}
 
-		if (permissioned &&
-			!AlloyPermission.contains(
-				themeDisplay.getPermissionChecker(),
-				themeDisplay.getScopeGroupId(), portlet.getRootPortletId(),
-				controllerPath, actionPath)) {
-
+		if (!hasPermission()) {
 			renderError(
 				"you-do-not-have-permission-to-access-the-requested-resource");
 
@@ -176,6 +171,11 @@ public abstract class BaseAlloyControllerImpl implements AlloyController {
 		}
 		else if (lifecycle.equals(PortletRequest.RESOURCE_PHASE)) {
 			executeResource(method);
+		}
+
+		if (alloyNotificationEventHelper != null) {
+			alloyNotificationEventHelper.addUserNotificationEvents(
+				request, controllerPath, actionPath);
 		}
 	}
 
@@ -475,6 +475,17 @@ public abstract class BaseAlloyControllerImpl implements AlloyController {
 		return attributesMap;
 	}
 
+	protected boolean hasPermission() {
+		if (permissioned &&
+			!AlloyPermission.contains(
+				themeDisplay, controllerPath, actionPath)) {
+
+			return false;
+		}
+
+		return true;
+	}
+
 	protected long increment(String name) throws Exception {
 		return CounterLocalServiceUtil.increment(name);
 	}
@@ -750,6 +761,10 @@ public abstract class BaseAlloyControllerImpl implements AlloyController {
 		user = themeDisplay.getUser();
 	}
 
+	protected String processDataRequest(ActionRequest actionRequest) {
+		return null;
+	}
+
 	protected void redirectTo(PortletURL portletURL) {
 		redirectTo(portletURL.toString());
 	}
@@ -789,13 +804,29 @@ public abstract class BaseAlloyControllerImpl implements AlloyController {
 	}
 
 	protected AlloySearchResult search(
-			Map<String, Serializable> attributes, String keywords, Sort sort)
+			HttpServletRequest request, PortletRequest portletRequest,
+			Map<String, Serializable> attributes, String keywords, Sort[] sorts)
 		throws Exception {
 
-		return search(attributes, keywords, new Sort[] {sort});
+		return search(
+			request, portletRequest, null, attributes, keywords, sorts);
 	}
 
 	protected AlloySearchResult search(
+			HttpServletRequest request, PortletRequest portletRequest,
+			SearchContainer<? extends BaseModel<?>> searchContainer,
+			Map<String, Serializable> attributes, String keywords, Sort[] sorts)
+		throws Exception {
+
+		return search(
+			indexer, alloyServiceInvoker, request, portletRequest,
+			searchContainer, attributes, keywords, sorts);
+	}
+
+	protected AlloySearchResult search(
+			Indexer indexer, AlloyServiceInvoker alloyServiceInvoker,
+			HttpServletRequest request, PortletRequest portletRequest,
+			SearchContainer<? extends BaseModel<?>> searchContainer,
 			Map<String, Serializable> attributes, String keywords, Sort[] sorts)
 		throws Exception {
 
@@ -807,9 +838,10 @@ public abstract class BaseAlloyControllerImpl implements AlloyController {
 
 		alloySearchResult.setAlloyServiceInvoker(alloyServiceInvoker);
 
-		SearchContainer<BaseModel<?>> searchContainer =
-			new SearchContainer<BaseModel<?>>(
+		if (searchContainer == null) {
+			searchContainer = new SearchContainer<BaseModel<?>>(
 				portletRequest, portletURL, null, null);
+		}
 
 		SearchContext searchContext = SearchContextFactory.getInstance(request);
 
@@ -823,7 +855,7 @@ public abstract class BaseAlloyControllerImpl implements AlloyController {
 
 		searchContext.setEnd(searchContainer.getEnd());
 
-		Class<?> indexerClass = Class.forName(indexerClassName);
+		Class<?> indexerClass = Class.forName(indexer.getClassNames()[0]);
 
 		if (!GroupedModel.class.isAssignableFrom(indexerClass)) {
 			searchContext.setGroupIds(null);
@@ -857,6 +889,20 @@ public abstract class BaseAlloyControllerImpl implements AlloyController {
 		return alloySearchResult;
 	}
 
+	protected AlloySearchResult search(
+			Map<String, Serializable> attributes, String keywords, Sort sort)
+		throws Exception {
+
+		return search(attributes, keywords, new Sort[] {sort});
+	}
+
+	protected AlloySearchResult search(
+			Map<String, Serializable> attributes, String keywords, Sort[] sorts)
+		throws Exception {
+
+		return search(request, portletRequest, attributes, keywords, sorts);
+	}
+
 	protected AlloySearchResult search(String keywords) throws Exception {
 		return search(keywords, (Sort[])null);
 	}
@@ -871,6 +917,12 @@ public abstract class BaseAlloyControllerImpl implements AlloyController {
 		throws Exception {
 
 		return search(null, keywords, sorts);
+	}
+
+	protected void setAlloyNotificationEventHelper(
+		AlloyNotificationEventHelper alloyNotificationEventHelper) {
+
+		this.alloyNotificationEventHelper = alloyNotificationEventHelper;
 	}
 
 	protected void setAlloyServiceInvokerClass(Class<?> clazz) {
@@ -968,6 +1020,7 @@ public abstract class BaseAlloyControllerImpl implements AlloyController {
 	protected String actionPath;
 	protected ActionRequest actionRequest;
 	protected ActionResponse actionResponse;
+	protected AlloyNotificationEventHelper alloyNotificationEventHelper;
 	protected AlloyPortlet alloyPortlet;
 	protected AlloyServiceInvoker alloyServiceInvoker;
 	protected ClassLoader classLoader;

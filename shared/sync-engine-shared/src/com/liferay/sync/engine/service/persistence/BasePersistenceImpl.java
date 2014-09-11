@@ -63,9 +63,15 @@ public class BasePersistenceImpl<TT extends BaseModel, TID>
 
 	@Override
 	public int delete(TT model) throws SQLException {
+		return delete(model, true);
+	}
+
+	public int delete(TT model, boolean notify) throws SQLException {
 		int count = super.delete(model);
 
-		notifyModelListenersOnRemove(model);
+		if (notify) {
+			notifyModelListenersOnRemove(model);
+		}
 
 		return count;
 	}
@@ -74,7 +80,7 @@ public class BasePersistenceImpl<TT extends BaseModel, TID>
 	public int deleteById(TID tid) throws SQLException {
 		TT model = queryForId(tid);
 
-		return delete(model);
+		return delete(model, true);
 	}
 
 	public void registerModelListener(ModelListener<TT> modelListener) {
@@ -136,28 +142,20 @@ public class BasePersistenceImpl<TT extends BaseModel, TID>
 				continue;
 			}
 
-			if (syncNotificationFieldName.equals("uiEvent")) {
-				if (targetModel.getUiEvent() != BaseModel.UI_EVENT_DEFAULT) {
-					originalValues.put("uiEvent", null);
-				}
-			}
-			else {
-				FieldType fieldType = tableInfo.getFieldTypeByColumnName(
-					syncNotificationFieldName);
+			FieldType fieldType = tableInfo.getFieldTypeByColumnName(
+				syncNotificationFieldName);
 
-				Object sourceFieldValue = fieldType.extractJavaFieldValue(
-					sourceModel);
-				Object targetFieldValue = fieldType.extractJavaFieldValue(
-					targetModel);
+			Object sourceFieldValue = fieldType.extractJavaFieldValue(
+				sourceModel);
+			Object targetFieldValue = fieldType.extractJavaFieldValue(
+				targetModel);
 
-				DataPersister dataPersister = fieldType.getDataPersister();
+			DataPersister dataPersister = fieldType.getDataPersister();
 
-				if (!dataPersister.dataIsEqual(
-						sourceFieldValue, targetFieldValue)) {
+			if (!dataPersister.dataIsEqual(
+					sourceFieldValue, targetFieldValue)) {
 
-					originalValues.put(
-						fieldType.getColumnName(), sourceFieldValue);
-				}
+				originalValues.put(fieldType.getColumnName(), sourceFieldValue);
 			}
 		}
 

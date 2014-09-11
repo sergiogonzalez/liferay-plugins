@@ -30,7 +30,6 @@ import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
-import com.liferay.portal.kernel.util.UniqueList;
 import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.theme.ThemeDisplay;
 
@@ -38,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -52,7 +52,7 @@ public class CalendarUtil {
 
 	public static JSONObject getCalendarRenderingRules(
 		ThemeDisplay themeDisplay, long[] calendarIds, int[] statuses,
-		long startTime, long endTime, String ruleName) {
+		long startTime, long endTime, String ruleName, TimeZone timeZone) {
 
 		List<CalendarBooking> calendarBookings =
 			CalendarBookingLocalServiceUtil.search(
@@ -64,10 +64,16 @@ public class CalendarUtil {
 			new HashMap<Integer, Map<Integer, List<Integer>>>();
 
 		for (CalendarBooking calendarBooking : calendarBookings) {
+			TimeZone displayTimeZone = timeZone;
+
+			if (calendarBooking.isAllDay()) {
+				displayTimeZone = _utcTimeZone;
+			}
+
 			java.util.Calendar startTimeJCalendar = JCalendarUtil.getJCalendar(
-				calendarBooking.getStartTime());
+				calendarBooking.getStartTime(), displayTimeZone);
 			java.util.Calendar endTimeJCalendar = JCalendarUtil.getJCalendar(
-				calendarBooking.getEndTime());
+				calendarBooking.getEndTime(), displayTimeZone);
 
 			long days = JCalendarUtil.getDaysBetween(
 				startTimeJCalendar, endTimeJCalendar);
@@ -181,14 +187,14 @@ public class CalendarUtil {
 	}
 
 	public static String[] splitKeywords(String keywords) {
-		List<String> keywordsList = new UniqueList<String>();
+		Set<String> keywordsSet = new LinkedHashSet<String>();
 
 		StringBundler sb = new StringBundler();
 
 		for (char c : keywords.toCharArray()) {
 			if (Character.isWhitespace(c)) {
 				if (sb.length() > 0) {
-					keywordsList.add(sb.toString());
+					keywordsSet.add(sb.toString());
 
 					sb = new StringBundler();
 				}
@@ -202,10 +208,10 @@ public class CalendarUtil {
 		}
 
 		if (sb.length() > 0) {
-			keywordsList.add(sb.toString());
+			keywordsSet.add(sb.toString());
 		}
 
-		return StringUtil.split(StringUtil.merge(keywordsList));
+		return StringUtil.split(StringUtil.merge(keywordsSet));
 	}
 
 	public static JSONObject toCalendarBookingJSONObject(
@@ -277,9 +283,8 @@ public class CalendarUtil {
 	}
 
 	public static JSONArray toCalendarBookingsJSONArray(
-			ThemeDisplay themeDisplay, List<CalendarBooking> calendarBookings,
-			TimeZone timeZone)
-		throws PortalException {
+		ThemeDisplay themeDisplay, List<CalendarBooking> calendarBookings,
+		TimeZone timeZone) {
 
 		JSONArray jsonArray = JSONFactoryUtil.createJSONArray();
 
@@ -414,5 +419,7 @@ public class CalendarUtil {
 
 		return jsonObject;
 	}
+
+	private static TimeZone _utcTimeZone = TimeZone.getTimeZone(StringPool.UTC);
 
 }

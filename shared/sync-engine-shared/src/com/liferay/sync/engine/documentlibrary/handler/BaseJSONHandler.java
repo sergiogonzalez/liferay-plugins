@@ -22,14 +22,19 @@ import com.liferay.sync.engine.model.SyncAccount;
 import com.liferay.sync.engine.model.SyncFile;
 import com.liferay.sync.engine.service.SyncAccountService;
 import com.liferay.sync.engine.service.SyncFileService;
+import com.liferay.sync.engine.session.Session;
+import com.liferay.sync.engine.session.SessionManager;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.StatusLine;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.util.EntityUtils;
 
@@ -46,41 +51,100 @@ public class BaseJSONHandler extends BaseHandler {
 	}
 
 	@Override
+	public Void handleResponse(HttpResponse httpResponse) {
+		try {
+			StatusLine statusLine = httpResponse.getStatusLine();
+
+			if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
+				String response = getResponseString(httpResponse);
+
+				if (handlePortalException(getException(response))) {
+					return null;
+				}
+
+				_logger.error("Status code {}", statusLine.getStatusCode());
+
+				throw new HttpResponseException(
+					statusLine.getStatusCode(), statusLine.getReasonPhrase());
+			}
+
+			doHandleResponse(httpResponse);
+		}
+		catch (Exception e) {
+			handleException(e);
+		}
+
+		return null;
+	}
+
+	@Override
 	protected void doHandleResponse(HttpResponse httpResponse)
 		throws Exception {
 
-		HttpEntity httpEntity = httpResponse.getEntity();
+		Header header = httpResponse.getFirstHeader("Sync-JWT");
 
-		String response = EntityUtils.toString(httpEntity);
+		if (header != null) {
+			Session session = SessionManager.getSession(getSyncAccountId());
 
-		if (!handlePortalException(response)) {
-			if (_logger.isTraceEnabled()) {
-				_logger.trace("Handling response {}", response);
-			}
-
-			processResponse(response);
+			session.setToken(header.getValue());
 		}
+
+		String response = getResponseString(httpResponse);
+
+		if (handlePortalException(getException(response))) {
+			return;
+		}
+
+		if (_logger.isTraceEnabled()) {
+			_logger.trace("Handling response {}", response);
+		}
+
+		processResponse(response);
 	}
 
-	protected boolean handlePortalException(String response) throws Exception {
+	protected String getException(String response) {
 		ObjectMapper objectMapper = new ObjectMapper();
 
 		JsonNode responseJsonNode = null;
 
 		try {
+			response = StringEscapeUtils.unescapeJava(response);
+
 			responseJsonNode = objectMapper.readTree(response);
 		}
 		catch (Exception e) {
-			return false;
+			return "";
 		}
 
-		JsonNode exceptionJsonNode = responseJsonNode.get("exception");
+		JsonNode errorJsonNode = responseJsonNode.get("error");
 
-		if (exceptionJsonNode == null) {
-			return false;
+		if (errorJsonNode == null) {
+			JsonNode exceptionJsonNode = responseJsonNode.get("exception");
+
+			if (exceptionJsonNode == null) {
+				return "";
+			}
+
+			return exceptionJsonNode.asText();
 		}
 
-		String exception = exceptionJsonNode.asText();
+		JsonNode typeJsonNode = errorJsonNode.get("type");
+
+		return typeJsonNode.asText();
+	}
+
+	protected String getResponseString(HttpResponse httpResponse)
+		throws Exception {
+
+		HttpEntity httpEntity = httpResponse.getEntity();
+
+		return EntityUtils.toString(httpEntity);
+	}
+
+	protected boolean handlePortalException(String exception) throws Exception {
+		if (exception.equals("")) {
+			return false;
+		}
 
 		if (_logger.isDebugEnabled()) {
 			_logger.debug("Handling exception {}", exception);
@@ -137,19 +201,46 @@ public class BaseJSONHandler extends BaseHandler {
 
 			SyncFileService.deleteSyncFile(syncFile);
 		}
-		else if (exception.equals("java.lang.RuntimeException")) {
+		else if (exception.equals(
+					"com.liferay.sync.SyncServicesUnavailableException")) {
+
 			SyncAccount syncAccount = SyncAccountService.fetchSyncAccount(
 				getSyncAccountId());
 
-			syncAccount.setActive(false);
+			syncAccount.setState(SyncAccount.STATE_DISCONNECTED);
+			syncAccount.setUiEvent(
+				SyncAccount.UI_EVENT_SYNC_SERVICES_NOT_ACTIVE);
+
+			SyncAccountService.update(syncAccount);
+
+			retryServerConnection();
+		}
+		else if (exception.equals(
+					"com.liferay.portal.kernel.jsonwebservice." +
+						"NoSuchJSONWebServiceException") ||
+				 exception.equals("java.lang.RuntimeException")) {
+
+			SyncAccount syncAccount = SyncAccountService.fetchSyncAccount(
+				getSyncAccountId());
+
 			syncAccount.setState(SyncAccount.STATE_DISCONNECTED);
 			syncAccount.setUiEvent(SyncAccount.UI_EVENT_SYNC_WEB_MISSING);
 
 			SyncAccountService.update(syncAccount);
+
+			retryServerConnection();
 		}
 		else if (exception.equals("java.lang.SecurityException")) {
 			throw new HttpResponseException(
 				HttpStatus.SC_UNAUTHORIZED, "Authenticated access required");
+		}
+		else {
+			SyncFile syncFile = (SyncFile)getParameterValue("syncFile");
+
+			syncFile.setState(SyncFile.STATE_ERROR);
+			syncFile.setUiEvent(SyncFile.UI_EVENT_DEFAULT);
+
+			SyncFileService.update(syncFile);
 		}
 
 		return true;

@@ -14,6 +14,8 @@
 
 package com.liferay.pushnotifications.service;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.service.ServiceWrapper;
 
 /**
@@ -23,6 +25,7 @@ import com.liferay.portal.service.ServiceWrapper;
  * @see PushNotificationsDeviceLocalService
  * @generated
  */
+@ProviderType
 public class PushNotificationsDeviceLocalServiceWrapper
 	implements PushNotificationsDeviceLocalService,
 		ServiceWrapper<PushNotificationsDeviceLocalService> {
@@ -278,10 +281,10 @@ public class PushNotificationsDeviceLocalServiceWrapper
 	}
 
 	@Override
-	public void sendPushNotification(long userId,
+	public void sendPushNotification(long toUserId,
 		com.liferay.portal.kernel.json.JSONObject jsonObject, int start, int end)
 		throws com.liferay.portal.kernel.exception.PortalException {
-		_pushNotificationsDeviceLocalService.sendPushNotification(userId,
+		_pushNotificationsDeviceLocalService.sendPushNotification(toUserId,
 			jsonObject, start, end);
 	}
 

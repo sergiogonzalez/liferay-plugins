@@ -1054,6 +1054,10 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 	}
 
 	protected ExtRepositoryAdapter(ExtRepository extRepository) {
+		if (extRepository == null) {
+			extRepository = (ExtRepository)this;
+		}
+
 		_extRepository = extRepository;
 	}
 
@@ -1073,6 +1077,15 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 		repositoryEntry = _getRootRepositoryEntry(rootMountDLFolder);
 
 		return repositoryEntry.getMappedId();
+	}
+
+	private void _checkAssetEntry(
+			ExtRepositoryFileEntryAdapter extRepositoryFileEntryAdapter)
+		throws PortalException {
+
+		dlAppHelperLocalService.checkAssetEntry(
+			PrincipalThreadLocal.getUserId(), extRepositoryFileEntryAdapter,
+			extRepositoryFileEntryAdapter.getFileVersion() );
 	}
 
 	private <T extends ExtRepositoryObjectAdapter<?>> List<T> _filterByMimeType(
@@ -1103,7 +1116,7 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 		return filteredExtRepositoryObjects;
 	}
 
-	private void _forceGetVersions(
+	private void _forceGetFileVersions(
 		ExtRepositoryFileEntryAdapter extRepositoryFileEntryAdapter) {
 
 		extRepositoryFileEntryAdapter.getFileVersions(
@@ -1202,6 +1215,16 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 		return repositoryEntry;
 	}
 
+	private <T, V extends T> List<T> _subList(
+		List<V> list, int start, int end, OrderByComparator<T> obc) {
+
+		if (obc != null) {
+			list = ListUtil.sort(list, obc);
+		}
+
+		return ListUtil.toList(ListUtil.subList(list, start, end));
+	}
+
 	private ExtRepositoryFileVersionAdapter _toExtRepositoryFileVersionAdapter(
 			ExtRepositoryFileEntryAdapter extRepositoryFileEntryAdapter,
 			ExtRepositoryFileVersion extRepositoryFileVersion)
@@ -1296,7 +1319,10 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 				extRepositoryObjectAdapter = new ExtRepositoryFileEntryAdapter(
 					this, extRepositoryObjectId, uuid, extRepositoryFileEntry);
 
-				_forceGetVersions(
+				_forceGetFileVersions(
+					(ExtRepositoryFileEntryAdapter)extRepositoryObjectAdapter);
+
+				_checkAssetEntry(
 					(ExtRepositoryFileEntryAdapter)extRepositoryObjectAdapter);
 			}
 
@@ -1352,16 +1378,6 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 		}
 
 		return extRepositoryObjectAdapters;
-	}
-
-	private <T, V extends T> List<T>_subList(
-		List<V> list, int start, int end, OrderByComparator<T> obc) {
-
-		if (obc != null) {
-			list = ListUtil.sort(list, obc);
-		}
-
-		return ListUtil.toList(ListUtil.subList(list, start, end));
 	}
 
 	private static Log _log = LogFactoryUtil.getLog(ExtRepositoryAdapter.class);

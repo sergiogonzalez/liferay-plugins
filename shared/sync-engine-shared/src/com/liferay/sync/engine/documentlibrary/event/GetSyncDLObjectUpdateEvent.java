@@ -20,7 +20,6 @@ import com.liferay.sync.engine.model.SyncFile;
 import com.liferay.sync.engine.model.SyncSite;
 import com.liferay.sync.engine.service.SyncFileService;
 import com.liferay.sync.engine.service.SyncSiteService;
-import com.liferay.sync.engine.util.FileUtil;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -56,16 +55,15 @@ public class GetSyncDLObjectUpdateEvent extends BaseEvent {
 		if (syncSite.getRemoteSyncTime() == 0) {
 			String filePathName = syncSite.getFilePathName();
 
-			SyncFile syncFile = SyncFileService.fetchSyncFile(
-				filePathName, getSyncAccountId());
+			SyncFile syncFile = SyncFileService.fetchSyncFile(filePathName);
 
 			if (syncFile == null) {
 				Files.createDirectories(Paths.get(filePathName));
 
 				SyncFileService.addSyncFile(
-					null, null, filePathName, FileUtil.getFileKey(filePathName),
-					filePathName, null, filePathName, 0, syncSite.getGroupId(),
-					syncSite.getSyncAccountId(), SyncFile.TYPE_SYSTEM);
+					null, null, null, filePathName, null, filePathName, 0,
+					syncSite.getGroupId(), syncSite.getSyncAccountId(),
+					SyncFile.TYPE_SYSTEM);
 			}
 		}
 
@@ -75,7 +73,7 @@ public class GetSyncDLObjectUpdateEvent extends BaseEvent {
 		parameters.put("lastAccessTime", syncSite.getRemoteSyncTime());
 		parameters.put("repositoryId", syncSite.getGroupId());
 
-		executeAsynchronousPost(_URL_PATH, parameters);
+		executePost(_URL_PATH, parameters);
 	}
 
 	private static final String _URL_PATH =
