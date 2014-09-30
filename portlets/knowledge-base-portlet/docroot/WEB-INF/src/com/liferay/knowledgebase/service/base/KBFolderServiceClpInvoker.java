@@ -34,6 +34,31 @@ public class KBFolderServiceClpInvoker {
 		_methodName43 = "setBeanIdentifier";
 
 		_methodParameterTypes43 = new String[] { "java.lang.String" };
+
+		_methodName48 = "addKBFolder";
+
+		_methodParameterTypes48 = new String[] {
+				"long", "long", "long", "java.lang.String", "java.lang.String",
+				"com.liferay.portal.service.ServiceContext"
+			};
+
+		_methodName49 = "getFolder";
+
+		_methodParameterTypes49 = new String[] { "long" };
+
+		_methodName50 = "getFolders";
+
+		_methodParameterTypes50 = new String[] { "long", "long", "int", "int" };
+
+		_methodName51 = "getFoldersCount";
+
+		_methodParameterTypes51 = new String[] { "long", "long" };
+
+		_methodName52 = "updateKBFolder";
+
+		_methodParameterTypes52 = new String[] {
+				"long", "long", "long", "java.lang.String", "java.lang.String"
+			};
 	}
 
 	public Object invokeMethod(String name, String[] parameterTypes,
@@ -50,6 +75,42 @@ public class KBFolderServiceClpInvoker {
 			return null;
 		}
 
+		if (_methodName48.equals(name) &&
+				Arrays.deepEquals(_methodParameterTypes48, parameterTypes)) {
+			return KBFolderServiceUtil.addKBFolder(((Long)arguments[0]).longValue(),
+				((Long)arguments[1]).longValue(),
+				((Long)arguments[2]).longValue(),
+				(java.lang.String)arguments[3], (java.lang.String)arguments[4],
+				(com.liferay.portal.service.ServiceContext)arguments[5]);
+		}
+
+		if (_methodName49.equals(name) &&
+				Arrays.deepEquals(_methodParameterTypes49, parameterTypes)) {
+			return KBFolderServiceUtil.getFolder(((Long)arguments[0]).longValue());
+		}
+
+		if (_methodName50.equals(name) &&
+				Arrays.deepEquals(_methodParameterTypes50, parameterTypes)) {
+			return KBFolderServiceUtil.getFolders(((Long)arguments[0]).longValue(),
+				((Long)arguments[1]).longValue(),
+				((Integer)arguments[2]).intValue(),
+				((Integer)arguments[3]).intValue());
+		}
+
+		if (_methodName51.equals(name) &&
+				Arrays.deepEquals(_methodParameterTypes51, parameterTypes)) {
+			return KBFolderServiceUtil.getFoldersCount(((Long)arguments[0]).longValue(),
+				((Long)arguments[1]).longValue());
+		}
+
+		if (_methodName52.equals(name) &&
+				Arrays.deepEquals(_methodParameterTypes52, parameterTypes)) {
+			return KBFolderServiceUtil.updateKBFolder(((Long)arguments[0]).longValue(),
+				((Long)arguments[1]).longValue(),
+				((Long)arguments[2]).longValue(),
+				(java.lang.String)arguments[3], (java.lang.String)arguments[4]);
+		}
+
 		throw new UnsupportedOperationException();
 	}
 
@@ -57,4 +118,14 @@ public class KBFolderServiceClpInvoker {
 	private String[] _methodParameterTypes42;
 	private String _methodName43;
 	private String[] _methodParameterTypes43;
+	private String _methodName48;
+	private String[] _methodParameterTypes48;
+	private String _methodName49;
+	private String[] _methodParameterTypes49;
+	private String _methodName50;
+	private String[] _methodParameterTypes50;
+	private String _methodName51;
+	private String[] _methodParameterTypes51;
+	private String _methodName52;
+	private String[] _methodParameterTypes52;
 }

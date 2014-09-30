@@ -45,6 +45,19 @@ public class KBFolderLocalServiceWrapper implements KBFolderLocalService,
 		return _kbFolderLocalService.addKBFolder(kbFolder);
 	}
 
+	@Override
+	public com.liferay.knowledgebase.model.KBFolder addKBFolder(long userId,
+		long groupId, long parentResourceClassNameId,
+		long parentResourcePrimKey, java.lang.String name,
+		java.lang.String description,
+		com.liferay.portal.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _kbFolderLocalService.addKBFolder(userId, groupId,
+			parentResourceClassNameId, parentResourcePrimKey, name,
+			description, serviceContext);
+	}
+
 	/**
 	* Creates a new k b folder with the primary key. Does not add the k b folder to the database.
 	*
@@ -217,6 +230,22 @@ public class KBFolderLocalServiceWrapper implements KBFolderLocalService,
 		return _kbFolderLocalService.getExportActionableDynamicQuery(portletDataContext);
 	}
 
+	@Override
+	public java.util.List<com.liferay.knowledgebase.model.KBFolder> getFolders(
+		long groupId, long parentKBFolderId, int start, int end)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _kbFolderLocalService.getFolders(groupId, parentKBFolderId,
+			start, end);
+	}
+
+	@Override
+	public int getFoldersCount(long groupId, long parentKBFolderId)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _kbFolderLocalService.getFoldersCount(groupId, parentKBFolderId);
+	}
+
 	/**
 	* Returns the k b folder with the primary key.
 	*
@@ -322,6 +351,16 @@ public class KBFolderLocalServiceWrapper implements KBFolderLocalService,
 	public com.liferay.knowledgebase.model.KBFolder updateKBFolder(
 		com.liferay.knowledgebase.model.KBFolder kbFolder) {
 		return _kbFolderLocalService.updateKBFolder(kbFolder);
+	}
+
+	@Override
+	public com.liferay.knowledgebase.model.KBFolder updateKBFolder(
+		long parentResourceClassNameId, long parentResourcePrimKey,
+		long kbFolderId, java.lang.String name, java.lang.String description)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _kbFolderLocalService.updateKBFolder(parentResourceClassNameId,
+			parentResourcePrimKey, kbFolderId, name, description);
 	}
 
 	/**
