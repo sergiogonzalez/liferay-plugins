@@ -375,6 +375,98 @@ AUI.add(
 				);
 			},
 
+			getCalendarsMenu: function(config) {
+				var instance = this;
+
+				var toggler = new A.Toggler(
+					{
+						after: {
+							expandedChange: function(event) {
+								if (event.newVal) {
+									var activeView = config.scheduler.get('activeView');
+
+									activeView._fillHeight();
+								}
+							}
+						},
+						animated: true,
+						content: config.content,
+						expanded: false,
+						header: config.header
+					}
+				);
+
+				var items = [
+					{
+						caption: Liferay.Language.get('check-availability'),
+						fn: function(event) {
+							var instance = this;
+
+							A.each(
+								CalendarUtil.availableCalendars,
+								function(item, index) {
+									item.set('visible', false);
+								}
+							);
+
+							var calendarList = instance.get('host');
+
+							calendarList.activeItem.set('visible', true);
+
+							toggler.expand();
+							instance.hide();
+
+							return false;
+						},
+						id: 'check-availability'
+					}
+				];
+
+				var calendarsMenu = {
+					items: items
+				};
+
+				if (config.invitable) {
+					items.push(
+						{
+							caption: Liferay.Language.get('remove'),
+							fn: function(event) {
+								var instance = this;
+
+								var calendarList = instance.get('host');
+
+								calendarList.remove(calendarList.activeItem);
+
+								instance.hide();
+							},
+							id: 'remove'
+						}
+					);
+
+					calendarsMenu.on = {
+						visibleChange: function(event) {
+							var instance = this;
+
+							if (event.newVal) {
+								var calendarList = instance.get('host');
+
+								var calendar = calendarList.activeItem;
+
+								var hiddenItems = [];
+
+								if (calendar.get('calendarId') === config.defaultCalendarId) {
+									hiddenItems.push('remove');
+								}
+
+								instance.set('hiddenItems', hiddenItems);
+							}
+						}
+					};
+				}
+
+				return calendarsMenu;
+			},
+
 			getDatesList: function(startDate, total) {
 				var instance = this;
 
@@ -983,7 +1075,8 @@ AUI.add(
 
 						var node = instance.get('node');
 
-						node.attr('data-endDate', instance._formatDate(val, '%m/%d/%Y %I:%M %p'));
+						node.attr('data-endDate', instance._formatDate(val, '%m/%d/%Y'));
+						node.attr('data-endTime', instance._formatDate(val, '%I:%M %p'));
 					},
 
 					_uiSetLoading: function(val) {
@@ -997,7 +1090,8 @@ AUI.add(
 
 						var node = instance.get('node');
 
-						node.attr('data-startDate', instance._formatDate(val, '%m/%d/%Y %I:%M %p'));
+						node.attr('data-startDate', instance._formatDate(val, '%m/%d/%Y'));
+						node.attr('data-startTime', instance._formatDate(val, '%I:%M %p'));
 					},
 
 					_uiSetStatus: function(val) {
@@ -1482,7 +1576,9 @@ AUI.add(
 					_promptSchedulerEventUpdate: function(data) {
 						var instance = this;
 
-						var schedulerEvent = data[0];
+						var schedulerEvent = data.schedulerEvent;
+
+						data.answers = {};
 
 						instance.queue = new A.AsyncQueue();
 
@@ -1528,7 +1624,7 @@ AUI.add(
 								args: [data],
 								autoContinue: false,
 								context: instance,
-								fn: instance._queueableQuestionResolver,
+								fn: data.resolver,
 								timeout: 0
 							}
 						);
@@ -1548,10 +1644,10 @@ AUI.add(
 					_queueableQuestionResolver: function(data) {
 						var instance = this;
 
-						var answers = data[3];
-						var duration = data[2];
-						var offset = data[1];
-						var schedulerEvent = data[0];
+						var answers = data.answers;
+						var duration = data.duration;
+						var offset = data.offset;
+						var schedulerEvent = data.schedulerEvent;
 
 						var showNextQuestion = A.bind(instance.queue.run, instance.queue);
 
@@ -1569,7 +1665,7 @@ AUI.add(
 					_queueableQuestionUpdateAllInvited: function(data) {
 						var instance = this;
 
-						var answers = data[3];
+						var answers = data.answers;
 
 						var showNextQuestion = A.bind(instance.queue.run, instance.queue);
 
@@ -1596,7 +1692,7 @@ AUI.add(
 					_queueableQuestionUpdateRecurring: function(data) {
 						var instance = this;
 
-						var answers = data[3];
+						var answers = data.answers;
 
 						var showNextQuestion = A.bind(instance.queue.run, instance.queue);
 
@@ -1632,8 +1728,8 @@ AUI.add(
 					_queueableQuestionUserCalendarOnly: function(data) {
 						var instance = this;
 
-						var answers = data[3];
-						var schedulerEvent = data[0];
+						var answers = data.answers;
+						var schedulerEvent = data.schedulerEvent;
 
 						var showNextQuestion = A.bind(instance.queue.run, instance.queue);
 
@@ -1671,18 +1767,12 @@ AUI.add(
 					_updateSchedulerEvent: function(schedulerEvent, changedAttributes) {
 						var instance = this;
 
-						var answers = {};
-						var calendarBookingId = schedulerEvent.get('calendarBookingId');
-
-						A.batch(
-							schedulerEvent,
-							instance._getCalendarBookingOffset(schedulerEvent, changedAttributes),
-							instance._getCalendarBookingDuration(schedulerEvent),
-							answers
-						)
-						.then(
-							function(data) {
-								instance._promptSchedulerEventUpdate(data);
+						instance._promptSchedulerEventUpdate(
+							{
+								duration: instance._getCalendarBookingDuration(schedulerEvent),
+								offset: instance._getCalendarBookingOffset(schedulerEvent, changedAttributes),
+								resolver: instance._queueableQuestionResolver,
+								schedulerEvent: schedulerEvent
 							}
 						);
 					}

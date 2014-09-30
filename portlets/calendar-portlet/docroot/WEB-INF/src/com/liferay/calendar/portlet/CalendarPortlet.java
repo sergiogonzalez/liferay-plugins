@@ -93,7 +93,7 @@ import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.comparator.UserFirstNameComparator;
 import com.liferay.portlet.messageboards.model.MBMessage;
 import com.liferay.portlet.messageboards.service.MBMessageServiceUtil;
-import com.liferay.util.bridges.mvc.MVCPortlet;
+import com.liferay.portal.kernel.portlet.bridges.mvc.MVCPortlet;
 import com.liferay.util.dao.orm.CustomSQLUtil;
 
 import java.io.File;
@@ -1008,6 +1008,20 @@ public class CalendarPortlet extends MVCPortlet {
 		}
 
 		long groupClassNameId = PortalUtil.getClassNameId(Group.class);
+
+		List<CalendarResource> companyCalendarResources =
+			CalendarResourceServiceUtil.search(
+				themeDisplay.getCompanyId(),
+				new long[] {themeDisplay.getCompanyGroupId()},
+				new long[] {groupClassNameId}, keywords, true, true, 0,
+				SearchContainer.DEFAULT_DELTA,
+				new CalendarResourceNameComparator());
+
+		for (CalendarResource calendarResource : companyCalendarResources) {
+			addCalendarJSONObject(
+				resourceRequest, jsonArray, calendarResource.getClassNameId(),
+				calendarResource.getClassPK());
+		}
 
 		String name = StringUtil.merge(
 			CustomSQLUtil.keywords(keywords), StringPool.BLANK);

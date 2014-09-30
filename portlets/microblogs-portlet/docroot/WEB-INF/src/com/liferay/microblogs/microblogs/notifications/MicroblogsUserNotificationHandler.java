@@ -20,6 +20,7 @@ package com.liferay.microblogs.microblogs.notifications;
 import com.liferay.microblogs.model.MicroblogsEntry;
 import com.liferay.microblogs.model.MicroblogsEntryConstants;
 import com.liferay.microblogs.service.MicroblogsEntryLocalServiceUtil;
+import com.liferay.microblogs.util.MicroblogsUtil;
 import com.liferay.microblogs.util.PortletKeys;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
@@ -27,8 +28,10 @@ import com.liferay.portal.kernel.notifications.BaseUserNotificationHandler;
 import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.model.User;
 import com.liferay.portal.model.UserNotificationEvent;
 import com.liferay.portal.service.ServiceContext;
+import com.liferay.portal.service.UserLocalServiceUtil;
 import com.liferay.portal.service.UserNotificationEventLocalServiceUtil;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portlet.asset.AssetRendererFactoryRegistryUtil;
@@ -76,14 +79,28 @@ public class MicroblogsUserNotificationHandler
 
 			title = serviceContext.translate(
 				"x-commented-on-your-post", userFullName);
+
+			if (microblogsEntry.getReceiverUserId() !=
+					serviceContext.getUserId()) {
+
+				User receiverUser = UserLocalServiceUtil.fetchUser(
+					microblogsEntry.getReceiverUserId());
+
+				if (receiverUser != null) {
+					title = serviceContext.translate(
+						"x-also-commented-on-x's-post", userFullName,
+						receiverUser.getFullName());
+				}
+			}
 		}
+
+		String body = MicroblogsUtil.getTaggedContent(
+			StringUtil.shorten(microblogsEntry.getContent(), 50),
+			serviceContext);
 
 		return StringUtil.replace(
 			getBodyTemplate(), new String[] {"[$BODY$]", "[$TITLE$]"},
-			new String[] {
-				HtmlUtil.escape(
-					StringUtil.shorten(microblogsEntry.getContent(), 50)), title
-			});
+			new String[] {body, title});
 	}
 
 	@Override

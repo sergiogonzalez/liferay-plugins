@@ -15,6 +15,7 @@
 package com.liferay.knowledgebase.service.impl;
 
 import com.liferay.knowledgebase.KBArticleContentException;
+import com.liferay.knowledgebase.KBArticleParentException;
 import com.liferay.knowledgebase.KBArticlePriorityException;
 import com.liferay.knowledgebase.KBArticleSourceURLException;
 import com.liferay.knowledgebase.KBArticleTitleException;
@@ -26,6 +27,7 @@ import com.liferay.knowledgebase.admin.util.AdminSubscriptionSender;
 import com.liferay.knowledgebase.admin.util.AdminUtil;
 import com.liferay.knowledgebase.model.KBArticle;
 import com.liferay.knowledgebase.model.KBArticleConstants;
+import com.liferay.knowledgebase.model.KBFolderConstants;
 import com.liferay.knowledgebase.service.KBArticleLocalServiceUtil;
 import com.liferay.knowledgebase.service.base.KBArticleLocalServiceBaseImpl;
 import com.liferay.knowledgebase.util.KnowledgeBaseUtil;
@@ -61,7 +63,7 @@ import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
-import com.liferay.portal.kernel.util.TempFileUtil;
+import com.liferay.portal.kernel.util.TempFileEntryUtil;
 import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
@@ -98,9 +100,10 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 
 	@Override
 	public KBArticle addKBArticle(
-			long userId, long parentResourcePrimKey, String title,
-			String urlTitle, String content, String description,
-			String sourceURL, String[] sections, String[] selectedFileNames,
+			long userId, long parentResourceClassNameId,
+			long parentResourcePrimKey, String title, String urlTitle,
+			String content, String description, String sourceURL,
+			String[] sections, String[] selectedFileNames,
 			ServiceContext serviceContext)
 		throws PortalException {
 
@@ -112,13 +115,14 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 		Date now = new Date();
 
 		validate(title, content, sourceURL);
+		validateParent(parentResourceClassNameId, parentResourcePrimKey);
 
 		long kbArticleId = counterLocalService.increment();
 
 		long resourcePrimKey = counterLocalService.increment();
 
 		long rootResourcePrimKey = getRootResourcePrimKey(
-			resourcePrimKey, parentResourcePrimKey);
+			resourcePrimKey, parentResourceClassNameId, parentResourcePrimKey);
 
 		KBArticle kbArticle = kbArticlePersistence.create(kbArticleId);
 
@@ -131,6 +135,7 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 		kbArticle.setCreateDate(serviceContext.getCreateDate(now));
 		kbArticle.setModifiedDate(serviceContext.getModifiedDate(now));
 		kbArticle.setRootResourcePrimKey(rootResourcePrimKey);
+		kbArticle.setParentResourceClassNameId(parentResourceClassNameId);
 		kbArticle.setParentResourcePrimKey(parentResourcePrimKey);
 		kbArticle.setVersion(KBArticleConstants.DEFAULT_VERSION);
 		kbArticle.setTitle(title);
@@ -236,14 +241,14 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 
 	@Override
 	public void addKBArticlesMarkdown(
-			long userId, long groupId, String fileName, InputStream inputStream,
-			ServiceContext serviceContext)
+			long userId, long groupId, long parentKbFolderId, String fileName,
+			InputStream inputStream, ServiceContext serviceContext)
 		throws PortalException {
 
 		KBArticleImporter kbArticleImporter = new KBArticleImporter();
 
 		kbArticleImporter.processZipFile(
-			userId, groupId, inputStream, serviceContext);
+			userId, groupId, parentKbFolderId, inputStream, serviceContext);
 	}
 
 	@Override
@@ -252,7 +257,7 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 			InputStream inputStream, String mimeType)
 		throws PortalException {
 
-		TempFileUtil.addTempFile(
+		TempFileEntryUtil.addTempFileEntry(
 			groupId, userId, fileName, tempFolderName, inputStream, mimeType);
 	}
 
@@ -382,7 +387,8 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 			long groupId, long userId, String fileName, String tempFolderName)
 		throws PortalException {
 
-		TempFileUtil.deleteTempFile(groupId, userId, fileName, tempFolderName);
+		TempFileEntryUtil.deleteTempFileEntry(
+			groupId, userId, fileName, tempFolderName);
 	}
 
 	@Override
@@ -785,27 +791,29 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 			long groupId, long userId, String tempFolderName)
 		throws PortalException {
 
-		return TempFileUtil.getTempFileEntryNames(
+		return TempFileEntryUtil.getTempFileNames(
 			groupId, userId, tempFolderName);
 	}
 
 	@Override
 	public void moveKBArticle(
-			long userId, long resourcePrimKey, long parentResourcePrimKey,
-			double priority)
+			long userId, long resourcePrimKey, long parentResourceClassNameId,
+			long parentResourcePrimKey, double priority)
 		throws PortalException {
 
 		// KB article
 
 		validate(priority);
 
-		updatePermissionFields(resourcePrimKey, parentResourcePrimKey);
+		updatePermissionFields(
+			resourcePrimKey, parentResourceClassNameId, parentResourcePrimKey);
 
 		List<KBArticle> kbArticles = getKBArticleVersions(
 			resourcePrimKey, WorkflowConstants.STATUS_ANY, QueryUtil.ALL_POS,
 			QueryUtil.ALL_POS, new KBArticleVersionComparator());
 
 		for (KBArticle kbArticle : kbArticles) {
+			kbArticle.setParentResourceClassNameId(parentResourceClassNameId);
 			kbArticle.setParentResourcePrimKey(parentResourcePrimKey);
 			kbArticle.setPriority(priority);
 
@@ -909,6 +917,8 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 			kbArticle.setCreateDate(oldKBArticle.getCreateDate());
 			kbArticle.setRootResourcePrimKey(
 				oldKBArticle.getRootResourcePrimKey());
+			kbArticle.setParentResourceClassNameId(
+				oldKBArticle.getParentResourceClassNameId());
 			kbArticle.setParentResourcePrimKey(
 				oldKBArticle.getParentResourcePrimKey());
 			kbArticle.setVersion(oldVersion + 1);
@@ -1194,7 +1204,7 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 			String selectedFileName)
 		throws PortalException {
 
-		FileEntry tempFileEntry = TempFileUtil.getTempFile(
+		FileEntry tempFileEntry = TempFileEntryUtil.getTempFileEntry(
 			groupId, userId, selectedFileName, _TEMP_FOLDER_NAME);
 
 		InputStream inputStream = tempFileEntry.getContentStream();
@@ -1204,7 +1214,8 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 			userId, resourcePrimKey, selectedFileName, inputStream, mimeType);
 
 		if (tempFileEntry != null) {
-			TempFileUtil.deleteTempFile(tempFileEntry.getFileEntryId());
+			TempFileEntryUtil.deleteTempFileEntry(
+				tempFileEntry.getFileEntryId());
 		}
 	}
 
@@ -1494,7 +1505,8 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 	}
 
 	protected long getRootResourcePrimKey(
-			long resourcePrimKey, long parentResourcePrimKey)
+			long resourcePrimKey, long parentResourceClassNameId,
+			long parentResourcePrimKey)
 		throws PortalException {
 
 		if (parentResourcePrimKey ==
@@ -1503,10 +1515,17 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 			return resourcePrimKey;
 		}
 
-		KBArticle kbArticle = getLatestKBArticle(
-			parentResourcePrimKey, WorkflowConstants.STATUS_ANY);
+		long classNameId = classNameLocalService.getClassNameId(
+			KBArticleConstants.getClassName());
 
-		return kbArticle.getRootResourcePrimKey();
+		if (parentResourceClassNameId == classNameId) {
+			KBArticle kbArticle = getLatestKBArticle(
+				parentResourcePrimKey, WorkflowConstants.STATUS_ANY);
+
+			return kbArticle.getRootResourcePrimKey();
+		}
+
+		return resourcePrimKey;
 	}
 
 	protected Date getTicketExpirationDate() {
@@ -1690,7 +1709,10 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 		subscriptionSender.addPersistedSubscribers(
 			KBArticle.class.getName(), kbArticle.getResourcePrimKey());
 
-		while (!kbArticle.isRoot()) {
+		while (!kbArticle.isRoot() &&
+			   (kbArticle.getClassNameId() ==
+					kbArticle.getParentResourceClassNameId())) {
+
 			kbArticle = getLatestKBArticle(
 				kbArticle.getParentResourcePrimKey(),
 				WorkflowConstants.STATUS_APPROVED);
@@ -1715,7 +1737,8 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 	}
 
 	protected void updatePermissionFields(
-			long resourcePrimKey, long parentResourcePrimKey)
+			long resourcePrimKey, long parentResourceClassNameId,
+			long parentResourcePrimKey)
 		throws PortalException {
 
 		// See KBArticlePermission#contains
@@ -1728,7 +1751,7 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 		}
 
 		long rootResourcePrimKey = getRootResourcePrimKey(
-			resourcePrimKey, parentResourcePrimKey);
+			resourcePrimKey, parentResourceClassNameId, parentResourcePrimKey);
 
 		if (kbArticle.getRootResourcePrimKey() == rootResourcePrimKey) {
 			return;
@@ -1775,6 +1798,26 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 		}
 
 		validateSourceURL(sourceURL);
+	}
+
+	protected void validateParent(
+			long resourceClassNameId, long resourcePrimKey)
+		throws PortalException {
+
+		long kbArticleClassNameId = classNameLocalService.getClassNameId(
+			KBArticleConstants.getClassName());
+
+		long kbFolderClassNameId = classNameLocalService.getClassNameId(
+			KBFolderConstants.getClassName());
+
+		if ((resourceClassNameId != kbArticleClassNameId) &&
+			(resourceClassNameId != kbFolderClassNameId)) {
+
+			throw new KBArticleParentException(
+				String.format(
+					"Invalid parent with classNameId %s and primary key %s",
+					resourceClassNameId, resourcePrimKey));
+		}
 	}
 
 	protected void validateSourceURL(String sourceURL) throws PortalException {

@@ -22,11 +22,31 @@ import com.liferay.util.portlet.PortletProps;
  */
 public class PortletPropsValues {
 
+	public static final String EMAIL_LARGE_GROUP_ROLE = GetterUtil.getString(
+		PortletProps.get(PortletPropsKeys.EMAIL_LARGE_GROUP_ROLE));
+
+	public static final int EMAIL_LARGE_GROUP_SIZE = GetterUtil.getInteger(
+		PortletProps.get(PortletPropsKeys.EMAIL_LARGE_GROUP_SIZE));
+
 	public static final String EMAIL_PERMISSION = GetterUtil.getString(
 		PortletProps.get(PortletPropsKeys.EMAIL_PERMISSION));
 
 	public static final String EMAIL_PREFIX = GetterUtil.getString(
 		PortletProps.get(PortletPropsKeys.EMAIL_PREFIX));
+
+	public static final String GOOGLE_API_SERVICE_ACCOUNT_ID =
+		GetterUtil.getString(
+			PortletProps.get(PortletPropsKeys.GOOGLE_API_SERVICE_ACCOUNT_ID));
+
+	public static final String GOOGLE_API_SERVICE_ACCOUNT_PRIVATE_KEY_P12_FILE =
+		GetterUtil.getString(
+			PortletProps.get(
+				PortletPropsKeys.
+					GOOGLE_API_SERVICE_ACCOUNT_PRIVATE_KEY_P12_FILE));
+
+	public static final String GOOGLE_API_SERVICE_ACCOUNT_USER =
+		GetterUtil.getString(
+			PortletProps.get(PortletPropsKeys.GOOGLE_API_SERVICE_ACCOUNT_USER));
 
 	public static final boolean SYNC_ON_STARTUP = GetterUtil.getBoolean(
 		PortletProps.get(PortletPropsKeys.SYNC_ON_STARTUP));

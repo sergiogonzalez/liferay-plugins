@@ -19,9 +19,24 @@ package com.liferay.google.mail.groups.util;
  */
 public class PortletPropsKeys {
 
+	public static final String EMAIL_LARGE_GROUP_ROLE =
+		"email.large.group.role";
+
+	public static final String EMAIL_LARGE_GROUP_SIZE =
+		"email.large.group.size";
+
 	public static final String EMAIL_PERMISSION = "email.permission";
 
 	public static final String EMAIL_PREFIX = "email.prefix";
+
+	public static final String GOOGLE_API_SERVICE_ACCOUNT_ID =
+		"google.api.service.account.id";
+
+	public static final String GOOGLE_API_SERVICE_ACCOUNT_PRIVATE_KEY_P12_FILE =
+		"google.api.service.account.private.key.p12.file";
+
+	public static final String GOOGLE_API_SERVICE_ACCOUNT_USER =
+		"google.api.service.account.user";
 
 	public static final String SYNC_ON_STARTUP = "sync.on.startup";
 

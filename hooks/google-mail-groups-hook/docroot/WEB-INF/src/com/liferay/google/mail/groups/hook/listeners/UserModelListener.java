@@ -14,10 +14,10 @@
 
 package com.liferay.google.mail.groups.hook.listeners;
 
-import com.liferay.google.apps.connector.GGroupManager;
-import com.liferay.google.apps.connector.GoogleAppsConnectionFactoryUtil;
 import com.liferay.google.mail.groups.util.GoogleMailGroupsUtil;
 import com.liferay.portal.ModelListenerException;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.model.BaseModelListener;
 import com.liferay.portal.model.Group;
 import com.liferay.portal.model.Organization;
@@ -46,19 +46,20 @@ public class UserModelListener extends BaseModelListener<User> {
 				classPK, associationClassName, associationClassPK) {
 
 				@Override
-				public void onAssociation(
-						User user, Group group, GGroupManager gGroupManager)
+				public void onAssociation(User user, Group group)
 					throws Exception {
 
-					gGroupManager.addGGroupMember(
+					GoogleMailGroupsUtil.addGGroupMember(
 						GoogleMailGroupsUtil.getGroupEmailAddress(group),
 						GoogleMailGroupsUtil.getUserEmailAddress(user));
+
+					GoogleMailGroupsUtil.checkLargeGroup(group);
 				}
 
 			};
 		}
 		catch (Exception e) {
-			throw new ModelListenerException(e);
+			_log.error(e, e);
 		}
 	}
 
@@ -73,8 +74,7 @@ public class UserModelListener extends BaseModelListener<User> {
 				classPK, associationClassName, associationClassPK) {
 
 				@Override
-				public void onAssociation(
-						User user, Group group, GGroupManager gGroupManager)
+				public void onAssociation(User user, Group group)
 					throws Exception {
 
 					if (GroupLocalServiceUtil.hasUserGroup(
@@ -83,17 +83,21 @@ public class UserModelListener extends BaseModelListener<User> {
 						return;
 					}
 
-					gGroupManager.deleteGGroupMember(
+					GoogleMailGroupsUtil.deleteGGroupMember(
 						GoogleMailGroupsUtil.getGroupEmailAddress(group),
 						GoogleMailGroupsUtil.getUserEmailAddress(user));
+
+					GoogleMailGroupsUtil.checkLargeGroup(group);
 				}
 
 			};
 		}
 		catch (Exception e) {
-			throw new ModelListenerException(e);
+			_log.error(e, e);
 		}
 	}
+
+	private static Log _log = LogFactoryUtil.getLog(UserModelListener.class);
 
 	private abstract class OnAssociation {
 
@@ -124,21 +128,16 @@ public class UserModelListener extends BaseModelListener<User> {
 
 			User user = UserLocalServiceUtil.getUser((Long)classPK);
 
-			GGroupManager gGroupManager =
-				GoogleAppsConnectionFactoryUtil.getGGroupManager(
-					user.getCompanyId());
-
 			for (Group group : groups) {
 				if (!GoogleMailGroupsUtil.isSync(group)) {
 					continue;
 				}
 
-				onAssociation(user, group, gGroupManager);
+				onAssociation(user, group);
 			}
 		}
 
-		public abstract void onAssociation(
-				User user, Group group, GGroupManager gGroupManager)
+		public abstract void onAssociation(User user, Group group)
 			throws Exception;
 
 	}
