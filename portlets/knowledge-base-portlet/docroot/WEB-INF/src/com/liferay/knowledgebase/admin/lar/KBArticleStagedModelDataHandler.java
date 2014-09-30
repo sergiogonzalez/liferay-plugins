@@ -41,6 +41,7 @@ import com.liferay.portlet.documentlibrary.DuplicateFileException;
 import com.liferay.portlet.documentlibrary.model.DLFileEntry;
 
 import java.io.InputStream;
+
 import java.util.List;
 import java.util.Map;
 
@@ -213,8 +214,7 @@ public class KBArticleStagedModelDataHandler
 		}
 		else {
 			importedKBArticle = KBArticleLocalServiceUtil.addKBArticle(
-				userId,
-				parentResourceClassNameId, parentResourcePrimKey,
+				userId, parentResourceClassNameId, parentResourcePrimKey,
 				kbArticle.getTitle(), kbArticle.getUrlTitle(),
 				kbArticle.getContent(), kbArticle.getDescription(),
 				kbArticle.getSourceURL(), sections, null, serviceContext);

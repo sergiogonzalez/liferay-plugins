@@ -21,7 +21,6 @@ import com.liferay.knowledgebase.service.base.KBFolderServiceBaseImpl;
 import com.liferay.knowledgebase.service.permission.KBFolderPermission;
 import com.liferay.knowledgebase.util.ActionKeys;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.service.ServiceContext;
 
 import java.util.List;
@@ -37,7 +36,7 @@ public class KBFolderServiceImpl extends KBFolderServiceBaseImpl {
 			long groupId, long parentResourceClassNameId,
 			long parentResourcePrimKey, String name, String description,
 			ServiceContext serviceContext)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		KBFolderPermission.check(
 			getPermissionChecker(), groupId, parentResourcePrimKey,
@@ -49,9 +48,7 @@ public class KBFolderServiceImpl extends KBFolderServiceBaseImpl {
 	}
 
 	@Override
-	public KBFolder getFolder(long kbFolderId)
-		throws PortalException, SystemException {
-
+	public KBFolder getFolder(long kbFolderId) throws PortalException {
 		KBFolderPermission.check(
 			getPermissionChecker(), kbFolderId, ActionKeys.VIEW);
 
@@ -61,7 +58,7 @@ public class KBFolderServiceImpl extends KBFolderServiceBaseImpl {
 	@Override
 	public List<KBFolder> getFolders(
 			long groupId, long parentKBFolderId, int start, int end)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		return kbFolderPersistence.filterFindByG_P(
 			groupId, parentKBFolderId, start, end);
@@ -69,7 +66,7 @@ public class KBFolderServiceImpl extends KBFolderServiceBaseImpl {
 
 	@Override
 	public int getFoldersCount(long groupId, long parentKBFolderId)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		return kbFolderPersistence.filterCountByG_P(groupId, parentKBFolderId);
 	}
@@ -78,7 +75,7 @@ public class KBFolderServiceImpl extends KBFolderServiceBaseImpl {
 	public KBFolder updateKBFolder(
 			long parentResourceClassNameId, long parentResourcePrimKey,
 			long kbFolderId, String name, String description)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		KBFolderPermission.check(
 			getPermissionChecker(), kbFolderId, ActionKeys.UPDATE);
