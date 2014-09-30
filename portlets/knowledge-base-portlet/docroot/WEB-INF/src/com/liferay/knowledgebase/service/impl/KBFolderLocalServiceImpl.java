@@ -21,7 +21,6 @@ import com.liferay.knowledgebase.model.KBFolder;
 import com.liferay.knowledgebase.model.KBFolderConstants;
 import com.liferay.knowledgebase.service.base.KBFolderLocalServiceBaseImpl;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.model.User;
 import com.liferay.portal.service.ServiceContext;
 
@@ -39,7 +38,7 @@ public class KBFolderLocalServiceImpl extends KBFolderLocalServiceBaseImpl {
 			long userId, long groupId, long parentResourceClassNameId,
 			long parentResourcePrimKey, String name, String description,
 			ServiceContext serviceContext)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		validateParent(parentResourceClassNameId, parentResourcePrimKey);
 
@@ -85,7 +84,7 @@ public class KBFolderLocalServiceImpl extends KBFolderLocalServiceBaseImpl {
 	@Override
 	public List<KBFolder> getFolders(
 			long groupId, long parentKBFolderId, int start, int end)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		return kbFolderPersistence.findByG_P(
 			groupId, parentKBFolderId, start, end);
@@ -93,7 +92,7 @@ public class KBFolderLocalServiceImpl extends KBFolderLocalServiceBaseImpl {
 
 	@Override
 	public int getFoldersCount(long groupId, long parentKBFolderId)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		return kbFolderPersistence.countByG_P(groupId, parentKBFolderId);
 	}
@@ -102,7 +101,7 @@ public class KBFolderLocalServiceImpl extends KBFolderLocalServiceBaseImpl {
 	public KBFolder updateKBFolder(
 			long parentResourceClassNameId, long parentResourcePrimKey,
 			long kbFolderId, String name, String description)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		validateParent(parentResourceClassNameId, parentResourcePrimKey);
 
@@ -121,7 +120,7 @@ public class KBFolderLocalServiceImpl extends KBFolderLocalServiceBaseImpl {
 	protected void addKBFolderResources(
 			KBFolder kbFolder, boolean addGroupPermissions,
 			boolean addGuestPermissions)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		resourceLocalService.addResources(
 			kbFolder.getCompanyId(), kbFolder.getGroupId(),
@@ -133,7 +132,7 @@ public class KBFolderLocalServiceImpl extends KBFolderLocalServiceBaseImpl {
 	protected void addKBFolderResources(
 			KBFolder kbFolder, String[] groupPermissions,
 			String[] guestPermissions)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		resourceLocalService.addModelResources(
 			kbFolder.getCompanyId(), kbFolder.getGroupId(),
@@ -143,7 +142,7 @@ public class KBFolderLocalServiceImpl extends KBFolderLocalServiceBaseImpl {
 
 	protected void validateParent(
 			long parentResourceClassNameId, long parentResourcePrimKey)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		long kbFolderClassNameId = classNameLocalService.getClassNameId(
 			KBFolderConstants.getClassName());
