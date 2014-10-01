@@ -17,7 +17,11 @@ package com.liferay.knowledgebase.util;
 import com.liferay.knowledgebase.model.KBArticle;
 import com.liferay.knowledgebase.model.KBComment;
 import com.liferay.knowledgebase.model.KBCommentConstants;
+import com.liferay.knowledgebase.model.KBFolder;
+import com.liferay.knowledgebase.model.KBFolderConstants;
 import com.liferay.knowledgebase.model.KBTemplate;
+import com.liferay.knowledgebase.service.KBArticleServiceUtil;
+import com.liferay.knowledgebase.service.KBFolderServiceUtil;
 import com.liferay.knowledgebase.util.comparator.KBArticleCreateDateComparator;
 import com.liferay.knowledgebase.util.comparator.KBArticleModifiedDateComparator;
 import com.liferay.knowledgebase.util.comparator.KBArticlePriorityComparator;
@@ -32,7 +36,9 @@ import com.liferay.knowledgebase.util.comparator.KBTemplateCreateDateComparator;
 import com.liferay.knowledgebase.util.comparator.KBTemplateModifiedDateComparator;
 import com.liferay.knowledgebase.util.comparator.KBTemplateTitleComparator;
 import com.liferay.knowledgebase.util.comparator.KBTemplateUserNameComparator;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.io.unsync.UnsyncByteArrayInputStream;
+import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.search.Sort;
 import com.liferay.portal.kernel.search.SortFactoryUtil;
@@ -58,9 +64,15 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+
+import javax.portlet.PortletURL;
+import javax.portlet.RenderResponse;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author Peter Shin
@@ -68,7 +80,60 @@ import java.util.regex.Pattern;
  */
 public class KnowledgeBaseUtil {
 
-	public static OrderByComparator<KBArticle> getKBArticleOrderByComparator(
+	public static void addPortletBreadcrumbEntries(
+			long parentResourceClassNameId, long parentResourcePrimKey,
+			String mvcPath, HttpServletRequest request,
+			RenderResponse renderResponse)
+		throws PortalException {
+
+		PortletURL portletURL = renderResponse.createRenderURL();
+
+		portletURL.setParameter("mvcPath", mvcPath);
+		portletURL.setParameter(
+			"parentResourcePrimKey", String.valueOf(parentResourcePrimKey));
+		portletURL.setParameter(
+			"parentResourceClassNameId",
+			String.valueOf(parentResourceClassNameId));
+
+		String entryURL = portletURL.toString();
+
+		if (parentResourcePrimKey ==
+				KBFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
+
+			Locale locale = PortalUtil.getLocale(request);
+
+			PortalUtil.addPortletBreadcrumbEntry(
+				request, LanguageUtil.get(locale, "home"), entryURL);
+		}
+		else if (parentResourceClassNameId ==
+					PortalUtil.getClassNameId(
+						KBFolderConstants.getClassName())) {
+
+			KBFolder kbFolder = KBFolderServiceUtil.getKBFolder(
+				parentResourcePrimKey);
+
+			addPortletBreadcrumbEntries(
+				kbFolder.getClassNameId(), kbFolder.getParentKBFolderId(),
+				mvcPath, request, renderResponse);
+
+			PortalUtil.addPortletBreadcrumbEntry(
+				request, kbFolder.getName(), entryURL);
+		}
+		else {
+			KBArticle kbArticle = KBArticleServiceUtil.getLatestKBArticle(
+				parentResourcePrimKey, WorkflowConstants.STATUS_ANY);
+
+			addPortletBreadcrumbEntries(
+				kbArticle.getParentResourceClassNameId(),
+				kbArticle.getParentResourcePrimKey(), mvcPath, request,
+				renderResponse);
+
+			PortalUtil.addPortletBreadcrumbEntry(
+				request, kbArticle.getTitle(), entryURL);
+		}
+	}
+
+	public static OrderByComparator getKBArticleOrderByComparator(
 		String orderByCol, String orderByType) {
 
 		if (Validator.isNull(orderByCol) || Validator.isNull(orderByType)) {
