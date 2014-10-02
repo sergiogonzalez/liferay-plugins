@@ -63,11 +63,8 @@ import com.liferay.portal.util.PortalUtil;
 import com.liferay.portlet.PortalPreferences;
 import com.liferay.portlet.PortletPreferencesFactoryUtil;
 
-import javax.portlet.PortletRequest;
-import javax.portlet.PortletURL;
-import javax.portlet.RenderResponse;
-import javax.servlet.http.HttpServletRequest;
 import java.io.InputStream;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -77,6 +74,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+
+import javax.portlet.PortletRequest;
+import javax.portlet.PortletURL;
+import javax.portlet.RenderResponse;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author Peter Shin
@@ -419,7 +422,7 @@ public class KnowledgeBaseUtil {
 	public static long getRootResourcePrimKey(
 			PortletRequest portletRequest, long groupId,
 			long resourceClassNameId, long resourcePrimKey)
-		throws PortalException, SystemException {
+		throws PortalException {
 
 		long kbFolderClassNameId = PortalUtil.getClassNameId(
 			KBFolderConstants.getClassName());
