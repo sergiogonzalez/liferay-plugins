@@ -71,7 +71,9 @@
 		<field name="modifiedDate" type="Date" />
 		<field name="parentKBFolderId" type="long" />
 		<field name="name" type="String" />
-		<field name="urlTitle" type="String" />
+		<field name="urlTitle" type="String">
+			<hint name="max-length">4000</hint>
+		</field>
 		<field name="description" type="String">
 			<hint-collection name="TEXTAREA" />
 		</field>
