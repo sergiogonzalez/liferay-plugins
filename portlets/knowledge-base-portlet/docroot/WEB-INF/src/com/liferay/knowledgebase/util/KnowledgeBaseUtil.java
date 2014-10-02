@@ -17,7 +17,12 @@ package com.liferay.knowledgebase.util;
 import com.liferay.knowledgebase.model.KBArticle;
 import com.liferay.knowledgebase.model.KBComment;
 import com.liferay.knowledgebase.model.KBCommentConstants;
+import com.liferay.knowledgebase.model.KBFolder;
+import com.liferay.knowledgebase.model.KBFolderConstants;
 import com.liferay.knowledgebase.model.KBTemplate;
+import com.liferay.knowledgebase.service.KBArticleLocalServiceUtil;
+import com.liferay.knowledgebase.service.KBArticleServiceUtil;
+import com.liferay.knowledgebase.service.KBFolderServiceUtil;
 import com.liferay.knowledgebase.util.comparator.KBArticleCreateDateComparator;
 import com.liferay.knowledgebase.util.comparator.KBArticleModifiedDateComparator;
 import com.liferay.knowledgebase.util.comparator.KBArticlePriorityComparator;
@@ -32,6 +37,7 @@ import com.liferay.knowledgebase.util.comparator.KBTemplateCreateDateComparator;
 import com.liferay.knowledgebase.util.comparator.KBTemplateModifiedDateComparator;
 import com.liferay.knowledgebase.util.comparator.KBTemplateTitleComparator;
 import com.liferay.knowledgebase.util.comparator.KBTemplateUserNameComparator;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.io.unsync.UnsyncByteArrayInputStream;
 import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.search.Sort;
@@ -51,6 +57,7 @@ import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.model.ModelHintsUtil;
+import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
 
 import java.io.InputStream;
@@ -62,11 +69,68 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import javax.portlet.PortletURL;
+import javax.portlet.RenderResponse;
+
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * @author Peter Shin
  * @author Brian Wing Shun Chan
  */
 public class KnowledgeBaseUtil {
+
+	public static void addPortletBreadcrumbEntries(
+			long parentResourceClassNameId, long parentResourcePrimKey,
+			String mvcPath, HttpServletRequest request,
+			RenderResponse renderResponse)
+		throws PortalException {
+
+		PortletURL portletURL = renderResponse.createRenderURL();
+
+		portletURL.setParameter("mvcPath", mvcPath);
+		portletURL.setParameter(
+			"parentResourcePrimKey", String.valueOf(parentResourcePrimKey));
+		portletURL.setParameter(
+			"parentResourceClassNameId",
+			String.valueOf(parentResourceClassNameId));
+
+		if (parentResourcePrimKey ==
+				KBFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
+
+			ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
+				WebKeys.THEME_DISPLAY);
+
+			PortalUtil.addPortletBreadcrumbEntry(
+				request, themeDisplay.translate("home"), portletURL.toString());
+		}
+		else if (parentResourceClassNameId ==
+					PortalUtil.getClassNameId(
+						KBFolderConstants.getClassName())) {
+
+			KBFolder kbFolder = KBFolderServiceUtil.getKBFolder(
+				parentResourcePrimKey);
+
+			addPortletBreadcrumbEntries(
+				kbFolder.getClassNameId(), kbFolder.getParentKBFolderId(),
+				mvcPath, request, renderResponse);
+
+			PortalUtil.addPortletBreadcrumbEntry(
+				request, kbFolder.getName(), portletURL.toString());
+		}
+		else {
+			KBArticle kbArticle = KBArticleServiceUtil.getLatestKBArticle(
+				parentResourcePrimKey, WorkflowConstants.STATUS_ANY);
+
+			addPortletBreadcrumbEntries(
+				kbArticle.getParentResourceClassNameId(),
+				kbArticle.getParentResourcePrimKey(), mvcPath, request,
+				renderResponse);
+
+			PortalUtil.addPortletBreadcrumbEntry(
+				request, kbArticle.getTitle(), portletURL.toString());
+		}
+	}
 
 	public static OrderByComparator<KBArticle> getKBArticleOrderByComparator(
 		String orderByCol, String orderByType) {
@@ -221,6 +285,29 @@ public class KnowledgeBaseUtil {
 		}
 
 		return null;
+	}
+
+	public static long getKBFolderId(
+			long parentResourceClassNameId, long parentResourcePrimKey)
+		throws PortalException {
+
+		long kbFolderClassNameId = PortalUtil.getClassNameId(
+			KBFolderConstants.getClassName());
+
+		if (parentResourceClassNameId == kbFolderClassNameId) {
+			return parentResourcePrimKey;
+		}
+
+		while (parentResourceClassNameId != kbFolderClassNameId) {
+			KBArticle kbArticle = KBArticleLocalServiceUtil.getLatestKBArticle(
+				parentResourcePrimKey, WorkflowConstants.STATUS_ANY);
+
+			parentResourceClassNameId =
+				kbArticle.getParentResourceClassNameId();
+			parentResourcePrimKey = kbArticle.getParentResourcePrimKey();
+		}
+
+		return parentResourcePrimKey;
 	}
 
 	public static OrderByComparator<KBTemplate> getKBTemplateOrderByComparator(
