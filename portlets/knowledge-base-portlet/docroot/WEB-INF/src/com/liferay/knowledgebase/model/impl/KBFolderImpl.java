@@ -16,8 +16,16 @@ package com.liferay.knowledgebase.model.impl;
 
 import aQute.bnd.annotation.ProviderType;
 
+import com.liferay.knowledgebase.model.KBFolder;
 import com.liferay.knowledgebase.model.KBFolderConstants;
+import com.liferay.knowledgebase.service.KBArticleServiceUtil;
+import com.liferay.knowledgebase.service.KBFolderServiceUtil;
+import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.language.LanguageUtil;
+import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.util.PortalUtil;
+
+import java.util.Locale;
 
 /**
  * @author Brian Wing Shun Chan
@@ -36,6 +44,35 @@ public class KBFolderImpl extends KBFolderBaseImpl {
 		}
 
 		return _classNameId;
+	}
+
+	@Override
+	public String getParentTitle(Locale locale) throws PortalException {
+		if (getParentKBFolderId() ==
+				KBFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
+
+			return "(" + LanguageUtil.get(locale, "none") + ")";
+		}
+
+		KBFolder kbFolder = KBFolderServiceUtil.getKBFolder(
+			getParentKBFolderId());
+
+		return kbFolder.getName();
+	}
+
+	@Override
+	public boolean isLeaf() throws PortalException {
+		int kbArticleCount = KBArticleServiceUtil.getKBArticlesCount(
+			getGroupId(), getKbFolderId(), WorkflowConstants.STATUS_ANY);
+
+		if (kbArticleCount > 0) {
+			return false;
+		}
+
+		int kbFolderCount = KBFolderServiceUtil.getKBFoldersCount(
+			getGroupId(), getKbFolderId());
+
+		return kbFolderCount == 0;
 	}
 
 	private long _classNameId;
