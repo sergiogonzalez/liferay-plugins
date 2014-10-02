@@ -157,6 +157,7 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 		kbArticle.setMain(false);
 		kbArticle.setStatus(WorkflowConstants.STATUS_DRAFT);
 		kbArticle.setSourceURL(sourceURL);
+		kbArticle.setKbFolderId(kbFolderId);
 
 		kbArticlePersistence.update(kbArticle);
 
@@ -952,6 +953,7 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 			kbArticle.setUrlTitle(oldKBArticle.getUrlTitle());
 			kbArticle.setPriority(oldKBArticle.getPriority());
 			kbArticle.setViewCount(oldKBArticle.getViewCount());
+			kbArticle.setKbFolderId(oldKBArticle.getKbFolderId());
 		}
 		else {
 			kbArticle = oldKBArticle;
