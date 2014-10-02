@@ -56,7 +56,7 @@ create table KBFolder (
 	modifiedDate DATE null,
 	parentKBFolderId LONG,
 	name VARCHAR(75) null,
-	urlTitle VARCHAR(75) null,
+	urlTitle STRING null,
 	description STRING null
 );
 

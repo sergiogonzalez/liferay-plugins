@@ -331,6 +331,12 @@ public class KBFolderWrapper implements KBFolder, ModelWrapper<KBFolder> {
 	}
 
 	@Override
+	public boolean isLeaf()
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _kbFolder.isLeaf();
+	}
+
+	@Override
 	public boolean isNew() {
 		return _kbFolder.isNew();
 	}

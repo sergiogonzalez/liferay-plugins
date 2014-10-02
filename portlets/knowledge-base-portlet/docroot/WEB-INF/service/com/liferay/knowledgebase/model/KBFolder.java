@@ -38,4 +38,7 @@ public interface KBFolder extends KBFolderModel, PersistedModel {
 
 	public java.lang.String getParentTitle(java.util.Locale locale)
 		throws com.liferay.portal.kernel.exception.PortalException;
+
+	public boolean isLeaf()
+		throws com.liferay.portal.kernel.exception.PortalException;
 }
