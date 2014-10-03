@@ -66,6 +66,7 @@ public class KBArticleWrapper implements KBArticle, ModelWrapper<KBArticle> {
 		attributes.put("parentResourceClassNameId",
 			getParentResourceClassNameId());
 		attributes.put("parentResourcePrimKey", getParentResourcePrimKey());
+		attributes.put("kbFolderId", getKbFolderId());
 		attributes.put("version", getVersion());
 		attributes.put("title", getTitle());
 		attributes.put("urlTitle", getUrlTitle());
@@ -159,6 +160,12 @@ public class KBArticleWrapper implements KBArticle, ModelWrapper<KBArticle> {
 
 		if (parentResourcePrimKey != null) {
 			setParentResourcePrimKey(parentResourcePrimKey);
+		}
+
+		Long kbFolderId = (Long)attributes.get("kbFolderId");
+
+		if (kbFolderId != null) {
+			setKbFolderId(kbFolderId);
 		}
 
 		Integer version = (Integer)attributes.get("version");
@@ -362,6 +369,16 @@ public class KBArticleWrapper implements KBArticle, ModelWrapper<KBArticle> {
 	@Override
 	public long getKbArticleId() {
 		return _kbArticle.getKbArticleId();
+	}
+
+	/**
+	* Returns the kb folder ID of this k b article.
+	*
+	* @return the kb folder ID of this k b article
+	*/
+	@Override
+	public long getKbFolderId() {
+		return _kbArticle.getKbFolderId();
 	}
 
 	/**
@@ -842,6 +859,16 @@ public class KBArticleWrapper implements KBArticle, ModelWrapper<KBArticle> {
 	@Override
 	public void setKbArticleId(long kbArticleId) {
 		_kbArticle.setKbArticleId(kbArticleId);
+	}
+
+	/**
+	* Sets the kb folder ID of this k b article.
+	*
+	* @param kbFolderId the kb folder ID of this k b article
+	*/
+	@Override
+	public void setKbFolderId(long kbFolderId) {
+		_kbArticle.setKbFolderId(kbFolderId);
 	}
 
 	/**
