@@ -1,4 +1,3 @@
-<%--
 /**
  * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
@@ -12,8 +11,20 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
---%>
 
-<%@ include file="/article/init.jsp" %>
+package com.liferay.knowledgebase.service.persistence;
 
-<liferay-util:include page="/admin/common/move_article.jsp" servletContext="<%= application %>" />
+import aQute.bnd.annotation.ProviderType;
+
+/**
+ * @author Brian Wing Shun Chan
+ */
+@ProviderType
+public interface KBArticleFinder {
+	public int countByUrlTitle(long groupId, java.lang.String kbFolderUrlTitle,
+		java.lang.String kbArticleUrlTitle, int[] status);
+
+	public java.util.List<com.liferay.knowledgebase.model.KBArticle> findByUrlTitle(
+		long groupId, java.lang.String kbFolderUrlTitle,
+		java.lang.String kbArticleUrlTitle, int[] status, int start, int end);
+}

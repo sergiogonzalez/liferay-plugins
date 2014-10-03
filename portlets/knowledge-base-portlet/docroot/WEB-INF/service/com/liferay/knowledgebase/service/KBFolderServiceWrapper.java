@@ -49,6 +49,14 @@ public class KBFolderServiceWrapper implements KBFolderService,
 		return _kbFolderService.deleteKBFolder(kbFolderId);
 	}
 
+	@Override
+	public com.liferay.knowledgebase.model.KBFolder fetchKBFolderByUrlTitle(
+		long groupId, long parentKbFolderId, java.lang.String urlTitle)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _kbFolderService.fetchKBFolderByUrlTitle(groupId,
+			parentKbFolderId, urlTitle);
+	}
+
 	/**
 	* Returns the Spring bean ID for this bean.
 	*
@@ -63,6 +71,14 @@ public class KBFolderServiceWrapper implements KBFolderService,
 	public com.liferay.knowledgebase.model.KBFolder getKBFolder(long kbFolderId)
 		throws com.liferay.portal.kernel.exception.PortalException {
 		return _kbFolderService.getKBFolder(kbFolderId);
+	}
+
+	@Override
+	public com.liferay.knowledgebase.model.KBFolder getKBFolderByUrlTitle(
+		long groupId, long parentKbFolderId, java.lang.String urlTitle)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _kbFolderService.getKBFolderByUrlTitle(groupId,
+			parentKbFolderId, urlTitle);
 	}
 
 	@Override
@@ -84,6 +100,12 @@ public class KBFolderServiceWrapper implements KBFolderService,
 		java.lang.String[] parameterTypes, java.lang.Object[] arguments)
 		throws java.lang.Throwable {
 		return _kbFolderService.invokeMethod(name, parameterTypes, arguments);
+	}
+
+	@Override
+	public void moveKBFolder(long kbFolderId, long parentKBFolderId)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		_kbFolderService.moveKBFolder(kbFolderId, parentKBFolderId);
 	}
 
 	/**

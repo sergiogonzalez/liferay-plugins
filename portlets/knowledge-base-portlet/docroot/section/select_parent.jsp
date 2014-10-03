@@ -1,3 +1,4 @@
+<%--
 /**
  * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
@@ -11,25 +12,8 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
+--%>
 
-package com.liferay.marketplace.hook.upgrade;
+<%@ include file="/section/init.jsp" %>
 
-import com.liferay.marketplace.hook.upgrade.v1_0_1.UpgradeModule;
-import com.liferay.portal.kernel.upgrade.UpgradeProcess;
-
-/**
- * @author Ryan Park
- */
-public class UpgradeProcess_1_0_1 extends UpgradeProcess {
-
-	@Override
-	public int getThreshold() {
-		return 101;
-	}
-
-	@Override
-	protected void doUpgrade() throws Exception {
-		upgrade(UpgradeModule.class);
-	}
-
-}
+<liferay-util:include page="/admin/common/select_parent.jsp" servletContext="<%= application %>" />

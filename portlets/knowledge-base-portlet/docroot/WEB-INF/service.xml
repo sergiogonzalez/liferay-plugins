@@ -30,6 +30,7 @@
 		<column name="rootResourcePrimKey" type="long" filter-primary="true" />
 		<column name="parentResourceClassNameId" type="long" />
 		<column name="parentResourcePrimKey" type="long" />
+		<column name="kbFolderId" type="long" />
 		<column name="version" type="int" />
 		<column name="title" type="String" />
 		<column name="urlTitle" type="String" />
@@ -76,10 +77,6 @@
 		<finder name="R_S" return-type="Collection">
 			<finder-column name="resourcePrimKey" arrayable-operator="OR" />
 			<finder-column name="status" />
-		</finder>
-		<finder name="G_UT" return-type="Collection">
-			<finder-column name="groupId" />
-			<finder-column name="urlTitle" />
 		</finder>
 		<finder name="G_L" return-type="Collection">
 			<finder-column name="groupId" />
@@ -147,10 +144,10 @@
 			<finder-column name="parentResourcePrimKey" arrayable-operator="OR" />
 			<finder-column name="status" />
 		</finder>
-		<finder name="G_UT_ST" return-type="Collection">
+		<finder name="G_KBFI_UT" return-type="Collection">
 			<finder-column name="groupId" />
+			<finder-column name="kbFolderId" />
 			<finder-column name="urlTitle" />
-			<finder-column name="status" />
 		</finder>
 		<finder name="G_P_S_L" return-type="Collection" db-index="false">
 			<finder-column name="groupId" />
@@ -169,6 +166,12 @@
 			<finder-column name="parentResourcePrimKey" />
 			<finder-column name="sections" comparator="LIKE" arrayable-operator="OR" />
 			<finder-column name="status" />
+		</finder>
+		<finder name="G_KBFI_UT_ST" return-type="Collection">
+			<finder-column name="groupId" />
+			<finder-column name="kbFolderId" />
+			<finder-column name="urlTitle" />
+			<finder-column name="status" arrayable-operator="OR" />
 		</finder>
 
 		<!-- References -->
@@ -272,6 +275,7 @@
 
 		<column name="parentKBFolderId" type="long" />
 		<column name="name" type="String" />
+		<column name="urlTitle" type="String" />
 		<column name="description" type="String" />
 
 		<!-- Finder methods -->
@@ -279,6 +283,11 @@
 		<finder name="G_P" return-type="Collection">
 			<finder-column name="groupId" />
 			<finder-column name="parentKBFolderId" />
+		</finder>
+		<finder name="G_P_UT" return-type="KBFolder">
+			<finder-column name="groupId" />
+			<finder-column name="parentKBFolderId" />
+			<finder-column name="urlTitle" />
 		</finder>
 	</entity>
 	<entity name="KBTemplate" uuid="true" local-service="true" remote-service="true">
