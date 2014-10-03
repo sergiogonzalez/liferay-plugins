@@ -16,16 +16,22 @@ package com.liferay.knowledgebase.service.impl;
 
 import aQute.bnd.annotation.ProviderType;
 
+import com.liferay.knowledgebase.InvalidKBFolderException;
 import com.liferay.knowledgebase.NoSuchFolderException;
 import com.liferay.knowledgebase.model.KBFolder;
 import com.liferay.knowledgebase.model.KBFolderConstants;
 import com.liferay.knowledgebase.service.base.KBFolderLocalServiceBaseImpl;
+import com.liferay.knowledgebase.util.KnowledgeBaseUtil;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.model.User;
 import com.liferay.portal.service.ServiceContext;
 
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Brian Wing Shun Chan
@@ -60,6 +66,9 @@ public class KBFolderLocalServiceImpl extends KBFolderLocalServiceBaseImpl {
 		kbFolder.setModifiedDate(now);
 		kbFolder.setParentKBFolderId(parentResourcePrimKey);
 		kbFolder.setName(name);
+		kbFolder.setUrlTitle(
+			getUniqueUrlTitle(
+				groupId, parentResourcePrimKey, kbFolderId, name));
 		kbFolder.setDescription(description);
 
 		kbFolderPersistence.update(kbFolder);
@@ -100,6 +109,24 @@ public class KBFolderLocalServiceImpl extends KBFolderLocalServiceBaseImpl {
 	}
 
 	@Override
+	public KBFolder fetchKBFolderByUrlTitle(
+			long groupId, long parentKbFolderId, String urlTitle)
+		throws PortalException {
+
+		return kbFolderPersistence.fetchByG_P_UT(
+			groupId, parentKbFolderId, urlTitle);
+	}
+
+	@Override
+	public KBFolder getKBFolderByUrlTitle(
+			long groupId, long parentKbFolderId, String urlTitle)
+		throws PortalException {
+
+		return kbFolderPersistence.findByG_P_UT(
+			groupId, parentKbFolderId, urlTitle);
+	}
+
+	@Override
 	public List<KBFolder> getKBFolders(
 			long groupId, long parentKBFolderId, int start, int end)
 		throws PortalException {
@@ -113,6 +140,26 @@ public class KBFolderLocalServiceImpl extends KBFolderLocalServiceBaseImpl {
 		throws PortalException {
 
 		return kbFolderPersistence.countByG_P(groupId, parentKBFolderId);
+	}
+
+	@Override
+	public void moveKBFolder(long kbFolderId, long parentKBFolderId)
+		throws PortalException {
+
+		KBFolder kbFolder = kbFolderPersistence.findByPrimaryKey(kbFolderId);
+
+		if (parentKBFolderId != KBFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
+			KBFolder parentKBFolder = kbFolderPersistence.findByPrimaryKey(
+				parentKBFolderId);
+
+			validateParent(kbFolder, parentKBFolder);
+
+			parentKBFolderId = parentKBFolder.getKbFolderId();
+		}
+
+		kbFolder.setParentKBFolderId(parentKBFolderId);
+
+		kbFolderPersistence.update(kbFolder);
 	}
 
 	@Override
@@ -154,6 +201,60 @@ public class KBFolderLocalServiceImpl extends KBFolderLocalServiceBaseImpl {
 			kbFolder.getCompanyId(), kbFolder.getGroupId(),
 			kbFolder.getUserId(), KBFolder.class.getName(),
 			kbFolder.getKbFolderId(), groupPermissions, guestPermissions);
+	}
+
+	protected void getSubfolderIds(
+		KBFolder parentKBFolder, Collection<Long> kbFolderIds) {
+
+		Collection<KBFolder> kbFolders = kbFolderPersistence.findByG_P(
+			parentKBFolder.getGroupId(), parentKBFolder.getKbFolderId());
+
+		for (KBFolder kbFolder : kbFolders) {
+			getSubfolderIds(kbFolder, kbFolderIds);
+		}
+
+		kbFolderIds.add(parentKBFolder.getKbFolderId());
+	}
+
+	protected String getUniqueUrlTitle(
+		long groupId, long parentKbFolderId, long kbFolderId, String name) {
+
+		String urlTitle = KnowledgeBaseUtil.getUrlTitle(kbFolderId, name);
+
+		String uniqueUrlTitle = urlTitle;
+
+		KBFolder kbFolder = null;
+
+		for (int i = 1; kbFolder != null; i++) {
+			uniqueUrlTitle = urlTitle + StringPool.DASH + i;
+
+			kbFolder = kbFolderPersistence.fetchByG_P_UT(
+				groupId, parentKbFolderId, uniqueUrlTitle);
+		}
+
+		return uniqueUrlTitle;
+	}
+
+	protected void validateParent(KBFolder kbFolder, KBFolder parentKBFolder)
+		throws PortalException {
+
+		if (kbFolder.getGroupId() != parentKBFolder.getGroupId()) {
+			throw new NoSuchFolderException(
+				String.format(
+					"No KB folder with KB folder ID %s found in group %s",
+					parentKBFolder.getKbFolderId(), kbFolder.getGroupId()));
+		}
+
+		Set<Long> subfolderIds = new HashSet<Long>();
+
+		getSubfolderIds(kbFolder, subfolderIds);
+
+		if (subfolderIds.contains(parentKBFolder.getKbFolderId())) {
+			throw new InvalidKBFolderException(
+				String.format(
+					"Cannot move KBFolder %s inside its descendant KBFolder %s",
+					kbFolder.getKbFolderId(), parentKBFolder.getKbFolderId()));
+		}
 	}
 
 	protected void validateParent(

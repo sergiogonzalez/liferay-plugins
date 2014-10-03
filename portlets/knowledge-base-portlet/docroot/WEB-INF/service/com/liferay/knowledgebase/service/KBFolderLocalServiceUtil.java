@@ -191,6 +191,13 @@ public class KBFolderLocalServiceUtil {
 		return getService().fetchKBFolder(kbFolderId);
 	}
 
+	public static com.liferay.knowledgebase.model.KBFolder fetchKBFolderByUrlTitle(
+		long groupId, long parentKbFolderId, java.lang.String urlTitle)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return getService()
+				   .fetchKBFolderByUrlTitle(groupId, parentKbFolderId, urlTitle);
+	}
+
 	/**
 	* Returns the k b folder matching the UUID and group.
 	*
@@ -232,6 +239,13 @@ public class KBFolderLocalServiceUtil {
 		long kbFolderId)
 		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService().getKBFolder(kbFolderId);
+	}
+
+	public static com.liferay.knowledgebase.model.KBFolder getKBFolderByUrlTitle(
+		long groupId, long parentKbFolderId, java.lang.String urlTitle)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return getService()
+				   .getKBFolderByUrlTitle(groupId, parentKbFolderId, urlTitle);
 	}
 
 	/**
@@ -307,6 +321,11 @@ public class KBFolderLocalServiceUtil {
 		java.lang.String[] parameterTypes, java.lang.Object[] arguments)
 		throws java.lang.Throwable {
 		return getService().invokeMethod(name, parameterTypes, arguments);
+	}
+
+	public static void moveKBFolder(long kbFolderId, long parentKBFolderId)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		getService().moveKBFolder(kbFolderId, parentKBFolderId);
 	}
 
 	/**
