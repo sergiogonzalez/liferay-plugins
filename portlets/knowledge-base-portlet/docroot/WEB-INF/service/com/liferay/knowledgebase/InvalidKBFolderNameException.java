@@ -12,26 +12,32 @@
  * details.
  */
 
-package com.liferay.calendar.hook.upgrade;
+package com.liferay.knowledgebase;
 
-import com.liferay.calendar.hook.upgrade.v1_0_0.UpgradeCalendarBooking;
-import com.liferay.calendar.hook.upgrade.v1_0_0.UpgradePortletPreferences;
-import com.liferay.portal.kernel.upgrade.UpgradeProcess;
+import aQute.bnd.annotation.ProviderType;
+
+import com.liferay.portal.kernel.exception.PortalException;
 
 /**
- * @author Jenny Chen
+ * @author Brian Wing Shun Chan
  */
-public class UpgradeProcess_1_0_0 extends UpgradeProcess {
+@ProviderType
+public class InvalidKBFolderNameException extends PortalException {
 
-	@Override
-	public int getThreshold() {
-		return 100;
+	public InvalidKBFolderNameException() {
+		super();
 	}
 
-	@Override
-	protected void doUpgrade() throws Exception {
-		upgrade(UpgradeCalendarBooking.class);
-		upgrade(UpgradePortletPreferences.class);
+	public InvalidKBFolderNameException(String msg) {
+		super(msg);
+	}
+
+	public InvalidKBFolderNameException(String msg, Throwable cause) {
+		super(msg, cause);
+	}
+
+	public InvalidKBFolderNameException(Throwable cause) {
+		super(cause);
 	}
 
 }
