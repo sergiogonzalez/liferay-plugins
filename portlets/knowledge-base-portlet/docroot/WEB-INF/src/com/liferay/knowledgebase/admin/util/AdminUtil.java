@@ -32,6 +32,8 @@ import com.liferay.portal.util.PortalUtil;
 import com.liferay.util.ContentUtil;
 
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.portlet.PortletPreferences;
 
@@ -362,6 +364,10 @@ public class AdminUtil {
 			new UnsyncStringReader(sourceHtml),
 			new UnsyncStringReader(targetHtml));
 
+		Matcher matcher = _XML_DECLARATION_PATTERN.matcher(diff);
+
+		diff = matcher.replaceFirst(StringPool.BLANK);
+
 		Source source = new Source(diff);
 
 		OutputDocument outputDocument = new OutputDocument(source);
@@ -458,5 +464,8 @@ public class AdminUtil {
 
 		return sectionsArray;
 	}
+
+	private static final Pattern _XML_DECLARATION_PATTERN = Pattern.compile(
+		"^<?[^?]+?>");
 
 }
