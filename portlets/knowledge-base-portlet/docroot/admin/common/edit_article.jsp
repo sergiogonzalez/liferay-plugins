@@ -47,6 +47,7 @@ String[] sections = AdminUtil.unescapeSections(BeanPropertiesUtil.getString(kbAr
 	<aui:input name="workflowAction" type="hidden" value="<%= WorkflowConstants.ACTION_SAVE_DRAFT %>" />
 
 	<liferay-ui:error exception="<%= DuplicateFileException.class %>" message="please-enter-a-unique-document-name" />
+	<liferay-ui:error exception="<%= DuplicateKBArticleUrlTitleException.class %>" message="please-enter-a-unique-friendly-url" />
 	<liferay-ui:error exception="<%= FileNameException.class %>" message="please-enter-a-file-with-a-valid-file-name" />
 
 	<liferay-ui:error exception="<%= FileSizeException.class %>">
@@ -64,6 +65,7 @@ String[] sections = AdminUtil.unescapeSections(BeanPropertiesUtil.getString(kbAr
 		<liferay-ui:message arguments="<%= fileMaxSize %>" key="please-enter-a-file-with-a-valid-file-size-no-larger-than-x" translateArguments="<%= false %>" />
 	</liferay-ui:error>
 
+	<liferay-ui:error exception="<%= InvalidKBArticleUrlTitleException.class %>" message="please-enter-a-friendly-url-that-starts-with-a-slash-and-contains-alphanumeric-characters-dashes-and-underscores" />
 	<liferay-ui:error exception="<%= KBArticleContentException.class %>" message="please-enter-valid-content" />
 	<liferay-ui:error exception="<%= KBArticleSourceURLException.class %>" message="please-enter-a-valid-source-url" />
 	<liferay-ui:error exception="<%= KBArticleTitleException.class %>" message="please-enter-a-valid-title" />
@@ -118,7 +120,7 @@ String[] sections = AdminUtil.unescapeSections(BeanPropertiesUtil.getString(kbAr
 
 			<span class="input-group-addon" id="<portlet:namespace />urlBase"><liferay-ui:message key="<%= StringUtil.shorten(sb.toString(), 40) %>" /></span>
 
-			<aui:input cssClass="input-medium" disabled="<%= kbArticle != null %>" label="" name="urlTitle" />
+			<aui:input cssClass="input-medium" disabled="<%= kbArticle != null %>" label="" name="urlTitle" placeholder="/sample-article-url-title" value="<%= (kbArticle == null ? StringPool.BLANK : (StringPool.SLASH + kbArticle.getUrlTitle())) %>" />
 		</aui:field-wrapper>
 
 		<aui:field-wrapper label="content" required="<%= true %>">
@@ -204,12 +206,76 @@ String[] sections = AdminUtil.unescapeSections(BeanPropertiesUtil.getString(kbAr
 	</aui:fieldset>
 </aui:form>
 
-<aui:script>
+<aui:script use="aui-base,event-input">
+	var A = AUI();
+
+	var titleInput = A.one('#<portlet:namespace />title');
+	var urlTitleInput = A.one('#<portlet:namespace />urlTitle');
+
+	var urlTitleCustomized = false;
+
+	titleInput.on(
+		'input',
+		function(event) {
+			if (urlTitleCustomized) {
+				return;
+			}
+
+			var urlTitle = titleInput.val();
+
+			urlTitle = urlTitle.replace(/[^a-zA-Z0-9_-]/g, '-');
+
+			if (urlTitle[0] === '-') {
+				urlTitle = urlTitle.replace(/^-+/, '');
+			}
+
+			urlTitle = urlTitle.replace(/--+/g, '-');
+
+			urlTitleInput.val('/' + urlTitle.toLowerCase());
+		}
+	);
+
+	urlTitleInput.on(
+		'input',
+		function() {
+			urlTitleCustomized = true;
+		}
+	);
+
+	Liferay.provide(
+		window,
+		'<portlet:namespace />initEditor',
+		function() {
+			return '<%= UnicodeFormatter.toString(content) %>';
+		}
+	);
+
+	Liferay.provide(
+		window,
+		'<portlet:namespace />publishKBArticle',
+		function() {
+			document.<portlet:namespace />fm.<portlet:namespace />workflowAction.value = '<%= WorkflowConstants.ACTION_PUBLISH %>';
+			<portlet:namespace />updateKBArticle();
+		}
+	);
+
+	Liferay.provide(
+		window,
+		'<portlet:namespace />updateKBArticle',
+		function() {
+			document.<portlet:namespace />fm.<portlet:namespace /><%= Constants.CMD %>.value = '<%= (kbArticle == null) ? Constants.ADD : Constants.UPDATE %>';
+			document.<portlet:namespace />fm.<portlet:namespace />content.value = window.<portlet:namespace />editor.getHTML();
+
+			<portlet:namespace />updateMultipleKBArticleAttachments();
+
+			submitForm(document.<portlet:namespace />fm);
+		}
+	);
+
 	Liferay.provide(
 		window,
 		'<portlet:namespace />updateMultipleKBArticleAttachments',
 		function() {
-			var A = AUI();
 			var Lang = A.Lang;
 
 			var selectedFileNameContainer = A.one('#<portlet:namespace />selectedFileNameContainer');
@@ -230,21 +296,6 @@ String[] sections = AdminUtil.unescapeSections(BeanPropertiesUtil.getString(kbAr
 			}
 
 			selectedFileNameContainer.html(buffer.join(''));
-		},
-		['aui-base']
+		}
 	);
-
-	function <portlet:namespace />publishKBArticle() {
-		document.<portlet:namespace />fm.<portlet:namespace />workflowAction.value = '<%= WorkflowConstants.ACTION_PUBLISH %>';
-		<portlet:namespace />updateKBArticle();
-	}
-
-	function <portlet:namespace />updateKBArticle() {
-		document.<portlet:namespace />fm.<portlet:namespace /><%= Constants.CMD %>.value = '<%= (kbArticle == null) ? Constants.ADD : Constants.UPDATE %>';
-		document.<portlet:namespace />fm.<portlet:namespace />content.value = window.<portlet:namespace />editor.getHTML();
-
-		<portlet:namespace />updateMultipleKBArticleAttachments();
-
-		submitForm(document.<portlet:namespace />fm);
-	}
 </aui:script>
