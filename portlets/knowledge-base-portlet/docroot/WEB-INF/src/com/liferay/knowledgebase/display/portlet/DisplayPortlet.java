@@ -23,6 +23,7 @@ import com.liferay.knowledgebase.model.KBFolderConstants;
 import com.liferay.knowledgebase.portlet.BaseKBPortlet;
 import com.liferay.knowledgebase.service.KBArticleLocalServiceUtil;
 import com.liferay.knowledgebase.service.KBArticleServiceUtil;
+import com.liferay.knowledgebase.service.KBFolderLocalServiceUtil;
 import com.liferay.knowledgebase.service.KBFolderServiceUtil;
 import com.liferay.knowledgebase.service.permission.KBArticlePermission;
 import com.liferay.knowledgebase.service.permission.KBFolderPermission;
@@ -168,6 +169,34 @@ public class DisplayPortlet extends BaseKBPortlet {
 		portalPreferences.setValue(
 			PortletKeys.KNOWLEDGE_BASE_DISPLAY, "preferredKBFolderUrlTitle",
 			kbFolder.getUrlTitle());
+
+		String urlTitle = ParamUtil.getString(actionRequest, "urlTitle");
+
+		if (Validator.isNull(urlTitle)) {
+			return;
+		}
+
+		KBArticle kbArticle =
+			KBArticleLocalServiceUtil.fetchKBArticleByUrlTitle(
+				kbFolder.getGroupId(), kbFolder.getUrlTitle(), urlTitle);
+
+		if (kbArticle == null) {
+			return;
+		}
+
+		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
+			WebKeys.THEME_DISPLAY);
+
+		if (!KBArticlePermission.contains(
+				themeDisplay.getPermissionChecker(), kbArticle,
+				ActionKeys.VIEW)) {
+
+			return;
+		}
+
+		actionResponse.setRenderParameter(
+			"kbFolderUrlTitle", kbFolder.getUrlTitle());
+		actionResponse.setRenderParameter("urlTitle", urlTitle);
 	}
 
 	@Override
@@ -268,7 +297,11 @@ public class DisplayPortlet extends BaseKBPortlet {
 					KBFolderConstants.DEFAULT_PARENT_FOLDER_ID, urlTitle);
 			}
 
-			if (kbArticle != null) {
+			if ((kbArticle != null) &&
+				KBArticlePermission.contains(
+					themeDisplay.getPermissionChecker(), kbArticle,
+					ActionKeys.VIEW)) {
+
 				return new Tuple(
 					kbArticle.getClassNameId(), kbArticle.getResourcePrimKey());
 			}
@@ -308,7 +341,11 @@ public class DisplayPortlet extends BaseKBPortlet {
 			KBFolderConstants.getClassName());
 
 		if (resourceClassNameId == kbFolderClassNameId) {
-			if (!KBFolderPermission.contains(
+			KBFolder kbFolder = KBFolderLocalServiceUtil.fetchKBFolder(
+				resourcePrimKey);
+
+			if ((kbFolder != null) &&
+				!KBFolderPermission.contains(
 					themeDisplay.getPermissionChecker(),
 					themeDisplay.getScopeGroupId(), defaultResourcePrimKey,
 					ActionKeys.VIEW)) {
@@ -319,8 +356,9 @@ public class DisplayPortlet extends BaseKBPortlet {
 			}
 		}
 		else {
-			KBArticle kbArticle = KBArticleServiceUtil.fetchLatestKBArticle(
-				defaultResourcePrimKey, WorkflowConstants.STATUS_ANY);
+			KBArticle kbArticle =
+				KBArticleLocalServiceUtil.fetchLatestKBArticle(
+					defaultResourcePrimKey, WorkflowConstants.STATUS_ANY);
 
 			if ((kbArticle != null) &&
 				!KBArticlePermission.contains(
