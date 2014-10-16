@@ -124,7 +124,7 @@ String[] sections = AdminUtil.unescapeSections(BeanPropertiesUtil.getString(kbAr
 		</aui:field-wrapper>
 
 		<aui:field-wrapper label="content" required="<%= true %>">
-			<liferay-ui:input-editor width="100%" />
+			<liferay-ui:input-editor contents="<%= content %>" width="100%" />
 
 			<aui:input name="content" type="hidden" />
 		</aui:field-wrapper>
