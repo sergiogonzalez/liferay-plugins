@@ -12,20 +12,15 @@
  * details.
  */
 
-package com.liferay.webform.util;
+package com.liferay.knowledgebase.util;
+
+import com.liferay.knowledgebase.admin.portlet.AdminPortlet;
 
 /**
- * @author Brian Wing Shun Chan
+ * @author Adolfo Pérez
  */
-public interface PortletPropsKeys {
+public class KnowledgeBaseConstants {
 
-	public static final String CSV_SEPARATOR = "csv.separator";
-
-	public static final String EMAIL_FROM_ADDRESS = "email.from.address";
-
-	public static final String EMAIL_FROM_NAME = "email.from.name";
-
-	public static final String VALIDATION_SCRIPT_ENABLED =
-		"validation.script.enabled";
+	public static final String TEMP_FOLDER_NAME = AdminPortlet.class.getName();
 
 }
