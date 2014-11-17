@@ -14,36 +14,22 @@
 
 package com.liferay.jsonwebserviceclient;
 
-import java.io.IOException;
-
 /**
  * @author Ivica Cardic
+ * @author Igor Beslic
  */
-public class JSONWebServiceUnavailableException extends IOException {
+public class JSONWebServiceInvocationException extends Exception {
 
-	public JSONWebServiceUnavailableException() {
-	}
-
-	public JSONWebServiceUnavailableException(int status) {
-		_status = status;
-	}
-
-	public JSONWebServiceUnavailableException(String message) {
+	public JSONWebServiceInvocationException(String message) {
 		super(message);
 	}
 
-	public JSONWebServiceUnavailableException(String message, Throwable cause) {
+	public JSONWebServiceInvocationException(String message, Throwable cause) {
 		super(message, cause);
 	}
 
-	public JSONWebServiceUnavailableException(Throwable cause) {
+	public JSONWebServiceInvocationException(Throwable cause) {
 		super(cause);
 	}
-
-	public int getStatus() {
-		return _status;
-	}
-
-	private int _status;
 
 }
