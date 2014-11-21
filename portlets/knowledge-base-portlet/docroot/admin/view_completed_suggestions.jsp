@@ -1,3 +1,4 @@
+<%--
 /**
  * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
@@ -11,21 +12,14 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
+--%>
 
-package com.liferay.knowledgebase.service.persistence;
+<%@ include file="/admin/init.jsp" %>
 
-import aQute.bnd.annotation.ProviderType;
+<%
+String emptyResultsMessage = "no-completed-suggestion-was-found";
+String navItem = "viewCompletedSuggestions";
+int suggestionStatus = KBCommentConstants.STATUS_COMPLETED;
+%>
 
-/**
- * @author Brian Wing Shun Chan
- * @generated
- */
-@ProviderType
-public interface KBArticleFinder {
-	public int countByUrlTitle(long groupId, java.lang.String kbFolderUrlTitle,
-		java.lang.String kbArticleUrlTitle, int[] status);
-
-	public java.util.List<com.liferay.knowledgebase.model.KBArticle> findByUrlTitle(
-		long groupId, java.lang.String kbFolderUrlTitle,
-		java.lang.String kbArticleUrlTitle, int[] status, int start, int end);
-}
+<%@ include file="/admin/view_suggestions_in_state.jspf" %>

@@ -12,20 +12,22 @@
  * details.
  */
 
-package com.liferay.knowledgebase.service.persistence;
+package com.liferay.knowledgebase.hook.upgrade.v1_3_4;
 
-import aQute.bnd.annotation.ProviderType;
+import com.liferay.knowledgebase.util.ActionKeys;
+import com.liferay.portal.kernel.upgrade.UpgradeProcess;
 
 /**
- * @author Brian Wing Shun Chan
- * @generated
+ * @author Adolfo Pérez
  */
-@ProviderType
-public interface KBArticleFinder {
-	public int countByUrlTitle(long groupId, java.lang.String kbFolderUrlTitle,
-		java.lang.String kbArticleUrlTitle, int[] status);
+public class UpgradeResourceAction extends UpgradeProcess {
 
-	public java.util.List<com.liferay.knowledgebase.model.KBArticle> findByUrlTitle(
-		long groupId, java.lang.String kbFolderUrlTitle,
-		java.lang.String kbArticleUrlTitle, int[] status, int start, int end);
+	@Override
+	protected void doUpgrade() throws Exception {
+		runSQL(
+			"update ResourceAction set actionId = '" +
+				ActionKeys.VIEW_KB_SUGGESTIONS + "' where actionId = " +
+					"'VIEW_KB_FEEDBACK'");
+	}
+
 }
