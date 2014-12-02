@@ -267,27 +267,6 @@ public interface KBCommentModel extends AttachedModel, BaseModel<KBComment>,
 	public void setContent(String content);
 
 	/**
-	 * Returns the helpful of this k b comment.
-	 *
-	 * @return the helpful of this k b comment
-	 */
-	public boolean getHelpful();
-
-	/**
-	 * Returns <code>true</code> if this k b comment is helpful.
-	 *
-	 * @return <code>true</code> if this k b comment is helpful; <code>false</code> otherwise
-	 */
-	public boolean isHelpful();
-
-	/**
-	 * Sets whether this k b comment is helpful.
-	 *
-	 * @param helpful the helpful of this k b comment
-	 */
-	public void setHelpful(boolean helpful);
-
-	/**
 	 * Returns the status of this k b comment.
 	 *
 	 * @return the status of this k b comment
@@ -300,6 +279,20 @@ public interface KBCommentModel extends AttachedModel, BaseModel<KBComment>,
 	 * @param status the status of this k b comment
 	 */
 	public void setStatus(int status);
+
+	/**
+	 * Returns the user opinion of this k b comment.
+	 *
+	 * @return the user opinion of this k b comment
+	 */
+	public int getUserOpinion();
+
+	/**
+	 * Sets the user opinion of this k b comment.
+	 *
+	 * @param userOpinion the user opinion of this k b comment
+	 */
+	public void setUserOpinion(int userOpinion);
 
 	@Override
 	public boolean isNew();
