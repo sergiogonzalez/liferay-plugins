@@ -157,47 +157,65 @@ public abstract class ExtRepositoryModelAdapter<T>
 
 	@Override
 	public void setCompanyId(long companyId) {
-		throw new UnsupportedOperationException("Model is read only");
+		if (companyId != getCompanyId()) {
+			throw new UnsupportedOperationException("Model cannot be modified");
+		}
 	}
 
 	@Override
 	public void setCreateDate(Date date) {
-		throw new UnsupportedOperationException("Model is read only");
+		if (!date.equals(getCreateDate())) {
+			throw new UnsupportedOperationException("Model cannot be modified");
+		}
 	}
 
 	@Override
 	public void setGroupId(long groupId) {
-		throw new UnsupportedOperationException("Model is read only");
+		if (groupId != getGroupId()) {
+			throw new UnsupportedOperationException("Model cannot be modified");
+		}
 	}
 
 	@Override
 	public void setModifiedDate(Date modifiedDate) {
-		throw new UnsupportedOperationException("Model is read only");
+		if (!modifiedDate.equals(getModifiedDate())) {
+			throw new UnsupportedOperationException("Model cannot be modified");
+		}
 	}
 
 	@Override
 	public void setPrimaryKeyObj(Serializable primaryKeyObj) {
-		throw new UnsupportedOperationException("Model is read only");
+		if (!primaryKeyObj.equals(getPrimaryKeyObj())) {
+			throw new UnsupportedOperationException("Model cannot be modified");
+		}
 	}
 
 	@Override
 	public void setUserId(long userId) {
-		throw new UnsupportedOperationException("Model is read only");
+		if (userId != getUserId()) {
+			throw new UnsupportedOperationException("Model cannot be modified");
+		}
 	}
 
 	@Override
 	public void setUserName(String userName) {
-		throw new UnsupportedOperationException("Model is read only");
+		if (!userName.equals(getUserName())) {
+			throw new UnsupportedOperationException("Model cannot be modified");
+		}
 	}
 
 	@Override
 	public void setUserUuid(String userUuid) {
-		throw new UnsupportedOperationException("Model is read only");
+		if (!userUuid.equals(getUserUuid())) {
+			throw new UnsupportedOperationException("Model cannot be modified");
+		}
 	}
 
 	@Override
 	public void setUuid(String uuid) {
-		throw new UnsupportedOperationException("Model is read only");
+		if (!uuid.equals(getUuid())) {
+			throw new UnsupportedOperationException("Model cannot be modified");
+		}
 	}
 
 	@Override
