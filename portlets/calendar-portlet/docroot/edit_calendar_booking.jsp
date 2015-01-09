@@ -21,6 +21,8 @@ String activeView = ParamUtil.getString(request, "activeView", defaultView);
 
 TimeZone calendarBookingTimeZone = userTimeZone;
 
+boolean allDay = BeanParamUtil.getBoolean(calendarBooking, request, "allDay");
+
 if (allDay) {
 	calendarBookingTimeZone = utcTimeZone;
 }
