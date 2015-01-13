@@ -76,6 +76,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.portlet.PortletPreferences;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletURL;
 import javax.portlet.RenderResponse;
@@ -609,12 +610,17 @@ public class KnowledgeBaseUtil {
 			PortletRequest portletRequest, long groupId, long kbFolderId)
 		throws PortalException {
 
+		PortletPreferences preferences = portletRequest.getPreferences();
+
+		String contentRootPrefix = GetterUtil.getString(
+			preferences.getValue("contentRootPrefix", null));
+
 		PortalPreferences portalPreferences =
 			PortletPreferencesFactoryUtil.getPortalPreferences(portletRequest);
 
 		String kbFolderURLTitle = portalPreferences.getValue(
-			PortletKeys.KNOWLEDGE_BASE_DISPLAY, "preferredKBFolderURLTitle",
-			null);
+			PortletKeys.KNOWLEDGE_BASE_DISPLAY,
+			contentRootPrefix + "preferredKBFolderURLTitle", null);
 
 		long childKbFolderId = KBFolderConstants.DEFAULT_PARENT_FOLDER_ID;
 
