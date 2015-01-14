@@ -95,10 +95,16 @@ public class DisplayPortlet extends BaseKBPortlet {
 						PortletPreferencesFactoryUtil.getPortalPreferences(
 							renderRequest);
 
+					PortletPreferences preferences =
+						renderRequest.getPreferences();
+
+					String contentRootPrefix = GetterUtil.getString(
+						preferences.getValue("contentRootPrefix", null));
+
 					String preferredKBFolderURLTitle =
 						portalPreferences.getValue(
 							PortletKeys.KNOWLEDGE_BASE_DISPLAY,
-							"preferredKBFolderURLTitle");
+							contentRootPrefix + "preferredKBFolderURLTitle");
 
 					kbArticle = getKBFolderKBArticle(
 						themeDisplay.getScopeGroupId(), resourcePrimKey,
@@ -162,12 +168,18 @@ public class DisplayPortlet extends BaseKBPortlet {
 
 		KBFolder kbFolder = KBFolderServiceUtil.getKBFolder(kbFolderId);
 
+		PortletPreferences preferences = actionRequest.getPreferences();
+
+		String contentRootPrefix = GetterUtil.getString(
+			preferences.getValue("contentRootPrefix", null));
+
 		PortalPreferences portalPreferences =
 			PortletPreferencesFactoryUtil.getPortalPreferences(
 				PortalUtil.getLiferayPortletRequest(actionRequest));
 
 		portalPreferences.setValue(
-			PortletKeys.KNOWLEDGE_BASE_DISPLAY, "preferredKBFolderURLTitle",
+			PortletKeys.KNOWLEDGE_BASE_DISPLAY,
+			contentRootPrefix + "preferredKBFolderURLTitle",
 			kbFolder.getUrlTitle());
 
 		String urlTitle = ParamUtil.getString(actionRequest, "urlTitle");
