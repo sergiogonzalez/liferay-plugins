@@ -16,13 +16,17 @@ package com.liferay.knowledgebase.admin.importer.util;
 
 import com.liferay.knowledgebase.KBArticleImportException;
 import com.liferay.knowledgebase.model.KBArticle;
+import com.liferay.knowledgebase.util.KnowledgeBaseUtil;
+import com.liferay.knowledgebase.util.PortletPropsValues;
 import com.liferay.markdown.converter.MarkdownConverter;
 import com.liferay.markdown.converter.factory.MarkdownConverterFactoryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.repository.model.FileEntry;
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.CharPool;
+import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
@@ -46,20 +50,7 @@ public class KBArticleMarkdownConverter {
 			String markdown, String fileEntryName, Map<String, String> metadata)
 		throws KBArticleImportException {
 
-		MarkdownConverter markdownConverter =
-			MarkdownConverterFactoryUtil.create();
-
-		String html = null;
-
-		try {
-			html = markdownConverter.convert(markdown);
-		}
-		catch (IOException ioe) {
-			throw new KBArticleImportException(
-				"Unable to convert Markdown to HTML: " +
-					ioe.getLocalizedMessage(),
-				ioe);
-		}
+		String html = convertContent(fileEntryName, markdown);
 
 		String heading = getHeading(html);
 
@@ -226,6 +217,32 @@ public class KBArticleMarkdownConverter {
 		return sb.toString();
 	}
 
+	protected String convertContent(String fileEntryName, String content)
+		throws KBArticleImportException {
+
+		try {
+			String extension = FileUtil.getExtension(fileEntryName);
+
+			if (ArrayUtil.contains(
+					PortletPropsValues.MARKDOWN_IMPORTER_ARTICLE_RAW_EXTENSIONS,
+					StringPool.PERIOD + extension)) {
+
+				return content;
+			}
+
+			MarkdownConverter markdownConverter =
+				MarkdownConverterFactoryUtil.create();
+
+			return markdownConverter.convert(content);
+		}
+		catch (IOException ioe) {
+			throw new KBArticleImportException(
+				"Unable to convert Markdown to HTML: " +
+					ioe.getLocalizedMessage(),
+				ioe);
+		}
+	}
+
 	protected String getHeading(String html) {
 		int x = html.indexOf("<h1>");
 		int y = html.indexOf("</h1>");
@@ -252,6 +269,9 @@ public class KBArticleMarkdownConverter {
 				urlTitle, StringPool.SPACE, StringPool.DASH);
 
 			urlTitle = StringUtil.toLowerCase(urlTitle);
+		}
+		else {
+			urlTitle = KnowledgeBaseUtil.getUrlTitle(heading);
 		}
 
 		if (!urlTitle.startsWith(StringPool.SLASH)) {

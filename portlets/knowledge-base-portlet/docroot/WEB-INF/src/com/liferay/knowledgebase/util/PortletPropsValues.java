@@ -147,6 +147,10 @@ public class PortletPropsValues {
 		GetterUtil.getString(
 			PortletProps.get(PortletPropsKeys.MARKDOWN_IMPORTER_ARTICLE_INTRO));
 
+	public static final String[] MARKDOWN_IMPORTER_ARTICLE_RAW_EXTENSIONS =
+		PortletProps.getArray(
+			PortletPropsKeys.MARKDOWN_IMPORTER_ARTICLE_RAW_EXTENSIONS);
+
 	public static final String[] MARKDOWN_IMPORTER_IMAGE_FILE_EXTENSIONS =
 		PortletProps.getArray(
 			PortletPropsKeys.MARKDOWN_IMPORTER_IMAGE_FILE_EXTENSIONS);
