@@ -46,20 +46,7 @@ public class KBArticleMarkdownConverter {
 			String markdown, String fileEntryName, Map<String, String> metadata)
 		throws KBArticleImportException {
 
-		MarkdownConverter markdownConverter =
-			MarkdownConverterFactoryUtil.create();
-
-		String html = null;
-
-		try {
-			html = markdownConverter.convert(markdown);
-		}
-		catch (IOException ioe) {
-			throw new KBArticleImportException(
-				"Unable to convert Markdown to HTML: " +
-					ioe.getLocalizedMessage(),
-				ioe);
-		}
+		String html = convertContent(markdown);
 
 		String heading = getHeading(html);
 
@@ -224,6 +211,27 @@ public class KBArticleMarkdownConverter {
 		sb.append(fileEntryName);
 
 		return sb.toString();
+	}
+
+	protected String convertContent(String content)
+		throws KBArticleImportException {
+
+		MarkdownConverter markdownConverter =
+			MarkdownConverterFactoryUtil.create();
+
+		String html = null;
+
+		try {
+			html = markdownConverter.convert(content);
+		}
+		catch (IOException ioe) {
+			throw new KBArticleImportException(
+				"Unable to convert Markdown to HTML: " +
+					ioe.getLocalizedMessage(),
+				ioe);
+		}
+
+		return html;
 	}
 
 	protected String getHeading(String html) {
