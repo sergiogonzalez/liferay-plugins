@@ -216,13 +216,11 @@ public class KBArticleMarkdownConverter {
 	protected String convertContent(String content)
 		throws KBArticleImportException {
 
-		MarkdownConverter markdownConverter =
-			MarkdownConverterFactoryUtil.create();
-
-		String html = null;
-
 		try {
-			html = markdownConverter.convert(content);
+			MarkdownConverter markdownConverter =
+				MarkdownConverterFactoryUtil.create();
+
+			return markdownConverter.convert(content);
 		}
 		catch (IOException ioe) {
 			throw new KBArticleImportException(
@@ -230,8 +228,6 @@ public class KBArticleMarkdownConverter {
 					ioe.getLocalizedMessage(),
 				ioe);
 		}
-
-		return html;
 	}
 
 	protected String getHeading(String html) {
