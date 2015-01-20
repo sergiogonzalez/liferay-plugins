@@ -494,6 +494,16 @@ public class KnowledgeBaseUtil {
 			KBArticle.class.getName(), "urlTitle", title);
 	}
 
+	public static String getUrlTitle(String title) {
+		String urlTitle = StringUtil.toLowerCase(title.trim());
+
+		urlTitle = FriendlyURLNormalizerUtil.normalize(
+			urlTitle, _normalizationFriendlyUrlPattern);
+
+		return ModelHintsUtil.trimString(
+			KBArticle.class.getName(), "urlTitle", urlTitle);
+	}
+
 	public static boolean isValidUrlTitle(String urlTitle) {
 		Matcher matcher = _validFriendlyUrlPattern.matcher(urlTitle);
 

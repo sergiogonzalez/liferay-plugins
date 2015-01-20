@@ -16,6 +16,7 @@ package com.liferay.knowledgebase.admin.importer.util;
 
 import com.liferay.knowledgebase.KBArticleImportException;
 import com.liferay.knowledgebase.model.KBArticle;
+import com.liferay.knowledgebase.util.KnowledgeBaseUtil;
 import com.liferay.knowledgebase.util.PortletPropsValues;
 import com.liferay.markdown.converter.MarkdownConverter;
 import com.liferay.markdown.converter.factory.MarkdownConverterFactoryUtil;
@@ -268,6 +269,9 @@ public class KBArticleMarkdownConverter {
 				urlTitle, StringPool.SPACE, StringPool.DASH);
 
 			urlTitle = StringUtil.toLowerCase(urlTitle);
+		}
+		else {
+			urlTitle = KnowledgeBaseUtil.getUrlTitle(heading);
 		}
 
 		if (!urlTitle.startsWith(StringPool.SLASH)) {
