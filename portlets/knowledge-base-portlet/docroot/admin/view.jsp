@@ -45,14 +45,28 @@ long parentResourcePrimKey = ParamUtil.getLong(request, "parentResourcePrimKey",
 	<liferay-ui:error exception="<%= KBArticlePriorityException.class %>" message='<%= LanguageUtil.format(request, "please-enter-a-priority-that-is-greater-than-x", "0", false) %>' translateMessage="<%= false %>" />
 
 	<c:if test='<%= SessionMessages.contains(renderRequest, "importedKBArticlesCount") %>'>
-		<div class="alert alert-success">
-			<liferay-ui:message key="your-request-completed-successfully" />
 
-			<liferay-ui:message
-				arguments='<%= SessionMessages.get(renderRequest, "importedKBArticlesCount") %>'
-				key="a-total-of-x-articles-have-been-imported"
-			/>
-		</div>
+		<%
+		int importedKBArticlesCount = GetterUtil.getInteger(SessionMessages.get(renderRequest, "importedKBArticlesCount"));
+		%>
+
+		<c:choose>
+			<c:when test="<%= importedKBArticlesCount > 0 %>">
+				<div class="alert alert-success">
+					<liferay-ui:message key="your-request-completed-successfully" />
+
+					<liferay-ui:message arguments="<%= importedKBArticlesCount %>" key="a-total-of-x-articles-have-been-imported" />
+				</div>
+			</c:when>
+			<c:otherwise>
+				<div class="alert alert-warning">
+					<liferay-ui:message
+						arguments="<%= StringUtil.merge(PortletPropsValues.MARKDOWN_IMPORTER_ARTICLE_EXTENSIONS, StringPool.COMMA_AND_SPACE) %>"
+						key="nothing-was-imported-no-articles-were-found-with-one-of-the-supported-extensions-x"
+					/>
+				</div>
+			</c:otherwise>
+		</c:choose>
 	</c:if>
 
 	<liferay-portlet:renderURL varImpl="iteratorURL">
@@ -61,16 +75,21 @@ long parentResourcePrimKey = ParamUtil.getLong(request, "parentResourcePrimKey",
 		<portlet:param name="parentResourcePrimKey" value="<%= String.valueOf(parentResourcePrimKey) %>" />
 	</liferay-portlet:renderURL>
 
+	<%
+	boolean hasDeleteKBArticlesPermission = AdminPermission.contains(permissionChecker, scopeGroupId, ActionKeys.DELETE_KB_ARTICLES);
+	boolean hasUpdateKBArticlesPrioritiesPermission = AdminPermission.contains(permissionChecker, scopeGroupId, ActionKeys.UPDATE_KB_ARTICLES_PRIORITIES);
+	%>
+
 	<aui:fieldset>
 		<aui:nav-bar>
 			<aui:nav cssClass="navbar-nav">
-				<c:if test="<%= AdminPermission.contains(permissionChecker, scopeGroupId, ActionKeys.DELETE_KB_ARTICLES) || AdminPermission.contains(permissionChecker, scopeGroupId, ActionKeys.UPDATE_KB_ARTICLES_PRIORITIES) %>">
+				<c:if test="<%= hasDeleteKBArticlesPermission || hasUpdateKBArticlesPrioritiesPermission %>">
 					<aui:nav-item cssClass="hide" dropdown="<%= true %>" id="actionsButton" label="actions">
-						<c:if test="<%= AdminPermission.contains(permissionChecker, scopeGroupId, ActionKeys.UPDATE_KB_ARTICLES_PRIORITIES) %>">
+						<c:if test="<%= hasUpdateKBArticlesPrioritiesPermission %>">
 							<aui:nav-item iconCssClass="icon-save" id="updateKBArticlesPriorities" label="save" />
 						</c:if>
 
-						<c:if test="<%= AdminPermission.contains(permissionChecker, scopeGroupId, ActionKeys.DELETE_KB_ARTICLES) %>">
+						<c:if test="<%= hasDeleteKBArticlesPermission %>">
 							<aui:nav-item cssClass="item-remove" iconCssClass="icon-remove" id="deleteKBArticles" label="delete" />
 						</c:if>
 					</aui:nav-item>
@@ -238,7 +257,7 @@ long parentResourcePrimKey = ParamUtil.getLong(request, "parentResourcePrimKey",
 		<liferay-ui:search-container
 			curParam="cur2"
 			id="kbArticlesAdminSearchContainer"
-			rowChecker="<%= AdminPermission.contains(permissionChecker, scopeGroupId, ActionKeys.DELETE_KB_ARTICLES) ? new RowChecker(renderResponse) : null %>"
+			rowChecker="<%= (hasDeleteKBArticlesPermission || hasUpdateKBArticlesPrioritiesPermission) ? new RowChecker(renderResponse) : null %>"
 			searchContainer="<%= new KBArticleSearch(renderRequest, iteratorURL) %>"
 		>
 
@@ -247,10 +266,6 @@ long parentResourcePrimKey = ParamUtil.getLong(request, "parentResourcePrimKey",
 			%>
 
 			<%@ include file="/admin/article_search_results.jspf" %>
-
-			<%
-			boolean updateArticlesPriorities = AdminPermission.contains(permissionChecker, scopeGroupId, ActionKeys.UPDATE_KB_ARTICLES_PRIORITIES);
-			%>
 
 			<liferay-ui:search-container-row
 				className="com.liferay.knowledgebase.model.KBArticle"
@@ -275,7 +290,7 @@ long parentResourcePrimKey = ParamUtil.getLong(request, "parentResourcePrimKey",
 					orderable="<%= true %>"
 				>
 					<c:choose>
-						<c:when test="<%= updateArticlesPriorities %>">
+						<c:when test="<%= hasUpdateKBArticlesPrioritiesPermission %>">
 							<aui:input cssClass="kb-article-priority" label="" name='<%= "priority" + kbArticle.getResourcePrimKey() %>' size="5" title="priority" type="text" value="<%= BigDecimal.valueOf(kbArticle.getPriority()).toPlainString() %>" />
 						</c:when>
 						<c:otherwise>
