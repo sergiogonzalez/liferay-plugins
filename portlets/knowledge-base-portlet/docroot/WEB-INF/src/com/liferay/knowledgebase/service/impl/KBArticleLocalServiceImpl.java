@@ -295,7 +295,8 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 	@Override
 	@SystemEvent(
 		action = SystemEventConstants.ACTION_SKIP,
-		type = SystemEventConstants.TYPE_DELETE)
+		type = SystemEventConstants.TYPE_DELETE
+	)
 	public KBArticle deleteKBArticle(KBArticle kbArticle)
 		throws PortalException {
 
@@ -400,6 +401,15 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 
 		TempFileEntryUtil.deleteTempFileEntry(
 			groupId, userId, fileName, tempFolderName);
+	}
+
+	@Override
+	public KBArticle fetchFirstChildKBArticle(
+		long groupId, long parentResourcePrimKey) {
+
+		return kbArticlePersistence.fetchByG_P_L_First(
+			groupId, parentResourcePrimKey, true,
+			new KBArticlePriorityComparator(true));
 	}
 
 	@Override
