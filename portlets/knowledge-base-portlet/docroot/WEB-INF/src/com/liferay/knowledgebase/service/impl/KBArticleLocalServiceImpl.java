@@ -295,7 +295,8 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 	@Override
 	@SystemEvent(
 		action = SystemEventConstants.ACTION_SKIP,
-		type = SystemEventConstants.TYPE_DELETE)
+		type = SystemEventConstants.TYPE_DELETE
+	)
 	public KBArticle deleteKBArticle(KBArticle kbArticle)
 		throws PortalException {
 
@@ -404,8 +405,7 @@ public class KBArticleLocalServiceImpl extends KBArticleLocalServiceBaseImpl {
 
 	@Override
 	public KBArticle fetchFirstChildKBArticle(
-			long groupId, long parentResourcePrimKey)
-		throws SystemException {
+		long groupId, long parentResourcePrimKey) {
 
 		return kbArticlePersistence.fetchByG_P_L_First(
 			groupId, parentResourcePrimKey, true,
