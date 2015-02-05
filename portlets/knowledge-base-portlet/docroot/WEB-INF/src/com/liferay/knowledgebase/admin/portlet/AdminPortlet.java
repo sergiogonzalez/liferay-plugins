@@ -124,46 +124,52 @@ public class AdminPortlet extends BaseKBPortlet {
 			ActionRequest actionRequest, ActionResponse actionResponse)
 		throws Exception {
 
-		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
-			WebKeys.THEME_DISPLAY);
-
-		UploadPortletRequest uploadPortletRequest =
-			PortalUtil.getUploadPortletRequest(actionRequest);
-
-		long parentKBFolderId = ParamUtil.getLong(
-			uploadPortletRequest, "parentKBFolderId",
-			KBFolderConstants.DEFAULT_PARENT_FOLDER_ID);
-
-		String fileName = uploadPortletRequest.getFileName("file");
-
-		if (Validator.isNull(fileName)) {
-			throw new KBArticleImportException("File name is null");
-		}
-
-		InputStream inputStream = null;
-
 		try {
-			inputStream = uploadPortletRequest.getFileAsStream("file");
+			ThemeDisplay themeDisplay =
+				(ThemeDisplay)actionRequest.getAttribute(WebKeys.THEME_DISPLAY);
 
-			ServiceContext serviceContext = ServiceContextFactory.getInstance(
-				AdminPortlet.class.getName(), actionRequest);
+			UploadPortletRequest uploadPortletRequest =
+				PortalUtil.getUploadPortletRequest(actionRequest);
 
-			serviceContext.setGuestPermissions(new String[] {ActionKeys.VIEW});
+			long parentKBFolderId = ParamUtil.getLong(
+				uploadPortletRequest, "parentKBFolderId",
+				KBFolderConstants.DEFAULT_PARENT_FOLDER_ID);
 
-			int importedKBArticlesCount =
-				KBArticleServiceUtil.addKBArticlesMarkdown(
-					themeDisplay.getScopeGroupId(), parentKBFolderId, fileName,
-					inputStream, serviceContext);
+			String fileName = uploadPortletRequest.getFileName("file");
 
-			SessionMessages.add(
-				actionRequest, "importedKBArticlesCount",
-				importedKBArticlesCount);
+			if (Validator.isNull(fileName)) {
+				throw new KBArticleImportException("File name is null");
+			}
+
+			InputStream inputStream = null;
+
+			try {
+				inputStream = uploadPortletRequest.getFileAsStream("file");
+
+				ServiceContext serviceContext =
+					ServiceContextFactory.getInstance(
+						AdminPortlet.class.getName(), actionRequest);
+
+				serviceContext.setGuestPermissions(
+					new String[] {ActionKeys.VIEW});
+
+				int importedKBArticlesCount =
+					KBArticleServiceUtil.addKBArticlesMarkdown(
+						themeDisplay.getScopeGroupId(), parentKBFolderId,
+						fileName, inputStream, serviceContext);
+
+				SessionMessages.add(
+					actionRequest, "importedKBArticlesCount",
+					importedKBArticlesCount);
+			}
+			finally {
+				StreamUtil.cleanUp(inputStream);
+			}
 		}
 		catch (KBArticleImportException kbaie) {
 			SessionErrors.add(actionRequest, kbaie.getClass(), kbaie);
-		}
-		finally {
-			StreamUtil.cleanUp(inputStream);
+
+			sendRedirect(actionRequest, actionResponse, "/admin/import.jsp");
 		}
 	}
 
@@ -402,6 +408,27 @@ public class AdminPortlet extends BaseKBPortlet {
 		}
 
 		return false;
+	}
+
+	protected void sendRedirect(
+			ActionRequest actionRequest, ActionResponse actionResponse,
+			String mvcPath)
+		throws IOException {
+
+		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
+			WebKeys.THEME_DISPLAY);
+
+		PortletURL redirectURL = PortletURLFactoryUtil.create(
+			actionRequest, PortalUtil.getPortletId(actionRequest),
+			themeDisplay.getPlid(), PortletRequest.RENDER_PHASE);
+
+		redirectURL.setParameter(
+			"redirect", ParamUtil.getString(actionRequest, "redirect"));
+		redirectURL.setParameter("mvcPath", mvcPath);
+
+		actionRequest.setAttribute(WebKeys.REDIRECT, redirectURL.toString());
+
+		sendRedirect(actionRequest, actionResponse);
 	}
 
 }
