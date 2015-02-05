@@ -521,6 +521,12 @@ public class KBArticleLocalServiceUtil {
 				   .getKBArticlesCount(groupId, parentResourcePrimKey, status);
 	}
 
+	public static int getKBFolderKBArticlesCount(long groupId, long kbFolderId,
+		int status) throws com.liferay.portal.kernel.exception.SystemException {
+		return getService()
+				   .getKBFolderKBArticlesCount(groupId, kbFolderId, status);
+	}
+
 	public static com.liferay.knowledgebase.model.KBArticle getLatestKBArticle(
 		long resourcePrimKey, int status)
 		throws com.liferay.portal.kernel.exception.PortalException {
