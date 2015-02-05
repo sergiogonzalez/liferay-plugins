@@ -168,6 +168,8 @@ public class AdminPortlet extends BaseKBPortlet {
 		}
 		catch (KBArticleImportException kbaie) {
 			SessionErrors.add(actionRequest, kbaie.getClass(), kbaie);
+
+			sendRedirect(actionRequest, actionResponse, "/admin/import.jsp");
 		}
 	}
 
@@ -406,6 +408,27 @@ public class AdminPortlet extends BaseKBPortlet {
 		}
 
 		return false;
+	}
+
+	protected void sendRedirect(
+			ActionRequest actionRequest, ActionResponse actionResponse,
+			String mvcPath)
+		throws IOException {
+
+		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
+			WebKeys.THEME_DISPLAY);
+
+		PortletURL redirectURL = PortletURLFactoryUtil.create(
+			actionRequest, PortalUtil.getPortletId(actionRequest),
+			themeDisplay.getPlid(), PortletRequest.RENDER_PHASE);
+
+		redirectURL.setParameter(
+			"redirect", ParamUtil.getString(actionRequest, "redirect"));
+		redirectURL.setParameter("mvcPath", mvcPath);
+
+		actionRequest.setAttribute(WebKeys.REDIRECT, redirectURL.toString());
+
+		sendRedirect(actionRequest, actionResponse);
 	}
 
 }
