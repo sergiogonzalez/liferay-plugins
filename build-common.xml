@@ -179,6 +179,7 @@ Error-Prone was automatically installed. Please rerun your task.
 
 	<macrodef name="build-css">
 		<attribute name="module.dir" />
+		<attribute default="${module.dir.unix}/docroot" name="saas.docroot.dir" />
 
 		<sequential>
 			<java
@@ -190,7 +191,7 @@ Error-Prone was automatically installed. Please rerun your task.
 			>
 				<jvmarg value="-Dliferay.lib.portal.dir=${app.server.lib.portal.dir}" />
 				<arg value="sass.dir=/" />
-				<arg value="sass.docroot.dir=${module.dir.unix}/docroot" />
+				<arg value="sass.docroot.dir=@{saas.docroot.dir}" />
 				<arg value="sass.portal.common.dir=${app.server.portal.dir}/html/css/common" />
 			</java>
 
@@ -2025,7 +2026,7 @@ Please find a solution that does not require portal-impl.jar.
 								<equals arg1="${test.integration.count}" arg2="0" />
 							</not>
 							<not>
-								<available file="@{module.dir}/test/integration/arquillian.xml" type="file" />
+								<available file="@{module.dir}/test/integration/skip.managed.app.server" type="file" />
 							</not>
 						</and>
 						<then>
