@@ -18,6 +18,7 @@ import com.liferay.mentions.util.MentionsNotifier;
 import com.liferay.mentions.util.MentionsUtil;
 import com.liferay.mentions.util.PortletPropsValues;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.service.ServiceContext;
@@ -80,8 +81,10 @@ public class MentionsBlogsEntryServiceImpl
 				"contentURL", workflowContext.get("url"));
 		}
 
+		String content = HtmlUtil.extractText(entry.getContent());
+
 		mentionsNotifier.notify(
-			entry.getUserId(), entry.getGroupId(), entry.getContent(),
+			entry.getUserId(), entry.getGroupId(), content,
 			BlogsEntry.class.getName(), entry.getEntryId(),
 			ContentUtil.get(
 				PortletPropsValues.ASSET_ENTRY_MENTION_EMAIL_SUBJECT),
