@@ -16,6 +16,7 @@ package com.liferay.mentions.util;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.util.ArrayUtil;
+import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.PrefsPropsUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.StringPool;
@@ -78,7 +79,7 @@ public class MentionsNotifier {
 			getAssetEntryName(className, serviceContext), "[$USER_ADDRESS$]",
 			messageUserEmailAddress, "[USER_NAME$]", messageUserName,
 			"[$CONTENT_URL$]", contentURL);
-		subscriptionSender.setEntryTitle(content);
+		subscriptionSender.setEntryTitle(HtmlUtil.extractText(content));
 		subscriptionSender.setEntryURL(contentURL);
 		subscriptionSender.setFrom(fromAddress, fromName);
 		subscriptionSender.setHtmlFormat(true);
@@ -89,7 +90,7 @@ public class MentionsNotifier {
 		subscriptionSender.setScopeGroupId(groupId);
 		subscriptionSender.setServiceContext(serviceContext);
 		subscriptionSender.setSubject(subject);
-		subscriptionSender.setUserId(userId);
+		subscriptionSender.setCurrentUserId(userId);
 
 		for (int i = 0; i < mentionedUsersScreenNames.length; i++) {
 			String mentionedUserScreenName = mentionedUsersScreenNames[i];
