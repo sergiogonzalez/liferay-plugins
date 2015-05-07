@@ -279,6 +279,15 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 
 	@Override
 	public List<FileEntry> getFileEntries(
+			long folderId, int status, int start, int end,
+			OrderByComparator<FileEntry> obc)
+		throws PortalException {
+
+		return getFileEntries(folderId, start, end, obc);
+	}
+
+	@Override
+	public List<FileEntry> getFileEntries(
 			long folderId, int start, int end, OrderByComparator<FileEntry> obc)
 		throws PortalException {
 
@@ -339,6 +348,13 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 
 		return _extRepository.getExtRepositoryObjectsCount(
 			ExtRepositoryObjectType.FILE, extRepositoryFolderKey);
+	}
+
+	@Override
+	public int getFileEntriesCount(long folderId, int status)
+		throws PortalException {
+
+		return getFileEntriesCount(folderId);
 	}
 
 	@Override
