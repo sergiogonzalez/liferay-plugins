@@ -351,6 +351,16 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 	}
 
 	@Override
+	public int getFileEntriesCount(long folderId, int status)
+		throws PortalException {
+
+		String extRepositoryFolderKey = getExtRepositoryObjectKey(folderId);
+
+		return _extRepository.getExtRepositoryObjectsCount(
+			ExtRepositoryObjectType.FILE, extRepositoryFolderKey);
+	}
+
+	@Override
 	public int getFileEntriesCount(long folderId, long fileEntryTypeId)
 		throws PortalException {
 
