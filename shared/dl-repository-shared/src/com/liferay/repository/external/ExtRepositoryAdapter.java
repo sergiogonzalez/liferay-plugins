@@ -739,16 +739,14 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 
 	@Override
 	@SuppressWarnings("unused")
-	public Lock lockFolder(long folderId) throws PortalException {
+	public Lock lockFolder(long folderId) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	@SuppressWarnings("unused")
 	public Lock lockFolder(
-			long folderId, String owner, boolean inheritable,
-			long expirationTime)
-		throws PortalException {
+		long folderId, String owner, boolean inheritable, long expirationTime) {
 
 		throw new UnsupportedOperationException();
 	}
@@ -805,8 +803,7 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 	@Override
 	@SuppressWarnings("unused")
 	public Lock refreshFileEntryLock(
-			String lockUuid, long companyId, long expirationTime)
-		throws PortalException {
+		String lockUuid, long companyId, long expirationTime) {
 
 		throw new UnsupportedOperationException();
 	}
@@ -814,8 +811,7 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 	@Override
 	@SuppressWarnings("unused")
 	public Lock refreshFolderLock(
-			String lockUuid, long companyId, long expirationTime)
-		throws PortalException {
+		String lockUuid, long companyId, long expirationTime) {
 
 		throw new UnsupportedOperationException();
 	}
@@ -893,18 +889,15 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 
 	@Override
 	@SuppressWarnings("unused")
-	public Hits search(long creatorUserId, int status, int start, int end)
-		throws PortalException {
-
+	public Hits search(long creatorUserId, int status, int start, int end) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	@SuppressWarnings("unused")
 	public Hits search(
-			long creatorUserId, long folderId, String[] mimeTypes, int status,
-			int start, int end)
-		throws PortalException {
+		long creatorUserId, long folderId, String[] mimeTypes, int status,
+		int start, int end) {
 
 		throw new UnsupportedOperationException();
 	}
@@ -991,9 +984,7 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 
 	@Override
 	@SuppressWarnings("unused")
-	public void unlockFolder(long folderId, String lockUuid)
-		throws PortalException {
-
+	public void unlockFolder(long folderId, String lockUuid) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -1097,17 +1088,13 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 
 	@Override
 	@SuppressWarnings("unused")
-	public boolean verifyFileEntryCheckOut(long fileEntryId, String lockUuid)
-		throws PortalException {
-
+	public boolean verifyFileEntryCheckOut(long fileEntryId, String lockUuid) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	@SuppressWarnings("unused")
-	public boolean verifyInheritableLock(long folderId, String lockUuid)
-		throws PortalException {
-
+	public boolean verifyInheritableLock(long folderId, String lockUuid) {
 		throw new UnsupportedOperationException();
 	}
 
