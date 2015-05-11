@@ -19,6 +19,7 @@ import com.liferay.portal.kernel.messaging.BaseMessageListener;
 import com.liferay.portal.kernel.messaging.Message;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.repository.model.Folder;
+import com.liferay.portal.kernel.repository.model.RepositoryEntry;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.model.User;
@@ -116,25 +117,23 @@ public class SyncDLObjectMessageListener extends BaseMessageListener {
 		if (event.equals(SyncConstants.EVENT_RESTORE) &&
 			type.equals(SyncConstants.TYPE_FOLDER)) {
 
-			List<Object> foldersAndFileEntriesAndFileShortcuts =
-				DLAppServiceUtil.getFoldersAndFileEntriesAndFileShortcuts(
+			List<RepositoryEntry> repositoryEntries =
+				DLAppServiceUtil.getRepositoryEntries(
 					syncDLObject.getRepositoryId(), syncDLObject.getTypePK(),
 					WorkflowConstants.STATUS_ANY, false, QueryUtil.ALL_POS,
 					QueryUtil.ALL_POS);
 
-			for (Object folderAndFileEntryAndFileShortcut :
-					foldersAndFileEntriesAndFileShortcuts) {
+			for (RepositoryEntry repositoryEntry : repositoryEntries) {
 
-				if (folderAndFileEntryAndFileShortcut instanceof FileEntry) {
-					FileEntry fileEntry =
-						(FileEntry)folderAndFileEntryAndFileShortcut;
+				if (repositoryEntry instanceof FileEntry) {
+					FileEntry fileEntry = (FileEntry)repositoryEntry;
 
 					addSyncDLObject(
 						modifiedTime, SyncConstants.EVENT_RESTORE,
 						SyncConstants.TYPE_FILE, fileEntry.getFileEntryId());
 				}
-				else if (folderAndFileEntryAndFileShortcut instanceof Folder) {
-					Folder folder = (Folder)folderAndFileEntryAndFileShortcut;
+				else if (repositoryEntry instanceof Folder) {
+					Folder folder = (Folder)repositoryEntry;
 
 					if (!SyncUtil.isSupportedFolder(folder)) {
 						continue;
