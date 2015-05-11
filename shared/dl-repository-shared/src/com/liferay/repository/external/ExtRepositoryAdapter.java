@@ -27,6 +27,7 @@ import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.repository.model.FileShortcut;
 import com.liferay.portal.kernel.repository.model.FileVersion;
 import com.liferay.portal.kernel.repository.model.Folder;
+import com.liferay.portal.kernel.repository.model.RepositoryEntry;
 import com.liferay.portal.kernel.search.Document;
 import com.liferay.portal.kernel.search.DocumentImpl;
 import com.liferay.portal.kernel.search.Field;
@@ -48,7 +49,6 @@ import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.model.CompanyConstants;
 import com.liferay.portal.model.Lock;
-import com.liferay.portal.model.RepositoryEntry;
 import com.liferay.portal.model.User;
 import com.liferay.portal.security.auth.PrincipalThreadLocal;
 import com.liferay.portal.service.ServiceContext;
@@ -536,8 +536,8 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 	}
 
 	@Override
-	public List<Object> getFoldersAndFileEntries(
-		long folderId, int start, int end, OrderByComparator<?> obc) {
+	public List<RepositoryEntry> getRepositoryEntries(
+			long folderId, int start, int end, OrderByComparator<?> obc) {
 
 		try {
 			String extRepositoryFolderKey = getExtRepositoryObjectKey(folderId);
@@ -553,7 +553,7 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 
 			return _subList(
 				extRepositoryObjectAdapters, start, end,
-				(OrderByComparator<Object>)obc);
+				(OrderByComparator<RepositoryEntry>)obc);
 		}
 		catch (Exception e) {
 			throw new RepositoryException(e);
@@ -561,7 +561,7 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 	}
 
 	@Override
-	public List<Object> getFoldersAndFileEntries(
+	public List<RepositoryEntry>getRepositoryEntries(
 			long folderId, String[] mimeTypes, int start, int end,
 			OrderByComparator<?> obc)
 		throws PortalException {
@@ -581,11 +581,11 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 
 		return _subList(
 			extRepositoryObjectAdapters, start, end,
-			(OrderByComparator<Object>)obc);
+			(OrderByComparator<RepositoryEntry>)obc);
 	}
 
 	@Override
-	public int getFoldersAndFileEntriesCount(long folderId) {
+	public int getRepositoryEntriesCount(long folderId) {
 		try {
 			String extRepositoryFolderKey = getExtRepositoryObjectKey(folderId);
 
@@ -598,10 +598,10 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 	}
 
 	@Override
-	public int getFoldersAndFileEntriesCount(long folderId, String[] mimeTypes)
+	public int getRepositoryEntriesCount(long folderId, String[] mimeTypes)
 		throws PortalException {
 
-		List<Object> extRepositoryObjects = getFoldersAndFileEntries(
+		List<RepositoryEntry> extRepositoryObjects = getRepositoryEntries(
 			folderId, mimeTypes, QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
 
 		return extRepositoryObjects.size();
@@ -687,7 +687,7 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 		List<Long> subfolderIds = new ArrayList<>();
 
 		for (String extRepositorySubfolderKey : extRepositorySubfolderKeys) {
-			RepositoryEntry repositoryEntry = getRepositoryEntry(
+			com.liferay.portal.model.RepositoryEntry repositoryEntry = getRepositoryEntry(
 				extRepositorySubfolderKey);
 
 			subfolderIds.add(repositoryEntry.getRepositoryEntryId());
@@ -1109,7 +1109,7 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 	protected String getExtRepositoryObjectKey(long repositoryEntryId)
 		throws PortalException {
 
-		RepositoryEntry repositoryEntry =
+		com.liferay.portal.model.RepositoryEntry repositoryEntry =
 			repositoryEntryLocalService.fetchRepositoryEntry(repositoryEntryId);
 
 		if (repositoryEntry != null) {
@@ -1194,7 +1194,7 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 	private String _getExtRepositoryObjectKey(String uuid)
 		throws PortalException {
 
-		RepositoryEntry repositoryEntry =
+		com.liferay.portal.model.RepositoryEntry repositoryEntry =
 			repositoryEntryLocalService.fetchRepositoryEntryByUuidAndGroupId(
 				uuid, getGroupId());
 
@@ -1251,7 +1251,7 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 		return PrincipalThreadLocal.getPassword();
 	}
 
-	private RepositoryEntry _getRootRepositoryEntry(DLFolder rootMountFolder)
+	private com.liferay.portal.model.RepositoryEntry _getRootRepositoryEntry(DLFolder rootMountFolder)
 		throws PortalException {
 
 		return repositoryEntryLocalService.getRepositoryEntry(
@@ -1296,7 +1296,7 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 			extRepositoryAdapterCache.get(extRepositoryModelKey);
 
 		if (extRepositoryVersionAdapter == null) {
-			RepositoryEntry repositoryEntry = getRepositoryEntry(
+			com.liferay.portal.model.RepositoryEntry repositoryEntry = getRepositoryEntry(
 				extRepositoryModelKey);
 
 			extRepositoryVersionAdapter = new ExtRepositoryFileVersionAdapter(
@@ -1351,7 +1351,7 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 			extRepositoryAdapterCache.get(extRepositoryModelKey);
 
 		if (extRepositoryObjectAdapter == null) {
-			RepositoryEntry repositoryEntry = getRepositoryEntry(
+			com.liferay.portal.model.RepositoryEntry repositoryEntry = getRepositoryEntry(
 				extRepositoryModelKey);
 
 			if (extRepositoryObject instanceof ExtRepositoryFolder) {
