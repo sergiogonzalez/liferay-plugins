@@ -80,6 +80,30 @@ import java.util.Set;
 public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 
 	@Override
+	public List<RepositoryEntry>getRepositoryEntries(
+			long folderId, String[] mimeTypes, int start, int end,
+			OrderByComparator<?> obc)
+		throws PortalException {
+
+		String extRepositoryFolderKey = getExtRepositoryObjectKey(folderId);
+
+		List<ExtRepositoryObject> extRepositoryObjects =
+			_extRepository.getExtRepositoryObjects(
+				ExtRepositoryObjectType.OBJECT, extRepositoryFolderKey);
+
+		List<ExtRepositoryObjectAdapter<?>> extRepositoryObjectAdapters =
+			_toExtRepositoryObjectAdapters(
+				ExtRepositoryObjectAdapterType.OBJECT, extRepositoryObjects);
+
+		extRepositoryObjectAdapters = _filterByMimeType(
+			extRepositoryObjectAdapters, mimeTypes);
+
+		return _subList(
+			extRepositoryObjectAdapters, start, end,
+			(OrderByComparator<RepositoryEntry>)obc);
+	}
+
+	@Override
 	public FileEntry addFileEntry(
 			long userId, long folderId, String sourceFileName, String mimeType,
 			String title, String description, String changeLog,
@@ -536,78 +560,6 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 	}
 
 	@Override
-	public List<RepositoryEntry> getRepositoryEntries(
-			long folderId, int start, int end, OrderByComparator<?> obc) {
-
-		try {
-			String extRepositoryFolderKey = getExtRepositoryObjectKey(folderId);
-
-			List<? extends ExtRepositoryObject> extRepositoryObjects =
-				_extRepository.getExtRepositoryObjects(
-					ExtRepositoryObjectType.OBJECT, extRepositoryFolderKey);
-
-			List<ExtRepositoryObjectAdapter<?>> extRepositoryObjectAdapters =
-				_toExtRepositoryObjectAdapters(
-					ExtRepositoryObjectAdapterType.OBJECT,
-					extRepositoryObjects);
-
-			return _subList(
-				extRepositoryObjectAdapters, start, end,
-				(OrderByComparator<RepositoryEntry>)obc);
-		}
-		catch (Exception e) {
-			throw new RepositoryException(e);
-		}
-	}
-
-	@Override
-	public List<RepositoryEntry>getRepositoryEntries(
-			long folderId, String[] mimeTypes, int start, int end,
-			OrderByComparator<?> obc)
-		throws PortalException {
-
-		String extRepositoryFolderKey = getExtRepositoryObjectKey(folderId);
-
-		List<ExtRepositoryObject> extRepositoryObjects =
-			_extRepository.getExtRepositoryObjects(
-				ExtRepositoryObjectType.OBJECT, extRepositoryFolderKey);
-
-		List<ExtRepositoryObjectAdapter<?>> extRepositoryObjectAdapters =
-			_toExtRepositoryObjectAdapters(
-				ExtRepositoryObjectAdapterType.OBJECT, extRepositoryObjects);
-
-		extRepositoryObjectAdapters = _filterByMimeType(
-			extRepositoryObjectAdapters, mimeTypes);
-
-		return _subList(
-			extRepositoryObjectAdapters, start, end,
-			(OrderByComparator<RepositoryEntry>)obc);
-	}
-
-	@Override
-	public int getRepositoryEntriesCount(long folderId) {
-		try {
-			String extRepositoryFolderKey = getExtRepositoryObjectKey(folderId);
-
-			return _extRepository.getExtRepositoryObjectsCount(
-				ExtRepositoryObjectType.OBJECT, extRepositoryFolderKey);
-		}
-		catch (PortalException pe) {
-			throw new SystemException(pe);
-		}
-	}
-
-	@Override
-	public int getRepositoryEntriesCount(long folderId, String[] mimeTypes)
-		throws PortalException {
-
-		List<RepositoryEntry> extRepositoryObjects = getRepositoryEntries(
-			folderId, mimeTypes, QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-
-		return extRepositoryObjects.size();
-	}
-
-	@Override
 	public int getFoldersCount(long parentFolderId, boolean includeMountfolders)
 		throws PortalException {
 
@@ -669,6 +621,54 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 	}
 
 	@Override
+	public List<RepositoryEntry> getRepositoryEntries(
+		long folderId, int start, int end, OrderByComparator<?> obc) {
+
+		try {
+			String extRepositoryFolderKey = getExtRepositoryObjectKey(folderId);
+
+			List<? extends ExtRepositoryObject> extRepositoryObjects =
+				_extRepository.getExtRepositoryObjects(
+					ExtRepositoryObjectType.OBJECT, extRepositoryFolderKey);
+
+			List<ExtRepositoryObjectAdapter<?>> extRepositoryObjectAdapters =
+				_toExtRepositoryObjectAdapters(
+					ExtRepositoryObjectAdapterType.OBJECT,
+					extRepositoryObjects);
+
+			return _subList(
+				extRepositoryObjectAdapters, start, end,
+				(OrderByComparator<RepositoryEntry>)obc);
+		}
+		catch (Exception e) {
+			throw new RepositoryException(e);
+		}
+	}
+
+	@Override
+	public int getRepositoryEntriesCount(long folderId) {
+		try {
+			String extRepositoryFolderKey = getExtRepositoryObjectKey(folderId);
+
+			return _extRepository.getExtRepositoryObjectsCount(
+				ExtRepositoryObjectType.OBJECT, extRepositoryFolderKey);
+		}
+		catch (PortalException pe) {
+			throw new SystemException(pe);
+		}
+	}
+
+	@Override
+	public int getRepositoryEntriesCount(long folderId, String[] mimeTypes)
+		throws PortalException {
+
+		List<RepositoryEntry> extRepositoryObjects = getRepositoryEntries(
+			folderId, mimeTypes, QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
+
+		return extRepositoryObjects.size();
+	}
+
+	@Override
 	public void getSubfolderIds(List<Long> folderIds, long folderId)
 		throws PortalException {
 
@@ -687,8 +687,8 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 		List<Long> subfolderIds = new ArrayList<>();
 
 		for (String extRepositorySubfolderKey : extRepositorySubfolderKeys) {
-			com.liferay.portal.model.RepositoryEntry repositoryEntry = getRepositoryEntry(
-				extRepositorySubfolderKey);
+			com.liferay.portal.model.RepositoryEntry repositoryEntry =
+				getRepositoryEntry(extRepositorySubfolderKey);
 
 			subfolderIds.add(repositoryEntry.getRepositoryEntryId());
 		}
@@ -1251,7 +1251,8 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 		return PrincipalThreadLocal.getPassword();
 	}
 
-	private com.liferay.portal.model.RepositoryEntry _getRootRepositoryEntry(DLFolder rootMountFolder)
+	private com.liferay.portal.model.RepositoryEntry _getRootRepositoryEntry(
+			DLFolder rootMountFolder)
 		throws PortalException {
 
 		return repositoryEntryLocalService.getRepositoryEntry(
@@ -1296,8 +1297,8 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 			extRepositoryAdapterCache.get(extRepositoryModelKey);
 
 		if (extRepositoryVersionAdapter == null) {
-			com.liferay.portal.model.RepositoryEntry repositoryEntry = getRepositoryEntry(
-				extRepositoryModelKey);
+			com.liferay.portal.model.RepositoryEntry repositoryEntry =
+				getRepositoryEntry(extRepositoryModelKey);
 
 			extRepositoryVersionAdapter = new ExtRepositoryFileVersionAdapter(
 				this, repositoryEntry.getRepositoryEntryId(),
@@ -1351,8 +1352,8 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 			extRepositoryAdapterCache.get(extRepositoryModelKey);
 
 		if (extRepositoryObjectAdapter == null) {
-			com.liferay.portal.model.RepositoryEntry repositoryEntry = getRepositoryEntry(
-				extRepositoryModelKey);
+			com.liferay.portal.model.RepositoryEntry repositoryEntry =
+				getRepositoryEntry(extRepositoryModelKey);
 
 			if (extRepositoryObject instanceof ExtRepositoryFolder) {
 				ExtRepositoryFolder extRepositoryFolder =
