@@ -26,6 +26,7 @@ import com.liferay.calendar.service.base.CalendarImporterLocalServiceBaseImpl;
 import com.liferay.calendar.util.CalendarResourceUtil;
 import com.liferay.portal.kernel.cal.DayAndPosition;
 import com.liferay.portal.kernel.cal.TZSRecurrence;
+import com.liferay.portal.kernel.comment.CommentManagerUtil;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
@@ -129,9 +130,11 @@ public class CalendarImporterLocalServiceImpl
 
 		importAssets(calEvent, calendarBookingId);
 
-		// Message boards
+		// Discussions
 
-		importMBDiscussion(calEvent, calendarBookingId);
+		CommentManagerUtil.copyDiscussion(
+			CalEvent.class.getName(), calEvent.getEventId(),
+			CalendarBooking.class.getName(), calendarBookingId);
 
 		// Social
 
