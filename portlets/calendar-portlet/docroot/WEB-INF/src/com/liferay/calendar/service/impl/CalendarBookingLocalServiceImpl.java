@@ -35,6 +35,7 @@ import com.liferay.calendar.util.RecurrenceUtil;
 import com.liferay.calendar.workflow.CalendarBookingApprovalWorkflow;
 import com.liferay.calendar.workflow.CalendarBookingWorkflowConstants;
 import com.liferay.portal.kernel.bean.BeanReference;
+import com.liferay.portal.kernel.comment.CommentManagerUtil;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQueryFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.Property;
@@ -297,9 +298,9 @@ public class CalendarBookingLocalServiceImpl
 			CalendarBooking.class.getName(),
 			calendarBooking.getCalendarBookingId());
 
-		// Message boards
+		// Discussion
 
-		mbMessageLocalService.deleteDiscussionMessages(
+		CommentManagerUtil.deleteDiscussion(
 			CalendarBooking.class.getName(),
 			calendarBooking.getCalendarBookingId());
 
