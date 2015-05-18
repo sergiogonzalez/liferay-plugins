@@ -53,6 +53,8 @@ import com.liferay.calendar.util.PortletKeys;
 import com.liferay.calendar.util.RSSUtil;
 import com.liferay.calendar.util.WebKeys;
 import com.liferay.calendar.workflow.CalendarBookingWorkflowConstants;
+import com.liferay.portal.kernel.comment.CommentManagerUtil;
+import com.liferay.portal.kernel.comment.DiscussionPermission;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.search.SearchContainer;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -73,6 +75,7 @@ import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.FileUtil;
+import com.liferay.portal.kernel.util.Function;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.LocalizationUtil;
@@ -92,13 +95,12 @@ import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.service.GroupLocalServiceUtil;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.ServiceContextFactory;
+import com.liferay.portal.service.ServiceContextFunction;
 import com.liferay.portal.service.SubscriptionLocalServiceUtil;
 import com.liferay.portal.service.UserLocalServiceUtil;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.comparator.UserFirstNameComparator;
-import com.liferay.portlet.messageboards.model.MBMessage;
-import com.liferay.portlet.messageboards.service.MBMessageServiceUtil;
 import com.liferay.util.dao.orm.CustomSQLUtil;
 
 import java.io.File;
@@ -533,10 +535,6 @@ public class CalendarPortlet extends MVCPortlet {
 	}
 
 	protected void deleteMessage(ActionRequest actionRequest) throws Exception {
-		long groupId = PortalUtil.getScopeGroupId(actionRequest);
-
-		String className = ParamUtil.getString(actionRequest, "className");
-		long classPK = ParamUtil.getLong(actionRequest, "classPK");
 		String permissionClassName = ParamUtil.getString(
 			actionRequest, "permissionClassName");
 		long permissionClassPK = ParamUtil.getLong(
@@ -546,9 +544,18 @@ public class CalendarPortlet extends MVCPortlet {
 
 		long messageId = ParamUtil.getLong(actionRequest, "messageId");
 
-		MBMessageServiceUtil.deleteDiscussionMessage(
-			groupId, className, classPK, permissionClassName, permissionClassPK,
-			permissionOwnerId, messageId);
+		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
+			WebKeys.THEME_DISPLAY);
+
+		DiscussionPermission discussionPermission =
+			CommentManagerUtil.getDiscussionPermission(
+				themeDisplay.getPermissionChecker());
+
+		discussionPermission.checkDeletePermission(
+			permissionClassName, permissionClassPK, messageId,
+			permissionOwnerId);
+
+		CommentManagerUtil.deleteComment(messageId);
 	}
 
 	@Override
@@ -1196,9 +1203,7 @@ public class CalendarPortlet extends MVCPortlet {
 		}
 	}
 
-	protected MBMessage updateMessage(ActionRequest actionRequest)
-		throws Exception {
-
+	protected long updateMessage(ActionRequest actionRequest) throws Exception {
 		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
@@ -1213,27 +1218,39 @@ public class CalendarPortlet extends MVCPortlet {
 
 		long messageId = ParamUtil.getLong(actionRequest, "messageId");
 
-		long threadId = ParamUtil.getLong(actionRequest, "threadId");
 		long parentMessageId = ParamUtil.getLong(
 			actionRequest, "parentMessageId");
 		String subject = ParamUtil.getString(actionRequest, "subject");
 		String body = ParamUtil.getString(actionRequest, "body");
 
-		ServiceContext serviceContext = ServiceContextFactory.getInstance(
-			MBMessage.class.getName(), actionRequest);
+		User user = themeDisplay.getUser();
 
-		MBMessage message = null;
+		DiscussionPermission discussionPermission =
+			CommentManagerUtil.getDiscussionPermission(
+				themeDisplay.getPermissionChecker());
+
+		Function<String, ServiceContext> serviceContextFunction =
+			new ServiceContextFunction(actionRequest);
+
+		long commentId = 0;
 
 		if (messageId <= 0) {
-			message = MBMessageServiceUtil.addDiscussionMessage(
-				serviceContext.getScopeGroupId(), className, classPK,
-				permissionClassName, permissionClassPK, permissionOwnerId,
-				threadId, parentMessageId, subject, body, serviceContext);
+			discussionPermission.checkAddPermission(
+				themeDisplay.getCompanyId(), themeDisplay.getScopeGroupId(),
+				permissionClassName, permissionClassPK, permissionOwnerId);
+
+			commentId = CommentManagerUtil.addComment(
+				user.getUserId(), className, classPK, user.getFullName(),
+				parentMessageId, subject, body, serviceContextFunction);
 		}
 		else {
-			message = MBMessageServiceUtil.updateDiscussionMessage(
-				className, classPK, permissionClassName, permissionClassPK,
-				permissionOwnerId, messageId, subject, body, serviceContext);
+			discussionPermission.checkUpdatePermission(
+				permissionClassName, permissionClassPK, messageId,
+				permissionOwnerId);
+
+			commentId = CommentManagerUtil.updateComment(
+				user.getUserId(), className, classPK, messageId, subject, body,
+				serviceContextFunction);
 		}
 
 		// Subscription
@@ -1241,12 +1258,12 @@ public class CalendarPortlet extends MVCPortlet {
 		boolean subscribe = ParamUtil.getBoolean(actionRequest, "subscribe");
 
 		if (subscribe) {
-			SubscriptionLocalServiceUtil.addSubscription(
+			CommentManagerUtil.subscribeDiscussion(
 				themeDisplay.getUserId(), themeDisplay.getScopeGroupId(),
 				className, classPK);
 		}
 
-		return message;
+		return commentId;
 	}
 
 }
