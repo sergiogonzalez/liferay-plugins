@@ -49,9 +49,6 @@ import com.liferay.portlet.asset.service.persistence.AssetEntryPersistence;
 import com.liferay.portlet.asset.service.persistence.AssetLinkPersistence;
 import com.liferay.portlet.asset.service.persistence.AssetVocabularyPersistence;
 import com.liferay.portlet.calendar.service.persistence.CalEventPersistence;
-import com.liferay.portlet.messageboards.service.persistence.MBDiscussionPersistence;
-import com.liferay.portlet.messageboards.service.persistence.MBMessagePersistence;
-import com.liferay.portlet.messageboards.service.persistence.MBThreadPersistence;
 import com.liferay.portlet.ratings.service.persistence.RatingsEntryPersistence;
 import com.liferay.portlet.ratings.service.persistence.RatingsStatsPersistence;
 import com.liferay.portlet.social.service.persistence.SocialActivityPersistence;
@@ -1082,157 +1079,6 @@ public abstract class CalendarImporterLocalServiceBaseImpl
 	}
 
 	/**
-	 * Returns the message boards discussion local service.
-	 *
-	 * @return the message boards discussion local service
-	 */
-	public com.liferay.portlet.messageboards.service.MBDiscussionLocalService getMBDiscussionLocalService() {
-		return mbDiscussionLocalService;
-	}
-
-	/**
-	 * Sets the message boards discussion local service.
-	 *
-	 * @param mbDiscussionLocalService the message boards discussion local service
-	 */
-	public void setMBDiscussionLocalService(
-		com.liferay.portlet.messageboards.service.MBDiscussionLocalService mbDiscussionLocalService) {
-		this.mbDiscussionLocalService = mbDiscussionLocalService;
-	}
-
-	/**
-	 * Returns the message boards discussion persistence.
-	 *
-	 * @return the message boards discussion persistence
-	 */
-	public MBDiscussionPersistence getMBDiscussionPersistence() {
-		return mbDiscussionPersistence;
-	}
-
-	/**
-	 * Sets the message boards discussion persistence.
-	 *
-	 * @param mbDiscussionPersistence the message boards discussion persistence
-	 */
-	public void setMBDiscussionPersistence(
-		MBDiscussionPersistence mbDiscussionPersistence) {
-		this.mbDiscussionPersistence = mbDiscussionPersistence;
-	}
-
-	/**
-	 * Returns the message-boards message local service.
-	 *
-	 * @return the message-boards message local service
-	 */
-	public com.liferay.portlet.messageboards.service.MBMessageLocalService getMBMessageLocalService() {
-		return mbMessageLocalService;
-	}
-
-	/**
-	 * Sets the message-boards message local service.
-	 *
-	 * @param mbMessageLocalService the message-boards message local service
-	 */
-	public void setMBMessageLocalService(
-		com.liferay.portlet.messageboards.service.MBMessageLocalService mbMessageLocalService) {
-		this.mbMessageLocalService = mbMessageLocalService;
-	}
-
-	/**
-	 * Returns the message-boards message remote service.
-	 *
-	 * @return the message-boards message remote service
-	 */
-	public com.liferay.portlet.messageboards.service.MBMessageService getMBMessageService() {
-		return mbMessageService;
-	}
-
-	/**
-	 * Sets the message-boards message remote service.
-	 *
-	 * @param mbMessageService the message-boards message remote service
-	 */
-	public void setMBMessageService(
-		com.liferay.portlet.messageboards.service.MBMessageService mbMessageService) {
-		this.mbMessageService = mbMessageService;
-	}
-
-	/**
-	 * Returns the message-boards message persistence.
-	 *
-	 * @return the message-boards message persistence
-	 */
-	public MBMessagePersistence getMBMessagePersistence() {
-		return mbMessagePersistence;
-	}
-
-	/**
-	 * Sets the message-boards message persistence.
-	 *
-	 * @param mbMessagePersistence the message-boards message persistence
-	 */
-	public void setMBMessagePersistence(
-		MBMessagePersistence mbMessagePersistence) {
-		this.mbMessagePersistence = mbMessagePersistence;
-	}
-
-	/**
-	 * Returns the message boards thread local service.
-	 *
-	 * @return the message boards thread local service
-	 */
-	public com.liferay.portlet.messageboards.service.MBThreadLocalService getMBThreadLocalService() {
-		return mbThreadLocalService;
-	}
-
-	/**
-	 * Sets the message boards thread local service.
-	 *
-	 * @param mbThreadLocalService the message boards thread local service
-	 */
-	public void setMBThreadLocalService(
-		com.liferay.portlet.messageboards.service.MBThreadLocalService mbThreadLocalService) {
-		this.mbThreadLocalService = mbThreadLocalService;
-	}
-
-	/**
-	 * Returns the message boards thread remote service.
-	 *
-	 * @return the message boards thread remote service
-	 */
-	public com.liferay.portlet.messageboards.service.MBThreadService getMBThreadService() {
-		return mbThreadService;
-	}
-
-	/**
-	 * Sets the message boards thread remote service.
-	 *
-	 * @param mbThreadService the message boards thread remote service
-	 */
-	public void setMBThreadService(
-		com.liferay.portlet.messageboards.service.MBThreadService mbThreadService) {
-		this.mbThreadService = mbThreadService;
-	}
-
-	/**
-	 * Returns the message boards thread persistence.
-	 *
-	 * @return the message boards thread persistence
-	 */
-	public MBThreadPersistence getMBThreadPersistence() {
-		return mbThreadPersistence;
-	}
-
-	/**
-	 * Sets the message boards thread persistence.
-	 *
-	 * @param mbThreadPersistence the message boards thread persistence
-	 */
-	public void setMBThreadPersistence(MBThreadPersistence mbThreadPersistence) {
-		this.mbThreadPersistence = mbThreadPersistence;
-	}
-
-	/**
 	 * Returns the ratings entry local service.
 	 *
 	 * @return the ratings entry local service
@@ -1564,22 +1410,6 @@ public abstract class CalendarImporterLocalServiceBaseImpl
 	protected com.liferay.portlet.calendar.service.CalEventLocalService calEventLocalService;
 	@BeanReference(type = CalEventPersistence.class)
 	protected CalEventPersistence calEventPersistence;
-	@BeanReference(type = com.liferay.portlet.messageboards.service.MBDiscussionLocalService.class)
-	protected com.liferay.portlet.messageboards.service.MBDiscussionLocalService mbDiscussionLocalService;
-	@BeanReference(type = MBDiscussionPersistence.class)
-	protected MBDiscussionPersistence mbDiscussionPersistence;
-	@BeanReference(type = com.liferay.portlet.messageboards.service.MBMessageLocalService.class)
-	protected com.liferay.portlet.messageboards.service.MBMessageLocalService mbMessageLocalService;
-	@BeanReference(type = com.liferay.portlet.messageboards.service.MBMessageService.class)
-	protected com.liferay.portlet.messageboards.service.MBMessageService mbMessageService;
-	@BeanReference(type = MBMessagePersistence.class)
-	protected MBMessagePersistence mbMessagePersistence;
-	@BeanReference(type = com.liferay.portlet.messageboards.service.MBThreadLocalService.class)
-	protected com.liferay.portlet.messageboards.service.MBThreadLocalService mbThreadLocalService;
-	@BeanReference(type = com.liferay.portlet.messageboards.service.MBThreadService.class)
-	protected com.liferay.portlet.messageboards.service.MBThreadService mbThreadService;
-	@BeanReference(type = MBThreadPersistence.class)
-	protected MBThreadPersistence mbThreadPersistence;
 	@BeanReference(type = com.liferay.portlet.ratings.service.RatingsEntryLocalService.class)
 	protected com.liferay.portlet.ratings.service.RatingsEntryLocalService ratingsEntryLocalService;
 	@BeanReference(type = com.liferay.portlet.ratings.service.RatingsEntryService.class)
