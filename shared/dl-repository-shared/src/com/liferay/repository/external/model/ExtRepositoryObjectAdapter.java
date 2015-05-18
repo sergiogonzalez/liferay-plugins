@@ -17,6 +17,7 @@ package com.liferay.repository.external.model;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.repository.RepositoryException;
 import com.liferay.portal.kernel.repository.model.Folder;
+import com.liferay.portal.kernel.repository.model.RepositoryEntry;
 import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portlet.documentlibrary.service.DLAppLocalServiceUtil;
@@ -35,7 +36,7 @@ import java.util.Map;
  * @author Sergio González
  */
 public abstract class ExtRepositoryObjectAdapter<T>
-	extends ExtRepositoryModelAdapter<T> {
+	extends ExtRepositoryModelAdapter<T> implements RepositoryEntry {
 
 	@SuppressWarnings("unused")
 	public boolean containsPermission(
