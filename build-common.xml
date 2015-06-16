@@ -79,6 +79,7 @@
 	<path id="test.classpath">
 		<path refid="plugin.classpath" />
 		<path refid="plugin-test-type.classpath" />
+		<fileset dir="${ant.home}/lib" includes="ecj.jar" />
 		<fileset dir="${app.server.lib.portal.dir}" excludes="ant.jar" includes="*.jar" />
 		<fileset dir="${module.framework.base.dir}/test" erroronmissingdir="false" includes="portal-test*.jar" />
 	</path>
@@ -90,6 +91,12 @@
 	<taskdef classname="com.liferay.ant.bnd.BaselineJarTask" classpathref="classpath.com.liferay.ant.bnd" name="baseline-jar" />
 	<taskdef classname="com.liferay.ant.bnd.ReleaseToRepoTask" classpathref="classpath.com.liferay.ant.bnd" name="release-to-repo" />
 	<taskdef classpathref="classpath.com.liferay.ant.bnd" resource="aQute/bnd/ant/taskdef.properties" />
+
+	<path id="classpath.com.liferay.ant.heap.dump">
+		<fileset dir="${sdk.dir}/dependencies/com.liferay.ant.heap.dump/lib" includes="*.jar" />
+	</path>
+
+	<taskdef classname="com.liferay.ant.heap.dump.HeapDumpTask" classpathref="classpath.com.liferay.ant.heap.dump" name="heap-dump" />
 
 	<path id="classpath.com.liferay.ant.jgit">
 		<fileset dir="${sdk.dir}/dependencies/com.liferay.ant.jgit/lib" includes="*.jar" />
@@ -177,9 +184,13 @@ Error-Prone was automatically installed. Please rerun your task.
 		<sequential>
 			<local name="build-css.output" />
 
+			<path id="css.builder.classpath">
+				<fileset dir="${sdk.dir}/dependencies/com.liferay.css.builder/lib" includes="*.jar" />
+			</path>
+
 			<java
-				classname="com.liferay.portal.tools.SassToCssBuilder"
-				classpathref="portal.classpath"
+				classname="com.liferay.css.builder.CSSBuilder"
+				classpathref="css.builder.classpath"
 				fork="true"
 				newenvironment="true"
 				outputproperty="build-css.output"
@@ -190,7 +201,14 @@ Error-Prone was automatically installed. Please rerun your task.
 				<arg value="sass.portal.common.dir=${app.server.portal.dir}/html/css/common" />
 			</java>
 
-			<echo>${build-css.output}</echo>
+			<if>
+				<not>
+					<equals arg1="${build-css.output}" arg2="" />
+				</not>
+				<then>
+					<echo>${build-css.output}</echo>
+				</then>
+			</if>
 
 			<if>
 				<contains string="${build-css.output}" substring="Error" />
@@ -412,6 +430,7 @@ Error-Prone was automatically installed. Please rerun your task.
 
 	<macrodef name="check-snapshot">
 		<attribute name="module.dir" />
+		<attribute default="true" name="snapshot.download.enabled" />
 
 		<sequential>
 			<set-module-properties
@@ -423,45 +442,46 @@ Error-Prone was automatically installed. Please rerun your task.
 			<var name="snapshot.uptodate" value="false" />
 
 			<if>
-				<available file="@{module.dir}/snapshot.properties" />
+				<and>
+					<equals arg1="${snapshot.check.enabled}" arg2="true" />
+					<available file="@{module.dir}/snapshot.properties" />
+				</and>
 				<then>
 					<property file="@{module.dir}/snapshot.properties" />
 
-					<git-head-hash
-						path="${module.dir.unix}"
-						property="module.git.head.hash"
-						ignoreFileName="snapshot.properties"
-					/>
-
 					<if>
-						<and>
-							<equals arg1="${module.git.head.hash}" arg2="${module.snapshot.git.hash}" />
-							<git-is-clean path="${module.dir.unix}" />
-						</and>
+						<git-up-to-date
+							path="${module.dir.unix}"
+							since="${module.snapshot.git.hash}"
+						/>
 						<then>
 							<var name="snapshot.uptodate" value="true" />
 						</then>
 					</if>
 
 					<if>
-						<equals arg1="${snapshot.uptodate}" arg2="true" />
+						<equals arg1="@{snapshot.download.enabled}" arg2="true" />
 						<then>
-							<trycatch>
-								<try>
-									<mirrors-get
-										dest="${plugin.file}"
-										trylocalnetwork="false"
-										src="${module.snapshot.url}"
-									/>
-								</try>
-								<catch>
-									<var name="snapshot.uptodate" value="false" />
-								</catch>
-							</trycatch>
+							<if>
+								<equals arg1="${snapshot.uptodate}" arg2="true" />
+								<then>
+									<trycatch>
+										<try>
+											<mirrors-get
+												dest="${plugin.file}"
+												trylocalnetwork="false"
+												src="${module.snapshot.url}"
+											/>
+										</try>
+										<catch>
+											<var name="snapshot.uptodate" value="false" />
+										</catch>
+									</trycatch>
+								</then>
+							</if>
 						</then>
 					</if>
 
-					<var name="module.git.head.hash" unset="true" />
 					<var name="module.snapshot.git.hash" unset="true" />
 					<var name="module.snapshot.url" unset="true" />
 				</then>
@@ -1198,7 +1218,7 @@ Please find a solution that does not require portal-impl.jar.
 					<ivy:resolve
 						conf="test"
 						file="${sdk.dir}/ivy.xml"
-						log="download-only"
+						log="${ivy.log.level}"
 						transitive="${ivy.resolve.transitive.dependencies.test}"
 					/>
 
@@ -1208,7 +1228,7 @@ Please find a solution that does not require portal-impl.jar.
 							<ivy:resolve
 								conf="test"
 								file="@{module.dir}/ivy.xml"
-								log="download-only"
+								log="${ivy.log.level}"
 								transitive="${ivy.resolve.transitive.dependencies.test}"
 							/>
 						</then>
@@ -1283,18 +1303,64 @@ Please find a solution that does not require portal-impl.jar.
 			</if>
 
 			<if>
+				<resourcecount count="1" when="eq">
+					<fileset dir="${module.framework.base.dir}/portal" includes="com.liferay.frontend.css.web*.jar" />
+				</resourcecount>
+				<then>
+					<property name="frontend.css.web.dir" value="${sdk.dir}/tmp/com.liferay.frontend.css.web" />
+
+					<pathconvert property="frontend.css.web.jar.path">
+						<path>
+							<fileset dir="${module.framework.base.dir}/portal" includes="com.liferay.frontend.css.web*.jar" />
+						</path>
+					</pathconvert>
+
+					<basename file="${frontend.css.web.jar.path}" property="frontend.css.web.file" />
+
+					<if>
+						<not>
+							<uptodate
+								srcfile="${module.framework.base.dir}/portal/${frontend.css.web.file}"
+								targetfile="${frontend.css.web.dir}"
+							/>
+						</not>
+						<then>
+							<delete dir="${frontend.css.web.dir}" />
+
+							<mkdir dir="${frontend.css.web.dir}" />
+
+							<unzip
+								dest="${frontend.css.web.dir}"
+								src="${frontend.css.web.jar.path}"
+							>
+								<patternset>
+									<include name="**/html/themes/**" />
+								</patternset>
+								<mapper>
+									<globmapper from="META-INF/resources/html/*" to="html/*" />
+								</mapper>
+							</unzip>
+						</then>
+					</if>
+				</then>
+				<else>
+					<fail>The module com.liferay.frotnend.css.web.jar does not exist.</fail>
+				</else>
+			</if>
+
+			<if>
 				<equals arg1="${theme.parent}" arg2="_unstyled" />
 				<then>
 					<copy todir="@{module.dir}/docroot" overwrite="true" preservelastmodified="true">
 						<fileset
-							dir="${app.server.portal.dir}/html/themes/_unstyled"
+							dir="${frontend.css.web.dir}/html/themes/_unstyled"
 							excludes="templates/**"
 						/>
 					</copy>
 
 					<copy todir="@{module.dir}/docroot/templates" overwrite="true" preservelastmodified="true">
 						<fileset
-							dir="${app.server.portal.dir}/html/themes/_unstyled/templates"
+							dir="${frontend.css.web.dir}/html/themes/_unstyled/templates"
 							excludes="init.${theme.type}"
 							includes="*.${theme.type}"
 						/>
@@ -1305,14 +1371,14 @@ Please find a solution that does not require portal-impl.jar.
 					<then>
 						<copy todir="@{module.dir}/docroot" overwrite="true" preservelastmodified="true">
 							<fileset
-								dir="${app.server.portal.dir}/html/themes/_unstyled"
+								dir="${frontend.css.web.dir}/html/themes/_unstyled"
 								excludes="templates/**"
 							/>
 						</copy>
 
 						<copy todir="@{module.dir}/docroot/templates" overwrite="true" preservelastmodified="true">
 							<fileset
-								dir="${app.server.portal.dir}/html/themes/_unstyled/templates"
+								dir="${frontend.css.web.dir}/html/themes/_unstyled/templates"
 								excludes="init.${theme.type}"
 								includes="*.${theme.type}"
 							/>
@@ -1320,7 +1386,7 @@ Please find a solution that does not require portal-impl.jar.
 
 						<copy todir="@{module.dir}/docroot" overwrite="true" preservelastmodified="true">
 							<fileset
-								dir="${app.server.portal.dir}/html/themes/_styled"
+								dir="${frontend.css.web.dir}/html/themes/_styled"
 							/>
 						</copy>
 					</then>
@@ -1330,14 +1396,14 @@ Please find a solution that does not require portal-impl.jar.
 					<then>
 						<copy todir="@{module.dir}/docroot" overwrite="true" preservelastmodified="true">
 							<fileset
-								dir="${app.server.portal.dir}/html/themes/classic"
+								dir="${frontend.css.web.dir}/html/themes/classic"
 								excludes="**/.sass-cache/**,_diffs/**,templates/**"
 							/>
 						</copy>
 
 						<copy todir="@{module.dir}/docroot/templates" overwrite="true" preservelastmodified="true">
 							<fileset
-								dir="${app.server.portal.dir}/html/themes/classic/templates"
+								dir="${frontend.css.web.dir}/html/themes/classic/templates"
 								includes="*.${theme.type}"
 							/>
 						</copy>
@@ -1348,14 +1414,14 @@ Please find a solution that does not require portal-impl.jar.
 					<then>
 						<copy todir="@{module.dir}/docroot" overwrite="true" preservelastmodified="true">
 							<fileset
-								dir="${app.server.portal.dir}/html/themes/control_panel"
+								dir="${frontend.css.web.dir}/html/themes/control_panel"
 								excludes="**/.sass-cache/**,_diffs/**,templates/**"
 							/>
 						</copy>
 
 						<copy todir="@{module.dir}/docroot/templates" overwrite="true" preservelastmodified="true">
 							<fileset
-								dir="${app.server.portal.dir}/html/themes/control_panel/templates"
+								dir="${frontend.css.web.dir}/html/themes/control_panel/templates"
 								includes="*.${theme.type}"
 							/>
 						</copy>
@@ -1773,6 +1839,7 @@ Please find a solution that does not require portal-impl.jar.
 	</macrodef>
 
 	<macrodef name="gradle-execute">
+		<attribute default="true" name="failonerror" />
 		<attribute name="task" />
 		<element implicit="true" name="args" optional="true" />
 
@@ -1789,7 +1856,7 @@ Please find a solution that does not require portal-impl.jar.
 				</else>
 			</if>
 
-			<exec executable="${sdk.dir}/tools/gradle/gradlew${gradlew.suffix}" failonerror="true">
+			<exec executable="${sdk.dir}/tools/gradle/gradlew${gradlew.suffix}" failonerror="@{failonerror}">
 				<arg value="-PpluginsExcludes=${plugins.excludes}" />
 				<arg value="-PpluginsIncludes=${plugins.includes}" />
 				<args />
@@ -2288,6 +2355,24 @@ Please find a solution that does not require portal-impl.jar.
 		</sequential>
 	</macrodef>
 
+	<macrodef name="print-stale-snapshot">
+		<attribute name="module.dir" />
+
+		<sequential>
+			<check-snapshot
+				module.dir="@{module.dir}"
+				snapshot.download.enabled="false"
+			/>
+
+			<if>
+				<equals arg1="${snapshot.uptodate}" arg2="false" />
+				<then>
+					<echo>@{module.dir}</echo>
+				</then>
+			</if>
+		</sequential>
+	</macrodef>
+
 	<macrodef name="publish-local-m2-release">
 		<attribute name="module.dir" />
 
@@ -2648,15 +2733,38 @@ Please find a solution that does not require portal-impl.jar.
 					<if>
 						<available file="@{module.dir}/test/@{test.type}" type="dir" />
 						<then>
+							<local name="junit.java.gc" />
+
+							<if>
+								<equals arg1="@{test.type}" arg2="unit" />
+								<then>
+									<if>
+										<equals arg1="${junit.java.unit.gc.logging}" arg2="on" />
+										<then>
+											<property name="junit.java.gc" value="${junit.java.unit.gc} -verbose:gc -XX:+PrintGCCause -XX:+PrintGCDetails" />
+										</then>
+										<else>
+											<property name="junit.java.gc" value="${junit.java.unit.gc}" />
+										</else>
+									</if>
+								</then>
+								<else>
+									<local name="project.dir.name" />
+
+									<basename property="module.dir.name" file="@{module.dir}" />
+
+									<property name="junit.java.gc" value="${junit.java.integration.gc} -verbose:gc -Xloggc:/tmp/${module.dir.name}-@{test.type}-gc.log -XX:+PrintGCCause -XX:+PrintGCDetails" />
+								</else>
+							</if>
+
 							<junit dir="@{module.dir}" fork="on" forkmode="@{junit.forkmode}" jvm="${junit.jvm}" outputtoformatters="false" printsummary="on" showoutput="true">
 								<sysproperty key="app.server.tomcat.dir" value="${app.server.tomcat.dir}" />
 								<sysproperty key="whip.agent" file="${whip.agent}" />
 								<sysproperty key="whip.datafile" file="@{module.dir}/test-coverage/whip.dat" />
 								<sysproperty key="whip.instrument.dump" value="${whip.instrument.dump}" />
 								<jvmarg line="${junit.debug.jpda}" />
+								<jvmarg line="${junit.java.gc}" />
 								<jvmarg line="${whip.agent}" />
-								<jvmarg value="-Xmx${junit.java.mx}" />
-								<jvmarg value="-XX:MaxPermSize=${junit.java.maxpermsize}" />
 								<jvmarg value="-Dexternal-properties=${test.properties}" />
 								<jvmarg value="-Dfile.encoding=UTF-8" />
 								<jvmarg value="-Djava.net.preferIPv4Stack=true" />
@@ -3118,18 +3226,7 @@ for (String path : paths) {
 		<for param="module.web.dir">
 			<dirset dir="." excludes="**/templates/**" />
 			<sequential>
-				<if>
-					<resourcecount count="0" when="gt">
-						<fileset
-							dir="@{module.web.dir}"
-							excludes="**/custom_jsps/**/*"
-							includes="docroot/**/*.jsp,src/META-INF/resources/**/*.jsp,tmp/**/*.jsp"
-						/>
-					</resourcecount>
-					<then>
-						<ant antfile="@{module.web.dir}/build.xml" dir="@{module.web.dir}" target="compile-jsp" />
-					</then>
-				</if>
+				<ant antfile="@{module.web.dir}/build.xml" dir="@{module.web.dir}" target="compile-jsp" />
 			</sequential>
 		</for>
 	</target>
@@ -3173,6 +3270,8 @@ for (String path : paths) {
 	</target>
 
 	<target name="deploy">
+		<git-up-to-date-cache dir="${basedir}" />
+
 		<loop-macrodef-or-target
 			module.dirs="${plugins.includes.path}"
 			target.name="deploy"
@@ -3243,6 +3342,23 @@ for (String path : paths) {
 		>
 			<jvmarg value="-Xmx512m" />
 			<jvmarg value="-Xss2048k" />
+		</java>
+
+		<delete file="ServiceBuilder.temp" />
+	</target>
+
+	<target name="format-tld">
+		<path id="tld.formatter.classpath">
+			<fileset dir="${sdk.dir}/dependencies/com.liferay.tld.formatter/lib" includes="*.jar" />
+		</path>
+
+		<java
+			classname="com.liferay.tld.formatter.TLDFormatter"
+			classpathref="tld.formatter.classpath"
+			fork="true"
+			newenvironment="true"
+		>
+			<arg value="tld.plugin=true" />
 		</java>
 
 		<delete file="ServiceBuilder.temp" />
@@ -3346,6 +3462,13 @@ for (String path : paths) {
 		</tstamp>
 
 		<echo message="${current.time}" />
+	</target>
+
+	<target name="print-stale-snapshot">
+		<loop-macrodef-or-target
+			module.dirs="${plugins.includes.path}"
+			target.name="print-stale-snapshot"
+		/>
 	</target>
 
 	<target name="publish-local-m2-release" depends="jar-javadoc,jar-source,war">

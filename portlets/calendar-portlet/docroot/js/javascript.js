@@ -64,8 +64,9 @@ AUI.add(
 				var value = 0;
 
 				if (milliseconds > 0) {
-					AArray.some(
-						[Time.WEEK, Time.DAY, Time.HOUR, Time.MINUTE],
+					var timeArray = [Time.WEEK, Time.DAY, Time.HOUR, Time.MINUTE];
+
+					timeArray.some(
 						function(item, index) {
 							value = milliseconds / item;
 							desc = Time.TIME_DESC[index];
@@ -227,8 +228,7 @@ AUI.add(
 							);
 						},
 						resultFormatter: function(query, results) {
-							return AArray.map(
-								results,
+							return results.map(
 								function(result) {
 									var calendar = result.raw;
 									var calendarResourceName = calendar.calendarResourceName;
@@ -546,7 +546,7 @@ AUI.add(
 
 				map[themeDisplay.getLanguageId()] = value;
 
-				return A.JSON.stringify(map);
+				return JSON.stringify(map);
 			},
 
 			getResourceCalendars: function(calendarResourceId, callback) {
@@ -593,7 +593,7 @@ AUI.add(
 					{
 						cache: false,
 						data: {
-							cmd: A.JSON.stringify(payload),
+							cmd: JSON.stringify(payload),
 							p_auth: Liferay.authToken
 						},
 						dataType: 'JSON',
@@ -1513,7 +1513,7 @@ AUI.add(
 							A.each(
 								changedAttributes,
 								function(item, index) {
-									persist = AObject.owns(persistentAttrMap, index);
+									persist = persistentAttrMap.hasOwnProperty(index);
 								}
 							);
 
@@ -2252,8 +2252,7 @@ AUI.add(
 					_syncInviteesContent: function(contentNode, calendarResources) {
 						var instance = this;
 
-						var values = AArray.map(
-							calendarResources,
+						var values = calendarResources.map(
 							function(item) {
 								return item.name;
 							}

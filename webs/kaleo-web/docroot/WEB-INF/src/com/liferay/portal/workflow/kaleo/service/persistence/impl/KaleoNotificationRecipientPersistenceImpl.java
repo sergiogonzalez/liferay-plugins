@@ -29,6 +29,8 @@ import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.model.CacheModel;
+import com.liferay.portal.service.ServiceContext;
+import com.liferay.portal.service.ServiceContextThreadLocal;
 import com.liferay.portal.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.workflow.kaleo.NoSuchNotificationRecipientException;
 import com.liferay.portal.workflow.kaleo.model.KaleoNotificationRecipient;
@@ -39,6 +41,7 @@ import com.liferay.portal.workflow.kaleo.service.persistence.KaleoNotificationRe
 import java.io.Serializable;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -1772,6 +1775,30 @@ public class KaleoNotificationRecipientPersistenceImpl
 
 		KaleoNotificationRecipientModelImpl kaleoNotificationRecipientModelImpl = (KaleoNotificationRecipientModelImpl)kaleoNotificationRecipient;
 
+		ServiceContext serviceContext = ServiceContextThreadLocal.getServiceContext();
+
+		Date now = new Date();
+
+		if (isNew && (kaleoNotificationRecipient.getCreateDate() == null)) {
+			if (serviceContext == null) {
+				kaleoNotificationRecipient.setCreateDate(now);
+			}
+			else {
+				kaleoNotificationRecipient.setCreateDate(serviceContext.getCreateDate(
+						now));
+			}
+		}
+
+		if (!kaleoNotificationRecipientModelImpl.hasSetModifiedDate()) {
+			if (serviceContext == null) {
+				kaleoNotificationRecipient.setModifiedDate(now);
+			}
+			else {
+				kaleoNotificationRecipient.setModifiedDate(serviceContext.getModifiedDate(
+						now));
+			}
+		}
+
 		Session session = null;
 
 		try {
@@ -1898,7 +1925,11 @@ public class KaleoNotificationRecipientPersistenceImpl
 		kaleoNotificationRecipientImpl.setRecipientClassName(kaleoNotificationRecipient.getRecipientClassName());
 		kaleoNotificationRecipientImpl.setRecipientClassPK(kaleoNotificationRecipient.getRecipientClassPK());
 		kaleoNotificationRecipientImpl.setRecipientRoleType(kaleoNotificationRecipient.getRecipientRoleType());
+		kaleoNotificationRecipientImpl.setRecipientScript(kaleoNotificationRecipient.getRecipientScript());
+		kaleoNotificationRecipientImpl.setRecipientScriptLanguage(kaleoNotificationRecipient.getRecipientScriptLanguage());
+		kaleoNotificationRecipientImpl.setRecipientScriptRequiredContexts(kaleoNotificationRecipient.getRecipientScriptRequiredContexts());
 		kaleoNotificationRecipientImpl.setAddress(kaleoNotificationRecipient.getAddress());
+		kaleoNotificationRecipientImpl.setNotificationReceptionType(kaleoNotificationRecipient.getNotificationReceptionType());
 
 		return kaleoNotificationRecipientImpl;
 	}

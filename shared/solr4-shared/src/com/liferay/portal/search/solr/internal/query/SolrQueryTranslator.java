@@ -15,59 +15,64 @@
 package com.liferay.portal.search.solr.internal.query;
 
 import com.liferay.portal.kernel.search.BooleanQuery;
-import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.search.Query;
-import com.liferay.portal.kernel.search.QueryVisitor;
 import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.search.TermQuery;
 import com.liferay.portal.kernel.search.TermRangeQuery;
 import com.liferay.portal.kernel.search.WildcardQuery;
+import com.liferay.portal.kernel.search.generic.DisMaxQuery;
+import com.liferay.portal.kernel.search.generic.FuzzyLikeThisQuery;
+import com.liferay.portal.kernel.search.generic.FuzzyQuery;
+import com.liferay.portal.kernel.search.generic.MatchAllQuery;
+import com.liferay.portal.kernel.search.generic.MatchQuery;
+import com.liferay.portal.kernel.search.generic.MoreLikeThisQuery;
+import com.liferay.portal.kernel.search.generic.MultiMatchQuery;
+import com.liferay.portal.kernel.search.generic.NestedQuery;
+import com.liferay.portal.kernel.search.generic.StringQuery;
 import com.liferay.portal.kernel.search.query.QueryTranslator;
-import com.liferay.portal.kernel.util.StringBundler;
-import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.search.solr.SolrPostProcesor;
+import com.liferay.portal.kernel.search.query.QueryVisitor;
 import com.liferay.portal.search.solr.query.BooleanQueryTranslator;
+import com.liferay.portal.search.solr.query.DisMaxQueryTranslator;
+import com.liferay.portal.search.solr.query.FuzzyLikeThisQueryTranslator;
+import com.liferay.portal.search.solr.query.FuzzyQueryTranslator;
+import com.liferay.portal.search.solr.query.LuceneQueryConverter;
+import com.liferay.portal.search.solr.query.MatchAllQueryTranslator;
+import com.liferay.portal.search.solr.query.MatchQueryTranslator;
+import com.liferay.portal.search.solr.query.MoreLikeThisQueryTranslator;
+import com.liferay.portal.search.solr.query.MultiMatchQueryTranslator;
+import com.liferay.portal.search.solr.query.NestedQueryTranslator;
+import com.liferay.portal.search.solr.query.StringQueryTranslator;
 import com.liferay.portal.search.solr.query.TermQueryTranslator;
 import com.liferay.portal.search.solr.query.TermRangeQueryTranslator;
 import com.liferay.portal.search.solr.query.WildcardQueryTranslator;
+
+import org.apache.lucene.search.MatchAllDocsQuery;
+
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author André de Oliveira
  * @author Miguel Angelo Caldas Gallindo
  */
+@Component(
+	immediate = true, property = {"search.engine.impl=Solr"},
+	service = {LuceneQueryConverter.class, QueryTranslator.class}
+)
 public class SolrQueryTranslator
-	implements QueryTranslator<String>,
+	implements LuceneQueryConverter, QueryTranslator<String>,
 			   QueryVisitor<org.apache.lucene.search.Query> {
 
-	public void setBooleanQueryTranslator(
-		BooleanQueryTranslator booleanQueryTranslator) {
-
-		_booleanQueryTranslator = booleanQueryTranslator;
-	}
-
-	public void setTermQueryTranslator(
-		TermQueryTranslator termQueryTranslator) {
-
-		_termQueryTranslator = termQueryTranslator;
-	}
-
-	public void setTermRangeQueryTranslator(
-		TermRangeQueryTranslator termRangeQueryTranslator) {
-
-		_termRangeQueryTranslator = termRangeQueryTranslator;
-	}
-
-	public void setWildcardQueryTranslator(
-		WildcardQueryTranslator wildcardQueryTranslator) {
-
-		_wildcardQueryTranslator = wildcardQueryTranslator;
+	@Override
+	public org.apache.lucene.search.Query convert(Query query) {
+		return query.accept(this);
 	}
 
 	@Override
 	public String translate(Query query, SearchContext searchContext) {
 		org.apache.lucene.search.Query luceneQuery = query.accept(this);
 
-		String queryString;
+		String queryString = null;
 
 		if (luceneQuery != null) {
 			queryString = luceneQuery.toString();
@@ -76,7 +81,7 @@ public class SolrQueryTranslator
 			queryString = _postProcess(query.toString(), searchContext);
 		}
 
-		return _includeCompanyId(queryString, searchContext);
+		return queryString;
 	}
 
 	@Override
@@ -84,6 +89,66 @@ public class SolrQueryTranslator
 		BooleanQuery booleanQuery) {
 
 		return _booleanQueryTranslator.translate(booleanQuery, this);
+	}
+
+	@Override
+	public org.apache.lucene.search.Query visitQuery(DisMaxQuery disMaxQuery) {
+		return _disMaxQueryTranslator.translate(disMaxQuery, this);
+	}
+
+	@Override
+	public org.apache.lucene.search.Query visitQuery(
+		FuzzyLikeThisQuery fuzzyLikeThisQuery) {
+
+		return _fuzzyLikeThisQueryTranslator.translate(fuzzyLikeThisQuery);
+	}
+
+	@Override
+	public org.apache.lucene.search.Query visitQuery(FuzzyQuery fuzzyQuery) {
+		return _fuzzyQueryTranslator.translate(fuzzyQuery);
+	}
+
+	@Override
+	public org.apache.lucene.search.Query visitQuery(
+		MatchAllQuery matchAllQuery) {
+
+		org.apache.lucene.search.MatchAllDocsQuery matchAllDocsQuery =
+			new MatchAllDocsQuery();
+
+		if (!matchAllQuery.isDefaultBoost()) {
+			matchAllDocsQuery.setBoost(matchAllQuery.getBoost());
+		}
+
+		return matchAllDocsQuery;
+	}
+
+	@Override
+	public org.apache.lucene.search.Query visitQuery(MatchQuery matchQuery) {
+		return _matchQueryTranslator.translate(matchQuery);
+	}
+
+	@Override
+	public org.apache.lucene.search.Query visitQuery(
+		MoreLikeThisQuery moreLikeThisQuery) {
+
+		return _moreLikeThisQueryTranslator.translate(moreLikeThisQuery);
+	}
+
+	@Override
+	public org.apache.lucene.search.Query visitQuery(
+		MultiMatchQuery multiMatchQuery) {
+
+		return _multiMatchQueryTranslator.translate(multiMatchQuery);
+	}
+
+	@Override
+	public org.apache.lucene.search.Query visitQuery(NestedQuery nestedQuery) {
+		return _nestedQueryTranslator.translate(nestedQuery, this);
+	}
+
+	@Override
+	public org.apache.lucene.search.Query visitQuery(StringQuery stringQuery) {
+		return _stringQueryTranslator.translate(stringQuery);
 	}
 
 	@Override
@@ -105,22 +170,95 @@ public class SolrQueryTranslator
 		return _wildcardQueryTranslator.translate(wildcardQuery);
 	}
 
-	private String _includeCompanyId(
-		String queryString, SearchContext searchContext) {
+	@Reference(unbind = "-")
+	protected void setBooleanQueryTranslator(
+		BooleanQueryTranslator booleanQueryTranslator) {
 
-		StringBundler sb = new StringBundler(9);
+		_booleanQueryTranslator = booleanQueryTranslator;
+	}
 
-		sb.append(StringPool.PLUS);
-		sb.append(StringPool.OPEN_PARENTHESIS);
-		sb.append(queryString);
-		sb.append(StringPool.CLOSE_PARENTHESIS);
-		sb.append(StringPool.SPACE);
-		sb.append(StringPool.PLUS);
-		sb.append(Field.COMPANY_ID);
-		sb.append(StringPool.COLON);
-		sb.append(searchContext.getCompanyId());
+	@Reference(unbind = "-")
+	protected void setDisMaxQueryTranslator(
+		DisMaxQueryTranslator disMaxQueryTranslator) {
 
-		return sb.toString();
+		_disMaxQueryTranslator = disMaxQueryTranslator;
+	}
+
+	@Reference(unbind = "-")
+	protected void setFuzzyLikeThisQueryTranslator(
+		FuzzyLikeThisQueryTranslator fuzzyLikeThisQueryTranslator) {
+
+		_fuzzyLikeThisQueryTranslator = fuzzyLikeThisQueryTranslator;
+	}
+
+	@Reference(unbind = "-")
+	protected void setFuzzyQueryTranslator(
+		FuzzyQueryTranslator fuzzyQueryTranslator) {
+
+		_fuzzyQueryTranslator = fuzzyQueryTranslator;
+	}
+
+	@Reference(unbind = "-")
+	protected void setMatchAllQueryTranslator(
+		MatchAllQueryTranslator matchAllQueryTranslator) {
+
+		_matchAllQueryTranslator = matchAllQueryTranslator;
+	}
+
+	@Reference(unbind = "-")
+	protected void setMatchQueryTranslator(
+		MatchQueryTranslator matchQueryTranslator) {
+
+		_matchQueryTranslator = matchQueryTranslator;
+	}
+
+	@Reference(unbind = "-")
+	protected void setMoreLikeThisQueryTranslator(
+		MoreLikeThisQueryTranslator moreLikeThisQueryTranslator) {
+
+		_moreLikeThisQueryTranslator = moreLikeThisQueryTranslator;
+	}
+
+	@Reference(unbind = "-")
+	protected void setMultiMatchQueryTranslator(
+		MultiMatchQueryTranslator multiMatchQueryTranslator) {
+
+		_multiMatchQueryTranslator = multiMatchQueryTranslator;
+	}
+
+	@Reference(unbind = "-")
+	protected void setNestedQueryTranslator(
+		NestedQueryTranslator nestedQueryTranslator) {
+
+		_nestedQueryTranslator = nestedQueryTranslator;
+	}
+
+	@Reference(unbind = "-")
+	protected void setStringQueryTranslator(
+		StringQueryTranslator stringQueryTranslator) {
+
+		_stringQueryTranslator = stringQueryTranslator;
+	}
+
+	@Reference(unbind = "-")
+	protected void setTermQueryTranslator(
+		TermQueryTranslator termQueryTranslator) {
+
+		_termQueryTranslator = termQueryTranslator;
+	}
+
+	@Reference(unbind = "-")
+	protected void setTermRangeQueryTranslator(
+		TermRangeQueryTranslator termRangeQueryTranslator) {
+
+		_termRangeQueryTranslator = termRangeQueryTranslator;
+	}
+
+	@Reference(unbind = "-")
+	protected void setWildcardQueryTranslator(
+		WildcardQueryTranslator wildcardQueryTranslator) {
+
+		_wildcardQueryTranslator = wildcardQueryTranslator;
 	}
 
 	private String _postProcess(
@@ -133,6 +271,15 @@ public class SolrQueryTranslator
 	}
 
 	private BooleanQueryTranslator _booleanQueryTranslator;
+	private DisMaxQueryTranslator _disMaxQueryTranslator;
+	private FuzzyLikeThisQueryTranslator _fuzzyLikeThisQueryTranslator;
+	private FuzzyQueryTranslator _fuzzyQueryTranslator;
+	private MatchAllQueryTranslator _matchAllQueryTranslator;
+	private MatchQueryTranslator _matchQueryTranslator;
+	private MoreLikeThisQueryTranslator _moreLikeThisQueryTranslator;
+	private MultiMatchQueryTranslator _multiMatchQueryTranslator;
+	private NestedQueryTranslator _nestedQueryTranslator;
+	private StringQueryTranslator _stringQueryTranslator;
 	private TermQueryTranslator _termQueryTranslator;
 	private TermRangeQueryTranslator _termRangeQueryTranslator;
 	private WildcardQueryTranslator _wildcardQueryTranslator;
