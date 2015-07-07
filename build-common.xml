@@ -1335,11 +1335,15 @@ Please find a solution that does not require portal-impl.jar.
 									<globmapper from="META-INF/resources/html/*" to="html/*" />
 								</mapper>
 							</unzip>
+
+							<touch>
+								<fileset dir="${frontend.themes.web.dir}" />
+							</touch>
 						</then>
 					</if>
 				</then>
 				<else>
-					<fail>The module com.liferay.frotnend.themes.web.jar does not exist.</fail>
+					<fail>The module com.liferay.frontend.themes.web.jar does not exist.</fail>
 				</else>
 			</if>
 
@@ -1898,7 +1902,7 @@ Please find a solution that does not require portal-impl.jar.
 				</then>
 				<else>
 					<if>
-						<matches pattern=".*-test" string="@{module.dir}" />
+						<matches pattern=".*-test$" string="@{module.dir}" />
 						<then>
 							<loop-macrodef-or-target
 								module.dirs="@{module.dir}"
@@ -1980,7 +1984,7 @@ Please find a solution that does not require portal-impl.jar.
 											<available file="@{module.dir}/bower.json" />
 											<available file="@{module.dir}/src/META-INF/resources" />
 											<resourcecount count="0" when="gt">
-												<fileset dir="@{module.dir}/src/META-INF/resources" includes="**/*.es.js,*.es.js" />
+												<fileset dir="@{module.dir}/src/META-INF/resources" includes="**/${transpile.file.pattern},${transpile.file.pattern}" />
 											</resourcecount>
 										</and>
 										<then>

@@ -183,6 +183,8 @@ ${nodejs.url[osx64]}.
 		<attribute name="module.dir" />
 
 		<sequential>
+			<delete dir="@{module.dir}/.js-cache" failonerror="false" />
+
 			<mkdir dir="@{module.dir}/.js-cache" />
 
 			<copy
@@ -194,8 +196,8 @@ ${nodejs.url[osx64]}.
 			<mkdir dir="@{module.dir}/tmp/transpile" />
 
 			<copy todir="@{module.dir}/tmp/transpile">
-				<fileset dir="@{module.dir}/src">
-					<include name="**/*.es.js" />
+				<fileset dir="@{module.dir}/src" id="transpile.fileset">
+					<include name="**/${transpile.file.pattern}" />
 				</fileset>
 			</copy>
 
@@ -211,13 +213,21 @@ ${nodejs.url[osx64]}.
 				node.module.name="lfr-module-config-generator"
 			/>
 
-			<download-node-module
-				node.module.name="lfr-module-config-generator"
-			/>
+			<pathconvert pathsep=" " property="transpile.files" setonempty="false" refid="transpile.fileset" >
+				<map from="@{module.dir}/src/" to="" />
+			</pathconvert>
 
 			<node-execute
 				node.command="node"
-				node.command.args="${sdk.tools.dir}/node-v${nodejs.version}/node_modules/lfr-module-config-generator/bin/index.js -c '' -e '' -f /_/g,- -i true -l -m @{module.dir}/.js-cache/bower.json -o @{module.dir}/classes/META-INF/config.json -p **/*.es.js -r @{module.dir}/.js-cache/META-INF/resources @{module.dir}/.js-cache"
+				node.command.args="${sdk.tools.dir}/node-v${nodejs.version}/node_modules/babel/bin/babel/index.js --modules amd -d @{module.dir}/.js-cache ${transpile.files}"
+				node.working.dir="@{module.dir}/tmp/transpile"
+			/>
+
+			<var name="transpile.files" unset="true" />
+
+			<node-execute
+				node.command="node"
+				node.command.args="${sdk.tools.dir}/node-v${nodejs.version}/node_modules/lfr-module-config-generator/bin/index.js -c '' -e '' -f /_/g,- -i true -l -m @{module.dir}/.js-cache/bower.json -o @{module.dir}/classes/META-INF/config.json -r @{module.dir}/.js-cache/META-INF/resources @{module.dir}/.js-cache"
 				node.working.dir="${sdk.tools.dir}/node-v${nodejs.version}"
 			/>
 		</sequential>
