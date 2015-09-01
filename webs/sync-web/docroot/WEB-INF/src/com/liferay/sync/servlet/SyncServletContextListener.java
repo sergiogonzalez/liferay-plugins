@@ -43,6 +43,7 @@ import com.liferay.sync.service.SyncDLObjectLocalServiceUtil;
 import com.liferay.sync.service.SyncPreferencesLocalServiceUtil;
 import com.liferay.sync.util.PortletPropsKeys;
 import com.liferay.sync.util.PortletPropsValues;
+import com.liferay.sync.util.VerifyUtil;
 
 import java.util.HashMap;
 import java.util.List;
@@ -93,6 +94,7 @@ public class SyncServletContextListener
 
 				values.put("event", dlSyncEvent.getEvent());
 				values.put("modifiedTime", dlSyncEvent.getModifiedTime());
+				values.put("syncEventId", dlSyncEvent.getSyncEventId());
 				values.put("type", dlSyncEvent.getType());
 				values.put("typePK", dlSyncEvent.getTypePK());
 
@@ -102,8 +104,6 @@ public class SyncServletContextListener
 					DestinationNames.DOCUMENT_LIBRARY_SYNC_EVENT_PROCESSOR,
 					message);
 			}
-
-			DLSyncEventLocalServiceUtil.deleteDLSyncEvents();
 		}
 		catch (Exception e) {
 			_log.error(e, e);
@@ -112,8 +112,6 @@ public class SyncServletContextListener
 
 	@Override
 	protected void doPortalDestroy() throws Exception {
-		DLSyncEventLocalServiceUtil.deleteDLSyncEvents();
-
 		MessageBusUtil.unregisterMessageListener(
 			DestinationNames.DOCUMENT_LIBRARY_SYNC_EVENT_PROCESSOR,
 			_syncDLObjectMessageListener);
@@ -132,6 +130,10 @@ public class SyncServletContextListener
 	@Override
 	protected void doPortalInit() {
 		try {
+			if (PortletPropsValues.SYNC_VERIFY) {
+				VerifyUtil.verify();
+			}
+
 			List<Company> companies = CompanyLocalServiceUtil.getCompanies();
 
 			for (Company company : companies) {

@@ -1437,7 +1437,7 @@ public class PushNotificationsDevicePersistenceImpl extends BasePersistenceImpl<
 				pushNotificationsDevice.setNew(false);
 			}
 			else {
-				session.merge(pushNotificationsDevice);
+				pushNotificationsDevice = (PushNotificationsDevice)session.merge(pushNotificationsDevice);
 			}
 		}
 		catch (Exception e) {
@@ -1481,8 +1481,9 @@ public class PushNotificationsDevicePersistenceImpl extends BasePersistenceImpl<
 			pushNotificationsDevice.getPrimaryKey(), pushNotificationsDevice,
 			false);
 
-		clearUniqueFindersCache(pushNotificationsDevice);
-		cacheUniqueFindersCache(pushNotificationsDevice, isNew);
+		clearUniqueFindersCache((PushNotificationsDevice)pushNotificationsDeviceModelImpl);
+		cacheUniqueFindersCache((PushNotificationsDevice)pushNotificationsDeviceModelImpl,
+			isNew);
 
 		pushNotificationsDevice.resetOriginalValues();
 

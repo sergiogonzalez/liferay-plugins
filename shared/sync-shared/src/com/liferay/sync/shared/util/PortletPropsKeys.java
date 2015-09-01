@@ -22,11 +22,17 @@ public class PortletPropsKeys {
 	public static final String SYNC_ALLOW_USER_PERSONAL_SITES =
 		"sync.allow.user.personal.sites";
 
-	public static final String SYNC_CLIENT_DESKTOP_MIN_BUILD =
-		"sync.client.desktop.min.build";
-
 	public static final String SYNC_CLIENT_MAX_CONNECTIONS =
 		"sync.client.max.connections";
+
+	public static final String SYNC_CLIENT_MIN_BUILD_ANDROID =
+		"sync.client.min.build.android";
+
+	public static final String SYNC_CLIENT_MIN_BUILD_DESKTOP =
+		"sync.client.min.build.desktop";
+
+	public static final String SYNC_CLIENT_MIN_BUILD_IOS =
+		"sync.client.min.build.ios";
 
 	public static final String SYNC_CLIENT_POLL_INTERVAL =
 		"sync.client.poll.interval";
@@ -45,5 +51,7 @@ public class PortletPropsKeys {
 	public static final String SYNC_PAGINATION_DELTA = "sync.pagination.delta";
 
 	public static final String SYNC_SERVICES_ENABLED = "sync.services.enabled";
+
+	public static final String SYNC_VERIFY = "sync.verify";
 
 }

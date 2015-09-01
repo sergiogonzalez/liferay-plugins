@@ -70,6 +70,7 @@ public class PushNotificationsDeviceLocalServiceImpl
 		return pushNotificationsDevice;
 	}
 
+	@Override
 	public List<PushNotificationsDevice> getPushNotificationsDevices(
 		int start, int end, OrderByComparator orderByComparator) {
 
@@ -119,11 +120,25 @@ public class PushNotificationsDeviceLocalServiceImpl
 			String platform, List<String> tokens, JSONObject payloadJSONObject)
 		throws PortalException {
 
+		sendPushNotification(platform, tokens, payloadJSONObject, null);
+	}
+
+	@Override
+	public void sendPushNotification(
+			String platform, List<String> tokens, JSONObject payloadJSONObject,
+			Map<String, Object> configuration)
+		throws PortalException {
+
 		PushNotificationsSender pushNotificationsSender =
 			_pushNotificationsSenders.get(platform);
 
 		if (pushNotificationsSender == null) {
 			return;
+		}
+
+		if (configuration != null) {
+			pushNotificationsSender = pushNotificationsSender.create(
+				configuration);
 		}
 
 		try {
@@ -139,6 +154,23 @@ public class PushNotificationsDeviceLocalServiceImpl
 		}
 		catch (Exception e) {
 			throw new PortalException(e);
+		}
+	}
+
+	@Override
+	public void updateToken(String oldToken, String newToken)
+		throws PortalException {
+
+		PushNotificationsDevice oldPushNotificationsDevice =
+			deletePushNotificationsDevice(oldToken);
+
+		PushNotificationsDevice newPushNotificationsDevice =
+			pushNotificationsDevicePersistence.fetchByToken(newToken);
+
+		if (newPushNotificationsDevice == null) {
+			addPushNotificationsDevice(
+				oldPushNotificationsDevice.getUserId(),
+				oldPushNotificationsDevice.getPlatform(), newToken);
 		}
 	}
 

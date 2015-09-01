@@ -18,6 +18,7 @@
 	<classpathentry kind="lib" path="/portal-master/util-java/util-java.jar" />
 	<classpathentry kind="lib" path="/portal-master/util-taglib/util-taglib.jar" />
 	<classpathentry kind="lib" path="docroot/WEB-INF/lib/com.liferay.dynamic.data.lists.api.jar" />
+	<classpathentry kind="lib" path="docroot/WEB-INF/lib/com.liferay.dynamic.data.mapping.api.jar" />
 	<classpathentry kind="lib" path="docroot/WEB-INF/lib/com.liferay.journal.api.jar" />
 	<classpathentry kind="lib" path="docroot/WEB-INF/lib/com.liferay.journal.service.jar" />
 	<classpathentry kind="lib" path="docroot/WEB-INF/lib/com.liferay.wiki.api.jar" />
