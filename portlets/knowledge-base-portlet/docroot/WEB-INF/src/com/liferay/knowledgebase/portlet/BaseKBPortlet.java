@@ -42,6 +42,7 @@ import com.liferay.portal.kernel.upload.UploadPortletRequest;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.StreamUtil;
@@ -321,14 +322,20 @@ public abstract class BaseKBPortlet extends MVCPortlet {
 				title, urlTitle, content, description, sourceURL, sections,
 				selectedFileNames, serviceContext);
 		}
-		else if (cmd.equals(Constants.UPDATE)) {
+		else if (cmd.equals(Constants.UPDATE) || cmd.equals(Constants.REVERT)) {
+			if (cmd.equals(Constants.REVERT)) {
+				content = HtmlUtil.unescape(content);
+			}
+
 			kbArticle = KBArticleServiceUtil.updateKBArticle(
 				resourcePrimKey, title, content, description, sourceURL,
 				sections, selectedFileNames, removeFileEntryIds,
 				serviceContext);
 		}
 
-		if (!cmd.equals(Constants.ADD) && !cmd.equals(Constants.UPDATE)) {
+		if (!cmd.equals(Constants.ADD) && !cmd.equals(Constants.UPDATE) &&
+			!cmd.equals(Constants.REVERT)) {
+
 			return;
 		}
 
