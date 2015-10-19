@@ -41,7 +41,8 @@ public class ExtRepositoryFileVersionAdapter
 		ExtRepositoryAdapter extRepositoryAdapter, long extRepositoryObjectId,
 		String uuid,
 		ExtRepositoryFileEntryAdapter extRepositoryFileEntryAdapter,
-		ExtRepositoryFileVersion extRepositoryFileVersion) {
+		ExtRepositoryFileVersion extRepositoryFileVersion,
+		boolean majorVersion) {
 
 		super(
 			extRepositoryAdapter, extRepositoryObjectId, uuid,
@@ -49,6 +50,7 @@ public class ExtRepositoryFileVersionAdapter
 
 		_extRepositoryFileEntryAdapter = extRepositoryFileEntryAdapter;
 		_extRepositoryFileVersion = extRepositoryFileVersion;
+		_majorVersion = majorVersion;
 	}
 
 	@Override
@@ -190,11 +192,17 @@ public class ExtRepositoryFileVersionAdapter
 	}
 
 	@Override
+	public boolean isMajorVersion() {
+		return _majorVersion;
+	}
+
+	@Override
 	public boolean isPending() {
 		return false;
 	}
 
 	private ExtRepositoryFileEntryAdapter _extRepositoryFileEntryAdapter;
 	private ExtRepositoryFileVersion _extRepositoryFileVersion;
+	private final boolean _majorVersion;
 
 }
