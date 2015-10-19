@@ -169,14 +169,19 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 			ServiceContext serviceContext)
 		throws PortalException {
 
+		boolean majorVersion = getMajorVersion(fileEntryId);
+
 		checkInFileEntry(
-			userId, fileEntryId, false, StringPool.BLANK, serviceContext);
+			userId, fileEntryId, majorVersion, StringPool.BLANK,
+			serviceContext);
 	}
 
 	@Override
 	public FileEntry checkOutFileEntry(
 			long fileEntryId, ServiceContext serviceContext)
 		throws PortalException {
+
+		updateMajorVersion(fileEntryId, false);
 
 		String extRepositoryFileEntryKey = getExtRepositoryObjectKey(
 			fileEntryId);
@@ -1042,6 +1047,10 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 			extRepositoryAdapterCache.remove(extRepositoryFileEntryKey);
 		}
 
+		if (!needsCheckIn) {
+			updateMajorVersion(fileEntryId, majorVersion);
+		}
+
 		if (needsCheckIn) {
 			_extRepository.checkInExtRepositoryFileEntry(
 				extRepositoryFileEntryKey, majorVersion, changeLog);
@@ -1137,6 +1146,16 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 		return repositoryEntry.getMappedId();
 	}
 
+	protected boolean getMajorVersion(long repositoryEntryId)
+		throws PortalException {
+
+		RepositoryEntry repositoryEntry =
+			repositoryEntryLocalService.getRepositoryEntry(repositoryEntryId);
+
+		return GetterUtil.getBoolean(
+			repositoryEntry.getTypeSettingsProperty("majorVersion"));
+	}
+
 	protected boolean isCheckedOut(
 		ExtRepositoryFileEntry extRepositoryFileEntry) {
 
@@ -1147,6 +1166,19 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 		}
 
 		return true;
+	}
+
+	protected void updateMajorVersion(
+			long repositoryEntryId, boolean majorVersion)
+		throws PortalException {
+
+		RepositoryEntry repositoryEntry =
+			repositoryEntryLocalService.getRepositoryEntry(repositoryEntryId);
+
+		repositoryEntry.setTypeSettingsProperty(
+			"majorVersion", String.valueOf(majorVersion));
+
+		repositoryEntryLocalService.updateRepositoryEntry(repositoryEntry);
 	}
 
 	private void _checkAssetEntry(
@@ -1312,10 +1344,13 @@ public class ExtRepositoryAdapter extends BaseRepositoryImpl {
 			RepositoryEntry repositoryEntry = getRepositoryEntry(
 				extRepositoryModelKey);
 
+			boolean majorVersion = GetterUtil.getBoolean(
+				repositoryEntry.getTypeSettingsProperty("majorVersion"));
+
 			extRepositoryVersionAdapter = new ExtRepositoryFileVersionAdapter(
 				this, repositoryEntry.getRepositoryEntryId(),
 				repositoryEntry.getUuid(), extRepositoryFileEntryAdapter,
-				extRepositoryFileVersion);
+				extRepositoryFileVersion, majorVersion);
 
 			extRepositoryAdapterCache.put(extRepositoryVersionAdapter);
 		}
