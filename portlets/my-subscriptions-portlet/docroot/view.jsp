@@ -58,7 +58,7 @@
 
 					ResultRow resultRow = new ResultRow(null, 0, searchContainer.getCur());
 
-					resultRow.addText("left", "top", 4, ResourceActionsUtil.getModelResource(locale, subscription.getClassName()));
+					resultRow.addText("left", "top", 4, MySubscriptionsUtil.getModelResource(locale, subscription.getClassName(), subscription.getClassPK()));
 					resultRow.setClassHoverName("asset-name");
 					resultRow.setClassName("asset-name");
 
@@ -88,7 +88,7 @@
 				<liferay-ui:search-container-column-text
 					href="<%= rowURL %>"
 					name="asset-type"
-					value="<%= ResourceActionsUtil.getModelResource(locale, subscription.getClassName()) %>"
+					value="<%= MySubscriptionsUtil.getModelResource(locale, subscription.getClassName(), subscription.getClassPK()) %>"
 				/>
 
 				<liferay-ui:search-container-column-date

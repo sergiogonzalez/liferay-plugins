@@ -29,6 +29,7 @@ import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.Group;
 import com.liferay.portal.model.Layout;
 import com.liferay.portal.model.PortletPreferences;
+import com.liferay.portal.security.permission.ResourceActionsUtil;
 import com.liferay.portal.service.GroupLocalServiceUtil;
 import com.liferay.portal.service.LayoutLocalServiceUtil;
 import com.liferay.portal.service.PortletPreferencesLocalServiceUtil;
@@ -129,6 +130,21 @@ public class MySubscriptionsUtil {
 		return null;
 	}
 
+	public static String getModelResource(
+			Locale locale, String className, long classPK)
+		throws SystemException {
+
+		Group group = GroupLocalServiceUtil.fetchGroup(classPK);
+
+		if (className.equals(_KNOWLEDGE_BASE_MODEL_CLASSNAME) &&
+			(group != null)) {
+
+			return "Knowledge Base";
+		}
+
+		return ResourceActionsUtil.getModelResource(locale, className);
+	}
+
 	public static String getTitleText(
 			Locale locale, String className, long classPK, String title)
 		throws PortalException {
@@ -163,7 +179,7 @@ public class MySubscriptionsUtil {
 			}
 		}
 		else if (className.equals(_KNOWLEDGE_BASE_MODEL_CLASSNAME)) {
-			title = "Knowledge Base Article at ";
+			title = "Knowledge Base at ";
 		}
 		else if (className.equals(Layout.class.getName())) {
 			Layout layout = LayoutLocalServiceUtil.getLayout(classPK);
