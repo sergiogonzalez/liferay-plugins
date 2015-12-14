@@ -17,6 +17,7 @@ package com.liferay.amazontools;
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup;
 import com.amazonaws.services.autoscaling.model.CreateOrUpdateTagsRequest;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsResult;
+import com.amazonaws.services.ec2.model.AssociateAddressRequest;
 import com.amazonaws.services.ec2.model.CreateTagsRequest;
 import com.amazonaws.services.ec2.model.Tag;
 
@@ -121,6 +122,8 @@ public class AsgardAMIDeployer extends BaseAMITool {
 		List<String> instanceIds = checkAutoScalingGroup(
 			autoScalingGroupName, minSize);
 
+		associateElasticIpAddresses(instanceIds);
+
 		deactivateOldScalingGroup(autoScalingGroupName);
 
 		if (openAsgardURLOption) {
@@ -129,6 +132,42 @@ public class AsgardAMIDeployer extends BaseAMITool {
 
 		System.out.println(
 			"Deployed Auto Scaling Group " + autoScalingGroupName);
+	}
+
+	protected void associateElasticIpAddresses(List<String> instanceIds) {
+		System.out.println("Associating Elastic IP addresses");
+
+		if (!properties.containsKey("elastic.ip.addresses")) {
+			return;
+		}
+
+		String elasticIpAddressesString = properties.getProperty(
+			"elastic.ip.addresses");
+
+		if ((elasticIpAddressesString == null) ||
+			(elasticIpAddressesString.length() == 0)) {
+
+			return;
+		}
+
+		String[] elasticIpAddresses = elasticIpAddressesString.split(",");
+
+		for (int i = 0;
+				(i < elasticIpAddresses.length) && (i < instanceIds.size());
+					i++) {
+
+			System.out.println(
+				"Associating IP address " + elasticIpAddresses[i] +
+					" with instance " + instanceIds.get(i));
+
+			AssociateAddressRequest associateAddressRequest =
+				new AssociateAddressRequest();
+
+			associateAddressRequest.setInstanceId(instanceIds.get(i));
+			associateAddressRequest.setPublicIp(elasticIpAddresses[i]);
+
+			amazonEC2Client.associateAddress(associateAddressRequest);
+		}
 	}
 
 	protected List<String> checkAutoScalingGroup(
@@ -155,6 +194,9 @@ public class AsgardAMIDeployer extends BaseAMITool {
 
 			if (size != -1) {
 				if (instanceStateJSONObjects.size() < size) {
+					System.out.println(
+						"Not enough instances started. Waiting " + i + "...");
+
 					sleep(15);
 
 					continue;
@@ -162,6 +204,9 @@ public class AsgardAMIDeployer extends BaseAMITool {
 			}
 
 			if (!isInService(loadBalancerJSONObject, autoScalingGroupName)) {
+				System.out.println(
+					"Instances not in service. Waiting " + i + "...");
+
 				sleep(15);
 			}
 			else {
